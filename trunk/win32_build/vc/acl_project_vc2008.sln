@@ -1,0 +1,55 @@
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_acl", "lib_acl\lib_acl_vc2008.vcproj", "{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_protocol", "lib_protocol\lib_protocol_vc2008.vcproj", "{FE724EF7-3763-4E78-BDF5-BCBC075719FD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		lib_acl_dll_debug|Win32 = lib_acl_dll_debug|Win32
+		lib_acl_dll_release|Win32 = lib_acl_dll_release|Win32
+		lib_acl_mysql_debug|Win32 = lib_acl_mysql_debug|Win32
+		lib_acl_mysql_release|Win32 = lib_acl_mysql_release|Win32
+		lib_protocol_dll_debug|Win32 = lib_protocol_dll_debug|Win32
+		lib_protocol_dll_release|Win32 = lib_protocol_dll_release|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.Debug|Win32.Build.0 = Debug|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_acl_dll_debug|Win32.ActiveCfg = lib_acl_dll_debug|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_acl_dll_debug|Win32.Build.0 = lib_acl_dll_debug|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_acl_dll_release|Win32.ActiveCfg = lib_acl_dll_release|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_acl_dll_release|Win32.Build.0 = lib_acl_dll_release|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_acl_mysql_debug|Win32.ActiveCfg = lib_acl_mysql_debug|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_acl_mysql_debug|Win32.Build.0 = lib_acl_mysql_debug|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_acl_mysql_release|Win32.ActiveCfg = lib_acl_mysql_release|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_acl_mysql_release|Win32.Build.0 = lib_acl_mysql_release|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_protocol_dll_debug|Win32.ActiveCfg = lib_acl_dll_debug|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_protocol_dll_debug|Win32.Build.0 = lib_acl_dll_debug|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_protocol_dll_release|Win32.ActiveCfg = lib_acl_dll_debug|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_protocol_dll_release|Win32.Build.0 = lib_acl_dll_debug|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.Release|Win32.ActiveCfg = Release|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.Release|Win32.Build.0 = Release|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.Debug|Win32.Build.0 = Debug|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_acl_dll_debug|Win32.ActiveCfg = lib_protocol_dll_debug|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_acl_dll_debug|Win32.Build.0 = lib_protocol_dll_debug|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_acl_dll_release|Win32.ActiveCfg = lib_protocol_dll_debug|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_acl_dll_release|Win32.Build.0 = lib_protocol_dll_debug|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_acl_mysql_debug|Win32.ActiveCfg = lib_protocol_dll_debug|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_acl_mysql_debug|Win32.Build.0 = lib_protocol_dll_debug|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_acl_mysql_release|Win32.ActiveCfg = lib_protocol_dll_debug|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_acl_mysql_release|Win32.Build.0 = lib_protocol_dll_debug|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_protocol_dll_debug|Win32.ActiveCfg = lib_protocol_dll_debug|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_protocol_dll_debug|Win32.Build.0 = lib_protocol_dll_debug|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_protocol_dll_release|Win32.ActiveCfg = lib_protocol_dll_release|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_protocol_dll_release|Win32.Build.0 = lib_protocol_dll_release|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.Release|Win32.ActiveCfg = Release|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
