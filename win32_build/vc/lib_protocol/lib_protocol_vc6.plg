@@ -1,0 +1,103 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: lib_protocol_vc6 - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "D:\DOCUME~1\zsx\LOCALS~1\Temp\RSP59.tmp" with contents
+[
+/nologo /MTd /W3 /WX /Gm /GX /ZI /Od /I "../../../lib_protocol/include" /I "../../../lib_acl/include" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /D "_MT" /D "MS_VC6" /FR"Debug/" /Fp"Debug/lib_protocol_vc6.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"H:\work\acl\acl_project\acl_project\lib_protocol\src\http\http_chat_async.c"
+"H:\work\acl\acl_project\acl_project\lib_protocol\src\http\http_chat_sync.c"
+"H:\work\acl\acl_project\acl_project\lib_protocol\src\http\http_hdr.c"
+"H:\work\acl\acl_project\acl_project\lib_protocol\src\http\http_hdr_build.c"
+"H:\work\acl\acl_project\acl_project\lib_protocol\src\http\http_hdr_req.c"
+"H:\work\acl\acl_project\acl_project\lib_protocol\src\http\http_hdr_res.c"
+"H:\work\acl\acl_project\acl_project\lib_protocol\src\http\http_init.c"
+"H:\work\acl\acl_project\acl_project\lib_protocol\src\http\http_req.c"
+"H:\work\acl\acl_project\acl_project\lib_protocol\src\http\http_res.c"
+"H:\work\acl\acl_project\acl_project\lib_protocol\src\http\http_rfc1123.c"
+"H:\work\acl\acl_project\acl_project\lib_protocol\src\http\http_status.c"
+"H:\work\acl\acl_project\acl_project\lib_protocol\src\http\http_tmpl.c"
+"H:\work\acl\acl_project\acl_project\lib_protocol\src\http\http_util.c"
+"H:\work\acl\acl_project\acl_project\lib_protocol\src\icmp\icmp_chat.c"
+"H:\work\acl\acl_project\acl_project\lib_protocol\src\icmp\icmp_chat_aio.c"
+"H:\work\acl\acl_project\acl_project\lib_protocol\src\icmp\icmp_chat_sio.c"
+"H:\work\acl\acl_project\acl_project\lib_protocol\src\icmp\icmp_host.c"
+"H:\work\acl\acl_project\acl_project\lib_protocol\src\icmp\icmp_ping.c"
+"H:\work\acl\acl_project\acl_project\lib_protocol\src\icmp\icmp_pkt.c"
+"H:\work\acl\acl_project\acl_project\lib_protocol\src\icmp\icmp_stat.c"
+"H:\work\acl\acl_project\acl_project\lib_protocol\src\icmp\icmp_stream.c"
+"H:\work\acl\acl_project\acl_project\lib_protocol\src\icmp\icmp_timer.c"
+]
+Creating command line "cl.exe @D:\DOCUME~1\zsx\LOCALS~1\Temp\RSP59.tmp" 
+Creating temporary file "D:\DOCUME~1\zsx\LOCALS~1\Temp\RSP5A.tmp" with contents
+[
+/nologo /out:"lib_protocol_vc6d.lib" 
+.\Debug\http_chat_async.obj
+.\Debug\http_chat_sync.obj
+.\Debug\http_hdr.obj
+.\Debug\http_hdr_build.obj
+.\Debug\http_hdr_req.obj
+.\Debug\http_hdr_res.obj
+.\Debug\http_init.obj
+.\Debug\http_req.obj
+.\Debug\http_res.obj
+.\Debug\http_rfc1123.obj
+.\Debug\http_status.obj
+.\Debug\http_tmpl.obj
+.\Debug\http_util.obj
+.\Debug\icmp_chat.obj
+.\Debug\icmp_chat_aio.obj
+.\Debug\icmp_chat_sio.obj
+.\Debug\icmp_host.obj
+.\Debug\icmp_ping.obj
+.\Debug\icmp_pkt.obj
+.\Debug\icmp_stat.obj
+.\Debug\icmp_stream.obj
+.\Debug\icmp_timer.obj
+]
+Creating command line "link.exe -lib @D:\DOCUME~1\zsx\LOCALS~1\Temp\RSP5A.tmp"
+<h3>Output Window</h3>
+Compiling...
+http_chat_async.c
+http_chat_sync.c
+http_hdr.c
+http_hdr_build.c
+http_hdr_req.c
+http_hdr_res.c
+http_init.c
+http_req.c
+http_res.c
+http_rfc1123.c
+http_status.c
+http_tmpl.c
+http_util.c
+icmp_chat.c
+icmp_chat_aio.c
+icmp_chat_sio.c
+icmp_host.c
+icmp_ping.c
+icmp_pkt.c
+icmp_stat.c
+icmp_stream.c
+icmp_timer.c
+Creating library...
+Creating temporary file "D:\DOCUME~1\zsx\LOCALS~1\Temp\RSP5B.bat" with contents
+[
+@echo off
+copy lib_protocol_vc6d.lib ..\..\..\dist\lib\win32\lib_protocol_vc6d.lib /Y
+]
+Creating command line "D:\DOCUME~1\zsx\LOCALS~1\Temp\RSP5B.bat"
+
+已复制         1 个文件。
+
+
+
+<h3>Results</h3>
+lib_protocol_vc6d.lib - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>
