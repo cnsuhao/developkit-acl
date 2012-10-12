@@ -1,0 +1,243 @@
+// http_server.cpp : 定义控制台应用程序的入口点。
+//
+
+#include "stdafx.h"
+#include <iostream>
+#include "rpc_stats.h"
+#include "http_rpc.h"
+
+//////////////////////////////////////////////////////////////////////////
+
+/**
+ * 异步客户端流的回调类的子类
+ */
+class handle_io : public aio_callback
+{
+public:
+	handle_io(rpc_service& service, aio_socket_stream* client)
+		: service_(service)
+		, client_(client)
+		, http_(NULL)
+	{
+	}
+
+	~handle_io()
+	{
+		if (http_)
+			delete http_;
+		std::cout << "delete io_callback now ..." << std::endl;
+	}
+
+	bool write_callback()
+	{
+		return (true);
+	}
+
+	/**
+	 * 实现父类中的虚函数，客户端流的超时回调过程
+	 */
+	void close_callback()
+	{
+		std::cout << "Closed now." << std::endl;
+
+		// 必须在此处删除该动态分配的回调类对象以防止内存泄露
+		delete this;
+	}
+
+	/**
+	 * 实现父类中的虚函数，客户端流的超时回调过程
+	 * @return {bool} 返回 true 表示继续，否则希望关闭该异步流
+	 */
+	bool timeout_callback()
+	{
+		std::cout << "Timeout ..." << std::endl;
+		return (false);
+	}
+
+	virtual bool read_wakeup()
+	{
+		// 测试状态
+		rpc_read_wait_del();
+		rpc_add();
+
+		// 从异步监听集合中去掉对该异步流的监控
+		client_->disable_read();
+
+		// 如果 HTTP 处理对象未创建，则创建一个
+		if (http_ == NULL)
+			http_ = new http_rpc(client_);
+		service_.rpc_fork(http_);  // 发起一个 http 会话过程
+
+		return true;
+	}
+
+private:
+	rpc_service& service_;
+	aio_socket_stream* client_;
+	http_rpc* http_;
+};
+
+//////////////////////////////////////////////////////////////////////////
+
+/**
+ * 异步监听流的回调类的子类
+ */
+class handle_accept : public aio_accept_callback
+{
+public:
+	handle_accept(rpc_service& service, bool preread)
+	: service_(service)
+ 	, preread_(preread)
+	{
+	}
+
+	~handle_accept()
+	{
+		printf(">>io_accept_callback over!\n");
+	}
+
+	/**
+	 * 基类虚函数，当有新连接到达后调用此回调过程
+	 * @param client {aio_socket_stream*} 异步客户端流
+	 * @return {bool} 返回 true 以通知监听流继续监听
+	 */
+	bool accept_callback(acl::aio_socket_stream* client)
+	{
+		// 如果允许在主线程中预读，则设置流的预读标志位
+		if (preread_)
+		{
+			ACL_VSTREAM* vstream = client->get_vstream();
+			vstream->flag |= ACL_VSTREAM_FLAG_PREREAD;
+		}
+
+		// 创建异步客户端流的回调对象并与该异步流进行绑定
+		handle_io* callback = new handle_io(service_, client);
+
+		// 注册异步流的读回调过程
+		client->add_read_callback(callback);
+
+		// 注册异步流的写回调过程
+		client->add_write_callback(callback);
+
+		// 注册异步流的关闭回调过程
+		client->add_close_callback(callback);
+
+		// 注册异步流的超时回调过程
+		client->add_timeout_callback(callback);
+
+		rpc_read_wait_add();
+
+		// 监控异步流是否可读
+		client->read_wait(10);
+
+		return (true);
+	}
+
+private:
+	rpc_service& service_;
+	bool preread_;
+};
+
+static void usage(const char* procname)
+{
+	printf("usage: %s -h[help] -p[preread in main thread] -s listen_addr\n", procname);
+}
+
+int main(int argc, char* argv[])
+{
+#ifdef WIN32
+	acl_cpp_init();
+#endif
+
+	bool preread = false;
+	char addr[32], ch;
+	snprintf(addr, sizeof(addr), "127.0.0.1:9001");
+
+	while ((ch = getopt(argc, argv, "hps:")) > 0)
+	{
+		switch (ch)
+		{
+		case 'h':
+			usage(argv[0]);
+			return 0;
+		case 's':
+			snprintf(addr, sizeof(addr), "%s", optarg);
+			break;
+		case 'p':
+			preread = true;
+			break;
+		default:
+			break;
+		}
+	}
+
+	// 允许日志信息输出至屏幕
+	log::stdout_open(false);
+
+	// 异步通信框架句柄，采用 select 系统 api
+	aio_handle handle(ENGINE_SELECT);
+
+	// 创建监听异步流
+	aio_listen_stream* sstream = new aio_listen_stream(&handle);
+
+	// 监听指定的地址
+	if (sstream->open(addr) == false)
+	{
+		std::cout << "open " << addr << " error!" << std::endl;
+		sstream->close();
+		// XXX: 为了保证能关闭监听流，应在此处再 check 一下
+		handle.check();
+#ifdef WIN32
+		getchar();
+#endif
+		return 1;
+	}
+
+	// 异步 RPC 通信服务句柄
+	rpc_service service(20);
+	// 打开消息服务器
+	if (service.open(&handle) == false)
+	{
+		printf("open service error: %s\r\n", last_serror());
+#ifdef WIN32
+		getchar();
+#endif
+		return 1;
+	}
+
+	// 创建回调类对象，当有新连接到达时自动调用此类对象的回调过程
+	handle_accept callback(service, preread);
+	// 将回调处理类对象与异步监听流绑定
+	sstream->add_accept_callback(&callback);
+
+	std::cout << "Listen: " << addr << " ok!" << std::endl;
+
+	time_t last = time(NULL), now;
+	while (true)
+	{
+		// 如果返回 false 则表示不再继续，需要退出
+		if (handle.check() == false)
+		{
+			std::cout << "aio_server stop now ..." << std::endl;
+			break;
+		}
+
+		time(&now);
+		if (now - last >= 1)
+		{
+			printf("\r\n------------------------------\r\n");
+			rpc_out(); // 输出当前 rpc 队列的数量
+			rpc_req_out();
+			rpc_read_wait_out();
+			last = now;
+		}
+	}
+
+	// 关闭监听流并释放流对象
+	sstream->close();
+
+	// XXX: 为了保证能关闭监听流，应在此处再 check 一下
+	handle.check();
+
+	return 0;
+}
