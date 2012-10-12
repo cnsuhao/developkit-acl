@@ -1,17 +1,22 @@
 
-352) 2012.10.12
-352.1) feature: xml/,
+353) 2012.10.12
+353.1) feature: xml/,
 增加了三个函数接口：acl_xml_getElementMeta/acl_xml_getEncoding/acl_xml_getType,
 用于取得 xml 起始控制字段的相关信息
 
-351) 2012.9.29
-351.1) 为了兼容 MAC OS 以及关于线程局部变量在动态库的限制因素，将库中
+352) 2012.9.29
+352.1) 为了兼容 MAC OS 以及关于线程局部变量在动态库的限制因素，将库中
 带有 __thread 关键字标识的局部变量统一改为通过 acl_pthread_getspecific
 等函数获得
 
-350) 2012.9.25
-350.1) 在 MAC OS 编译通过，并测试了大部分示例
-350.2) 去掉了 code/ 目录下一些与字符集转换相关的代码
+351) 2012.9.25
+351.1) 在 MAC OS 编译通过，并测试了大部分示例
+351.2) 去掉了 code/ 目录下一些与字符集转换相关的代码
+
+350) 2012.8.26
+350.1) feature: ACL_VSTREAM::flag 增加了一个标志位：ACL_VSTREAM_FLAG_PREREAD,
+当调用 acl_vstream_can_read 时会判断此标志位，如果设置了此标志位，则当系统提示
+有数据可读时，该函数会预读网络数据
 
 349) 2012.8.25
 349.1) bugfix: acl_vstream.c 中将 stream->sys_read_ready = 0; 代码放在

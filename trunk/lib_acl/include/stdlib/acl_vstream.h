@@ -118,6 +118,7 @@ struct ACL_VSTREAM {
 #define	ACL_VSTREAM_FLAG_TAGNO          (1 << 18) /* 没有找到标志位 */
 
 #define	ACL_VSTREAM_FLAG_CONNECTING     (1 << 19) /* 正在连接过程中 */
+#define	ACL_VSTREAM_FLAG_PREREAD	(1 << 20) /* 对于 acl_vstream_can_read 调用过程是否允许预读 */
 
 	char  errbuf[128];              /**< error info */
 	int   errnum;                   /**< record the system errno here */
