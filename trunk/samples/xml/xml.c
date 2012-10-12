@@ -449,22 +449,43 @@ static void build_xml2(void)
 
 static void test1(void)
 {
-	const char *data = "<root name1 = \"\\\"value1\\\"\" name2 = \"val\\ue2\" name3 = \"v\\al'u\'e3\" />";
+	const char* data = "<?xml version=\"1.0\" encoding=\"gb2312\"?>\r\n"
+	"<?xml-stylesheet type=\"text/xsl\"\r\n"
+	"\thref=\"http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl\"?>\r\n"
+	"\t<!DOCTYPE refentry PUBLIC \"-//OASIS//DTD DocBook XML V4.1.2//EN\"\r\n"
+	"\t\"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd\" [\r\n"
+	"	<!ENTITY xmllint \"<command>xmllint</command>\">\r\n"
+	"]>\r\n"
+	"<root name1 = \"\\\"value1\\\"\" name2 = \"val\\ue2\" name3 = \"v\\al'u\'e3\" />\r\n";
 	ACL_XML *xml = acl_xml_alloc();
 	ACL_ITER node_it, attr_it;
+	ACL_XML_NODE *node;
+	const char *encoding, *type, *href;
 
 	printf("data: %s\r\n", data);
 	acl_xml_update(xml, data);
 	acl_foreach(node_it, xml) {
-		ACL_XML_NODE *node = (ACL_XML_NODE*) node_it.data;
-		printf("tag: %s\r\n", STR(node->ltag));
-		acl_foreach(attr_it, node->attr_list) {
+		ACL_XML_NODE *tmp = (ACL_XML_NODE*) node_it.data;
+		printf("tag: %s\r\n", STR(tmp->ltag));
+		acl_foreach(attr_it, tmp->attr_list) {
 			ACL_XML_ATTR *attr = (ACL_XML_ATTR*) attr_it.data;
 			printf("\tattr_name: %s, attr_value: %s\r\n",
 				STR(attr->name), STR(attr->value));
 		}
 	}
 
+	printf("------------------------------------------------------\r\n");
+
+	encoding = acl_xml_getEncoding(xml);
+	type = acl_xml_getType(xml);
+	node = acl_xml_getElementMeta(xml, "xml-stylesheet");
+	if (node)
+		href = acl_xml_getElementAttrVal(node, "href");
+	else
+		href = NULL;
+	printf("xml encoding: %s, type: %s, href: %s\r\n",
+		encoding ? encoding : "null", type ? type : "null",
+		href ? href : "null");
 	acl_xml_free(xml);
 }
 
