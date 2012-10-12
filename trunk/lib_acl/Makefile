@@ -91,7 +91,7 @@ BASE_PATH  = .
 INC_PATH_SRC = $(BASE_PATH)/include
 SRC_PATH_SRC = $(BASE_PATH)/src
 
-CFLAGS += -I. -I$(INC_PATH_SRC) -I./mysql_include
+CFLAGS += -I. -I$(INC_PATH_SRC) -I../include/mysql
 
 ###########################################################
 
