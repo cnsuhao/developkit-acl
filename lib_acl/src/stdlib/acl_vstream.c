@@ -1089,15 +1089,20 @@ int acl_vstream_can_read(ACL_VSTREAM *stream)
 		acl_msg_fatal("%s, %s(%d): read_cnt(=%d) < 0",
 			myname, __FILE__, __LINE__, (int) stream->read_cnt);
 
-	if (stream->read_cnt > 0)
-		return ((int) stream->read_cnt);
-
-	if (stream->sys_read_ready) {
+	if (stream->flag & (ACL_VSTREAM_FLAG_ERR | ACL_VSTREAM_FLAG_EOF))
+		return (ACL_VSTREAM_EOF);
+	else if (stream->read_cnt > 0)
+		return (1);
+	else if (stream->sys_read_ready == 0)
+		return (0);
+	else if ((stream->flag & ACL_VSTREAM_FLAG_PREREAD) != 0) {
 		if (__vstream_sys_read(stream) <= 0)
 			return (ACL_VSTREAM_EOF);
+		else
+			return (1);
 	}
-
-	return ((int) stream->read_cnt);
+	else
+		return (1);
 }
 
 static int __vstream_sys_write(ACL_VSTREAM *stream, const void *vptr, int dlen)
