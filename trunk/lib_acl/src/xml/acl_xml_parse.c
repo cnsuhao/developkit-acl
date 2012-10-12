@@ -134,6 +134,82 @@ static const char *xml_parse_meta_tag(ACL_XML *xml, const char *data)
 	return (data);
 }
 
+static const char *xml_meta_attr_name(ACL_XML_ATTR *attr, const char *data)
+{
+	int   ch;
+
+	while ((ch = *data) != 0) {
+		if (ch == '=') {
+			data++;
+			ACL_VSTRING_TERMINATE(attr->name);
+			break;
+		}
+		if (!IS_SPACE(ch))
+			ACL_VSTRING_ADDCH(attr->name, ch);
+		data++;
+	}
+	return data;
+}
+
+static const char *xml_meta_attr_value(ACL_XML_ATTR *attr, const char *data)
+{
+	int   ch;
+
+	SKIP_SPACE(data);
+	if (*data == 0)
+		return data;
+	if (IS_QUOTE(*data))
+		attr->quote = *data++;
+
+	while ((ch = *data) != 0) {
+		if (attr->backslash) {
+			ACL_VSTRING_ADDCH(attr->value, ch);
+			attr->backslash = 0;
+		} else if (ch == '\\') {
+			attr->backslash = 1;
+		} else if (attr->quote) {
+			if (ch == attr->quote) {
+				data++;
+				break;
+			}
+			ACL_VSTRING_ADDCH(attr->value, ch);
+		} else if (IS_SPACE(ch)) {
+			data++;
+			break;
+		} else {
+			ACL_VSTRING_ADDCH(attr->value, ch);
+		}
+		data++;
+	}
+
+	ACL_VSTRING_TERMINATE(attr->value);
+	return data;
+}
+
+static void xml_meta_attr(ACL_XML_NODE *node)
+{
+	ACL_XML_ATTR *attr;
+	const char *ptr;
+	int   ch;
+
+	if (node->text == NULL)
+		return;
+	ptr = STR(node->text);
+	SKIP_SPACE(ptr);	/* ÂÔ¹ý ' ', '\t' */
+	if (*ptr == 0)
+		return;
+
+	while ((ch = *ptr) != 0) {
+		attr = acl_xml_attr_alloc(node);
+		ptr = xml_meta_attr_name(attr, ptr);
+		if (*ptr == 0)
+			break;
+		ptr = xml_meta_attr_value(attr, ptr);
+		if (*ptr == 0)
+			break;
+	}
+}
+
 static const char *xml_parse_meta_text(ACL_XML *xml, const char *data)
 {
 	int   ch;
@@ -158,8 +234,23 @@ static const char *xml_parse_meta_text(ACL_XML *xml, const char *data)
 			ACL_VSTRING_ADDCH(xml->curr_node->text, ch);
 		} else if (ch == '>') {
 			if (xml->curr_node->nlt == 0) {
+				char *last;
+				size_t off;
+
 				data++;
 				xml->curr_node->status = ACL_XML_S_MEND;
+				if ((xml->curr_node->flag & ACL_XML_F_META_QM) == 0)
+					break;
+
+				last = acl_vstring_end(xml->curr_node->text) - 1;
+				if (last < STR(xml->curr_node->text) || *last != '?')
+					break;
+				off = ACL_VSTRING_LEN(xml->curr_node->text) - 1;
+				if (off == 0)
+					break;
+				ACL_VSTRING_AT_OFFSET(xml->curr_node->text, off);
+				ACL_VSTRING_TERMINATE(xml->curr_node->text);
+				xml_meta_attr(xml->curr_node);
 				break;
 			}
 			xml->curr_node->nlt--;

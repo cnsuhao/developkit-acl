@@ -320,6 +320,29 @@ ACL_API const char *acl_xml_getAttrValueById(ACL_XML *xml, const char *id);
 ACL_API ACL_XML_NODE *acl_xml_getElementById(ACL_XML *xml, const char *id);
 
 /**
+ * 从 xml 对象中提取有在 ? ! 等开头的结点
+ * @param xml {ACL_XML*} xml 对象
+ * @param tag {const char*} 标签名
+ * @return {ACL_XML_NODE*} xml 结点元素, 若返回 NULL 则表示没有符合
+ *  条件的 xml 结点, 返回值不需要释放
+ */
+ACL_API ACL_XML_NODE *acl_xml_getElementMeta(ACL_XML *xml, const char *tag);
+
+/**
+ * 获得 xml 的字符集编码格式
+ * @param xml {ACL_XML*} xml 对象
+ * @return {const char*} 返回字符集编码格式，返回 NULL 时表示没有该属性
+ */
+ACL_API const char *acl_xml_getEncoding(ACL_XML *xml);
+
+/**
+ * 获得 xml 数据的类型，如：text/xsl
+ * @param xml {ACL_XML*} xml 对象
+ * @return {const char*} 返回 NULL 表示没有该属性
+ */
+ACL_API const char *acl_xml_getType(ACL_XML *xml);
+
+/**
  * 从 xml 结点中获得指定属性名的属性对象
  * @param node {ACL_XML_NODE*} xml 结点
  * @param name {const char*} 属性名称
