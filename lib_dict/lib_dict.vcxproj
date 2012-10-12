@@ -84,7 +84,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\lib_acl\include;..\..\..\lib_dict\include;..\..\..\lib_dict\bdb\include;..\..\..\lib_dict\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\lib_acl\include;.\include;.\bdb\include;.\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;HAS_BDB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -98,12 +98,12 @@
       <OutputFile>$(ProjectName)_vc2010d.lib</OutputFile>
     </Lib>
     <PostBuildEvent>
-      <Command>copy $(TargetName).lib ..\..\..\dist\lib\win32\$(TargetName).lib /Y</Command>
+      <Command>copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\lib_acl\include;..\..\..\lib_dict\include;..\..\..\lib_dict\bdb\include;..\..\..\lib_dict\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\lib_acl\include;.\include;.\bdb\include;.\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;HAS_BDB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -115,13 +115,13 @@
       <OutputFile>$(ProjectName)_vc2010.lib</OutputFile>
     </Lib>
     <PostBuildEvent>
-      <Command>copy $(TargetName).lib ..\..\..\dist\lib\win32\$(TargetName).lib /Y</Command>
+      <Command>copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='lib_dict_dll_debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\lib_acl\include;..\..\..\lib_dict\include;..\..\..\lib_dict\bdb\include;..\..\..\lib_dict\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\lib_acl\include;.\include;.\bdb\include;.\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;HAS_BDB;DICT_DLL;DICT_EXPORTS;ACL_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -133,20 +133,20 @@
     <Link>
       <AdditionalDependencies>libdb43.lib;lib_acl_d.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(ProjectName)_d.dll</OutputFile>
-      <AdditionalLibraryDirectories>..\..\..\lib\bdb;..\lib_acl;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib\bdb;..\lib_acl;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AssemblyDebug>true</AssemblyDebug>
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(TargetName).lib ..\..\..\dist\lib\win32\$(TargetName).lib /Y
-copy $(TargetName).dll ..\..\..\dist\lib\win32\$(TargetName).dll /Y
+      <Command>copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y
+copy $(TargetName).dll ..\dist\lib\win32\$(TargetName).dll /Y
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='lib_dict_dll_release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\lib_acl\include;..\..\..\lib_dict\include;..\..\..\lib_dict\bdb\include;..\..\..\lib_dict\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\lib_acl\include;.\include;.\bdb\include;.\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;HAS_BDB;DICT_DLL;DICT_EXPORTS;ACL_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -156,49 +156,49 @@ copy $(TargetName).dll ..\..\..\dist\lib\win32\$(TargetName).dll /Y
     <Link>
       <AdditionalDependencies>libdb43.lib;lib_acl.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(ProjectName).dll</OutputFile>
-      <AdditionalLibraryDirectories>..\..\..\lib\bdb;..\lib_acl;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib\bdb;..\lib_acl;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(TargetName).lib ..\..\..\dist\lib\win32\$(TargetName).lib /Y
-copy $(TargetName).dll ..\..\..\dist\lib\win32\$(TargetName).dll /Y
+      <Command>copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y
+copy $(TargetName).dll ..\dist\lib\win32\$(TargetName).dll /Y
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\lib_dict\src\debug_var.h" />
-    <ClInclude Include="..\..\..\lib_dict\src\dict_cdb.h" />
-    <ClInclude Include="..\..\..\lib_dict\src\dict_db.h" />
-    <ClInclude Include="..\..\..\lib_dict\src\dict_ht.h" />
-    <ClInclude Include="..\..\..\lib_dict\src\dict_tc.h" />
-    <ClInclude Include="..\..\..\lib_dict\src\mac_expand.h" />
-    <ClInclude Include="..\..\..\lib_dict\src\mac_parse.h" />
-    <ClInclude Include="..\..\..\lib_dict\src\name_mask.h" />
-    <ClInclude Include="..\..\..\lib_dict\src\StdAfx.h" />
-    <ClInclude Include="..\..\..\lib_dict\include\dict.h" />
-    <ClInclude Include="..\..\..\lib_dict\include\dict_pool.h" />
-    <ClInclude Include="..\..\..\lib_dict\include\unescape.h" />
+    <ClInclude Include=".\src\debug_var.h" />
+    <ClInclude Include=".\src\dict_cdb.h" />
+    <ClInclude Include=".\src\dict_db.h" />
+    <ClInclude Include=".\src\dict_ht.h" />
+    <ClInclude Include=".\src\dict_tc.h" />
+    <ClInclude Include=".\src\mac_expand.h" />
+    <ClInclude Include=".\src\mac_parse.h" />
+    <ClInclude Include=".\src\name_mask.h" />
+    <ClInclude Include=".\src\StdAfx.h" />
+    <ClInclude Include=".\include\dict.h" />
+    <ClInclude Include=".\include\dict_pool.h" />
+    <ClInclude Include=".\include\unescape.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\lib_dict\src\dict.c" />
-    <ClCompile Include="..\..\..\lib_dict\src\dict_alloc.c" />
-    <ClCompile Include="..\..\..\lib_dict\src\dict_cdb.c" />
-    <ClCompile Include="..\..\..\lib_dict\src\dict_db.c" />
-    <ClCompile Include="..\..\..\lib_dict\src\dict_debug.c" />
-    <ClCompile Include="..\..\..\lib_dict\src\dict_ht.c" />
-    <ClCompile Include="..\..\..\lib_dict\src\dict_open.c" />
-    <ClCompile Include="..\..\..\lib_dict\src\dict_pool.c" />
-    <ClCompile Include="..\..\..\lib_dict\src\dict_tc.c" />
-    <ClCompile Include="..\..\..\lib_dict\src\mac_expand.c" />
-    <ClCompile Include="..\..\..\lib_dict\src\mac_parse.c" />
-    <ClCompile Include="..\..\..\lib_dict\src\name_mask.c" />
-    <ClCompile Include="..\..\..\lib_dict\src\snprintf.c" />
-    <ClCompile Include="..\..\..\lib_dict\src\StdAfx.c">
+    <ClCompile Include=".\src\dict.c" />
+    <ClCompile Include=".\src\dict_alloc.c" />
+    <ClCompile Include=".\src\dict_cdb.c" />
+    <ClCompile Include=".\src\dict_db.c" />
+    <ClCompile Include=".\src\dict_debug.c" />
+    <ClCompile Include=".\src\dict_ht.c" />
+    <ClCompile Include=".\src\dict_open.c" />
+    <ClCompile Include=".\src\dict_pool.c" />
+    <ClCompile Include=".\src\dict_tc.c" />
+    <ClCompile Include=".\src\mac_expand.c" />
+    <ClCompile Include=".\src\mac_parse.c" />
+    <ClCompile Include=".\src\name_mask.c" />
+    <ClCompile Include=".\src\snprintf.c" />
+    <ClCompile Include=".\src\StdAfx.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='lib_dict_dll_debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='lib_dict_dll_release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\..\..\lib_dict\src\unescape.c" />
+    <ClCompile Include=".\src\unescape.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />

@@ -15,87 +15,87 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\lib_dict\src\debug_var.h">
+    <ClInclude Include=".\src\debug_var.h">
       <Filter>源文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\lib_dict\src\dict_cdb.h">
+    <ClInclude Include=".\src\dict_cdb.h">
       <Filter>源文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\lib_dict\src\dict_db.h">
+    <ClInclude Include=".\src\dict_db.h">
       <Filter>源文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\lib_dict\src\dict_ht.h">
+    <ClInclude Include=".\src\dict_ht.h">
       <Filter>源文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\lib_dict\src\dict_tc.h">
+    <ClInclude Include=".\src\dict_tc.h">
       <Filter>源文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\lib_dict\src\mac_expand.h">
+    <ClInclude Include=".\src\mac_expand.h">
       <Filter>源文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\lib_dict\src\mac_parse.h">
+    <ClInclude Include=".\src\mac_parse.h">
       <Filter>源文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\lib_dict\src\name_mask.h">
+    <ClInclude Include=".\src\name_mask.h">
       <Filter>源文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\lib_dict\src\StdAfx.h">
+    <ClInclude Include=".\src\StdAfx.h">
       <Filter>源文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\lib_dict\include\dict.h">
+    <ClInclude Include=".\include\dict.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\lib_dict\include\dict_pool.h">
+    <ClInclude Include=".\include\dict_pool.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\lib_dict\include\unescape.h">
+    <ClInclude Include=".\include\unescape.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\lib_dict\src\dict.c">
+    <ClCompile Include=".\src\dict.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\lib_dict\src\dict_alloc.c">
+    <ClCompile Include=".\src\dict_alloc.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\lib_dict\src\dict_cdb.c">
+    <ClCompile Include=".\src\dict_cdb.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\lib_dict\src\dict_db.c">
+    <ClCompile Include=".\src\dict_db.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\lib_dict\src\dict_debug.c">
+    <ClCompile Include=".\src\dict_debug.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\lib_dict\src\dict_ht.c">
+    <ClCompile Include=".\src\dict_ht.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\lib_dict\src\dict_open.c">
+    <ClCompile Include=".\src\dict_open.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\lib_dict\src\dict_pool.c">
+    <ClCompile Include=".\src\dict_pool.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\lib_dict\src\dict_tc.c">
+    <ClCompile Include=".\src\dict_tc.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\lib_dict\src\mac_expand.c">
+    <ClCompile Include=".\src\mac_expand.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\lib_dict\src\mac_parse.c">
+    <ClCompile Include=".\src\mac_parse.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\lib_dict\src\name_mask.c">
+    <ClCompile Include=".\src\name_mask.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\lib_dict\src\snprintf.c">
+    <ClCompile Include=".\src\snprintf.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\lib_dict\src\StdAfx.c">
+    <ClCompile Include=".\src\StdAfx.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\lib_dict\src\unescape.c">
+    <ClCompile Include=".\src\unescape.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
