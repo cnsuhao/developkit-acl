@@ -26,10 +26,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vstream", "vstream\vstream.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vstring", "vstring\vstring.vcxproj", "{AC9CA58D-28FB-40B7-85C8-BA7674DBD934}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_acl", "..\lib_acl\lib_acl_vc2010.vcxproj", "{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_protocol", "..\lib_protocol\lib_protocol_vc2010.vcxproj", "{FE724EF7-3763-4E78-BDF5-BCBC075719FD}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "thread_pool", "thread_pool\thread_pool.vcxproj", "{143D67EE-85E1-4456-AD99-6FDE7B1F1469}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ping", "ping\ping.vcxproj", "{814B40D7-29D3-4B12-B347-E4B632190DF9}"
@@ -45,10 +41,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "process", "process\process.vcxproj", "{FF94BA1A-1465-4E6B-9CAF-EC0A3C376E2B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tls_client", "tls_client\tls_client.vcxproj", "{1759A405-8572-4A70-8C14-16E7FCF4D899}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_dict", "..\lib_dict\lib_dict.vcxproj", "{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_tls", "..\lib_tls\lib_tls.vcxproj", "{389FDE47-7F16-4DD4-B37A-27918BE745B6}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tls_server", "tls_server\tls_server.vcxproj", "{B392992C-340B-417B-81E7-ACB265602DF7}"
 EndProject
@@ -83,9 +75,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xml", "xml\xml.vcxproj", "{BA8A20D5-958E-4DEC-9151-27049C2EEEB2}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "demo", "demo\demo.vcxproj", "{1AC6401F-21D8-4D44-9CDD-BDD45470CBFB}"
-	ProjectSection(ProjectDependencies) = postProject
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD} = {FE724EF7-3763-4E78-BDF5-BCBC075719FD}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winaio", "winaio\winaio.vcxproj", "{4B58485B-D846-4485-9C5E-7F2304D71701}"
 EndProject
@@ -448,58 +437,6 @@ Global
 		{AC9CA58D-28FB-40B7-85C8-BA7674DBD934}.ReleaseDll|Win32.Build.0 = ReleaseDll|Win32
 		{AC9CA58D-28FB-40B7-85C8-BA7674DBD934}.Template|Win32.ActiveCfg = Release|Win32
 		{AC9CA58D-28FB-40B7-85C8-BA7674DBD934}.Template|Win32.Build.0 = Release|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.Debug|Win32.ActiveCfg = Debug|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.Debug|Win32.Build.0 = Debug|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.DebugDll|Win32.ActiveCfg = lib_acl_dll_debug|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.DebugDll|Win32.Build.0 = lib_acl_dll_debug|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_acl_dll_debug|Win32.ActiveCfg = lib_acl_dll_debug|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_acl_dll_debug|Win32.Build.0 = lib_acl_dll_debug|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_acl_dll_release|Win32.ActiveCfg = lib_acl_dll_release|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_acl_dll_release|Win32.Build.0 = lib_acl_dll_release|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_dict_dll_debug|Win32.ActiveCfg = lib_acl_dll_release|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_dict_dll_debug|Win32.Build.0 = lib_acl_dll_release|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_dict_dll_release|Win32.ActiveCfg = lib_acl_dll_release|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_dict_dll_release|Win32.Build.0 = lib_acl_dll_release|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_protocol_dll_debug|Win32.ActiveCfg = lib_acl_dll_release|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_protocol_dll_debug|Win32.Build.0 = lib_acl_dll_release|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_protocol_dll_release|Win32.ActiveCfg = lib_acl_dll_release|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_protocol_dll_release|Win32.Build.0 = lib_acl_dll_release|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_tls_dll_debug|Win32.ActiveCfg = lib_acl_dll_release|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_tls_dll_debug|Win32.Build.0 = lib_acl_dll_release|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_tls_dll_release|Win32.ActiveCfg = lib_acl_dll_release|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.lib_tls_dll_release|Win32.Build.0 = lib_acl_dll_release|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.Release|Win32.ActiveCfg = Release|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.Release|Win32.Build.0 = Release|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.ReleaseDll|Win32.ActiveCfg = lib_acl_dll_release|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.ReleaseDll|Win32.Build.0 = lib_acl_dll_release|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.Template|Win32.ActiveCfg = Release|Win32
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.Template|Win32.Build.0 = Release|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.Debug|Win32.ActiveCfg = Debug|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.Debug|Win32.Build.0 = Debug|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.DebugDll|Win32.ActiveCfg = lib_protocol_dll_debug|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.DebugDll|Win32.Build.0 = lib_protocol_dll_debug|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_acl_dll_debug|Win32.ActiveCfg = lib_protocol_dll_release|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_acl_dll_debug|Win32.Build.0 = lib_protocol_dll_release|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_acl_dll_release|Win32.ActiveCfg = lib_protocol_dll_release|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_acl_dll_release|Win32.Build.0 = lib_protocol_dll_release|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_dict_dll_debug|Win32.ActiveCfg = lib_protocol_dll_release|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_dict_dll_debug|Win32.Build.0 = lib_protocol_dll_release|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_dict_dll_release|Win32.ActiveCfg = lib_protocol_dll_release|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_dict_dll_release|Win32.Build.0 = lib_protocol_dll_release|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_protocol_dll_debug|Win32.ActiveCfg = lib_protocol_dll_debug|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_protocol_dll_debug|Win32.Build.0 = lib_protocol_dll_debug|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_protocol_dll_release|Win32.ActiveCfg = lib_protocol_dll_release|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_protocol_dll_release|Win32.Build.0 = lib_protocol_dll_release|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_tls_dll_debug|Win32.ActiveCfg = lib_protocol_dll_release|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_tls_dll_debug|Win32.Build.0 = lib_protocol_dll_release|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_tls_dll_release|Win32.ActiveCfg = lib_protocol_dll_release|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.lib_tls_dll_release|Win32.Build.0 = lib_protocol_dll_release|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.Release|Win32.ActiveCfg = Release|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.Release|Win32.Build.0 = Release|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.ReleaseDll|Win32.ActiveCfg = lib_protocol_dll_release|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.ReleaseDll|Win32.Build.0 = lib_protocol_dll_release|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.Template|Win32.ActiveCfg = Release|Win32
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.Template|Win32.Build.0 = Release|Win32
 		{143D67EE-85E1-4456-AD99-6FDE7B1F1469}.Debug|Win32.ActiveCfg = Debug|Win32
 		{143D67EE-85E1-4456-AD99-6FDE7B1F1469}.Debug|Win32.Build.0 = Debug|Win32
 		{143D67EE-85E1-4456-AD99-6FDE7B1F1469}.DebugDll|Win32.ActiveCfg = DebugDll|Win32
@@ -708,58 +645,6 @@ Global
 		{1759A405-8572-4A70-8C14-16E7FCF4D899}.ReleaseDll|Win32.Build.0 = ReleaseDll|Win32
 		{1759A405-8572-4A70-8C14-16E7FCF4D899}.Template|Win32.ActiveCfg = Release|Win32
 		{1759A405-8572-4A70-8C14-16E7FCF4D899}.Template|Win32.Build.0 = Release|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.Debug|Win32.ActiveCfg = Debug|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.Debug|Win32.Build.0 = Debug|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.DebugDll|Win32.ActiveCfg = lib_dict_dll_debug|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.DebugDll|Win32.Build.0 = lib_dict_dll_debug|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.lib_acl_dll_debug|Win32.ActiveCfg = lib_dict_dll_release|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.lib_acl_dll_debug|Win32.Build.0 = lib_dict_dll_release|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.lib_acl_dll_release|Win32.ActiveCfg = lib_dict_dll_release|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.lib_acl_dll_release|Win32.Build.0 = lib_dict_dll_release|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.lib_dict_dll_debug|Win32.ActiveCfg = lib_dict_dll_debug|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.lib_dict_dll_debug|Win32.Build.0 = lib_dict_dll_debug|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.lib_dict_dll_release|Win32.ActiveCfg = lib_dict_dll_release|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.lib_dict_dll_release|Win32.Build.0 = lib_dict_dll_release|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.lib_protocol_dll_debug|Win32.ActiveCfg = lib_dict_dll_release|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.lib_protocol_dll_debug|Win32.Build.0 = lib_dict_dll_release|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.lib_protocol_dll_release|Win32.ActiveCfg = lib_dict_dll_release|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.lib_protocol_dll_release|Win32.Build.0 = lib_dict_dll_release|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.lib_tls_dll_debug|Win32.ActiveCfg = lib_dict_dll_release|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.lib_tls_dll_debug|Win32.Build.0 = lib_dict_dll_release|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.lib_tls_dll_release|Win32.ActiveCfg = lib_dict_dll_release|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.lib_tls_dll_release|Win32.Build.0 = lib_dict_dll_release|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.Release|Win32.ActiveCfg = Release|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.Release|Win32.Build.0 = Release|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.ReleaseDll|Win32.ActiveCfg = lib_dict_dll_release|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.ReleaseDll|Win32.Build.0 = lib_dict_dll_release|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.Template|Win32.ActiveCfg = Release|Win32
-		{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}.Template|Win32.Build.0 = Release|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.Debug|Win32.ActiveCfg = Debug|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.Debug|Win32.Build.0 = Debug|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.DebugDll|Win32.ActiveCfg = lib_tls_dll_debug|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.DebugDll|Win32.Build.0 = lib_tls_dll_debug|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.lib_acl_dll_debug|Win32.ActiveCfg = lib_tls_dll_release|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.lib_acl_dll_debug|Win32.Build.0 = lib_tls_dll_release|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.lib_acl_dll_release|Win32.ActiveCfg = lib_tls_dll_release|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.lib_acl_dll_release|Win32.Build.0 = lib_tls_dll_release|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.lib_dict_dll_debug|Win32.ActiveCfg = lib_tls_dll_release|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.lib_dict_dll_debug|Win32.Build.0 = lib_tls_dll_release|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.lib_dict_dll_release|Win32.ActiveCfg = lib_tls_dll_release|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.lib_dict_dll_release|Win32.Build.0 = lib_tls_dll_release|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.lib_protocol_dll_debug|Win32.ActiveCfg = lib_tls_dll_release|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.lib_protocol_dll_debug|Win32.Build.0 = lib_tls_dll_release|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.lib_protocol_dll_release|Win32.ActiveCfg = lib_tls_dll_release|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.lib_protocol_dll_release|Win32.Build.0 = lib_tls_dll_release|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.lib_tls_dll_debug|Win32.ActiveCfg = lib_tls_dll_debug|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.lib_tls_dll_debug|Win32.Build.0 = lib_tls_dll_debug|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.lib_tls_dll_release|Win32.ActiveCfg = lib_tls_dll_release|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.lib_tls_dll_release|Win32.Build.0 = lib_tls_dll_release|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.Release|Win32.ActiveCfg = Release|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.Release|Win32.Build.0 = Release|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.ReleaseDll|Win32.ActiveCfg = lib_tls_dll_release|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.ReleaseDll|Win32.Build.0 = lib_tls_dll_release|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.Template|Win32.ActiveCfg = Release|Win32
-		{389FDE47-7F16-4DD4-B37A-27918BE745B6}.Template|Win32.Build.0 = Release|Win32
 		{B392992C-340B-417B-81E7-ACB265602DF7}.Debug|Win32.ActiveCfg = Debug|Win32
 		{B392992C-340B-417B-81E7-ACB265602DF7}.Debug|Win32.Build.0 = Debug|Win32
 		{B392992C-340B-417B-81E7-ACB265602DF7}.DebugDll|Win32.ActiveCfg = DebugDll|Win32
