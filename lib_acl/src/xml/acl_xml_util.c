@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#include <stdio.h>
 #ifndef ACL_PREPARE_COMPILE
 
 #include "stdlib/acl_vstream.h"
@@ -181,6 +182,39 @@ ACL_XML_NODE *acl_xml_getElementById(ACL_XML *xml, const char *id)
 	if (attr == NULL)
 		return (NULL);
 	return (attr->node);
+}
+ACL_XML_NODE *acl_xml_getElementMeta(ACL_XML *xml, const char *tag)
+{
+	ACL_ITER iter;
+	ACL_XML_NODE *node;
+
+	acl_foreach(iter, xml) {
+		node = (ACL_XML_NODE*) iter.data;
+		if ((node->flag & ACL_XML_F_META_QM) == 0 || node->ltag == NULL)
+			continue;
+		if (strcasecmp(tag, STR(node->ltag)) == 0)
+			return node;
+	}
+
+	return NULL;
+}
+
+const char *acl_xml_getEncoding(ACL_XML *xml)
+{
+	ACL_XML_NODE *node = acl_xml_getElementMeta(xml, "xml");
+
+	if (node == NULL)
+		return NULL;
+	return acl_xml_getElementAttrVal(node, "encoding");
+}
+
+const char *acl_xml_getType(ACL_XML *xml)
+{
+	ACL_XML_NODE *node = acl_xml_getElementMeta(xml, "xml-stylesheet");
+
+	if (node == NULL)
+		return NULL;
+	return acl_xml_getElementAttrVal(node, "type");
 }
 
 ACL_XML_ATTR *acl_xml_getElementAttr(ACL_XML_NODE *node, const char *name)

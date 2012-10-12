@@ -1,3 +1,9 @@
+
+352) 2012.10.12
+352.1) feature: xml/,
+增加了三个函数接口：acl_xml_getElementMeta/acl_xml_getEncoding/acl_xml_getType,
+用于取得 xml 起始控制字段的相关信息
+
 351) 2012.9.29
 351.1) 为了兼容 MAC OS 以及关于线程局部变量在动态库的限制因素，将库中
 带有 __thread 关键字标识的局部变量统一改为通过 acl_pthread_getspecific
