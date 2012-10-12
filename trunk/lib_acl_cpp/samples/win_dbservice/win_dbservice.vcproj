@@ -36,7 +36,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="lib_acl_cpp_vc2003d_dll.lib lib_acl_vc2003d.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib"
+				AdditionalLibraryDirectories="..\..\lib;..\..\..\dist\lib\win32"
 				IgnoreDefaultLibraryNames=""
 				DelayLoadDLLs=""
 				GenerateDebugInformation="TRUE"
@@ -48,11 +48,11 @@
 				MkTypLibCompatible="FALSE"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\lib\lib_acl_d.dll $(OutDir)\ /Y
+				CommandLine="copy ..\..\..\dist\lib\win32\lib_acl_d.dll $(OutDir)\ /Y
 copy ..\..\bin\sqlite3.dll $(OutDir)\ /Y
 copy ..\..\bin\iconv.dll $(OutDir)\ /Y
 copy ..\..\lib\lib_acl_cpp_vc2003d_dll.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_protocol_d.dll $(OutDir)\ /Y
+copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y
 "/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
@@ -98,7 +98,7 @@ copy ..\..\lib\lib_protocol_d.dll $(OutDir)\ /Y
 				Name="VCLinkerTool"
 				AdditionalDependencies="lib_acl_cpp_vc2003_dll.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\lib"
+				AdditionalLibraryDirectories="..\..\lib;..\..\..\dist\lib\win32"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -110,11 +110,11 @@ copy ..\..\lib\lib_protocol_d.dll $(OutDir)\ /Y
 				MkTypLibCompatible="FALSE"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\lib\lib_acl.dll $(OutDir)\ /Y
+				CommandLine="copy ..\..\..\dist\lib\win32\lib_acl.dll $(OutDir)\ /Y
 copy ..\..\bin\sqlite3.dll $(OutDir)\ /Y
 copy ..\..\bin\iconv.dll $(OutDir)\ /Y
 copy ..\..\lib\lib_acl_cpp_vc2003_dll.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_protocol.dll $(OutDir)\ /Y
+copy ..\..\..\dist\lib\win32\lib_protocol.dll $(OutDir)\ /Y
 "/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
@@ -173,12 +173,12 @@ copy ..\..\lib\lib_protocol.dll $(OutDir)\ /Y
 				MkTypLibCompatible="FALSE"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\lib\lib_acl_d.dll $(OutDir)\ /Y
+				CommandLine="copy ..\..\..\dist\lib\win32\lib_acl_d.dll $(OutDir)\ /Y
 copy ..\..\bin\sqlite3.dll $(OutDir)\ /Y
 copy ..\..\bin\iconv.dll $(OutDir)\ /Y
 copy ..\..\lib\lib_acl_cpp_vc2003d_dll.dll $(OutDir)\ /Y
 copy ..\..\lib\lib_acl_cpp_vc2003d_dll.pdb $(OutDir)\ /Y
-copy ..\..\lib\lib_protocol_d.dll $(OutDir)\ /Y
+copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y
 "/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
@@ -236,11 +236,11 @@ copy ..\..\lib\lib_protocol_d.dll $(OutDir)\ /Y
 				MkTypLibCompatible="FALSE"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\lib\lib_acl.dll $(OutDir)\ /Y
+				CommandLine="copy ..\..\..\dist\lib\win32\lib_acl.dll $(OutDir)\ /Y
 copy ..\..\bin\sqlite3.dll $(OutDir)\ /Y
 copy ..\..\bin\iconv.dll $(OutDir)\ /Y
 copy ..\..\lib\lib_acl_cpp_vc2003_dll.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_protocol.dll $(OutDir)\ /Y
+copy ..\..\..\dist\lib\win32\lib_protocol.dll $(OutDir)\ /Y
 "/>
 			<Tool
 				Name="VCPreBuildEventTool"/>

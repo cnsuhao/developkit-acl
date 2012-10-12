@@ -16,7 +16,7 @@
   * Utility library.
   */
 #include <stdlib.h>
-#include "acl/stdlib/acl_vstring.h"
+#include "stdlib/acl_vstring.h"
 
  /*
   * HEADER header parser tokens. Specials and controls are represented by

@@ -2,11 +2,7 @@
 //
 
 #include "stdafx.h"
-#ifdef WIN32
-#include "acl/lib_acl.h"
-#else
 #include "lib_acl.h"
-#endif
 #include <iostream>
 #include "acl_cpp_init.hpp"
 #include "http_header.hpp"

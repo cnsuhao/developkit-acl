@@ -124,9 +124,9 @@
 
 	/* Utility library. */
 
-#include "acl/stdlib/acl_vstring.h"
-#include "acl/stdlib/acl_msg.h"
-#include "acl/stdlib/acl_stringops.h"
+#include "stdlib/acl_vstring.h"
+#include "stdlib/acl_msg.h"
+#include "stdlib/acl_stringops.h"
 
 	/* Global library. */
 

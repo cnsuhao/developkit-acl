@@ -43,8 +43,8 @@
 
 /* Utility library. */
 
-#include "acl/stdlib/acl_mymalloc.h"
-#include "acl/stdlib/acl_vstring.h"
+#include "stdlib/acl_mymalloc.h"
+#include "stdlib/acl_vstring.h"
 
 /* Global library. */
 
