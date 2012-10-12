@@ -10,13 +10,8 @@
 
 #include "acl_cpp_define.hpp"
 
-#ifdef WIN32
-#include "acl/lib_acl.h"
-#include "protocol/lib_protocol.h"
-#else
 #include "lib_acl.h"
 #include "lib_protocol.h"
-#endif
 
 #include "malloc.hpp"
 

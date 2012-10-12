@@ -1,10 +1,6 @@
+#include "lib_acl.h"
 #include "ofstream.hpp"
 #include "string.hpp"
-#ifdef WIN32
-#include "acl/lib_acl.h"
-#else
-#include "lib_acl.h"
-#endif
 #include <stdio.h>
 #include <string>
 

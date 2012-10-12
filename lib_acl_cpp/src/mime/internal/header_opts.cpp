@@ -35,11 +35,11 @@
 
 /* Utility library. */
 
-#include "acl/stdlib/acl_msg.h"
-#include "acl/stdlib/acl_htable.h"
-#include "acl/stdlib/acl_vstring.h"
-#include "acl/stdlib/acl_stringops.h"
-#include "acl/thread/acl_pthread.h"
+#include "stdlib/acl_msg.h"
+#include "stdlib/acl_htable.h"
+#include "stdlib/acl_vstring.h"
+#include "stdlib/acl_stringops.h"
+#include "thread/acl_pthread.h"
 /* Global library. */
 
 #include "trimblanks.hpp"

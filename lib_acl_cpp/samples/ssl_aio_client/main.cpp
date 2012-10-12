@@ -1,10 +1,6 @@
 #include <iostream>
 #include <assert.h>
-#ifdef WIN32
-#include "acl/lib_acl.h"
-#else
 #include "lib_acl.h"
-#endif
 #include "string.hpp"
 #include "http_header.hpp"
 #include "aio_handle.hpp"

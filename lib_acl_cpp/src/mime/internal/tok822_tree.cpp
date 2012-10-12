@@ -113,7 +113,7 @@
 
 /* Utility library. */
 #include "acl_stdafx.hpp"
-#include "acl/stdlib/acl_mymalloc.h"
+#include "stdlib/acl_mymalloc.h"
 
 /* Global library. */
 

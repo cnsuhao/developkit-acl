@@ -20,7 +20,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include;..\..\include\acl"
+				AdditionalIncludeDirectories="..\..\include;..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;VC2003"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -36,7 +36,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib wsock32.lib lib_acl_d.lib detours.lib dbghelp.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib"
+				AdditionalLibraryDirectories="..\..\lib;..\..\..\dist\lib\win32"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
@@ -82,7 +82,7 @@ copy ..\..\bin\vld.dll $(OutDir)\ /Y
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\include;..\..\include\acl"
+				AdditionalIncludeDirectories="..\..\include;..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;VC2003"
 				MinimalRebuild="FALSE"
 				RuntimeLibrary="2"
@@ -97,7 +97,7 @@ copy ..\..\bin\vld.dll $(OutDir)\ /Y
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib wsock32.lib lib_acl_vc2003.lib lib_acl_cpp_vc2003_dll.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\lib"
+				AdditionalLibraryDirectories="..\..\lib;..\..\..\dist\lib\win32"
 				IgnoreDefaultLibraryNames="libcmt"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
@@ -145,7 +145,7 @@ copy ..\..\lib\lib_protocol_d.dll $(OutDir)\ /Y
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include;..\..\include\acl"
+				AdditionalIncludeDirectories="..\..\include;..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;VC2003;ACL_CPP_DLL;ACL_DLL"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -210,7 +210,7 @@ copy ..\..\lib\lib_protocol_d.dll $(OutDir)\ /Y
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include"
+				AdditionalIncludeDirectories="..\..\include;..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;VC2003;ACL_CPP_DLL;ACL_DLL"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"

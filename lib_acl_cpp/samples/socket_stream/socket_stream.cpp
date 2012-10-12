@@ -2,12 +2,8 @@
 //
 
 #include "stdafx.h"
-#include "string.hpp"
-#ifdef WIN32
-#include "acl/lib_acl.h"
-#else
 #include "lib_acl.h"
-#endif
+#include "string.hpp"
 #include "socket_stream.hpp"
 
 //using acl;

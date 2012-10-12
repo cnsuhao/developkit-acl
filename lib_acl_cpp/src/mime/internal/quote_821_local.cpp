@@ -59,7 +59,7 @@
 
 /* Utility library. */
 
-#include "acl/stdlib/acl_vstring.h"
+#include "stdlib/acl_vstring.h"
 
 /* Global library. */
 

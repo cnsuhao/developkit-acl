@@ -1,7 +1,7 @@
 #include <iostream>
 #include <assert.h>
 #ifdef	WIN32
-#include "acl/lib_acl.h"
+#include "lib_acl.h"
 #else
 #include "lib_acl.h"
 #endif

@@ -49,7 +49,8 @@
 				Name="VCMIDLTool"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y"/>
+				CommandLine="copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y
+copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).pdb /Y"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -103,7 +104,8 @@
 				Name="VCMIDLTool"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y"/>
+				CommandLine="copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y
+copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).pdb /Y"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -149,6 +151,7 @@
 				Name="VCPostBuildEventTool"
 				CommandLine="copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y
 copy $(TargetName).dll ..\dist\lib\win32\$(TargetName).dll /Y
+copy $(TargetName).dll ..\dist\lib\win32\$(TargetName).pdb /Y
 "/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
@@ -205,6 +208,7 @@ copy $(TargetName).dll ..\dist\lib\win32\$(TargetName).dll /Y
 				Name="VCPostBuildEventTool"
 				CommandLine="copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y
 copy $(TargetName).dll ..\dist\lib\win32\$(TargetName).dll /Y
+copy $(TargetName).dll ..\dist\lib\win32\$(TargetName).pdb /Y
 "/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
