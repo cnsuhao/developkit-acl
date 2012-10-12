@@ -47,8 +47,8 @@
 				MkTypLibCompatible="FALSE"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\lib\lib_acl_d.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_protocol_d.dll $(OutDir)\ /Y
+				CommandLine="copy ..\..\..\dist\lib\win32\lib_acl_d.dll $(OutDir)\ /Y
+copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y
 copy ..\..\lib\lib_acl_cpp_vc2003d_dll.dll $(OutDir)\ /Y
 copy ..\..\bin\vld.dll $(OutDir)\ /Y
 "/>
@@ -110,10 +110,10 @@ copy ..\..\bin\vld.dll $(OutDir)\ /Y
 				MkTypLibCompatible="FALSE"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\lib\lib_acl.dll $(OutDir)\ /Y
+				CommandLine="copy ..\..\..\dist\lib\win32\lib_acl.dll $(OutDir)\ /Y
 copy ..\..\lib\lib_acl_cpp_vc2003_dll.dll $(OutDir)\ /Y
 copy ..\..\bin\vld.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_protocol_d.dll $(OutDir)\ /Y
+copy ..\..\..\dist\lib\win32\lib_protocol.dll $(OutDir)\ /Y
 "/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
@@ -176,9 +176,9 @@ copy ..\..\lib\lib_protocol_d.dll $(OutDir)\ /Y
 				MkTypLibCompatible="FALSE"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\lib\lib_acl_d.dll $(OutDir)\ /Y
+				CommandLine="copy ..\..\..\dist\lib\win32\lib_acl_d.dll $(OutDir)\ /Y
 copy ..\..\lib\lib_acl_cpp_vc2003d_dll.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_protocol_d.dll $(OutDir)\ /Y
+copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y
 "/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
@@ -239,8 +239,8 @@ copy ..\..\lib\lib_protocol_d.dll $(OutDir)\ /Y
 				MkTypLibCompatible="FALSE"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\lib\lib_acl.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_protocol.dll $(OutDir)\ /Y
+				CommandLine="copy ..\..\..\dist\lib\win32\lib_acl.dll $(OutDir)\ /Y
+copy ..\..\..\dist\lib\win32\lib_protocol.dll $(OutDir)\ /Y
 copy ..\..\lib\lib_acl_cpp_vc2003_dll.dll $(OutDir)\ /Y
 copy ..\..\bin\vld.dll $(OutDir)\ /Y
 "/>
