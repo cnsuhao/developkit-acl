@@ -1,59 +1,59 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "socket_stream", "samples\socket_stream\socket_stream.vcxproj", "{41FA5224-3315-4CDA-9C44-19085049F179}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "socket_stream", "lib_acl_cpp\samples\socket_stream\socket_stream.vcxproj", "{41FA5224-3315-4CDA-9C44-19085049F179}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mime", "samples\mime\mime.vcxproj", "{52AA7352-CE48-4F60-B92D-1EB16A79FE54}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mime", "lib_acl_cpp\samples\mime\mime.vcxproj", "{52AA7352-CE48-4F60-B92D-1EB16A79FE54}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xml", "samples\xml\xml.vcxproj", "{2DABFAD1-114B-4F96-9185-DC0C56A3662D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xml", "lib_acl_cpp\samples\xml\xml.vcxproj", "{2DABFAD1-114B-4F96-9185-DC0C56A3662D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "string", "samples\string\string.vcxproj", "{C94BEF01-706C-49A7-9FF1-9D87FA5BB8E7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "string", "lib_acl_cpp\samples\string\string.vcxproj", "{C94BEF01-706C-49A7-9FF1-9D87FA5BB8E7}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fstream", "samples\fstream\fstream.vcxproj", "{7680672C-4C9B-4BE8-8BAE-BB23B951AAA0}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fstream", "lib_acl_cpp\samples\fstream\fstream.vcxproj", "{7680672C-4C9B-4BE8-8BAE-BB23B951AAA0}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mime_base64", "samples\mime_base64\mime_base64.vcxproj", "{19CB30E5-2672-4A8B-96FB-9C42970CCF69}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mime_base64", "lib_acl_cpp\samples\mime_base64\mime_base64.vcxproj", "{19CB30E5-2672-4A8B-96FB-9C42970CCF69}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mime_qp", "samples\mime_qp\mime_qp.vcxproj", "{5DC79C83-9DE8-46B3-A172-8A4E3371878B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mime_qp", "lib_acl_cpp\samples\mime_qp\mime_qp.vcxproj", "{5DC79C83-9DE8-46B3-A172-8A4E3371878B}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flock", "samples\flock\flock.vcxproj", "{5F4063AD-B591-4C64-ADEA-609968A83550}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flock", "lib_acl_cpp\samples\flock\flock.vcxproj", "{5F4063AD-B591-4C64-ADEA-609968A83550}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rfc2047", "samples\rfc2047\rfc2047.vcxproj", "{503AFD46-DF2F-4D2B-8584-60AD2007D2BE}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rfc2047", "lib_acl_cpp\samples\rfc2047\rfc2047.vcxproj", "{503AFD46-DF2F-4D2B-8584-60AD2007D2BE}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "aio_server", "samples\aio_server\aio_server.vcxproj", "{225D0BFA-64D7-4F8F-951E-36A494CF6178}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "aio_server", "lib_acl_cpp\samples\aio_server\aio_server.vcxproj", "{225D0BFA-64D7-4F8F-951E-36A494CF6178}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "aio_client", "samples\aio_client\aio_client.vcxproj", "{9A04F86E-D4CB-45ED-9BB6-9939B9400B6F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "aio_client", "lib_acl_cpp\samples\aio_client\aio_client.vcxproj", "{9A04F86E-D4CB-45ED-9BB6-9939B9400B6F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winaio", "samples\winaio\winaio.vcxproj", "{ADE6F714-BD52-432D-AB86-62FA59AB6746}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winaio", "lib_acl_cpp\samples\winaio\winaio.vcxproj", "{ADE6F714-BD52-432D-AB86-62FA59AB6746}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "aio_ipc", "samples\aio_ipc\aio_ipc.vcxproj", "{956FA905-A77F-41FE-A4BE-C3BD3B5B3E83}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "aio_ipc", "lib_acl_cpp\samples\aio_ipc\aio_ipc.vcxproj", "{956FA905-A77F-41FE-A4BE-C3BD3B5B3E83}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "aio_dns", "samples\aio_dns\aio_dns.vcxproj", "{BE2DF8B2-2DCD-4F32-99B9-0B0CA24BFAD9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "aio_dns", "lib_acl_cpp\samples\aio_dns\aio_dns.vcxproj", "{BE2DF8B2-2DCD-4F32-99B9-0B0CA24BFAD9}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_acl_cpp_vc2010", "lib_acl_cpp_vc2010.vcxproj", "{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HttpClient", "samples\HttpClient\HttpClient.vcxproj", "{C0A7DB86-EF13-4A3E-9F34-8950521C9675}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HttpClient", "lib_acl_cpp\samples\HttpClient\HttpClient.vcxproj", "{C0A7DB86-EF13-4A3E-9F34-8950521C9675}"
 	ProjectSection(ProjectDependencies) = postProject
 		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC} = {6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "http_client", "samples\http_client\http_client.vcxproj", "{467619C7-C100-47B9-9A3B-7246A542EDC9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "http_client", "lib_acl_cpp\samples\http_client\http_client.vcxproj", "{467619C7-C100-47B9-9A3B-7246A542EDC9}"
 	ProjectSection(ProjectDependencies) = postProject
 		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC} = {6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "final_class", "samples\final_class\final_class.vcxproj", "{840C2263-DF87-4FD2-8964-EF81B74695FE}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "final_class", "lib_acl_cpp\samples\final_class\final_class.vcxproj", "{840C2263-DF87-4FD2-8964-EF81B74695FE}"
 	ProjectSection(ProjectDependencies) = postProject
 		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC} = {6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "win_dbservice", "samples\win_dbservice\win_dbservice.vcxproj", "{DC7E75E5-FE42-4529-9D9A-19D240B8727B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "win_dbservice", "lib_acl_cpp\samples\win_dbservice\win_dbservice.vcxproj", "{DC7E75E5-FE42-4529-9D9A-19D240B8727B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC} = {6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "md5", "samples\md5\md5.vcxproj", "{B8029C89-9870-4EE4-ADD0-E7852E0D1810}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "md5", "lib_acl_cpp\samples\md5\md5.vcxproj", "{B8029C89-9870-4EE4-ADD0-E7852E0D1810}"
 	ProjectSection(ProjectDependencies) = postProject
 		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC} = {6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_acl_cpp_vc2010", "lib_acl_cpp\lib_acl_cpp_vc2010.vcxproj", "{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -204,16 +204,6 @@ Global
 		{BE2DF8B2-2DCD-4F32-99B9-0B0CA24BFAD9}.Releasedll|Win32.Build.0 = Releasedll|Win32
 		{BE2DF8B2-2DCD-4F32-99B9-0B0CA24BFAD9}.Template|Win32.ActiveCfg = Release|Win32
 		{BE2DF8B2-2DCD-4F32-99B9-0B0CA24BFAD9}.Template|Win32.Build.0 = Release|Win32
-		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}.Debug|Win32.ActiveCfg = Debug|Win32
-		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}.Debug|Win32.Build.0 = Debug|Win32
-		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}.DebugDll|Win32.ActiveCfg = DebugDll|Win32
-		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}.DebugDll|Win32.Build.0 = DebugDll|Win32
-		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}.Release|Win32.ActiveCfg = Release|Win32
-		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}.Release|Win32.Build.0 = Release|Win32
-		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}.Releasedll|Win32.ActiveCfg = Releasedll|Win32
-		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}.Releasedll|Win32.Build.0 = Releasedll|Win32
-		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}.Template|Win32.ActiveCfg = Release|Win32
-		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}.Template|Win32.Build.0 = Release|Win32
 		{C0A7DB86-EF13-4A3E-9F34-8950521C9675}.Debug|Win32.ActiveCfg = Debug|Win32
 		{C0A7DB86-EF13-4A3E-9F34-8950521C9675}.Debug|Win32.Build.0 = Debug|Win32
 		{C0A7DB86-EF13-4A3E-9F34-8950521C9675}.DebugDll|Win32.ActiveCfg = DebugDll|Win32
@@ -264,6 +254,16 @@ Global
 		{B8029C89-9870-4EE4-ADD0-E7852E0D1810}.Releasedll|Win32.Build.0 = ReleaseDll|Win32
 		{B8029C89-9870-4EE4-ADD0-E7852E0D1810}.Template|Win32.ActiveCfg = Release|Win32
 		{B8029C89-9870-4EE4-ADD0-E7852E0D1810}.Template|Win32.Build.0 = Release|Win32
+		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}.Debug|Win32.Build.0 = Debug|Win32
+		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}.DebugDll|Win32.ActiveCfg = DebugDll|Win32
+		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}.DebugDll|Win32.Build.0 = DebugDll|Win32
+		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}.Release|Win32.ActiveCfg = Release|Win32
+		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}.Release|Win32.Build.0 = Release|Win32
+		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}.Releasedll|Win32.ActiveCfg = Releasedll|Win32
+		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}.Releasedll|Win32.Build.0 = Releasedll|Win32
+		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}.Template|Win32.ActiveCfg = Release|Win32
+		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}.Template|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -97,8 +97,8 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>lib_acl_vc2003d.lib;lib_acl_cpp_vc2010d.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>flock.exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <OutputFile>$(OutDir)flock.exe</OutputFile>
+      <AdditionalLibraryDirectories>..\..\lib;..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)flock.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
@@ -120,7 +120,7 @@
     <Link>
       <AdditionalDependencies>ws2_32.lib;wsock32.lib;lib_acl_vc2003.lib;lib_acl_cpp_vc2010.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)flock.exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\lib;..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -145,8 +145,8 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>ws2_32.lib;lib_acl_d.lib;lib_acl_cpp_vc2010d_dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>flock.exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <OutputFile>$(OutDir)flock.exe</OutputFile>
+      <AdditionalLibraryDirectories>..\..\lib;..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)flock.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
@@ -168,8 +168,8 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>lib_acl.lib;lib_acl_cpp_vc2010_dll.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>flock.exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <OutputFile>$(OutDir)flock.exe</OutputFile>
+      <AdditionalLibraryDirectories>..\..\lib;..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)flock.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
@@ -183,7 +183,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\lib_acl_cpp_vc2003.vcxproj">
+    <ProjectReference Include="..\..\lib_acl_cpp_vc2010.vcxproj">
       <Project>{6ec1f44e-6a6a-48e9-b699-d7e89b63c8dc}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
