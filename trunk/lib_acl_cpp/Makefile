@@ -78,7 +78,7 @@ LIB_PATH_DST = ./lib
 DEF_PATH_DST = ./Debug
 
 CFLAGS += -I./src -I./include -I../lib_acl/include -I../lib_protocol/include \
-	  -I../include/sqlite -I../include/mysql -I../include
+	  -I../include/sqlite -I../include/mysql -I../include/zlib -I../include
 
 #Project's objs
 OBJS_DST = $(patsubst %.cpp, $(OBJ_PATH_DST)/%.o, $(notdir $(wildcard src/*.cpp))) \
