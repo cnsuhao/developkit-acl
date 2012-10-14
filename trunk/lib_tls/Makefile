@@ -106,6 +106,8 @@ COMPILE = $(CC) $(CFLAGS)
 
 all: TLSMGR
 
+$(shell mkdir -p $(OBJ_PATH_DST))
+
 TLSMGR: $(LIB_NAME)
 	@(cd tlsmgr; make)
 
