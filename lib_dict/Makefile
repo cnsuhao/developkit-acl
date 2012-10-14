@@ -114,6 +114,8 @@ COMPILE = $(CC) $(CFLAGS)
 
 all: $(LIB_NAME)
 
+$(shell mkdir -p $(OBJ_PATH_DST))
+
 $(LIB_NAME): $(OBJS_DST)
 	$(AR) $(ARFL) $(LIB_PATH_DST)/$(LIB_NAME) $(OBJS_DST)
 	$(RANLIB) $(LIB_PATH_DST)/$(LIB_NAME)

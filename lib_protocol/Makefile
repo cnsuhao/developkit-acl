@@ -104,6 +104,8 @@ COMPILE = $(CC) $(CFLAGS)
 
 all: static shared
 
+$(shell mkdir -p $(OBJ_PATH_DST))
+
 static: $(OBJS_DST)
 	$(AR) $(ARFL) $(LIB_PATH_DST)/lib_protocol.a $(OBJS_DST)
 	$(RANLIB) $(LIB_PATH_DST)/lib_protocol.a
