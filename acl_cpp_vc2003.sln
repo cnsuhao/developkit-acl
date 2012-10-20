@@ -208,6 +208,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "http_server", "lib_acl_cpp\
 		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC} = {6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_acl", "lib_acl\lib_acl_vc2003.vcproj", "{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_protocol", "lib_protocol\lib_protocol_vc2003.vcproj", "{FE724EF7-3763-4E78-BDF5-BCBC075719FD}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -552,6 +560,22 @@ Global
 		{8B7A7746-C678-4205-8EA7-492A097F524B}.Release.Build.0 = Release|Win32
 		{8B7A7746-C678-4205-8EA7-492A097F524B}.Releasedll.ActiveCfg = Release|Win32
 		{8B7A7746-C678-4205-8EA7-492A097F524B}.Releasedll.Build.0 = Release|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.Debug.ActiveCfg = Debug|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.Debug.Build.0 = Debug|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.DebugDll.ActiveCfg = DebugDll|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.DebugDll.Build.0 = DebugDll|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.Release.ActiveCfg = Release|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.Release.Build.0 = Release|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.Releasedll.ActiveCfg = ReleaseDll|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.Releasedll.Build.0 = ReleaseDll|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.Debug.ActiveCfg = Debug|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.Debug.Build.0 = Debug|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.DebugDll.ActiveCfg = DebugDll|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.DebugDll.Build.0 = DebugDll|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.Release.ActiveCfg = Release|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.Release.Build.0 = Release|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.Releasedll.ActiveCfg = ReleaseDll|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.Releasedll.Build.0 = ReleaseDll|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
