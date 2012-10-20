@@ -98,7 +98,7 @@ copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).pdb /Y"/>
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="lib_tls_dll_debug|Win32"
+			Name="DebugDll|Win32"
 			OutputDirectory="."
 			IntermediateDirectory="DebugDll"
 			ConfigurationType="2"
@@ -151,7 +151,7 @@ copy $(TargetName).dll ..\dist\lib\win32\$(TargetName).pdb /Y
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="lib_tls_dll_release|Win32"
+			Name="ReleaseDll|Win32"
 			OutputDirectory="."
 			IntermediateDirectory="ReleaseDll"
 			ConfigurationType="2"
@@ -223,13 +223,13 @@ copy $(TargetName).dll ..\dist\lib\win32\$(TargetName).pdb /Y
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="lib_tls_dll_debug|Win32">
+					Name="DebugDll|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="lib_tls_dll_release|Win32">
+					Name="ReleaseDll|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"/>
