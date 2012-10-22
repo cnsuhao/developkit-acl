@@ -106,7 +106,8 @@
       <OutputFile>$(ProjectName)_vc2010d.lib</OutputFile>
     </Lib>
     <PostBuildEvent>
-      <Command>copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y</Command>
+      <Command>copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y
+copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -127,7 +128,8 @@
       <OutputFile>$(ProjectName)_vc2010.lib</OutputFile>
     </Lib>
     <PostBuildEvent>
-      <Command>copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y</Command>
+      <Command>copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y
+copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDll|Win32'">
@@ -148,6 +150,7 @@
     <PostBuildEvent>
       <Command>copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y
 copy $(TargetName).dll ..\dist\lib\win32\$(TargetName).dll /Y
+copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -180,6 +183,7 @@ copy $(TargetName).dll ..\dist\lib\win32\$(TargetName).dll /Y
     <PostBuildEvent>
       <Command>copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y
 copy $(TargetName).dll ..\dist\lib\win32\$(TargetName).dll /Y
+copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

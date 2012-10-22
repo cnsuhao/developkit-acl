@@ -115,7 +115,8 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Lib>
     <PostBuildEvent>
-      <Command>copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y</Command>
+      <Command>copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y
+copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y</Command>
     </PostBuildEvent>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -146,7 +147,8 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Lib>
     <PostBuildEvent>
-      <Command>copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y</Command>
+      <Command>copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y
+copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y</Command>
     </PostBuildEvent>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -170,6 +172,7 @@
     <PostBuildEvent>
       <Command>copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y
 copy $(TargetName).dll ..\dist\lib\win32\$(TargetName).dll /Y
+copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -199,6 +202,7 @@ copy $(TargetName).dll ..\dist\lib\win32\$(TargetName).dll /Y
     <PostBuildEvent>
       <Command>copy $(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y
 copy $(TargetName).dll ..\dist\lib\win32\$(TargetName).dll /Y
+copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
