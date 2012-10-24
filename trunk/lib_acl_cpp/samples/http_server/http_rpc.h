@@ -1,8 +1,9 @@
 #pragma once
 #include "rpc.hpp"
-
-class acl::aio_socket_stream;
-class acl::socket_stream;
+#include "aio_socket_stream.hpp"
+#include "socket_stream.hpp"
+//class acl::aio_socket_stream;
+//class acl::socket_stream;
 
 class http_rpc : public acl::rpc_request
 {
