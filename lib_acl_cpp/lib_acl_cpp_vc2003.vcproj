@@ -28,7 +28,7 @@
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="acl_stdafx.hpp"
 				PrecompiledHeaderFile="$(IntDir)/$(TargetName).pch"
-				ProgramDataBaseFileName="$(OutDir)/$(ProjectName)d.pdb"
+				ProgramDataBaseFileName="$(OutDir)/$(ProjectName)_vc2003d.pdb"
 				WarningLevel="3"
 				WarnAsError="TRUE"
 				Detect64BitPortabilityProblems="FALSE"
@@ -37,7 +37,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/$(ProjectName)d.lib"/>
+				OutputFile="$(OutDir)/$(ProjectName)_vc2003d.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -73,7 +73,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="acl_stdafx.hpp"
-				ProgramDataBaseFileName="$(OutDir)/$(ProjectName).pdb"
+				ProgramDataBaseFileName="$(OutDir)/$(ProjectName)_vc2003.pdb"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="FALSE"
 				DebugInformationFormat="3"/>
@@ -81,7 +81,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/$(ProjectName).lib"/>
+				OutputFile="$(OutDir)/$(ProjectName)_vc2003.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
