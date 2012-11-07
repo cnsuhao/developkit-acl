@@ -8,6 +8,16 @@
 extern "C" {
 #endif
 
+#ifdef ICMP_DLL
+# ifdef ICMP_EXPORTS
+#  define ICMP_API __declspec(dllexport)
+# else
+#  define ICMP_API __declspec(dllimport)
+# endif
+#else
+#  define ICMP_API
+#endif
+
 /* in icmp_chat.c */
 /**
  * 创建ICMP会话对象

@@ -1,16 +1,6 @@
 #ifndef __LIB_ICMP_TYPE_INCLUDE_H__
 #define __LIB_ICMP_TYPE_INCLUDE_H__
 
-#ifdef ICMP_DLL
-# ifdef ICMP_EXPORTS
-#  define ICMP_API __declspec(dllexport)
-# else
-#  define ICMP_API __declspec(dllimport)
-# endif
-#else
-#  define ICMP_API
-#endif
-
 typedef struct ICMP_CHAT ICMP_CHAT;
 typedef struct ICMP_STAT ICMP_STAT;
 typedef struct ICMP_HOST ICMP_HOST;
