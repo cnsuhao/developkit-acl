@@ -136,25 +136,35 @@ namespace acl {
 
 		/**
 		 * 尝试性从输入流中读取一行数据
-		 * @param buf {string&} 缓冲区，内部会首先自动清空该缓冲区
+		 * @param buf {string&} 缓冲区
 		 * @param nonl {bool} 是否保留所读行数据中的 "\r\n" 或 "\n"
+		 * @param clear {bool} 是否内部自动清空 buf 缓冲区
 		 * @return {bool} 是否读了一行数据; 如果返回 false 并不表示输入
 		 *  流结束，只是表示未读到一个完整行数据，应该通过调用 stream->eof()
 		 *  来检查输入流是否关闭，另外，如果仅读到了部分数据，则 buf 会存储
 		 *  这些部分数据
 		 */
-		bool gets_peek(string& buf, bool nonl = true);
+		bool gets_peek(string& buf, bool nonl = true, bool clear = false);
 
 		/**
-		 * 尝试性从输入流读取指定长度的数据
-		 * @param buf {string&} 缓冲区，内部会首先自动清空该缓冲区
+		 * 尝试性从输入流中读取数据
+		 * @param buf {string&} 缓冲区
+		 * @param clear {bool} 函数开始时是否内部自动清空 buf 缓冲区
+		 * @return {bool} 是否读到数据, 如果返回 false 仅 表示未读完所要求
+		 *  的数据长度，应该通过调用 stream->eof() 来检查输入流是否关闭
+		 */
+		bool read_peek(string& buf, bool clear = false);
+
+		/**
+		 * 尝试性从输入流中读取指定长度的数据
+		 * @param buf {string&} 缓冲区
 		 * @param cnt {size_t} 要求读到的数据长度
-		 * @param loop {bool} 是否阻塞式读
+		 * @param clear {bool} 函数开始时是否内部自动清空 buf 缓冲区
 		 * @return {bool} 是否读到所要求数据长度的数据, 如果返回 false 仅
 		 *  表示未读完所要求的数据长度，应该通过调用 stream->eof() 来检查
 		 *  输入流是否关闭
 		 */
-		bool read_peek(string& buf, size_t cnt, bool loop = true);
+		bool readn_peek(acl::string& buf, size_t cnt, bool clear = false);
 
 		/* 以下几个函数重载了输入操作符，它们都是阻塞式操作过程，且需要
 		 * 调用 stream->eof() 来判断输入流是否关闭或是否读到了文件尾 */
