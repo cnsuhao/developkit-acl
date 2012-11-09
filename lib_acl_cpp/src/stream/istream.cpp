@@ -134,9 +134,11 @@ namespace acl {
 		return (ret);
 	}
 
-	bool istream::gets_peek(acl::string& buf, bool nonl /* = true */)
+	bool istream::gets_peek(acl::string& buf, bool nonl /* = true */,
+		bool clear /* = false */)
 	{
-		buf.clear();
+		if (clear)
+			buf.clear();
 
 		int ready, ret;
 		ACL_VSTRING *vbf = (ACL_VSTRING*) buf.vstring();
@@ -149,23 +151,31 @@ namespace acl {
 		return (ready ? true : false);
 	}
 
-	bool istream::read_peek(acl::string& buf, size_t cnt, bool loop /* = true */)
+	bool istream::read_peek(acl::string& buf, bool clear /* = false */)
 	{
-		buf.clear();
+		if (clear)
+			buf.clear();
 
-		int ready, ret;
-		ACL_VSTRING *vbf = (ACL_VSTRING*) buf.vstring();
-		if (loop)
-			ret = acl_vstream_readn_peek(m_pStream, vbf, (int) cnt, &ready);
-		else {
-			ret = acl_vstream_read_peek(m_pStream, vbf);
-			if (ret > 0)
-				ready = 1;
-			else
-				ready = 0;
-		}
-		if (ret == ACL_VSTREAM_EOF)
+		if (acl_vstream_read_peek(m_pStream, buf.vstring()) == ACL_VSTREAM_EOF)
+		{
 			m_bEof = true;
+			return false;
+		}
+		else
+			return true;
+	}
+
+	bool istream::readn_peek(acl::string& buf, size_t cnt, bool clear /* = false */)
+	{
+		if (clear)
+			buf.clear();
+
+		int ready;
+		if (acl_vstream_readn_peek(m_pStream, buf.vstring(),
+			(int) cnt, &ready) == ACL_VSTREAM_EOF)
+		{
+			m_bEof = true;
+		}
 		return (ready ? true : false);
 	}
 
