@@ -484,7 +484,7 @@ int smtp_send_stream(SMTP_CLIENT *client, ACL_VSTREAM *in)
 
 /* 向服务器发送邮件内容 */
 
-int smtp_file_data(SMTP_CLIENT *client, const char* filepath)
+int smtp_send_file(SMTP_CLIENT *client, const char* filepath)
 {
 	int   ret;
 	ACL_VSTREAM *in = acl_vstream_fopen(filepath, O_RDONLY, 0600, 4096);
@@ -526,43 +526,7 @@ int smtp_quit(SMTP_CLIENT *client)
 	tokens = acl_argv_split(client->buf, "\t ");
 	client->smtp_code = atoi(tokens->argv[0]);
 	if (client->smtp_code != 221) {
-		acl_msg_error("%s(%d): quit's reply: %s",
-			__FUNCTION__, __LINE__, client->smtp_code);
-		acl_argv_free(tokens);
-		return -1;
-	}
-	acl_argv_free(tokens);
-	return 0;
-}
-
-/* 发送 QUIT 命令 */
-
-int smtp_cmd_quit(SMTP_CLIENT *client)
-{
-	int   ret;
-	ACL_ARGV *tokens;
-
-	client->smtp_code = 0;
-	client->buf[0] = 0;
-
-	ret = acl_vstream_fprintf(client->conn, "QUIT\r\n");
-	if (ret == ACL_VSTREAM_EOF) {
-		acl_msg_error("%s(%d): send quit cmd error(%s)",
-			__FUNCTION__, __LINE__, acl_last_serror());
-		return -1;
-	}
-
-	ret = acl_vstream_gets_nonl(client->conn, client->buf, client->size);
-	if (ret == ACL_VSTREAM_EOF) {
-		acl_msg_error("%s(%d): gets quit's reply error(%s)",
-			__FUNCTION__, __LINE__, acl_last_serror());
-		return -1;
-	}
-
-	tokens = acl_argv_split(client->buf, "\t ");
-	client->smtp_code = atoi(tokens->argv[0]);
-	if (client->smtp_code != 221) {
-		acl_msg_error("%s(%d): quit's reply: %s",
+		acl_msg_error("%s(%d): quit's reply: %d",
 			__FUNCTION__, __LINE__, client->smtp_code);
 		acl_argv_free(tokens);
 		return -1;
@@ -608,7 +572,7 @@ int smtp_noop(SMTP_CLIENT *client)
 	client->smtp_code = atoi(client->buf);
 	*ptr = ret;
 	if (client->smtp_code != 250) {
-		acl_msg_error("%s(%d): NOOP's reply(%s) code(%s) error",
+		acl_msg_error("%s(%d): NOOP's reply(%s) code(%d) error",
 			__FUNCTION__, __LINE__, client->buf, client->smtp_code);
 		return -1;
 	}

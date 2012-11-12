@@ -86,12 +86,14 @@ CFLAGS += $(INC_COMPILE)
 BASE_SRC   = $(wildcard $(SRC_PATH_SRC)/*.c)
 HTTP_SRC   = $(wildcard $(SRC_PATH_SRC)/http/*.c)
 ICMP_SRC   = $(wildcard $(SRC_PATH_SRC)/icmp/*.c)
-SOURCES_SRC  = $(HTTP_SRC) $(ICMP_SRC)
+SMTP_SRC   = $(wildcard $(SRC_PATH_SRC)/smtp/*.c)
+SOURCES_SRC  = $(HTTP_SRC) $(ICMP_SRC) $(SMTP_SRC)
 
 BASE_OBJ = $(patsubst %.c, $(OBJ_PATH_DST)/%.o, $(notdir $(BASE_SRC)))
 HTTP_OBJ = $(patsubst %.c, $(OBJ_PATH_DST)/%.o, $(notdir $(HTTP_SRC)))
 ICMP_OBJ = $(patsubst %.c, $(OBJ_PATH_DST)/%.o, $(notdir $(ICMP_SRC)))
-OBJS_DST = $(BASE_OBJ) $(HTTP_OBJ) $(ICMP_OBJ)
+SMTP_OBJ = $(patsubst %.c, $(OBJ_PATH_DST)/%.o, $(notdir $(SMTP_SRC)))
+OBJS_DST = $(BASE_OBJ) $(HTTP_OBJ) $(ICMP_OBJ) $(SMTP_OBJ)
 ###########################################################
 
 LIB_ACL_PATH = ../lib_acl
@@ -130,6 +132,10 @@ $(OBJ_PATH_DST)/%.o: $(SRC_PATH_SRC)/http/%.c
 
 # icmp
 $(OBJ_PATH_DST)/%.o: $(SRC_PATH_SRC)/icmp/%.c
+	$(COMPILE) $< -o $@
+
+# smtp
+$(OBJ_PATH_DST)/%.o: $(SRC_PATH_SRC)/smtp/%.c
 	$(COMPILE) $< -o $@
 
 clean:
