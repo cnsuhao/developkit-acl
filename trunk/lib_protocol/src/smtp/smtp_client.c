@@ -108,7 +108,7 @@ int smtp_helo(SMTP_CLIENT *client, const char *helo)
 		return -1;
 	}
 	*ptr = 0;
-	client->smtp_code = atoi(ptr);
+	client->smtp_code = atoi(client->buf);
 	*ptr = ' ';
 	if (client->smtp_code != 250) {
 		acl_msg_error("%s(%d): helo's reply code: %d, line(%s)",
