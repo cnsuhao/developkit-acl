@@ -114,14 +114,14 @@ namespace acl
 	void master_threads::thread_run(void* arg)
 	{
 		ACL_VSTREAM* client = (ACL_VSTREAM*) arg;
-		if (service_on_accept(client) == 0)
+		if (service_on_accept(client) != 0)
+			return;
+		while (true)
 		{
-			while (true)
-			{
-				// 当函数返回 1 时表示 client 已经被关闭了
-				if (service_main(client, NULL) == 1)
-					break;
-			}
+			// 当函数返回 1 时表示 client 已经被关闭了
+			(void) acl_read_wait(ACL_VSTREAM_SOCK(client), 10);
+			if (service_main(client, NULL) == 1)
+				break;
 		}
 	}
 
