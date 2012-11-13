@@ -119,7 +119,8 @@ namespace acl
 		while (true)
 		{
 			// 当函数返回 1 时表示 client 已经被关闭了
-			(void) acl_read_wait(ACL_VSTREAM_SOCK(client), 10);
+			if (acl_read_wait(ACL_VSTREAM_SOCK(client), 10) == 0)
+				client->sys_read_ready = 1;
 			if (service_main(client, NULL) == 1)
 				break;
 		}
