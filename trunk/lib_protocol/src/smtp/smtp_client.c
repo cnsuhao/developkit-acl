@@ -311,6 +311,7 @@ int smtp_mail(SMTP_CLIENT *client, const char *from)
 		return -1;
 	}
 
+
 	/* 读取响应信息 */
 	ret = acl_vstream_gets_nonl(client->conn, client->buf, client->size);
 	if (ret == ACL_VSTREAM_EOF) {
