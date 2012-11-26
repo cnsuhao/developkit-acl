@@ -167,7 +167,7 @@ ACL_API void acl_event_free(ACL_EVENT *eventp);
 /**
  * 返回事件的时间截
  * @param eventp {ACL_EVENT*} 事件对象指针, 不为能为空
- * @return {acl_int64} 当前事件的时间截
+ * @return {acl_int64} 当前事件的时间截(微秒级别)
  */
 ACL_API acl_int64 acl_event_time(ACL_EVENT *eventp);
 
