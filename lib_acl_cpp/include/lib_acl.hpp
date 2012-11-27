@@ -4,6 +4,8 @@
 #include "acl_cpp_init.hpp"
 #include "acl_cpp_test.hpp"
 
+#include "noncopyable.hpp"
+#include "singleton.hpp"
 #include "snprintf.hpp"
 #include "dns_service.hpp"
 #include "final_tpl.hpp"

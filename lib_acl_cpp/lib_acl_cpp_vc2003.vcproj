@@ -763,10 +763,16 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 					RelativePath=".\include\memcache_session.hpp">
 				</File>
 				<File
+					RelativePath=".\include\noncopyable.hpp">
+				</File>
+				<File
 					RelativePath=".\include\pipe_stream.hpp">
 				</File>
 				<File
 					RelativePath=".\include\session.hpp">
+				</File>
+				<File
+					RelativePath=".\include\singleton.hpp">
 				</File>
 				<File
 					RelativePath=".\include\snprintf.hpp">

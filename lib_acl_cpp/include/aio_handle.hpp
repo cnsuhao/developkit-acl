@@ -1,5 +1,6 @@
 #pragma once
 #include "acl_cpp_define.hpp"
+#include "noncopyable.hpp"
 #include <list>
 #include <set>
 //#include "string.hpp"
