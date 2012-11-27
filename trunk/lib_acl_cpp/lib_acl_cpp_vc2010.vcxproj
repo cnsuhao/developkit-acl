@@ -369,6 +369,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include="include\mime_quoted_printable.hpp" />
     <ClInclude Include="include\mime_uucode.hpp" />
     <ClInclude Include="include\mime_xxcode.hpp" />
+    <ClInclude Include="include\noncopyable.hpp" />
     <ClInclude Include="include\ofstream.hpp" />
     <ClInclude Include="include\ostream.hpp" />
     <ClInclude Include="include\pipe_stream.hpp" />
@@ -376,6 +377,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include="include\rfc822.hpp" />
     <ClInclude Include="include\rpc.hpp" />
     <ClInclude Include="include\session.hpp" />
+    <ClInclude Include="include\singleton.hpp" />
     <ClInclude Include="include\snprintf.hpp" />
     <ClInclude Include="include\socket_stream.hpp" />
     <ClInclude Include="include\ssl_aio_stream.hpp" />
