@@ -597,6 +597,12 @@
     <ClInclude Include="include\md5.hpp">
       <Filter>include\stdlib</Filter>
     </ClInclude>
+    <ClInclude Include="include\noncopyable.hpp">
+      <Filter>include\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="include\singleton.hpp">
+      <Filter>include\stdlib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="lib_acl_cpp_vc2010.rc" />
