@@ -1,5 +1,9 @@
 修改历史列表：
 ------------------------------------------------------------------------
+134) 2012.11.27
+134.1) feature: 增加了单体模板类 singleton.hpp
+134.2) samples: 增加了单例的测试示例 samples/singleton
+
 133) 2012.11.8
 133.1) class istream: 修改了 gets_peek/read_peek 的参数接口；增加了 readn_peek 函数
 
