@@ -79,6 +79,10 @@ public:
 	{
 		get_lock() = false;		
 	}
+
+	static bool is_locked() {
+		return get_lock();
+	}
 private:
 	static bool& get_lock()
 	{
