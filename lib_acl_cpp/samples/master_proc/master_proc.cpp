@@ -114,7 +114,7 @@ private:
 
 int main(int argc, char* argv[])
 {
-	master_proc_test mp;
+	master_proc_test& mp = singleton2<master_proc_test>::get_instance();
 
 	// 设置配置参数表
 	mp.set_cfg_int(var_conf_int_tab);
