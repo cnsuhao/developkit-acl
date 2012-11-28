@@ -2,9 +2,6 @@
 //
 
 #include "stdafx.h"
-#ifndef WIN32
-#include "mysql/mysql.h"
-#endif
 #include "lib_acl.h"
 #include "string.hpp"
 #include "db_mysql.hpp"
@@ -249,7 +246,7 @@ int main(void)
 	printf("\r\n");
 
 #ifndef WIN32
-	mysql_server_end();
+//	mysql_server_end();
 //	mysql_thread_end();
 #endif
 
