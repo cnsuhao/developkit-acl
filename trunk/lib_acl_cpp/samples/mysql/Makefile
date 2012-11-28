@@ -70,7 +70,7 @@ endif
 
 CFLAGS += $(INC_COMPILE)
 
-INC_COMPILE = -I../../include -I../../include/acl
+INC_COMPILE = -I../../include -I../../../lib_acl/include -I../../../include/mysql
 LIB_COMPILE = -L../../lib -l_acl_cpp -L/opt/import_lib/lib -l_acl \
 	      -lmysqlclient_r -ldl
 
