@@ -167,9 +167,13 @@ static void __service(ACL_IOCTL *h_ioctl, ACL_VSTREAM *stream,
 		(void) acl_vstream_writen(stream, __deny_info, strlen(__deny_info));
 		acl_vstream_close(stream);
 	} else {
-		if (__app_on_accept)
-			__app_on_accept(stream);
-		app_add_worker(h_ioctl, __app_handle, stream);
+		int ret = 0;
+		if (__app_on_accept) {
+			if ((ret = __app_on_accept(stream)) < 0)
+				acl_vstream_close(stream);
+		}
+		if (ret == 0)
+			app_add_worker(h_ioctl, __app_handle, stream);
 	}
 }
 

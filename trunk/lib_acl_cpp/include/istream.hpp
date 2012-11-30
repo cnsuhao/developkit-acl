@@ -105,10 +105,11 @@ namespace acl {
 		 * 从输入流中读一行数据至缓冲区中
 		 * @param s {string&} 缓冲区，内部会首先自动清空该缓冲区
 		 * @param nonl {bool} 是否保留所读行数据中的 "\r\n" 或 "\n"
-		 * @return {bool} 是否读到了一行数据, 出错则返回 false; 对文件输入流而
-		 *  言，如果读到的数据是最后一部分数据且这部分数据不含 "\r\n" 或 "\n"
-		 *  则也会返回 false, 调用者需要检查 *size_inout 值是否大于 0
-		 *  来确定是否读到了最后一部分数据
+		 * @return {bool} 是否读到了一行数据
+		 *  1）如果返回 true 则说明读到了完整一行数据；如果该行数据中只有
+		 *     "\r\n" 或 "\n"，则 s 的内容为空，即：s.empty() == true
+		 *  2）如果返回 false 则说明读关闭且未读到一行数据，此时 s 中有可能
+		 *     存储着部分数据，需要用 if (s.empty() == true) 判断一下
 		 */
 		bool gets(string& s, bool nonl = true);
 

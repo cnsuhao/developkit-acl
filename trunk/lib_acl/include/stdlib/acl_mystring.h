@@ -87,10 +87,16 @@ ACL_API char *acl_uppercase3(const char *string, char *buf, size_t size);
 
 /**
  * 将给定字符串用另一个分隔符字符串进行分割
- * @param src {char**} 需要被分割的字符串的地址的指针
- * @param sep {const char*} 分隔符
- * @return {char*} 当前被分割的字符串的指针位置
- * 如: 源字符串："abcd=|efg=|hijk", 分隔符 "=|"，则第一次分隔后
+ * @param src {char**} 需要被分割的字符串的地址的指针，必须是非空指针，
+ *  可以是空字符串，此时该函数返回 NULL
+ * @param sep {const char*} 分隔符，非空字符串
+ * @return {char*} 当前被分割的字符串的指针位置，src 指向下一个将要进行
+ *  分隔的起始位置；
+ *  1）当返回 NULL 时，则表示分隔过程结束，此时 src 的指针位置被赋予 '\0'；
+ *  2）当返回非 NULL 时，则此时 src 指向的字符串可能是或不是空字符串，
+ *     如果指向空字符串，则再次分隔时函数肯定能返回 NULL，否则，当再次分隔时
+ *     函数返回非 NULL 指针
+ *  举例: 源字符串："abcd=|efg=|hijk", 分隔符 "=|"，则第一次分隔后
  *  src 将指向 "efg"，而返回的地址为 "abcd"
  */
 ACL_API char *acl_mystrtok(char **src, const char *sep);
