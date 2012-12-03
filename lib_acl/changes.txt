@@ -1,4 +1,10 @@
 
+354) 2012.12.3
+354.1) bugfix: acl_events: event_limit() 函数在调用 acl_open_limit() 时传入了
+一个默认的值，导致进程打开的文件句柄数无法扩大。
+354.2) feature: acl_ioctl_server.c/acl_aio_server.c: 当客户端连接数超过系统限制时，
+原来的做法是程序退出，现在改为让程序暂时监听，通过定时器再重启监听过程
+
 353) 2012.10.12
 353.1) feature: xml/,
 增加了三个函数接口：acl_xml_getElementMeta/acl_xml_getEncoding/acl_xml_getType,

@@ -79,7 +79,7 @@ static void __read_notify_callback(int event_type, ACL_IOCTL *h_ioctl,
 		break;
 	default:
 		acl_msg_fatal("%s, %s(%d): unknown event type(%d)",
-				__FILE__, myname, __LINE__, event_type);
+			__FILE__, myname, __LINE__, event_type);
 		/* not reached */
 		break;
 	}
@@ -132,7 +132,7 @@ static ACL_APP_CLOSE_LOG __app_close_log = NULL;
 static int (*__app_on_accept)(ACL_VSTREAM *stream) = NULL;
 
 static void __service(ACL_IOCTL *h_ioctl, ACL_VSTREAM *stream,
-		char *service acl_unused, char **argv acl_unused)
+	char *service acl_unused, char **argv acl_unused)
 {
 	char  myname[] = "__service";
 	char  addr[64], *ptr;

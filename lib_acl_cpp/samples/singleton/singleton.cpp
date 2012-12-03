@@ -76,7 +76,7 @@ public:
 };
 
 //singleton_test::get_const_instance();
-int main(int argc, char* argv[])
+int main()
 {
 	printf("step %d: first line in main\r\n", ++__nstep);
 	fflush(stdout);
