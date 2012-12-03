@@ -36,14 +36,17 @@
 #include "events_wmsg.h"
 #include "events.h"
 
-static void event_init(ACL_EVENT *eventp, int fdsize, int delay_sec, int delay_usec)
+static void event_init(ACL_EVENT *eventp, int fdsize,
+	int delay_sec, int delay_usec)
 {
 	eventp->fdsize = fdsize;
 	/* eventp->fdtab_free_cnt = 0; */
 	eventp->fdcnt  = 0;
 	eventp->fdcnt_ready  = 0;
-	eventp->fdtabs = (ACL_EVENT_FDTABLE **) acl_mycalloc(fdsize, sizeof(ACL_EVENT_FDTABLE *));
-	eventp->fdtabs_ready = (ACL_EVENT_FDTABLE **) acl_mycalloc(fdsize, sizeof(ACL_EVENT_FDTABLE *));
+	eventp->fdtabs = (ACL_EVENT_FDTABLE **)
+		acl_mycalloc(fdsize,sizeof(ACL_EVENT_FDTABLE *));
+	eventp->fdtabs_ready = (ACL_EVENT_FDTABLE **)
+		acl_mycalloc(fdsize, sizeof(ACL_EVENT_FDTABLE *));
 
 	eventp->maxfd  = 0;
 	eventp->nested = 0;
@@ -64,22 +67,25 @@ static void event_init(ACL_EVENT *eventp, int fdsize, int delay_sec, int delay_u
 		eventp->init_fn(eventp);
 }
 
-static int event_limit(void)
+static int event_limit(int fdsize)
 {
 	const char *myname = "event_limit";
-	int   fdsize;
 
 #ifdef ACL_UNIX
-	if ((fdsize = acl_open_limit(FD_SETSIZE)) < 0) {
+	if ((fdsize = acl_open_limit(fdsize)) < 0) {
 		char  tbuf[256];
 		acl_msg_fatal("%s: unable to determine open file limit, err=%s",
 			myname, acl_last_strerror(tbuf, sizeof(tbuf)));
 	}
 #else
-	fdsize = 2048;
+	if (fdsize == 0)
+		fdsize = 1024;
 #endif
 	if ((unsigned) (fdsize) < FD_SETSIZE / 2 && fdsize < 256)
-		acl_msg_warn("%s: could allocate space for only %d open files", myname, fdsize);
+		acl_msg_warn("%s: could allocate space for only %d open files",
+			myname, fdsize);
+
+	acl_msg_info("%s: max fdsize: %d", myname, fdsize);
 
 	return (fdsize);
 }
@@ -89,7 +95,7 @@ ACL_EVENT *acl_event_new_select(int delay_sec, int delay_usec)
 	ACL_EVENT *eventp;
 	int   fdsize;
 
-	fdsize = event_limit();
+	fdsize = event_limit(FD_SETSIZE);
 	eventp = event_new_select();
 	event_init(eventp, fdsize, delay_sec, delay_usec);
 	return (eventp);
@@ -100,7 +106,7 @@ ACL_EVENT *acl_event_new_select_thr(int delay_sec, int delay_usec)
 	ACL_EVENT *eventp;
 	int   fdsize;
 
-	fdsize = event_limit();
+	fdsize = event_limit(FD_SETSIZE);
 	eventp = event_new_select_thr();
 	event_init(eventp, fdsize, delay_sec, delay_usec);
 	return (eventp);
@@ -112,7 +118,7 @@ ACL_EVENT *acl_event_new_poll(int delay_sec, int delay_usec)
 	ACL_EVENT *eventp;
 	int   fdsize;
 
-	fdsize = event_limit();
+	fdsize = event_limit(0);
 	eventp = event_new_poll(fdsize);
 	event_init(eventp, fdsize, delay_sec, delay_usec);
 	return (eventp);
@@ -132,7 +138,7 @@ ACL_EVENT *acl_event_new_poll_thr(int delay_sec, int delay_usec)
 	ACL_EVENT *eventp;
 	int   fdsize;
 
-	fdsize = event_limit();
+	fdsize = event_limit(0);
 	eventp = event_new_poll_thr(fdsize);
 	event_init(eventp, fdsize, delay_sec, delay_usec);
 	return (eventp);
@@ -152,7 +158,7 @@ ACL_EVENT *acl_event_new_kernel(int delay_sec, int delay_usec)
 	ACL_EVENT *eventp;
 	int   fdsize;
 
-	fdsize = event_limit();
+	fdsize = event_limit(0);
 	eventp = event_new_kernel(fdsize);
 	event_init(eventp, fdsize, delay_sec, delay_usec);
 	return (eventp);
@@ -160,7 +166,7 @@ ACL_EVENT *acl_event_new_kernel(int delay_sec, int delay_usec)
 	ACL_EVENT *eventp;
 	int   fdsize;
 
-	fdsize = event_limit();
+	fdsize = event_limit(0);
 	eventp = event_new_iocp(fdsize);
 	event_init(eventp, fdsize, delay_sec, delay_usec);
 	return (eventp);
@@ -180,7 +186,7 @@ ACL_EVENT *acl_event_new_kernel2(int delay_sec, int delay_usec)
 	ACL_EVENT *eventp;
 	int   fdsize;
 
-	fdsize = event_limit();
+	fdsize = event_limit(0);
 	eventp = event_new_kernel2(fdsize);
 	event_init(eventp, fdsize, delay_sec, delay_usec);
 	return (eventp);
@@ -200,7 +206,7 @@ ACL_EVENT *acl_event_new_kernel3(int delay_sec, int delay_usec)
 	ACL_EVENT *eventp;
 	int   fdsize;
 
-	fdsize = event_limit();
+	fdsize = event_limit(0);
 	eventp = event_new_kernel2(fdsize);
 	event_init(eventp, fdsize, delay_sec, delay_usec);
 	return (eventp);
@@ -220,7 +226,7 @@ ACL_EVENT *acl_event_new_kernel_thr(int delay_sec, int delay_usec)
 	ACL_EVENT *eventp;
 	int   fdsize;
 
-	fdsize = event_limit();
+	fdsize = event_limit(0);
 	eventp = event_new_kernel_thr(fdsize);
 	event_init(eventp, fdsize, delay_sec, delay_usec);
 	return (eventp);
@@ -240,7 +246,7 @@ ACL_EVENT *acl_event_new_wmsg(unsigned int nMsg)
 	ACL_EVENT *eventp;
 	int   fdsize;
 
-	fdsize = event_limit();
+	fdsize = event_limit(0);
 	eventp = event_new_wmsg(nMsg);
 	event_init(eventp, fdsize, 0, 0);
 	return (eventp);
@@ -329,37 +335,30 @@ acl_int64 acl_event_time(ACL_EVENT *eventp)
 	return (eventp->event_present);
 }
 
-void acl_event_enable_read(ACL_EVENT *eventp,
-			ACL_VSTREAM *stream,
-			int read_timeout,
-			ACL_EVENT_NOTIFY_RDWR callback,
-			void *context)
+void acl_event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
+	int read_timeout, ACL_EVENT_NOTIFY_RDWR callback, void *context)
 {
 	const char *myname = "acl_event_enable_read";
 	ACL_SOCKET sockfd = ACL_VSTREAM_SOCK(stream);
 	if (sockfd == ACL_SOCKET_INVALID)
-		acl_msg_fatal("%s(%d): sockfd(%d) invalid", myname, __LINE__, sockfd);
+		acl_msg_fatal("%s(%d): sockfd(%d) invalid",
+			myname, __LINE__, sockfd);
 	eventp->enable_read_fn(eventp, stream, read_timeout, callback, context);
 }
 
-void acl_event_enable_write(ACL_EVENT *eventp,
-			ACL_VSTREAM *stream,
-			int write_timeout,
-			ACL_EVENT_NOTIFY_RDWR callback,
-			void *context)
+void acl_event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
+	int write_timeout, ACL_EVENT_NOTIFY_RDWR callback, void *context)
 {
 	const char *myname = "acl_event_enable_write";
 	ACL_SOCKET sockfd = ACL_VSTREAM_SOCK(stream);
 	if (sockfd == ACL_SOCKET_INVALID)
-		acl_msg_fatal("%s(%d): sockfd(%d) invalid", myname, __LINE__, sockfd);
+		acl_msg_fatal("%s(%d): sockfd(%d) invalid",
+			myname, __LINE__, sockfd);
 	eventp->enable_write_fn(eventp, stream, write_timeout, callback, context);
 }
 
-void acl_event_enable_listen(ACL_EVENT *eventp,
-			ACL_VSTREAM *stream,
-			int read_timeout,
-			ACL_EVENT_NOTIFY_RDWR callback,
-			void *context)
+void acl_event_enable_listen(ACL_EVENT *eventp, ACL_VSTREAM *stream,
+	int read_timeout, ACL_EVENT_NOTIFY_RDWR callback, void *context)
 {
 	eventp->enable_listen_fn(eventp, stream, read_timeout, callback, context);
 }
@@ -369,7 +368,8 @@ void acl_event_disable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 	const char *myname = "acl_event_disable_read";
 	ACL_SOCKET sockfd = ACL_VSTREAM_SOCK(stream);
 	if (sockfd == ACL_SOCKET_INVALID)
-		acl_msg_fatal("%s(%d): sockfd(%d) invalid", myname, __LINE__, sockfd);
+		acl_msg_fatal("%s(%d): sockfd(%d) invalid",
+			myname, __LINE__, sockfd);
 	eventp->disable_read_fn(eventp, stream);
 }
 
@@ -378,7 +378,8 @@ void acl_event_disable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 	const char *myname = "acl_event_disable_write";
 	ACL_SOCKET sockfd = ACL_VSTREAM_SOCK(stream);
 	if (sockfd == ACL_SOCKET_INVALID)
-		acl_msg_fatal("%s(%d): sockfd(%d) invalid", myname, __LINE__, sockfd);
+		acl_msg_fatal("%s(%d): sockfd(%d) invalid",
+			myname, __LINE__, sockfd);
 	eventp->disable_write_fn(eventp, stream);
 }
 

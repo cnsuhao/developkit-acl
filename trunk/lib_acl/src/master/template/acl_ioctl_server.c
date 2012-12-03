@@ -215,23 +215,17 @@ static int get_client_count(void)
 	return (n);
 }
 
-void acl_ioctl_server_request_timer(ACL_IOCTL_TIMER_FN timer_fn, void *arg, int delay)
+void acl_ioctl_server_request_timer(ACL_IOCTL_TIMER_FN timer_fn,
+	void *arg, int delay)
 {
-	const char *myname = "acl_ioctl_server_request_timer";
-
-	if (__h_ioctl == NULL)
-		acl_msg_fatal("%s(%d)->%s: ioctl has not been inited",
-				__FILE__, __LINE__, myname);
-	acl_ioctl_request_timer(__h_ioctl, timer_fn, arg, (acl_int64) delay * 1000000);
+	acl_assert(__h_ioctl);
+	acl_ioctl_request_timer(__h_ioctl, timer_fn, arg,
+		(acl_int64) delay * 1000000);
 }
 
 void acl_ioctl_server_cancel_timer(ACL_IOCTL_TIMER_FN timer_fn, void *arg)
 {
-	const char *myname = "acl_ioctl_server_cancel_timer";
-
-	if (__h_ioctl == NULL)
-		acl_msg_fatal("%s(%d)->%s: ioctl has not been inited",
-				__FILE__, __LINE__, myname);
+	acl_assert(__h_ioctl);
 	acl_ioctl_cancel_timer(__h_ioctl, timer_fn, arg);
 }
 
@@ -296,7 +290,7 @@ static void ioctl_server_exit(void)
 /* ioctl_server_abort - terminate after abnormal master exit */
 
 static void ioctl_server_abort(int event acl_unused, ACL_IOCTL *h_ioctl,
-		ACL_VSTREAM *stream acl_unused, void *context acl_unused)
+	ACL_VSTREAM *stream acl_unused, void *context acl_unused)
 {
 	int   n;
 
@@ -314,10 +308,8 @@ static void ioctl_server_abort(int event acl_unused, ACL_IOCTL *h_ioctl,
 	if (n > 0) {
 		/* set idle timeout to 1 second, one second check once */
 		acl_var_ioctl_idle_limit = 1;
-		acl_ioctl_request_timer(h_ioctl,
-				ioctl_server_timeout,
-				(void*) h_ioctl,
-				(acl_int64) acl_var_ioctl_idle_limit * 1000000);
+		acl_ioctl_request_timer(h_ioctl, ioctl_server_timeout,
+			h_ioctl, (acl_int64) acl_var_ioctl_idle_limit * 1000000);
 		return;
 	}
 
@@ -338,9 +330,7 @@ static void ioctl_server_timeout(int event acl_unused, void *context)
 
 	/* if there are some fds not be closed, the timer should be reset again */
 	if (n > 0 && acl_var_ioctl_idle_limit > 0) {
-		acl_ioctl_request_timer(h_ioctl,
-			ioctl_server_timeout,
-			(void *) h_ioctl,
+		acl_ioctl_request_timer(h_ioctl, ioctl_server_timeout, h_ioctl,
 			(acl_int64) acl_var_ioctl_idle_limit * 1000000);
 		return;
 	}
@@ -349,9 +339,7 @@ static void ioctl_server_timeout(int event acl_unused, void *context)
 	inter = time(NULL) - last;
 
 	if (inter >= 0 && inter < acl_var_ioctl_idle_limit) {
-		acl_ioctl_request_timer(h_ioctl,
-			ioctl_server_timeout,
-			(void *) h_ioctl,
+		acl_ioctl_request_timer(h_ioctl, ioctl_server_timeout, h_ioctl,
 			(acl_int64) (acl_var_ioctl_idle_limit - inter) * 1000000);
 		return;
 	}
@@ -370,10 +358,8 @@ static void ioctl_server_use_timer(int event acl_unused, void *context)
 	n = get_client_count();
 
 	if (n > 0 || __use_count < acl_var_ioctl_use_limit) {
-		acl_ioctl_request_timer(h_ioctl,
-			ioctl_server_use_timer,
-			(void *) h_ioctl,
-			(acl_int64) __use_limit_delay * 1000000);
+		acl_ioctl_request_timer(h_ioctl, ioctl_server_use_timer,
+			h_ioctl, (acl_int64) __use_limit_delay * 1000000);
 		return;
 	}
 
@@ -383,25 +369,17 @@ static void ioctl_server_use_timer(int event acl_unused, void *context)
 	ioctl_server_exit();
 }
 
-void acl_ioctl_server_enable_read(ACL_IOCTL *h_ioctl,
-				ACL_VSTREAM *stream,
-				int timeout,
-				ACL_IOCTL_NOTIFY_FN notify_fn,
-				void *context)
+void acl_ioctl_server_enable_read(ACL_IOCTL *h_ioctl, ACL_VSTREAM *stream,
+	int timeout, ACL_IOCTL_NOTIFY_FN notify_fn, void *context)
 {
-	char  myname[] = "acl_ioctl_server_enable_read";
+	const char *myname = "acl_ioctl_server_enable_read";
 
 	if (h_ioctl == NULL || stream == NULL || ACL_VSTREAM_SOCK(stream) < 0) {
 		acl_msg_error("%s(%d): input error", myname, __LINE__);
 		return;
-	} else {
-		/* __client_count++; */
-		acl_ioctl_enable_read(h_ioctl,
-					stream,
-					timeout,
-					notify_fn,
-					context);
 	}
+	/* __client_count++; */
+	acl_ioctl_enable_read(h_ioctl, stream, timeout, notify_fn, context);
 }
 
 /* ioctl_server_execute - in case (char *) != (struct *) */
@@ -409,17 +387,26 @@ void acl_ioctl_server_enable_read(ACL_IOCTL *h_ioctl,
 static void ioctl_server_execute(ACL_IOCTL *h_ioctl, ACL_VSTREAM *stream)
 {
 	if (acl_var_ioctl_master_maxproc > 1
-	    && acl_master_notify(acl_var_ioctl_pid, ioctl_server_generation, ACL_MASTER_STAT_TAKEN) < 0)
-		ioctl_server_abort(ACL_EVENT_NULL_TYPE, NULL, NULL, ACL_EVENT_NULL_CONTEXT);
+	    && acl_master_notify(acl_var_ioctl_pid, ioctl_server_generation,
+		ACL_MASTER_STAT_TAKEN) < 0)
+	{
+		ioctl_server_abort(ACL_EVENT_NULL_TYPE, NULL, NULL,
+			ACL_EVENT_NULL_CONTEXT);
+	}
 
 	ioctl_server_service(h_ioctl, stream, ioctl_server_name, ioctl_server_argv);
 
 	if (acl_var_ioctl_master_maxproc > 1
-	    && acl_master_notify(acl_var_ioctl_pid, ioctl_server_generation, ACL_MASTER_STAT_AVAIL) < 0)
-		ioctl_server_abort(ACL_EVENT_NULL_TYPE, NULL, NULL, ACL_EVENT_NULL_CONTEXT);
+	    && acl_master_notify(acl_var_ioctl_pid, ioctl_server_generation,
+		ACL_MASTER_STAT_AVAIL) < 0)
+	{
+		ioctl_server_abort(ACL_EVENT_NULL_TYPE, NULL, NULL,
+			ACL_EVENT_NULL_CONTEXT);
+	}
 }
 
-static void decrease_counter_callback(ACL_VSTREAM *stream acl_unused, void *arg acl_unused)
+static void decrease_counter_callback(ACL_VSTREAM *stream acl_unused,
+	void *arg acl_unused)
 {
 	update_closing_time();
 	decrease_client_counter();
@@ -447,34 +434,47 @@ static void ioctl_server_wakeup(ACL_IOCTL *h_ioctl, int fd,
 	stream = acl_vstream_fdopen(fd, O_RDWR, acl_var_ioctl_buf_size,
 			acl_var_ioctl_rw_timeout, ACL_VSTREAM_TYPE_SOCK);
 	if (stream == NULL)
-		acl_msg_fatal("%s(%d): acl_vstream_fdopen error(%s)", __FILE__, __LINE__, strerror(errno));
+		acl_msg_fatal("%s(%d): acl_vstream_fdopen error(%s)",
+			__FILE__, __LINE__, strerror(errno));
 
 	if (remote_addr)
-		ACL_SAFE_STRNCPY(stream->remote_addr, remote_addr, sizeof(stream->remote_addr));
+		ACL_SAFE_STRNCPY(stream->remote_addr, remote_addr,
+			sizeof(stream->remote_addr));
 	if (local_addr)
-		ACL_SAFE_STRNCPY(stream->local_addr, local_addr, sizeof(stream->local_addr));
+		ACL_SAFE_STRNCPY(stream->local_addr, local_addr,
+			sizeof(stream->local_addr));
 	/* when the stream is closed, the callback will be called to decrease the counter */
 	acl_vstream_add_close_handle(stream, decrease_counter_callback, NULL);
 
 	ioctl_server_execute(h_ioctl, stream);
 }
 
+/* restart listening */
+
+static void ioctl_restart_listen(int event acl_unused, void *context)
+{
+	ACL_VSTREAM *stream = (ACL_VSTREAM*) context;
+	acl_assert(__h_ioctl);
+	acl_msg_info("restart listen now!");
+	acl_ioctl_enable_listen(__h_ioctl, stream, 0,
+		ioctl_server_accept, __h_ioctl);
+}
+
 /* ioctl_server_accept_local - accept client connection request */
 
-static void ioctl_server_accept_local(int event_type,
-					ACL_IOCTL *h_ioctl,
-					ACL_VSTREAM *stream,
-					void *context)
+static void ioctl_server_accept_local(int event_type, ACL_IOCTL *h_ioctl,
+	ACL_VSTREAM *stream, void *context)
 {
-	char    myname[] = "ioctl_server_accept_local";
+	const char *myname = "ioctl_server_accept_local";
 	int     listen_fd = ACL_VSTREAM_SOCK(stream);
 	int     time_left = -1;
+	int     delay_listen = 0;
 	int     fd;
 	int     i = 0;
 
 	if (event_type != ACL_EVENT_READ)
 		acl_msg_fatal("%s, %s(%d): unknown event_type(%d)",
-				__FILE__, myname, __LINE__, event_type);
+			__FILE__, myname, __LINE__, event_type);
 
 	/*
 	 * Be prepared for accept() to fail because some other process already
@@ -485,8 +485,7 @@ static void ioctl_server_accept_local(int event_type,
 	 */
 	if (acl_var_ioctl_idle_limit > 0)
 		time_left = (int) ((acl_ioctl_cancel_timer(h_ioctl,
-					ioctl_server_timeout,
-					(void *) h_ioctl) + 999999) / 1000000);
+			ioctl_server_timeout, h_ioctl) + 999999) / 1000000);
 	else
 		time_left = acl_var_ioctl_idle_limit;
 
@@ -496,53 +495,54 @@ static void ioctl_server_accept_local(int event_type,
 
 	while (i++ < acl_var_ioctl_max_accept) {
 		fd = acl_unix_accept(listen_fd);
-		if (fd < 0) {
-			if (errno != EAGAIN && errno != EINTR)
-				acl_msg_fatal("accept connection: %s", strerror(errno));
-			else
-				break;
-		} else {
+		if (fd >= 0) {
 			ioctl_server_wakeup(h_ioctl, fd, NULL, NULL);
+			continue;
 		}
+
+		if (errno == EMFILE) {
+			delay_listen = 1;
+			acl_msg_warn("accept connection: %s", strerror(errno));
+		} else if (errno != EAGAIN && errno != EINTR)
+			acl_msg_fatal("accept connection: %s", strerror(errno));
+		break;
 	}
 
 	if (ioctl_server_lock != 0
 	    && acl_myflock(ACL_VSTREAM_FILE(ioctl_server_lock),
-		    	ACL_INTERNAL_LOCK,
-			ACL_MYFLOCK_OP_NONE) < 0)
+		    	ACL_INTERNAL_LOCK, ACL_MYFLOCK_OP_NONE) < 0)
 		acl_msg_fatal("select unlock: %s", strerror(errno));
 
-	acl_ioctl_enable_listen(h_ioctl,
-				stream,
-				0,
-				ioctl_server_accept,
-				context);
+	if (delay_listen) {
+		acl_ioctl_disable_readwrite(h_ioctl, stream);
+		acl_ioctl_request_timer(h_ioctl, ioctl_restart_listen,
+			stream, 2000000);
+	} else
+		acl_ioctl_enable_listen(h_ioctl, stream,
+			0, ioctl_server_accept, context);
 
 	if (time_left >= 0)
-		acl_ioctl_request_timer(h_ioctl,
-			ioctl_server_timeout,
-			(void *) h_ioctl,
-			(acl_int64) time_left * 1000000);
+		acl_ioctl_request_timer(h_ioctl, ioctl_server_timeout,
+			h_ioctl, (acl_int64) time_left * 1000000);
 }
 
 #ifdef MASTER_XPORT_NAME_PASS
 
 /* ioctl_server_accept_pass - accept descriptor */
 
-static void ioctl_server_accept_pass(int event_type,
-					ACL_IOCTL *h_ioctl,
-					ACL_VSTREAM *stream,
-					void *context)
+static void ioctl_server_accept_pass(int event_type, ACL_IOCTL *h_ioctl,
+	ACL_VSTREAM *stream, void *context)
 {
-	cahr    myname[] = "ioctl_server_accept_pass";
+	const char  *myname = "ioctl_server_accept_pass";
 	int     listen_fd = acl_vstream_fileno(stream);
 	int     time_left = -1;
 	int     fd;
+	int     delay_listen = 0;
 	int     i = 0;
 
 	if (event_type != ACL_EVENT_READ)
 		acl_msg_fatal("%s, %s(%d): unknown event_type(%d)",
-				__FILE__, myname, __LINE__, event_type);
+			__FILE__, myname, __LINE__, event_type);
 
 	/*
 	 * Be prepared for accept() to fail because some other process already
@@ -553,8 +553,7 @@ static void ioctl_server_accept_pass(int event_type,
 	 */
 	if (acl_var_ioctl_idle_limit > 0)
 		time_left = (int) ((acl_ioctl_cancel_timer(h_ioctl,
-					ioctl_server_timeout,
-					(void *) h_ioctl) + 999999) / 1000000);
+			ioctl_server_timeout, h_ioctl) + 999999) / 1000000);
 	else
 		time_left = acl_var_ioctl_idle_limit;
 
@@ -563,54 +562,57 @@ static void ioctl_server_accept_pass(int event_type,
 
 	while (i++ < acl_var_ioctl_max_accept) {
 		fd = PASS_ACCEPT(listen_fd);
-		if (fd < 0) {
-			if (errno != EAGAIN && errno != EINTR)
-				acl_msg_fatal("accept connection: %s", strerror(errno));
-			else
-				break;
-		} else {
+		if (fd >= 0) {
 			ioctl_server_wakeup(h_ioctl, fd, NULL, NULL);
+			continue;
 		}
+
+		if (errno == EMFILE) {
+			delay_listen = 1;
+			acl_msg_warn("accept connection: %s", strerror(errno));
+		} else if (errno != EAGAIN && errno != EINTR)
+			acl_msg_fatal("accept connection: %s", strerror(errno));
+		break;
 	}
 
 	if (ioctl_server_lock != 0
 	    && acl_myflock(ACL_VSTREAM_FILE(ioctl_server_lock),
-		    	ACL_INTERNAL_LOCK,
-			ACL_MYFLOCK_OP_NONE) < 0)
+	    	ACL_INTERNAL_LOCK, ACL_MYFLOCK_OP_NONE) < 0)
+	{
 		acl_msg_fatal("select unlock: %s", strerror(errno));
+	}
 
-	acl_ioctl_enable_listen(h_ioctl,
-				stream,
-				0,
-				ioctl_server_accept,
-				context);
+	if (delay_listen) {
+		acl_ioctl_disable_readwrite(h_ioctl, stream);
+		acl_ioctl_request_timer(h_ioctl, ioctl_restart_listen,
+			stream, 2000000);
+	} else
+		acl_ioctl_enable_listen(h_ioctl, stream,
+			0, ioctl_server_accept, context);
 
 	if (time_left >= 0)
-		acl_ioctl_request_timer(h_ioctl,
-			ioctl_server_timeout,
-			(void *) h_ioctl,
-			(acl_int64) time_left * 1000000);
+		acl_ioctl_request_timer(h_ioctl, ioctl_server_timeout,
+			(void *) h_ioctl, (acl_int64) time_left * 1000000);
 }
 
 #endif
 
 /* ioctl_server_accept_inet - accept client connection request */
 
-static void ioctl_server_accept_inet(int event_type,
-					ACL_IOCTL *h_ioctl,
-					ACL_VSTREAM *stream,
-					void *context)
+static void ioctl_server_accept_inet(int event_type, ACL_IOCTL *h_ioctl,
+	ACL_VSTREAM *stream, void *context)
 {
-	char    myname[] = "ioctl_serer_accept_inet";
+	const char  *myname = "ioctl_serer_accept_inet";
 	int     listen_fd = ACL_VSTREAM_SOCK(stream);
 	int     time_left = -1;
 	int     fd;
 	int     i = 0;
+	int     delay_listen = 0;
 	char    remote_addr[64], local_addr[64];
 
 	if (event_type != ACL_EVENT_READ)
 		acl_msg_fatal("%s, %s(%d): unknown event_type(%d)",
-				__FILE__, myname, __LINE__, event_type);
+			__FILE__, myname, __LINE__, event_type);
 
 	/*
 	 * Be prepared for accept() to fail because some other process already
@@ -621,8 +623,7 @@ static void ioctl_server_accept_inet(int event_type,
 	 */
 	if (acl_var_ioctl_idle_limit > 0)
 		time_left = (int) ((acl_ioctl_cancel_timer(h_ioctl,
-					ioctl_server_timeout,
-					(void *) h_ioctl) + 999999) / 1000000);
+			ioctl_server_timeout, h_ioctl) + 999999) / 1000000);
 	else
 		time_left = acl_var_ioctl_idle_limit;
 
@@ -632,36 +633,39 @@ static void ioctl_server_accept_inet(int event_type,
 	while (i++ < acl_var_ioctl_max_accept) {
 		fd = acl_inet_accept_ex(listen_fd, remote_addr, sizeof(remote_addr));
 		if (fd < 0) {
-			if (errno != EAGAIN && errno != EINTR)
+			if (errno == EMFILE) {
+				delay_listen = 1;
+				acl_msg_warn("accept connection: %s", strerror(errno));
+			} else if (errno != EAGAIN && errno != EINTR)
 				acl_msg_fatal("accept connection: %s", strerror(errno));
-			else
-				break;
-		} else {
-		        /* ±ÜÃâ·¢ËÍÑÓ³ÙÏÖÏó */
-	                acl_tcp_set_nodelay(fd);
-			if (acl_getsockname(fd, local_addr, sizeof(local_addr)) < 0)
-				memset(local_addr, 0, sizeof(local_addr));
-			ioctl_server_wakeup(h_ioctl, fd, remote_addr, local_addr);
+			break;
 		}
+
+	        /* ±ÜÃâ·¢ËÍÑÓ³ÙÏÖÏó */
+		acl_tcp_set_nodelay(fd);
+		if (acl_getsockname(fd, local_addr, sizeof(local_addr)) < 0)
+			memset(local_addr, 0, sizeof(local_addr));
+		ioctl_server_wakeup(h_ioctl, fd, remote_addr, local_addr);
 	}
 
 	if (ioctl_server_lock != 0
 	    && acl_myflock(ACL_VSTREAM_FILE(ioctl_server_lock),
-		  	  	ACL_INTERNAL_LOCK,
-				ACL_MYFLOCK_OP_NONE) < 0)
+  	  	ACL_INTERNAL_LOCK, ACL_MYFLOCK_OP_NONE) < 0)
+	{
 		acl_msg_fatal("select unlock: %s", strerror(errno));
+	}
 
-	acl_ioctl_enable_listen(h_ioctl,
-				stream,
-				0,
-				ioctl_server_accept,
-				context);
+	if (delay_listen) {
+		acl_ioctl_disable_readwrite(h_ioctl, stream);
+		acl_ioctl_request_timer(h_ioctl, ioctl_restart_listen,
+			stream, 2000000);
+	} else
+		acl_ioctl_enable_listen(h_ioctl, stream, 0,
+			ioctl_server_accept, context);
 
 	if (time_left > 0) {
-		acl_ioctl_request_timer(h_ioctl,
-			ioctl_server_timeout,
-			(void *) h_ioctl,
-			(acl_int64) time_left * 1000000);
+		acl_ioctl_request_timer(h_ioctl, ioctl_server_timeout,
+			h_ioctl, (acl_int64) time_left * 1000000);
 	}
 }
 
@@ -751,7 +755,7 @@ static void usage(int argc, char *argv[])
 
 void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service,...)
 {
-	char   myname[] = "acl_ioctl_server_main";
+	const char *myname = "acl_ioctl_server_main";
 	ACL_VSTREAM *stream = 0;
 	char   *root_dir = 0;
 	char   *user_name = 0;
@@ -845,10 +849,10 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service,..
 
 	if (f_flag == 0)
 		acl_msg_fatal("%s(%d)->%s: need \"-f pathname\"",
-				__FILE__, __LINE__, myname);
+			__FILE__, __LINE__, myname);
 	else if (acl_msg_verbose)
 		acl_msg_info("%s(%d)->%s: configure file = %s", 
-				__FILE__, __LINE__, myname, conf_file);
+			__FILE__, __LINE__, myname, conf_file);
 
 	/*
 	 * Application-specific initialization.
@@ -912,17 +916,17 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service,..
 		case ACL_MASTER_SERVER_SOLITARY:
 			if (!alone)
 				acl_msg_fatal("service %s requires a process limit of 1",
-						service_name);
+					service_name);
 			break;
 		case ACL_MASTER_SERVER_UNLIMITED:
 			if (!zerolimit)
 				acl_msg_fatal("service %s requires a process limit of 0",
-						service_name);
+					service_name);
 			break;
 		case ACL_MASTER_SERVER_PRIVILEGED:
 			if (user_name)
 				acl_msg_fatal("service %s requires privileged operation",
-						service_name);
+					service_name);
 			break;
 		default:
 			acl_msg_panic("%s: unknown argument type: %d", myname, key);
@@ -940,7 +944,7 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service,..
 	 */
 	if (stream == 0 && isatty(STDIN_FILENO))
 		acl_msg_fatal("%s(%d)->%s: do not run this command by hand",
-				__FILE__, __LINE__, myname);
+			__FILE__, __LINE__, myname);
 
 	/*
 	 * Can options be required?
@@ -973,7 +977,7 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service,..
 		sscanf(generation, "%o", &ioctl_server_generation);
 		if (acl_msg_verbose)
 			acl_msg_info("process generation: %s (%o)",
-					generation, ioctl_server_generation);
+				generation, ioctl_server_generation);
 	}
 
 	/*
@@ -1005,27 +1009,26 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service,..
 		event_mode = ACL_EVENT_SELECT;
 	}
 
-	__h_ioctl = acl_ioctl_create_ex(event_mode,
-					acl_var_ioctl_max_threads,
-					acl_var_ioctl_thread_idle_limit,
-					acl_var_ioctl_delay_sec,
-					acl_var_ioctl_delay_usec);
+	__h_ioctl = acl_ioctl_create_ex(event_mode, acl_var_ioctl_max_threads,
+		acl_var_ioctl_thread_idle_limit, acl_var_ioctl_delay_sec,
+		acl_var_ioctl_delay_usec);
 	acl_ioctl_ctl(__h_ioctl, ACL_IOCTL_CTL_THREAD_STACKSIZE,
 		acl_var_ioctl_stacksize, ACL_IOCTL_CTL_END);
 	if (thread_init_fn)
 		acl_ioctl_ctl(__h_ioctl, ACL_IOCTL_CTL_INIT_FN, thread_init_fn,
-				ACL_IOCTL_CTL_INIT_CTX, thread_init_ctx,
-				ACL_IOCTL_CTL_END);
+			ACL_IOCTL_CTL_INIT_CTX, thread_init_ctx,
+			ACL_IOCTL_CTL_END);
 	if (thread_exit_fn)
 		acl_ioctl_ctl(__h_ioctl, ACL_IOCTL_CTL_EXIT_FN, thread_exit_fn,
-				ACL_IOCTL_CTL_EXIT_CTX, thread_exit_ctx,
-				ACL_IOCTL_CTL_END);
+			ACL_IOCTL_CTL_EXIT_CTX, thread_exit_ctx,
+			ACL_IOCTL_CTL_END);
 
 	/*
 	 * Run pre-jail initialization.
 	 */
 	if (chdir(acl_var_ioctl_queue_dir) < 0)
-		acl_msg_fatal("chdir(\"%s\"): %s", acl_var_ioctl_queue_dir, strerror(errno));
+		acl_msg_fatal("chdir(\"%s\"): %s",
+			acl_var_ioctl_queue_dir, strerror(errno));
 
 	if (pre_init)
 		pre_init(ioctl_server_name, ioctl_server_argv);
@@ -1065,7 +1068,7 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service,..
 	 */
 	if (acl_ioctl_start(__h_ioctl) < 0)
 		acl_msg_fatal("%s(%d): acl_ioctl_start error(%s)",
-				myname, __LINE__, strerror(errno));
+			myname, __LINE__, strerror(errno));
 
 	/*
 	 * Are we running as a one-shot server with the client connection on
@@ -1084,53 +1087,44 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service,..
 	 * when the master process terminated abnormally.
 	 */
 	if (acl_var_ioctl_idle_limit > 0) {
-		acl_ioctl_request_timer(__h_ioctl,
-			ioctl_server_timeout,
-			__h_ioctl,
-			(acl_int64) acl_var_ioctl_idle_limit * 1000000);
+		acl_ioctl_request_timer(__h_ioctl, ioctl_server_timeout,
+			__h_ioctl, (acl_int64) acl_var_ioctl_idle_limit * 1000000);
 	}
 
 	if (acl_var_ioctl_use_limit > 0) {
-		acl_ioctl_request_timer(__h_ioctl,
-			ioctl_server_use_timer,
-			(void *) __h_ioctl,
-			(acl_int64) __use_limit_delay * 1000000);
+		acl_ioctl_request_timer(__h_ioctl, ioctl_server_use_timer,
+			__h_ioctl, (acl_int64) __use_limit_delay * 1000000);
 	}
 
 	/* socket count is as same listen_fd_count in parent process */
 
 	__listen_streams = (ACL_VSTREAM **)
 		acl_mycalloc(__socket_count + 1, sizeof(ACL_VSTREAM *));
-	for (i = 0; i < __socket_count + 1; i++) {
+	for (i = 0; i < __socket_count + 1; i++)
 		__listen_streams[i] = NULL;
-	}
 
 	i = 0;
 	for (fd = ACL_MASTER_LISTEN_FD; fd < ACL_MASTER_LISTEN_FD + __socket_count; fd++) {
-		stream = acl_vstream_fdopen(fd,
-					O_RDWR,
-					acl_var_ioctl_buf_size,
-					acl_var_ioctl_rw_timeout,
-					fdtype);
+		stream = acl_vstream_fdopen(fd, O_RDWR, acl_var_ioctl_buf_size,
+			acl_var_ioctl_rw_timeout, fdtype);
 		if (stream == NULL)
 			acl_msg_fatal("%s(%d)->%s: stream null, fd = %d",
-					__FILE__, __LINE__, myname, fd);
+				__FILE__, __LINE__, myname, fd);
 
 		acl_non_blocking(ACL_VSTREAM_SOCK(stream), ACL_NON_BLOCKING);
-		acl_ioctl_enable_listen(__h_ioctl,
-					stream,
-					0,
-					ioctl_server_accept,
-					NULL);
+		acl_ioctl_enable_listen(__h_ioctl, stream, 0,
+			ioctl_server_accept, NULL);
 		acl_close_on_exec(ACL_VSTREAM_SOCK(stream), ACL_CLOSE_ON_EXEC);
 		__listen_streams[i++] = stream;
 	}
 
-	acl_ioctl_enable_read(__h_ioctl, ACL_MASTER_STAT_STREAM, 0, ioctl_server_abort, (void *) 0);
+	acl_ioctl_enable_read(__h_ioctl, ACL_MASTER_STAT_STREAM,
+		0, ioctl_server_abort, (void *) 0);
 	acl_close_on_exec(ACL_MASTER_STATUS_FD, ACL_CLOSE_ON_EXEC);
 	acl_close_on_exec(ACL_MASTER_FLOW_READ, ACL_CLOSE_ON_EXEC);
 	acl_close_on_exec(ACL_MASTER_FLOW_WRITE, ACL_CLOSE_ON_EXEC);
-	watchdog = acl_watchdog_create(acl_var_ioctl_daemon_timeout, (ACL_WATCHDOG_FN) 0, (char *) 0);
+	watchdog = acl_watchdog_create(acl_var_ioctl_daemon_timeout,
+		(ACL_WATCHDOG_FN) 0, (char *) 0);
 
 	acl_msg_info("%s: starting...", argv[0]);
 
@@ -1138,9 +1132,10 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service,..
 		if (ioctl_server_lock != 0) {
 			acl_watchdog_stop(watchdog);
 			if (acl_myflock(ACL_VSTREAM_FILE(ioctl_server_lock),
-					ACL_INTERNAL_LOCK,
-					ACL_MYFLOCK_OP_EXCLUSIVE) < 0)
+				ACL_INTERNAL_LOCK, ACL_MYFLOCK_OP_EXCLUSIVE) < 0)
+			{
 				acl_msg_fatal("select lock: %s", strerror(errno));
+			}
 		}
 		acl_watchdog_start(watchdog);
 		sleep(1);

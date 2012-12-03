@@ -495,8 +495,7 @@ int acl_aio_server_connect(const char *saddr, int timeout,
 	if (astream == NULL)
 		return (-1);
 	acl_aio_ctl(astream, ACL_AIO_CTL_CONNECT_HOOK_ADD, connect_fn, context,
-		ACL_AIO_CTL_TIMEOUT, timeout,
-		ACL_AIO_CTL_END);
+		ACL_AIO_CTL_TIMEOUT, timeout, ACL_AIO_CTL_END);
 	return (0);
 }
 
@@ -569,6 +568,15 @@ static void *tls_alloc(size_t len)
 	return ptr;
 }
 
+/* restart listening */
+
+static void restart_listen(int event acl_unused, void *context)
+{
+	ACL_ASTREAM *stream = (ACL_ASTREAM*) context;
+	acl_msg_info("restart listen now!");
+	acl_aio_listen(stream);
+}
+
 /* aio_server_accept_local - accept client connection request */
 
 static void aio_server_accept_local(ACL_ASTREAM *astream, void *context)
@@ -581,6 +589,7 @@ static void aio_server_accept_local(ACL_ASTREAM *astream, void *context)
 	int     fd;
 	int    *fds;
 	int     i, j;
+	int     delay_listen = 0;
 
 	/*
 	 * Be prepared for accept() to fail because some other process already
@@ -591,7 +600,7 @@ static void aio_server_accept_local(ACL_ASTREAM *astream, void *context)
 	 */
 	if (acl_var_aio_idle_limit > 0)
 		time_left = (int) ((acl_aio_cancel_timer(aio, aio_server_timeout,
-					(void *) aio) + 999999) / 1000000);
+			(void *) aio) + 999999) / 1000000);
 	else
 		time_left = acl_var_aio_idle_limit;
 
@@ -602,37 +611,52 @@ static void aio_server_accept_local(ACL_ASTREAM *astream, void *context)
 
 	for (i = 0; i < acl_var_aio_max_accept; i++) {
 		fd = acl_unix_accept(listen_fd);
-		if (fd < 0) {
-			if (errno != EAGAIN && errno != EINTR)
-				acl_msg_fatal("%s: accept connection: %s", myname, strerror(errno));
-			else
-				break;
-		} else {
+		if (fd >= 0) {
 			fds[i] = fd;
+			continue;
+		}
+
+		if (errno == EMFILE) {
+			delay_listen = 1;
+			acl_msg_warn("accept connection: %s", strerror(errno));
+		} else if (errno != EAGAIN && errno != EINTR)
+			acl_msg_fatal("%s: accept connection: %s",
+				myname, strerror(errno));
+		break;
+	}
+
+	if (acl_var_aio_master_maxproc > 1) {
+		if (acl_master_notify(acl_var_aio_pid, aio_server_generation,
+			ACL_MASTER_STAT_TAKEN) < 0)
+		{
+			aio_server_abort(astream, NULL);
 		}
 	}
 
-	if (acl_var_aio_master_maxproc > 1) {
-		if (acl_master_notify(acl_var_aio_pid, aio_server_generation, ACL_MASTER_STAT_TAKEN) < 0)
-			aio_server_abort(astream, NULL);
-	}
-
-	for (j = 0; j < i; j++) {
+	for (j = 0; j < i; j++)
 		aio_server_wakeup(aio, fds[j]);
-	}
 
 	if (acl_var_aio_master_maxproc > 1) {
-		if (acl_master_notify(acl_var_aio_pid, aio_server_generation, ACL_MASTER_STAT_AVAIL) < 0)
+		if (acl_master_notify(acl_var_aio_pid, aio_server_generation,
+			ACL_MASTER_STAT_AVAIL) < 0)
+		{
 			aio_server_abort(astream, NULL);
+		}
 	}
 	if (aio_server_lock != 0
-	    && acl_myflock(ACL_VSTREAM_FILE(aio_server_lock),
-				ACL_INTERNAL_LOCK,
-				ACL_MYFLOCK_OP_NONE) < 0)
+		&& acl_myflock(ACL_VSTREAM_FILE(aio_server_lock),
+			ACL_INTERNAL_LOCK, ACL_MYFLOCK_OP_NONE) < 0)
+	{
 		acl_msg_fatal("%s: select unlock: %s", myname, strerror(errno));
+	}
+
+	if (delay_listen) {
+		acl_aio_disable_read(astream);
+		acl_aio_request_timer(aio, restart_listen, astream, 2000000, 0);
+	}
 
 	if (time_left >= 0)
-		acl_aio_request_timer(aio, aio_server_timeout, (void *) aio,
+		acl_aio_request_timer(aio, aio_server_timeout, aio,
 			(acl_int64) time_left * 1000000, 0);
 }
 
@@ -650,6 +674,7 @@ static void aio_server_accept_pass(ACL_ASTREAM *astream, void *context)
 	int     fd;
 	int    *fds;
 	int     i, j;
+	int     delay_listen = 0;
 
 	/*
 	 * Be prepared for accept() to fail because some other process already
@@ -671,35 +696,51 @@ static void aio_server_accept_pass(ACL_ASTREAM *astream, void *context)
 
 	for (i = 0; i < acl_var_aio_max_accept; i++) {
 		fd = PASS_ACCEPT(listen_fd);
-		if (fd < 0) {
-			if (errno != EAGAIN && errno != EINTR)
-				acl_msg_fatal("%s: accept connection: %s", myname, strerror(errno));
-			else
-				break;
-		} else {
+		if (fd >= 0) {
 			fds[i] = fd;
+			continue;
+		}
+
+		if (errno == EMFILE) {
+			delay_listen = 1;
+			acl_msg_warn("accept connection: %s", strerror(errno));
+		} else if (errno != EAGAIN && errno != EINTR)
+			acl_msg_fatal("%s: accept connection: %s",
+				myname, strerror(errno));
+			break;
 		}
 	}
 
 	if (acl_var_aio_master_maxproc > 1) {
-		if (acl_master_notify(acl_var_aio_pid, aio_server_generation, ACL_MASTER_STAT_TAKEN) < 0)
+		if (acl_master_notify(acl_var_aio_pid, aio_server_generation,
+			ACL_MASTER_STAT_TAKEN) < 0)
+		{
 			aio_server_abort(astream, NULL);
+		}
 	}
 
-	for (j = 0; j < i; j++) {
+	for (j = 0; j < i; j++)
 		aio_server_wakeup(aio, fds[j]);
-	}
 
 	if (acl_var_aio_master_maxproc > 1) {
-		if (acl_master_notify(acl_var_aio_pid, aio_server_generation, ACL_MASTER_STAT_AVAIL) < 0)
+		if (acl_master_notify(acl_var_aio_pid, aio_server_generation,
+			ACL_MASTER_STAT_AVAIL) < 0)
+		{
 			aio_server_abort(astream, NULL);
+		}
 	}
 
 	if (aio_server_lock != 0
-	    && acl_myflock(ACL_VSTREAM_FILE(aio_server_lock),
-				ACL_INTERNAL_LOCK,
-				ACL_MYFLOCK_OP_NONE) < 0)
+		&& acl_myflock(ACL_VSTREAM_FILE(aio_server_lock),
+			ACL_INTERNAL_LOCK, ACL_MYFLOCK_OP_NONE) < 0)
+	{
 		acl_msg_fatal("%s: select unlock: %s", myname, strerror(errno));
+	}
+
+	if (delay_listen) {
+		acl_aio_disable_read(astream);
+		acl_aio_request_timer(aio, restart_listen, astream, 2000000, 0);
+	}
 
 	if (time_left >= 0)
 		acl_aio_request_timer(aio, aio_server_timeout, (void *) aio,
@@ -720,6 +761,7 @@ static void aio_server_accept_inet(ACL_ASTREAM *astream, void *context)
 	int     fd;
 	int    *fds;
 	int     i, j;
+	int     delay_listen = 0;
 
 	/*
 	 * Be prepared for accept() to fail because some other process already
@@ -730,7 +772,7 @@ static void aio_server_accept_inet(ACL_ASTREAM *astream, void *context)
 	 */
 	if (acl_var_aio_idle_limit > 0)
 		time_left = (int) ((acl_aio_cancel_timer(aio, aio_server_timeout,
-					(void *) aio) + 999999) / 1000000);
+			(void *) aio) + 999999) / 1000000);
 	else
 		time_left = acl_var_aio_idle_limit;
 
@@ -741,15 +783,18 @@ static void aio_server_accept_inet(ACL_ASTREAM *astream, void *context)
 
 	for (i = 0; i < acl_var_aio_max_accept; i++) {
 		fd = acl_inet_accept(listen_fd);
-		if (fd < 0) {
-			if (errno != EAGAIN && errno != EINTR)
-				acl_msg_fatal("%s: accept connection: %s",
-					myname, strerror(errno));
-			else
-				break;
-		} else {
+		if (fd >= 0) {
 			fds[i] = fd;
+			continue;
 		}
+
+		if (errno == EMFILE) {
+			delay_listen = 1;
+			acl_msg_warn("accept connection: %s", strerror(errno));
+		} else if (errno != EAGAIN && errno != EINTR)
+			acl_msg_fatal("%s: accept connection: %s",
+				myname, strerror(errno));
+		break;
 	}
 
 	if (acl_var_aio_master_maxproc > 1 && i >= acl_var_aio_min_notify) {
@@ -775,10 +820,15 @@ static void aio_server_accept_inet(ACL_ASTREAM *astream, void *context)
 	}
 
 	if (aio_server_lock != 0
-	    && acl_myflock(ACL_VSTREAM_FILE(aio_server_lock),
-		ACL_INTERNAL_LOCK, ACL_MYFLOCK_OP_NONE) < 0)
+		&& acl_myflock(ACL_VSTREAM_FILE(aio_server_lock),
+			ACL_INTERNAL_LOCK, ACL_MYFLOCK_OP_NONE) < 0)
 	{
 		acl_msg_fatal("%s: select unlock: %s", myname, strerror(errno));
+	}
+
+	if (delay_listen) {
+		acl_aio_disable_read(astream);
+		acl_aio_request_timer(aio, restart_listen, astream, 2000000, 0);
 	}
 
 	if (time_left > 0)
@@ -978,11 +1028,8 @@ static ACL_ASTREAM **create_listener(ACL_AIO *aio, int event_mode acl_unused,
 		fd < ACL_MASTER_LISTEN_FD + socket_count; fd++)
 	{
 		/* 打开监听数据流 */
-		stream = acl_vstream_fdopen(fd,
-				O_RDWR,
-				acl_var_aio_buf_size,
-				acl_var_aio_rw_timeout,
-				fdtype);
+		stream = acl_vstream_fdopen(fd, O_RDWR, acl_var_aio_buf_size,
+			acl_var_aio_rw_timeout, fdtype);
 		if (stream == NULL)
 			acl_msg_fatal("%s(%d)->%s: stream null, fd = %d",
 				__FILE__, __LINE__, myname, fd);
@@ -1018,7 +1065,8 @@ static void setup_ipc(ACL_AIO *aio)
 
 	ACL_MASTER_STAT_ASTREAM = acl_aio_open(aio, ACL_MASTER_STAT_STREAM);
 	if (ACL_MASTER_STAT_ASTREAM == NULL)
-		acl_msg_fatal("%s(%d): open master stat astream error", myname, __LINE__);
+		acl_msg_fatal("%s(%d): open master stat astream error",
+			myname, __LINE__);
 	acl_aio_ctl(ACL_MASTER_STAT_ASTREAM,
 		ACL_AIO_CTL_READ_HOOK_ADD, aio_server_read_abort, NULL,
 		ACL_AIO_CTL_CLOSE_HOOK_ADD, aio_server_abort, NULL,
@@ -1036,9 +1084,11 @@ static void run_loop(const char *procname)
 {
 	ACL_WATCHDOG *watchdog;
 
-	watchdog = acl_watchdog_create(acl_var_aio_daemon_timeout, (ACL_WATCHDOG_FN) 0, (char *) 0);
+	watchdog = acl_watchdog_create(acl_var_aio_daemon_timeout,
+		(ACL_WATCHDOG_FN) 0, (char *) 0);
 
-	acl_msg_info("%s: starting...(accept_alone: %s)", procname, acl_var_aio_accept_alone);
+	acl_msg_info("%s: starting...(accept_alone: %s)",
+		procname, acl_var_aio_accept_alone);
 
 	/*
 	 * Traditionally, BSD select() can't handle aiople processes selecting
@@ -1051,9 +1101,10 @@ static void run_loop(const char *procname)
 		if (aio_server_lock != 0) {
 			acl_watchdog_stop(watchdog);
 			if (acl_myflock(ACL_VSTREAM_FILE(aio_server_lock),
-					ACL_INTERNAL_LOCK,
-					ACL_MYFLOCK_OP_EXCLUSIVE) < 0)
+				ACL_INTERNAL_LOCK, ACL_MYFLOCK_OP_EXCLUSIVE) < 0)
+			{
 				acl_msg_fatal("select lock: %s", strerror(errno));
+			}
 		}
 		acl_watchdog_start(watchdog);
 
@@ -1262,7 +1313,8 @@ void acl_aio_server_main(int argc, char **argv, ACL_AIO_SERVER_FN service,...)
 
 	/* change to given directory */
 	if (chdir(acl_var_aio_queue_dir) < 0)
-		acl_msg_fatal("chdir(\"%s\"): %s", acl_var_aio_queue_dir, strerror(errno));
+		acl_msg_fatal("chdir(\"%s\"): %s", acl_var_aio_queue_dir,
+			strerror(errno));
 
 	/* Run pre-jail initialization. */
 	if (pre_init)
@@ -1283,7 +1335,7 @@ void acl_aio_server_main(int argc, char **argv, ACL_AIO_SERVER_FN service,...)
 
 	create_timer(__h_aio, __use_limit_delay);  /* 创建定时器 */
 	__listen_astreams = create_listener(__h_aio, __event_mode,
-			transport, __socket_count);  /* 创建监听者 */
+		transport, __socket_count);  /* 创建监听者 */
 	setup_ipc(__h_aio);  /* 安装进程间通信的通道 */
 	run_loop(argv[0]);  /* 进入事件主循环过程 */
 }
