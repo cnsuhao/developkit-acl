@@ -295,29 +295,19 @@ bool db_mysql::open(const char* local_charset /* = GBK */)
 	char *db_host, *db_unix;
 	int   db_port;
 
-	const char* ptr = strchr(dbaddr_, '/');
+	char* ptr = strchr(dbaddr_, '/');
 	if (ptr == NULL) {
-		ptr = strchr(dbaddr_, ':');
-		if (ptr == NULL)
+		ACL_SAFE_STRNCPY(tmpbuf, dbaddr_, sizeof(tmpbuf));
+		ptr = strchr(tmpbuf, ':');
+		if (ptr == NULL || *(ptr + 1) == 0)
 		{
 			logger_error("invalid db_addr=%s", dbaddr_);
 			return false;
 		}
-
-		size_t len = ptr - dbaddr_;
-		if (len == 0)
-		{
-			logger_error("invalid dbaddr=%s", dbaddr_);
-			return false;
-		}
-
-		len++;	/* 1 for '\0' */
-		size_t i = sizeof(tmpbuf) - 1;
-		size_t n = i > len ? len : i - 1;
-		ACL_SAFE_STRNCPY(tmpbuf, dbaddr_, n);
+		else
+			*ptr++ = 0;
 		db_host = tmpbuf;
 
-		ptr++;  /* skip ':' */
 		db_port = atoi(ptr);
 		if (db_port <= 0)
 		{
@@ -381,8 +371,10 @@ bool db_mysql::open(const char* local_charset /* = GBK */)
 		dbpass_ ? dbpass_ : "", dbname_, db_port,
 		db_unix, dbflags_) == NULL)
 	{
-		logger_error("connect mysql error(%s), db_host=%s",
-			__mysql_error(conn_), dbaddr_);
+		logger_error("connect mysql error(%s), db_host=%s, db_port=%d,"
+			" db_unix=%s, db_name=%s, db_user=%s, db_pass=%s",
+			__mysql_error(conn_), db_host ? db_host : "null", db_port,
+			db_unix ? db_unix : "null", dbname_, dbuser_, dbpass_);
 
 		__mysql_close(conn_);
 		conn_ = NULL;
