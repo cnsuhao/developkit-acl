@@ -26,33 +26,31 @@ namespace acl {
 		m_ptr = NULL;
 	}
 
-	string::string() : m_bin(false)
-	{
-		init();
-	}
-
-	string::string(size_t len) : m_bin(false)
+	string::string(size_t len /* = 64 */, bool bin /* = false */)
+	: m_bin(bin)
 	{
 		init(len);
 	}
 
 	string::string(const string& s) : m_bin(false)
 	{
-		init();
+		init(s.length() + 1);
 		MCP(m_pVbf, STR(s.m_pVbf), LEN(s.m_pVbf));
 		TERM(m_pVbf);
 	}
 
 	string::string(const char* s) : m_bin(false)
 	{
-		init();
-		SCP(m_pVbf, s);
+		size_t len = strlen(s);
+		init(len + 1);
+		MCP(m_pVbf, s, len);
+		TERM(m_pVbf);
 	}
 
 	string::string(const void* s, size_t n) : m_bin(false)
 	{
-		init();
-		MCP(m_pVbf, (const char*) s, n);
+		init(n);
+		MCP(m_pVbf, (const char*) s, n + 1);
 		TERM(m_pVbf);
 	}
 

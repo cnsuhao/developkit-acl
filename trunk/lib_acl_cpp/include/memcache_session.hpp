@@ -19,9 +19,11 @@ namespace acl
 		 *  IP:PORT，不能为空
 		 * @param prefix {const char*} 在 memcached 存储的键值的前缀
 		 * @param ttl {time_t} 生存周期(秒)
+		 * @param sid {const char*} session 对应的 sid，当为空时，内部
+		 *  会自动生成一个，其它说明请参考基类 session 的说明
 		 */
 		memcache_session(const char* cache_addr, const char* prefix = NULL,
-			time_t ttl = 0);
+			time_t ttl = 0, const char* sid = NULL);
 		~memcache_session(void);
 
 	private:

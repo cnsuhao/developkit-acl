@@ -10,12 +10,15 @@ static void test(void)
 {
 	std::string s;
 
+	printf("--------------------- in test -----------------\r\n");
+
 	s = "XXX";
 	printf(">>s: %s, len: %d\n", s.c_str(), (int) s.length());
 
 	acl::string s1("hello world, You're welcome!");
+	printf("strip: '\t !', before strip: %s, ", s1.c_str());
 	s1.strip("\t !", true);
-	printf(">>s1: %s\n", s1.c_str());
+	printf("after strip: %s\r\n", s1.c_str());
 
 	s1 = ("hello world, You're welcome!");
 	s1.strip(":", true);
@@ -34,6 +37,7 @@ static void test2(void)
 {
 	acl::string s, s1("hello1;"), s2("hello2;");
 
+	printf("------------------- in test2 ----------------------\r\n");
 	s.append("<");
 	s << s1;
 	s << s2;
@@ -43,6 +47,7 @@ static void test2(void)
 
 static void test3(void)
 {
+	printf("------------------- in test3 ------------------\r\n");
 	printf("parse_int: %s\n", acl::string::parse_int(100).c_str());
 	printf("parse_int(-1): %s, %s\n",
 		acl::string::parse_int(-1).c_str(),
@@ -234,6 +239,8 @@ static void test_main(void)
 	acl::string s;
 	int  n = 200;
 	unsigned char ch;
+
+	printf("-------------------- in test_main ---------------\r\n");
 
 	//////////////////////////////////////////////////////////////////////
 

@@ -221,6 +221,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "singleton", "lib_acl_cpp\sa
 		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC} = {6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "session", "lib_acl_cpp\samples\session\session.vcproj", "{90D013A0-4813-4BAB-8155-D175631A695E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC} = {6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD} = {FE724EF7-3763-4E78-BDF5-BCBC075719FD}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -589,6 +596,14 @@ Global
 		{128791D9-6787-471C-9A0C-0DCAE53F4911}.Release.Build.0 = Release|Win32
 		{128791D9-6787-471C-9A0C-0DCAE53F4911}.Releasedll.ActiveCfg = ReleaseDll|Win32
 		{128791D9-6787-471C-9A0C-0DCAE53F4911}.Releasedll.Build.0 = ReleaseDll|Win32
+		{90D013A0-4813-4BAB-8155-D175631A695E}.Debug.ActiveCfg = Debug|Win32
+		{90D013A0-4813-4BAB-8155-D175631A695E}.Debug.Build.0 = Debug|Win32
+		{90D013A0-4813-4BAB-8155-D175631A695E}.DebugDll.ActiveCfg = Debug|Win32
+		{90D013A0-4813-4BAB-8155-D175631A695E}.DebugDll.Build.0 = Debug|Win32
+		{90D013A0-4813-4BAB-8155-D175631A695E}.Release.ActiveCfg = Release|Win32
+		{90D013A0-4813-4BAB-8155-D175631A695E}.Release.Build.0 = Release|Win32
+		{90D013A0-4813-4BAB-8155-D175631A695E}.Releasedll.ActiveCfg = Release|Win32
+		{90D013A0-4813-4BAB-8155-D175631A695E}.Releasedll.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

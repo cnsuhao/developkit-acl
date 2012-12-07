@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "lib_acl.h"
-#include "iconv.h"
+//#include "iconv.h"
 #include "gbandutf8.h"
 #include ".\gb2utf8.h"
 

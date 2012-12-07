@@ -7,8 +7,9 @@ namespace acl
 {
 
 memcache_session::memcache_session(const char* cache_addr,
-	const char* prefix /* = NULL */, time_t ttl /* = 0 */)
-: session(ttl)
+	const char* prefix /* = NULL */, time_t ttl /* = 0 */,
+	const char* sid /* = NULL */)
+: session(ttl, sid)
 {
 	acl_assert(cache_addr && *cache_addr);
 	cache_ = NEW mem_cache(prefix ? prefix : "_", cache_addr);
