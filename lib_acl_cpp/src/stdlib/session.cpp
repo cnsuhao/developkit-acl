@@ -13,8 +13,31 @@ VBUF* session::vbuf_new(const void* str, size_t len)
 
 	// 这样可以减少分配内存的次数
 	VBUF* buf = (VBUF*) acl_mymalloc(sizeof(VBUF) + len + 1);
+	buf->size = len + 1;
+
 	memcpy(buf->buf, str, len);
 	// 必须保证尾部以 \0 结束以允许返回字符串属性值
+	buf->buf[len] = 0;
+	buf->len = len;
+	return buf;
+}
+
+VBUF* session::vbuf_set(VBUF* buf, const void* str, size_t len)
+{
+	acl_assert(len > 0);
+
+	if (buf == NULL)
+	{
+		buf = (VBUF*) acl_mymalloc(sizeof(VBUF) + len + 1);
+		buf->size = len + 1;
+	}
+	else if (buf->size <= len)
+	{
+		buf = (VBUF*) acl_myrealloc(buf, sizeof(VBUF) + len + 1);
+		buf->size = len + 1;
+	}
+
+	memcpy(buf->buf, str, len);
 	buf->buf[len] = 0;
 	buf->len = len;
 	return buf;
@@ -25,14 +48,18 @@ void session::vbuf_free(VBUF* buf)
 	acl_myfree(buf);
 }
 
-session::session(time_t ttl /* = 0 */)
+session::session(time_t ttl /* = 0 */, const char* sid /* = NULL */)
 : ttl_(ttl)
+, dirty_(false)
 {
 	struct timeval tv;
 
 	(void) gettimeofday(&tv, NULL);
-	snprintf(sid_, sizeof(sid_), "acl.%d.%d.%d", (int) tv.tv_sec,
-		(int) tv.tv_usec, rand());
+	if (sid == NULL || *sid == 0)
+		snprintf(sid_, sizeof(sid_), "acl.%d.%d.%d", (int) tv.tv_sec,
+			(int) tv.tv_usec, rand());
+	else
+		ACL_SAFE_STRNCPY(sid_, sid, sizeof(sid_));
 }
 
 session::~session()
@@ -52,20 +79,97 @@ void session::set_sid(const char* sid)
 
 void session::reset()
 {
+	attrs_clear();
+	attrs_cache_clear();
+}
+
+void session::attrs_clear()
+{
+	if (attrs_.empty())
+		return;
+
 	std::map<string, VBUF*>::iterator it = attrs_.begin();
 	for (; it != attrs_.end(); ++it)
 		vbuf_free(it->second);
 	attrs_.clear();
 }
 
-bool session::set(const char* name, const char* value)
+void session::attrs_cache_clear()
 {
-	return set(name, value, strlen(value));
+	if (attrs_cache_.empty())
+		return;
+
+	std::map<string, VBUF*>::iterator it2 = attrs_cache_.begin();
+	for (; it2 != attrs_cache_.end(); ++it2)
+		vbuf_free(it2->second);
+	attrs_cache_.clear();
 }
 
-bool session::set(const char* name, const void* value, size_t len)
+bool session::flush()
 {
-	string buf;
+	if (!dirty_)
+		return true;
+	dirty_ = false;
+
+	string buf(256);
+
+	// 调用纯虚接口，获得原来的 sid 数据
+	if (get_data(buf) == true)
+		deserialize(buf);  // 反序列化
+
+	std::map<string, VBUF*>::iterator it1 = attrs_cache_.begin();
+	for (; it1 != attrs_cache_.end(); ++it1)
+	{
+		// 如果该属性已存在，则需要先释放原来的属性值后再添加新值
+
+		std::map<string, VBUF*>::iterator it2 = attrs_.find(it1->first);
+		if (it2 == attrs_.end())
+			attrs_[it1->first] = it1->second;
+		else
+		{
+			// 清除旧的数据
+			vbuf_free(it2->second);
+			// 设置新的数据
+			attrs_[it1->first] = it1->second;
+		}
+		buf.clear();
+		serialize(buf);  // 序列化数据
+	}
+
+	// 清除缓存的数据：因为内部的数据已经被添加至 attrs_ 中，
+	// 所以只需要将 attrs_cache_ 空间清除即可
+	attrs_cache_.clear();
+
+	// 调用纯虚接口，向 memcached 或类似缓存中添加数据
+	if (set_data(buf.c_str(), buf.length(), ttl_) == false)
+	{
+		logger_error("set cache error, sid(%s)", sid_);
+		return false;
+	}
+	return true;
+}
+
+bool session::set(const char* name, const char* value,
+	bool delay /* = false */)
+{
+	return set(name, value, strlen(value), delay);
+}
+
+bool session::set(const char* name, const void* value, size_t len,
+	bool delay /* = false */)
+{
+	if (delay)
+	{
+		std::map<string, VBUF*>::iterator it = attrs_cache_.find(name);
+		if (it == attrs_cache_.end())
+			attrs_cache_[name] = vbuf_new(value, len);
+		else
+			attrs_cache_[name] = vbuf_set(it->second, value, len);
+		dirty_ = true;
+		return true;
+	}
+
+	string buf(256);
 
 	// 调用纯虚接口，获得原来的 sid 数据
 	if (get_data(buf) == false)
@@ -74,22 +178,20 @@ bool session::set(const char* name, const void* value, size_t len)
 		serialize(name, value, len, buf);
 	}
 
-	// 反序列化
-	else if (deserialize(buf) == false)
-	{
-		// XXX: 如果反序列化失败，则生成新的数据
-		serialize(name, value, len, buf);
-	}
-
 	// 如果存在对应 sid 的数据，则将新数据添加在原来数据中
 	else
 	{
+		// 反序列化
+		deserialize(buf);
+
 		// 如果该属性已存在，则需要先释放原来的属性值后再添加新值
 
 		std::map<string, VBUF*>::iterator it = attrs_.find(name);
-		if (it != attrs_.end())
-			vbuf_free(it->second);
-		attrs_[name] = vbuf_new(value, len);
+		if (it == attrs_.end())
+			attrs_[name] = vbuf_new(value, len);
+		else
+			attrs_[name] = vbuf_set(it->second, value, len);
+		buf.clear();
 		serialize(buf);  // 序列化数据
 	}
 
@@ -112,16 +214,33 @@ const char* session::get(const char* name)
 
 const VBUF* session::get_vbuf(const char* name)
 {
-	string buf;
+	string buf(256);
 	if (get_data(buf) == false)
 		return NULL;
-	if (deserialize(buf) == false)
-		return NULL;
-
+	deserialize(buf);
 	std::map<string, VBUF*>::const_iterator cit = attrs_.find(name);
 	if (cit == attrs_.end())
 		return NULL;
 	return cit->second;
+}
+
+bool session::set_ttl(time_t ttl, bool delay /* = false */)
+{
+	if (ttl == ttl_)
+		return true;
+	else if (delay)
+	{
+		ttl_ = ttl;
+		dirty_ = true;
+		return true;
+	}
+	else if (set_timeout(ttl) == true)
+	{
+		ttl_ = ttl;
+		return true;
+	}
+	else
+		return false;
 }
 
 time_t session::get_ttl() const
@@ -131,12 +250,11 @@ time_t session::get_ttl() const
 
 bool session::del(const char* name)
 {
-	string buf;
+	string buf(256);
 	if (get_data(buf) == false)
 		return true;
-	if (deserialize(buf) == false)
-		return false;
 
+	deserialize(buf);
 	std::map<string, VBUF*>::iterator it = attrs_.find(name);
 	if (it == attrs_.end())
 		return false;
@@ -179,17 +297,6 @@ bool session::remove()
 	return true;
 }
 
-bool session::set_ttl(time_t ttl)
-{
-	if (set_timeout(ttl) == true)
-	{
-		ttl_ = ttl;
-		return true;
-	}
-	else
-		return false;
-}
-
 // 采用 handlersocket 的编码方式
 
 void session::serialize(string& buf)
@@ -229,9 +336,9 @@ void session::serialize(const char* name, const void* value,
 
 // 采用 handlersocket 的解码方式
 
-bool session::deserialize(string& buf)
+void session::deserialize(string& buf)
 {
-	reset();  // 先重置 session 前一次查询状态
+	attrs_clear();  // 先重置 session 前一次查询状态
 
 	ACL_ARGV* tokens = acl_argv_split(buf.c_str(), "\t");
 	ACL_ITER  iter;
@@ -262,7 +369,6 @@ bool session::deserialize(string& buf)
 	}
 
 	acl_argv_free(tokens);
-	return true;
 }
 
 } // namespace acl

@@ -11,6 +11,7 @@ namespace acl
 	struct VBUF
 	{
 		size_t len;
+		size_t size;
 		char  buf[1];
 	};
 
@@ -21,12 +22,18 @@ namespace acl
 	{
 	public:
 		/**
-		 * 在调用本构造函数后，内部会自动生成一个唯一 ID,
-		 * 用户应保留该 ID (通过 get_sid() 获得)，然后以后每次
-		 * 再用时应该先调用 set_sid(const char*) 再设置一次与本
-		 * session 关联的 ID
+		 * 当构造函数的参数 sid 非空时，则该 session 对象使用该
+		 * sid；否则内部会自动生成一个 sid，用户应该通过 get_sid()
+		 * 获得这个自动生成的 sid 以便于每次查询该 sid 对应的数据
+		 * @param ttl {time_t} 指定 session 的生存周期(秒)
+		 * @param sid {const char*} 非空时，则 session 的 sid 使
+		 *  该值，否则内部会产生一个随机的 session sid，该随机的
+		 *  sid 可以通过调用 get_sid() 获得；当然在使用过程中，用户
+		 *  也可以通过 set_sid() 修改本对象的 session sid；
+		 *  此外，如果该 sid 为空，则如果用户查查找某个 sid 对应的
+		 *  数据，则用户必须先调用 set_sid()
 		 */
-		session(time_t ttl = 0);
+		session(time_t ttl = 0, const char* sid = NULL);
 		virtual ~session(void);
 		
 		/**
@@ -41,21 +48,29 @@ namespace acl
 		virtual const char* get_sid(void) const;
 
 		/**
-		 * 设置本 session 对象的唯一 ID 标识，当调用以下函数时，
-		 * 应该必须先调用 set_sid(const char*) 设置本 session 对象
-		 * 对应的数据对象标识 id
+		 * 设置本 session 对象的唯一 ID 标识
 		 * @param sid {const char*} 非空
 		 */
 		void set_sid(const char* sid);
+
+		/**
+		 * 当调用 session 类的 set/set_ttl 时，如果最后一个参数 delay 为 true，
+		 * 则必须通过调用本函数将数据真正进行更新
+		 * @return {bool} 数据更新是否成功
+		 */
+		bool flush();
 
 		/**
 		 * 向 session 中添加新的字符串属性，同时设置该
 		 * session 的过期时间间隔(秒)
 		 * @param name {const char*} session 名，非空
 		 * @param value {const char*} session 值，非空
+		 * @param delay {bool} 当为 true 时，则延迟发送更新指令到后端的
+		 *  缓存服务器，当用户调用了 session::flush 后再进行数据更新，这
+		 *  样可以提高传输效率；当为 false 时，则立刻更新数据
 		 * @return {bool} 返回 false 表示出错
 		 */
-		bool set(const char* name, const char* value);
+		bool set(const char* name, const char* value, bool delay = false);
 
 		/**
 		 * 向 session 中添加新的属性对象，同时设置该
@@ -63,9 +78,12 @@ namespace acl
 		 * @param name {const char*} session 属性名，非空
 		 * @param value {const char*} session 属性值，非空
 		 * @param len {size_t} value 值长度
+		 * @param delay {bool} 当为 true 时，则延迟发送更新指令到后端的
+		 *  缓存服务器，当用户调用了 session::flush 后再进行数据更新，这
+		 *  样可以提高传输效率；当为 false 时，则立刻更新数据
 		 * @return {bool} 返回 false 表示出错
 		 */
-		bool set(const char* name, const void* value, size_t len);
+		bool set(const char* name, const void* value, size_t len, bool delay = false);
 		
 		/**
 		 * 从 session 中取得字符串类型属性值
@@ -92,9 +110,12 @@ namespace acl
 		/**
 		 * 重新设置 session 在缓存服务器上的缓存时间
 		 * @param ttl {time_t} 生存周期(秒)
+		 * @param delay {bool} 当为 true 时，则延迟发送更新指令到后端的
+		 *  缓存服务器，当用户调用了 session::flush 后再进行数据更新，这
+		 *  样可以提高传输效率；当为 false 时，则立刻更新数据
 		 * @return {bool} 设置是否成功
 		 */
-		bool set_ttl(time_t ttl);
+		bool set_ttl(time_t ttl, bool delay = false);
 
 		/**
 		 * 获得本 session 对象中记录的 session 生存周期；该值有可能
@@ -126,7 +147,9 @@ namespace acl
 	private:
 		time_t ttl_;
 		char sid_[256];
+		bool dirty_;
 		std::map<string, VBUF*> attrs_;
+		std::map<string, VBUF*> attrs_cache_;
 
 		// 将 session 数据序列化
 		void serialize(string& buf);
@@ -135,10 +158,18 @@ namespace acl
 			size_t len, string& buf);
 
 		// 将 session 数据反序列化
-		bool deserialize(string& buf);
+		void deserialize(string& buf);
+
+		void attrs_clear();
+		void attrs_cache_clear();
 
 		// 分配内存对象
 		static VBUF* vbuf_new(const void* str, size_t len);
+
+		// 对内存对象赋值，如果内存对象空间不够，则重新分配
+		// 内存，调用者必须用返回值做为新的内存对象，该对象
+		// 可能是原有的内存对象，也有可能是新的内存对象
+		static VBUF* vbuf_set(VBUF* buf, const void* str, size_t len);
 
 		// 释放内存对象
 		static void vbuf_free(VBUF* buf);

@@ -11,8 +11,7 @@ namespace acl {
 	class ACL_CPP_API string
 	{
 	public:
-		string();
-		string(size_t n);
+		string(size_t n = 64, bool bin = false);
 		string(const string& s);
 		string(const char* s);
 		string(const void* s, size_t n);
@@ -175,7 +174,7 @@ namespace acl {
 
 	private:
 		bool m_bin;
-		void init(size_t len = 1024);
+		void init(size_t len);
 		ACL_VSTRING* m_pVbf;
 		const char* m_ptr;
 		std::list<string>* m_psList;
