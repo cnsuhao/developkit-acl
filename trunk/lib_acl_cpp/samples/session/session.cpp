@@ -1,41 +1,18 @@
-#include "lib_acl.hpp"
-#include <getopt.h>
+// session.cpp : 定义控制台应用程序的入口点。
+//
+
+#include "stdafx.h"
+#include "acl_cpp_init.hpp"
+#include "memcache_session.hpp"
 
 using namespace acl;
 
-static void usage(const char* procname)
+#ifdef WIN32
+#define snprintf _snprintf
+#endif
+
+static int session_test1(const char* addr, int n)
 {
-	printf("usage: %s -h[help] -s memcahced_addr[example: 127.0.0.1:11211] -n count\r\n", procname);
-}
-
-int main(int argc, char* argv[])
-{
-	char  addr[32];
-	int   ch, n = 10;
-
-	snprintf(addr, sizeof(addr), "127.0.0.1:11211");
-
-	while ((ch = getopt(argc, argv, "hs:n:")) > 0)
-	{
-		switch (ch)
-		{
-		case 'h':
-			usage(argv[0]);
-			return 0;
-		case 's':
-			snprintf(addr, sizeof(addr), "%s", optarg);
-			break;
-		case 'n':
-			n = atoi(optarg);
-			if (n <= 0)
-				n = 10;
-			break;
-		default:
-			usage(argv[0]);
-			return 0;
-		}
-	}
-
 	memcache_session s(addr);
 
 	char  name[32], value[32];
@@ -97,3 +74,74 @@ int main(int argc, char* argv[])
 	printf("\r\n------------ test session ok now -------------\r\n");
 	return 0;
 }
+
+static void session_delay_test(const char* addr)
+{
+	const char* sid = "XXXXXXXXXXXXXX";
+	memcache_session sess(addr, NULL, 120, sid);
+	sess.set_ttl(128, true);
+
+	char name[128], value[128];
+	for (int i = 0; i < 10; i++)
+	{
+		snprintf(name, sizeof(name), "name%d", i);
+		snprintf(value, sizeof(value), "value%d", i);
+		sess.set(name, value, true);
+		printf(">>>set %s: %s\r\n", name, value);
+	}
+
+	if (sess.flush() == false)
+		printf("set session error\r\n");
+	else
+	{
+		printf("set session ok\r\n");
+		printf("begin get session:\r\n");
+
+		for (int i = 0; i < 11; i++)
+		{
+			snprintf(name, sizeof(name), "name%d", i);
+			snprintf(value, sizeof(value), "value%d", i);
+			const char* ptr = sess.get(name);
+			if (ptr == NULL)
+			{
+				printf(">>> %s not found\r\n", name);
+				break;
+			}
+			printf(">>>get %s: %s, %s\r\n", name, ptr,
+				strcmp(ptr, value) == 0 ? "ok" : "failed");
+		}
+	}
+}
+
+
+int main(int argc, char* argv[])
+{
+	char  addr[256];
+	int   n;
+
+	if (argc >= 2)
+	{
+		snprintf(addr, sizeof(addr), "%s", argv[1]);
+		if (argc >= 3)
+			n = atoi(argv[2]);
+		if (n <= 0)
+			n = 10;
+	}
+	else
+	{
+		snprintf(addr, sizeof(addr), "192.168.0.250:11211");
+		n = 10;
+	}
+
+	acl_cpp_init();
+
+	session_test1(addr, n);
+	session_delay_test(addr);
+
+#ifdef WIN32
+	printf("enter any key to exit\r\n");
+	getchar();
+#endif
+	return 0;
+}
+
