@@ -8,10 +8,18 @@ namespace acl
 
 	// 用来存储属性值的缓冲区对象定义，这主要是为了兼容属性值
 	// 可以为二进制的情形而增加的结构类型
+	typedef enum
+	{
+		TODO_NUL,
+		TODO_SET,
+		TODO_DEL
+	} todo_t;
+
 	struct VBUF
 	{
 		size_t len;
 		size_t size;
+		todo_t todo;
 		char  buf[1];
 	};
 
@@ -88,24 +96,35 @@ namespace acl
 		/**
 		 * 从 session 中取得字符串类型属性值
 		 * @param name {const char*} session 属性名，非空
+		 * @param local_cached {bool} 当本 session 对象从后端 cache 服务器
+		 *  取过一次数据后，如果该参数为 true，则连续调用本函数时，所用数据
+		 *  是本对象缓存的数据，而不是每次都要从后端取；否则，则每调用本函数
+		 *  都将从后端 cache 服务器取数据
 		 * @return {const char*} session 属性值，返回空时表示出错或不存在
 		 */
-		const char* get(const char* name);
+		const char* get(const char* name, bool local_cached = false);
 
 		/**
 		 * 从 session 中取得二进制数据类型的属性值
 		 * @param name {const char*} session 属性名，非空
+		 * @param local_cached {bool} 当本 session 对象从后端 cache 服务器
+		 *  取过一次数据后，如果该参数为 true，则连续调用本函数时，所用数据
+		 *  是本对象缓存的数据，而不是每次都要从后端取；否则，则每调用本函数
+		 *  都将从后端 cache 服务器取数据
 		 * @return {const VBUF*} session 属性值，返回空时表示出错或不存在
 		 */
-		const VBUF* get_vbuf(const char* name);
+		const VBUF* get_vbuf(const char* name, bool local_cached = false);
 
 		/**
 		 * 从 session 中删除指定属性值，当所有的变量都删除
 		 * 时会将整个对象从 memcached 中删除
 		 * @param name {const char*} session 属性名，非空
+		 * @param delay {bool} 当为 true 时，则延迟发送更新指令到后端的
+		 *  缓存服务器，当用户调用了 session::flush 后再进行数据更新，这
+		 *  样可以提高传输效率；当为 false 时，则立刻更新数据
 		 * @return {bool} true 表示成功(含不存在情况)，false 表示删除失败
 		 */
-		bool del(const char* name);
+		bool del(const char* name, bool delay = false);
 
 		/**
 		 * 重新设置 session 在缓存服务器上的缓存时间
@@ -115,7 +134,7 @@ namespace acl
 		 *  样可以提高传输效率；当为 false 时，则立刻更新数据
 		 * @return {bool} 设置是否成功
 		 */
-		bool set_ttl(time_t ttl, bool delay = false);
+		bool set_ttl(time_t ttl, bool delay = true);
 
 		/**
 		 * 获得本 session 对象中记录的 session 生存周期；该值有可能
@@ -133,43 +152,49 @@ namespace acl
 
 	protected:
 		// 获得对应 sid 的数据
-		virtual bool get_data(string& buf) = 0;
+		virtual bool get_data(const char* sid, string& buf) = 0;
 
 		// 设置对应 sid 的数据
-		virtual bool set_data(const char* buf, size_t len, time_t ttl) = 0;
+		virtual bool set_data(const char* sid, const char* buf,
+			size_t len, time_t ttl) = 0;
 
 		// 删除对应 sid 的数据
-		virtual bool del_data(void) = 0;
+		virtual bool del_data(const char* sid) = 0;
 
 		// 设置对应 sid 数据的过期时间
-		virtual bool set_timeout(time_t ttl) = 0;
+		virtual bool set_timeout(const char* sid, time_t ttl) = 0;
 
 	private:
 		time_t ttl_;
-		char sid_[256];
+		VBUF* sid_;
+
+		// 该变量主要用在 set_ttl 函数中，如果推测该 sid_ 只是新产生的
+		// 且还没有在后端 cache 服务端存储，则 set_ttl 不会立即更新后端
+		// 的 cache 服务器
+		bool sid_saved_;
 		bool dirty_;
 		std::map<string, VBUF*> attrs_;
 		std::map<string, VBUF*> attrs_cache_;
 
 		// 将 session 数据序列化
-		void serialize(string& buf);
+		static void serialize(const std::map<string, VBUF*>& attrs, string& out);
 
-		void serialize(const char* name, const void* value,
+		static void serialize(const char* name, const void* value,
 			size_t len, string& buf);
 
 		// 将 session 数据反序列化
-		void deserialize(string& buf);
+		static void deserialize(string& buf, std::map<string, VBUF*>& attrs);
 
-		void attrs_clear();
-		void attrs_cache_clear();
+		// 清空 session 属性集合
+		static void attrs_clear(std::map<string, VBUF*>& attrs);
 
 		// 分配内存对象
-		static VBUF* vbuf_new(const void* str, size_t len);
+		static VBUF* vbuf_new(const void* str, size_t len, todo_t todo);
 
 		// 对内存对象赋值，如果内存对象空间不够，则重新分配
 		// 内存，调用者必须用返回值做为新的内存对象，该对象
 		// 可能是原有的内存对象，也有可能是新的内存对象
-		static VBUF* vbuf_set(VBUF* buf, const void* str, size_t len);
+		static VBUF* vbuf_set(VBUF* buf, const void* str, size_t len, todo_t todo);
 
 		// 释放内存对象
 		static void vbuf_free(VBUF* buf);

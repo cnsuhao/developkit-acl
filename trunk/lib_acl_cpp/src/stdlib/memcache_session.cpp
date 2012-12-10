@@ -20,24 +20,25 @@ memcache_session::~memcache_session()
 	delete cache_;
 }
 
-bool memcache_session::get_data(string& buf)
+bool memcache_session::get_data(const char* sid, string& buf)
 {
-	return cache_->get(get_sid(), buf);
+	return cache_->get(sid, buf);
 }
 
-bool memcache_session::set_data(const char* buf, size_t len, time_t ttl)
+bool memcache_session::set_data(const char* sid, const char* buf,
+	size_t len, time_t ttl)
 {
-	return cache_->set(get_sid(), buf, len, ttl);
+	return cache_->set(sid, buf, len, ttl);
 }
 
-bool memcache_session::del_data()
+bool memcache_session::del_data(const char* sid)
 {
-	return cache_->del(get_sid());
+	return cache_->del(sid);
 }
 
-bool memcache_session::set_timeout(time_t ttl)
+bool memcache_session::set_timeout(const char* sid, time_t ttl)
 {
-	return cache_->set(get_sid(), ttl);
+	return cache_->set(sid, ttl);
 }
 
 } // namespace acl

@@ -28,16 +28,17 @@ namespace acl
 
 	private:
 		// 基类纯虚函数，从 memcached 中获得数据
-		virtual bool get_data(string& buf);
+		virtual bool get_data(const char* sid, string& buf);
 
 		// 基类纯虚函数，向 memcached 中添加或修改数据
-		virtual bool set_data(const char* buf, size_t len, time_t ttl);
+		virtual bool set_data(const char* sid, const char* buf,
+			size_t len, time_t ttl);
 
 		// 基类纯虚函数，从 memcached 中删除数据
-		virtual bool del_data(void);
+		virtual bool del_data(const char* sid);
 
 		//重新设置 session 在缓存服务器上的缓存时间
-		virtual bool set_timeout(time_t ttl);
+		virtual bool set_timeout(const char* sid, time_t ttl);
 	private:
 		mem_cache* cache_;
 	};
