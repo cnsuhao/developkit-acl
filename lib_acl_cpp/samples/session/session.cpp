@@ -90,6 +90,9 @@ static void session_delay_test(const char* addr)
 		printf(">>>set %s: %s\r\n", name, value);
 	}
 
+	snprintf(name, sizeof(name), "name5");
+	sess.del(name, true);
+
 	if (sess.flush() == false)
 		printf("set session error\r\n");
 	else
@@ -103,12 +106,10 @@ static void session_delay_test(const char* addr)
 			snprintf(value, sizeof(value), "value%d", i);
 			const char* ptr = sess.get(name);
 			if (ptr == NULL)
-			{
 				printf(">>> %s not found\r\n", name);
-				break;
-			}
-			printf(">>>get %s: %s, %s\r\n", name, ptr,
-				strcmp(ptr, value) == 0 ? "ok" : "failed");
+			else
+				printf(">>>get %s: %s, %s\r\n", name, ptr,
+					strcmp(ptr, value) == 0 ? "ok" : "failed");
 		}
 	}
 }
