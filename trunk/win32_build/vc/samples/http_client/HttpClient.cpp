@@ -256,7 +256,7 @@ void *CHttpClient::DoRequestThread(void* arg)
 } while(0)
 
 	const char *pUrl = phClient->m_sReqUrl.GetString();
-	hdr_req = http_hdr_req_create(pUrl, "GET",
+	hdr_req = http_hdr_req_create(pUrl, phClient->m_bPostMethod ? "POST" : "GET",
 		phClient->m_bHttp11 ? "HTTP/1.1" : "HTTP/1.0");
 	ASSERT(hdr_req);
 
@@ -264,6 +264,13 @@ void *CHttpClient::DoRequestThread(void* arg)
 		http_hdr_put_str(&hdr_req->hdr, "Accept-Encoding", "gzip, deflate");
 	if (phClient->m_bKeepAlive)
 		http_hdr_entry_replace(&hdr_req->hdr, "Connection", "Keep-Alive", 1);
+	if (phClient->m_bPostMethod)
+		http_hdr_put_int(&hdr_req->hdr, "Content-Length",
+			(int) phClient->m_sHttpBody.GetLength());
+	if (!phClient->m_sAccept.IsEmpty())
+		http_hdr_put_str(&hdr_req->hdr, "Accept", phClient->m_sAccept.GetString());
+	if (!phClient->m_sCtype.IsEmpty())
+		http_hdr_put_str(&hdr_req->hdr, "Content-Type", phClient->m_sCtype.GetString());
 
 	if (phClient->m_sHttpHdrAppend.GetLength() > 0) {
 		ACL_ARGV *argv;
@@ -323,6 +330,16 @@ FORWARD:
 	if (ret == ACL_VSTREAM_EOF) {
 		acl_msg_error("%s(%d): write error", __FILE__, __LINE__);
 		RETURN (NULL);
+	}
+
+	if (phClient->m_bPostMethod && !phClient->m_sHttpBody.IsEmpty())
+	{
+		if (acl_vstream_writen(server, phClient->m_sHttpBody.GetString(),
+			phClient->m_sHttpBody.GetLength()) == ACL_VSTREAM_EOF)
+		{
+			acl_msg_error("%s(%d): write body error", __FILE__, __LINE__);
+			RETURN (NULL);
+		}
 	}
 
 	hdr_res = http_hdr_res_new();

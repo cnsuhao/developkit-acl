@@ -17,6 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flock", "flock\flock_vc2003
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "http_client", "http_client\http_client_vc2003.vcproj", "{9BCB6DE9-73D2-484A-B946-0BD5FDDF8CCB}"
 	ProjectSection(ProjectDependencies) = postProject
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD} = {FE724EF7-3763-4E78-BDF5-BCBC075719FD}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "memdb", "memdb\memdb_vc2003.vcproj", "{BA50914C-5890-4A29-85C0-F0C779552597}"
@@ -160,6 +162,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "html_code", "html_code\html
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "json", "json\json.vcproj", "{8021ECD9-04CB-463B-B287-1FB0F5486D91}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_acl", "..\..\..\lib_acl\lib_acl_vc2003.vcproj", "{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_protocol", "..\..\..\lib_protocol\lib_protocol_vc2003.vcproj", "{FE724EF7-3763-4E78-BDF5-BCBC075719FD}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
@@ -499,6 +509,22 @@ Global
 		{8021ECD9-04CB-463B-B287-1FB0F5486D91}.Release.Build.0 = Release|Win32
 		{8021ECD9-04CB-463B-B287-1FB0F5486D91}.ReleaseDll.ActiveCfg = ReleaseDll|Win32
 		{8021ECD9-04CB-463B-B287-1FB0F5486D91}.ReleaseDll.Build.0 = ReleaseDll|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.Debug.ActiveCfg = Debug|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.Debug.Build.0 = Debug|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.DebugDll.ActiveCfg = DebugDll|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.DebugDll.Build.0 = DebugDll|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.Release.ActiveCfg = Release|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.Release.Build.0 = Release|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.ReleaseDll.ActiveCfg = ReleaseDll|Win32
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}.ReleaseDll.Build.0 = ReleaseDll|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.Debug.ActiveCfg = Debug|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.Debug.Build.0 = Debug|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.DebugDll.ActiveCfg = DebugDll|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.DebugDll.Build.0 = DebugDll|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.Release.ActiveCfg = Release|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.Release.Build.0 = Release|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.ReleaseDll.ActiveCfg = ReleaseDll|Win32
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD}.ReleaseDll.Build.0 = ReleaseDll|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

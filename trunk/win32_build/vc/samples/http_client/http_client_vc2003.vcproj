@@ -162,7 +162,9 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCPreBuildEventTool"
+				CommandLine="copy ..\..\..\..\dist\lib\win32\lib_acl_d.dll $(OutDir)\ /Y
+copy ..\..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool

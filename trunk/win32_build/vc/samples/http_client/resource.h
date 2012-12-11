@@ -31,6 +31,11 @@
 #define IDC_CHECK_FORWARD               1018
 #define IDC_EDIT1                       1019
 #define IDC_EDIT_MAX_TRY                1019
+#define IDC_EDIT_HTTP_BODY              1021
+#define IDC_POST_METHOD                 1022
+#define IDC_CONTENT_TYPE                1023
+#define IDC_EDIT3                       1024
+#define IDC_ACCEPT                      1024
 #define ID_INDICATOR_PIXELS             32773
 #define ID_INDICATOR_BYTES              32774
 
@@ -40,7 +45,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        131
 #define _APS_NEXT_COMMAND_VALUE         32775
-#define _APS_NEXT_CONTROL_VALUE         1021
+#define _APS_NEXT_CONTROL_VALUE         1025
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -57,10 +57,13 @@ Chttp_clientDlg::Chttp_clientDlg(CWnd* pParent /*=NULL*/)
 	, m_bKeepAlive(FALSE)
 	, m_sHttpHdrAppend(_T(""))
 	, m_sServerAddr(_T(""))
+	, m_sAccept(_T("application/json, text/javascript, */*; q=0.01"))
+	, m_sCType(_T(""))
 	, m_bUseAddr(FALSE)
 	, m_nContentLength(-1)
 	, m_bForwardAuto(FALSE)
 	, m_nMaxTry(10)
+	, m_bPostMethod(FALSE)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -222,6 +225,11 @@ void Chttp_clientDlg::OnBnClickedButtonOption()
 	option.m_bUseAddr = m_bUseAddr;
 	option.m_bForwardAuto = m_bForwardAuto;
 	option.m_nMaxTry = m_nMaxTry;
+	option.m_bPostMethod = m_bPostMethod;
+	option.m_sCType = m_sCType;
+	option.m_sAccept = m_sAccept;
+	option.m_sHttpBody = m_sBody;
+	option.m_bPostMethod = m_bPostMethod;
 
 	if (option.DoModal() == IDOK) {
 		m_bHttp11 = option.m_bHttp11;
@@ -235,6 +243,16 @@ void Chttp_clientDlg::OnBnClickedButtonOption()
 			m_bUseAddr = FALSE;
 		m_bForwardAuto = option.m_bForwardAuto;
 		m_nMaxTry = option.m_nMaxTry;
+		m_bPostMethod = option.m_bPostMethod;
+		if (m_bPostMethod)
+		{
+			m_sBody = option.m_sHttpBody;
+			if (m_sBody.IsEmpty())
+				m_bPostMethod = FALSE;
+		}
+		m_sCType = option.m_sCType;
+		m_sAccept = option.m_sAccept;
+		m_bPostMethod = option.m_bPostMethod;
 	}
 }
 
@@ -271,6 +289,10 @@ void Chttp_clientDlg::OnBnClickedButtonGet()
 	m_hClient.m_sServerAddr = m_sServerAddr;
 	m_hClient.m_bForwardAuto = m_bForwardAuto;
 	m_hClient.m_nMaxTry = m_nMaxTry;
+	m_hClient.m_sHttpBody = m_sBody;
+	m_hClient.m_bPostMethod = m_bPostMethod;
+	m_hClient.m_sAccept = m_sAccept;
+	m_hClient.m_sCtype = m_sCType;
 	m_hClient.OnDataCallback(this->GetSafeHwnd(), WM_USER_DISPLAY);
 
 	// 与进度条有关
