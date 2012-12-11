@@ -26,10 +26,15 @@ public:
 	BOOL m_bHttp11;
 	BOOL m_bZip;
 	BOOL m_bKeepAlive;
+	BOOL m_bPostMethod;
 	virtual BOOL OnInitDialog();
 	CString m_sHttpHdrAppend;
+	CString m_sHttpBody;
 	CString m_sServerAddr;
+	CString m_sCType;
+	CString m_sAccept;
 	BOOL m_bUseAddr;
 	BOOL m_bForwardAuto;
 	UINT m_nMaxTry;
+	afx_msg void OnBnClickedPostMethod();
 };

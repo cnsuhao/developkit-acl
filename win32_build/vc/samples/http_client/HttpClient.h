@@ -76,8 +76,12 @@ public:
 	void EnableZip(BOOL enable);
 	void EnableKeepAlive(BOOL enable);
 	CString m_sHttpHdrAppend;
+	CString m_sHttpBody;
+	CString m_sAccept;
+	CString m_sCtype;
 	BOOL m_bUseAddr;
 	CString m_sServerAddr;
 	BOOL m_bForwardAuto;
 	UINT m_nMaxTry;
+	BOOL m_bPostMethod;
 };

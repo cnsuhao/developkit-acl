@@ -47,6 +47,10 @@ private:
 	BOOL m_bHttp11;
 	BOOL m_bZip;
 	BOOL m_bKeepAlive;
+	BOOL m_bPostMethod;
+	CString m_sBody;
+	CString m_sAccept;
+	CString m_sCType;
 
 	http_off_t m_nContentLength;
 	http_off_t m_nDownLen;
