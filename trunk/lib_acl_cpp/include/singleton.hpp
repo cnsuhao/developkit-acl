@@ -153,7 +153,7 @@ private:
 };
 
 template<class T>
-ACL_CPP_API T& singleton< T >::instance_ = singleton< T >::get_instance();
+T& singleton< T >::instance_ = singleton< T >::get_instance();
 
 //////////////////////////////////////////////////////////////////////////
 
