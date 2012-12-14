@@ -88,6 +88,13 @@ namespace acl {
 		const char* get_peer(bool full = false) const;
 
 		/**
+		 * 获得远程连接的 IP 地址
+		 * @return {const char*} 远程连接地址，若返回值 == '\0' 则表示
+		 *  无法获得远程连接地址
+		 */
+		const char* get_peer_ip() const;
+
+		/**
 		 * 获得连接的本地地址
 		 * @param full {bool} 是否获得完整地址，即：IP:PORT，如果该参数
 		 *  为 false，则仅返回 IP，否则返回 IP:PORT
@@ -95,10 +102,19 @@ namespace acl {
 		 *  无法获得本地地址
 		 */
 		const char* get_local(bool full = false) const;
+
+		/**
+		 * 获得连接的本地 IP 地址
+		 * @return {const char*} 该连接的本地地址，若返回值 == "" 则表示
+		 *  无法获得本地地址
+		 */
+		const char* get_local_ip() const;
 	protected:
 	private:
-		char  dummy_[33];
-		const char* get_ip(const char*);
+		char  dummy_[1];
+		char  peer_ip_[33];
+		char  local_ip_[33];
+		const char* get_ip(const char* addr, char* buf, size_t size);
 	};
 
 } // namespace acl
