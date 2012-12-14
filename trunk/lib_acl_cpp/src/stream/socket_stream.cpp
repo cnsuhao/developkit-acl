@@ -6,7 +6,7 @@ namespace acl {
 
 	socket_stream::socket_stream()
 	{
-		dummy[0] = 0;
+		dummy_[0] = 0;
 	}
 
 	socket_stream::~socket_stream()
@@ -19,7 +19,7 @@ namespace acl {
 		ACL_VSTREAM* conn = acl_vstream_fdopen(fd, O_RDWR,
 			8192, 0, ACL_VSTREAM_TYPE_SOCK);
 		acl_assert(conn);
-		return (open(conn));
+		return open(conn);
 	}
 
 	bool socket_stream::open(const char* addr, int conn_timeout, int rw_timeout)
@@ -27,9 +27,9 @@ namespace acl {
 		ACL_VSTREAM* conn = acl_vstream_connect(addr, ACL_BLOCKING,
 			conn_timeout, rw_timeout, 8192);
 		if (conn == NULL)
-			return (false);
+			return false;
 
-		return (open(conn));
+		return open(conn);
 	}
 
 	bool socket_stream::open(ACL_VSTREAM* vstream)
@@ -40,15 +40,15 @@ namespace acl {
 		m_pStream = vstream;
 		m_bEof = false;
 		m_bOpened = true;
-		return (true);
+		return true;
 	}
 
 	bool socket_stream::close()
 	{
 		if (m_bOpened == false)
-			return (false);
+			return false;
 		if (m_pStream == NULL)
-			return (true);
+			return true;
 
 		m_bEof = true;
 		m_bOpened = false;
@@ -62,32 +62,42 @@ namespace acl {
 	ACL_SOCKET socket_stream::sock_handle() const
 	{
 		if (m_pStream == NULL)
-			return (ACL_SOCKET_INVALID);
-		return (ACL_VSTREAM_SOCK(m_pStream));
+			return ACL_SOCKET_INVALID;
+		return ACL_VSTREAM_SOCK(m_pStream);
 	}
 
 	ACL_SOCKET socket_stream::unbind_sock()
 	{
 		if (m_pStream == NULL)
-			return (ACL_SOCKET_INVALID);
+			return ACL_SOCKET_INVALID;
 		ACL_SOCKET sock = ACL_VSTREAM_SOCK(m_pStream);
 		m_pStream->fd.sock = ACL_SOCKET_INVALID;
 		m_bEof = true;
 		m_bOpened = false;
-		return (sock);
+		return sock;
 	}
 
-	const char* socket_stream::get_peer() const
+	const char* socket_stream::get_peer(bool full /* = false */) const
 	{
 		if (m_pStream == NULL)
-			return (dummy);
-		return (ACL_VSTREAM_PEER(m_pStream));
+		{
+			const_cast<socket_stream*> (this)->dummy_[0] = 0;
+			return dummy_;
+		}
+		if (full)
+			return ACL_VSTREAM_PEER(m_pStream);
+		else
+			return const_cast<socket_stream*>
+				(this)->get_ip(ACL_VSTREAM_PEER(m_pStream));
 	}
 
-	const char* socket_stream::get_local() const
+	const char* socket_stream::get_local(bool full /* = false */) const
 	{
 		if (m_pStream == NULL)
-			return (dummy);
+		{
+			const_cast<socket_stream*> (this)->dummy_[0] = 0;
+			return dummy_;
+		}
 		// xxx: acl_vstream 中没有对此地址赋值
 		if (m_pStream->local_addr[0] == 0)
 		{
@@ -95,7 +105,20 @@ namespace acl {
 				m_pStream->local_addr,
 				sizeof(m_pStream->local_addr));
 		}
-		return (ACL_VSTREAM_LOCAL(m_pStream));
+		if (full)
+			return ACL_VSTREAM_LOCAL(m_pStream);
+		else
+			return const_cast<socket_stream*>
+				(this)->get_ip(ACL_VSTREAM_LOCAL(m_pStream));
+	}
+
+	const char* socket_stream::get_ip(const char* addr)
+	{
+		snprintf(dummy_, sizeof(dummy_), "%s", addr);
+		char* ptr = strchr(dummy_, ':');
+		if (ptr)
+			*ptr = 0;
+		return dummy_;
 	}
 
 } // namespace acl
