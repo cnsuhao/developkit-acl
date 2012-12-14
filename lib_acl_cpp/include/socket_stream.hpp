@@ -80,20 +80,25 @@ namespace acl {
 
 		/**
 		 * 获得远程连接的地址
-		 * @return {const char*} 远程连接地址，若返回值 == "" 则表示
+		 * @param full {bool} 是否获得完整地址，即：IP:PORT，如果该参数
+		 *  为 false，则仅返回 IP，否则返回 IP:PORT
+		 * @return {const char*} 远程连接地址，若返回值 == '\0' 则表示
 		 *  无法获得远程连接地址
 		 */
-		const char* get_peer() const;
+		const char* get_peer(bool full = false) const;
 
 		/**
 		 * 获得连接的本地地址
+		 * @param full {bool} 是否获得完整地址，即：IP:PORT，如果该参数
+		 *  为 false，则仅返回 IP，否则返回 IP:PORT
 		 * @return {const char*} 该连接的本地地址，若返回值 == "" 则表示
 		 *  无法获得本地地址
 		 */
-		const char* get_local() const;
+		const char* get_local(bool full = false) const;
 	protected:
 	private:
-		char  dummy[1];
+		char  dummy_[33];
+		const char* get_ip(const char*);
 	};
 
 } // namespace acl
