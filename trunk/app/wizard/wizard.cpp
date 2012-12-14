@@ -17,14 +17,14 @@ static bool file_copy(const char* from, const char* to)
 	ifstream in;
 	if (in.open_read(from) == false)
 	{
-		printf("open %s error: %s\r\n", last_serror());
+		printf("open %s error: %s\r\n", from, last_serror());
 		return false;
 	}
 
 	ofstream out;
 	if (out.open_write(to) == false)
 	{
-		printf("open %s error: %s\r\n", last_serror());
+		printf("open %s error: %s\r\n", from, last_serror());
 		return false;
 	}
 
@@ -36,7 +36,7 @@ static bool file_copy(const char* from, const char* to)
 			break;
 		if (out.write(buf) < 0)
 		{
-			printf("write to %s error: %s\r\n", last_serror());
+			printf("write to %s error: %s\r\n", to, last_serror());
 			return false;
 		}
 	}
@@ -53,6 +53,8 @@ struct FILE_FROM_TO
 static void create_master_threads()
 {
 	const FILE_FROM_TO tab[] = {
+		{ "tmpl/Makefile.in", "demo/Makefile.in" },
+		{ "tmpl/master/Makefile", "demo/Makefile" },
 		{ "tmpl/master/master.sln", "demo/master.sln" },
 		{ "tmpl/master/master.vcproj", "demo/master.vcproj" },
 		{ "tmpl/master/main_threads.cpp", "demo/main.cpp" },
@@ -74,6 +76,8 @@ static void create_master_threads()
 static void create_master_proc()
 {
 	const FILE_FROM_TO tab[] = {
+		{ "tmpl/Makefile.in", "demo/Makefile.in" },
+		{ "tmpl/master/Makefile", "demo/Makefile" },
 		{ "tmpl/master/master.sln", "demo/master.sln" },
 		{ "tmpl/master/master.vcproj", "demo/master.vcproj" },
 		{ "tmpl/master/main_proc.cpp", "demo/main.cpp" },
@@ -95,6 +99,8 @@ static void create_master_proc()
 static void create_master_aio()
 {
 	const FILE_FROM_TO tab[] = {
+		{ "tmpl/Makefile.in", "demo/Makefile.in" },
+		{ "tmpl/master/Makefile", "demo/Makefile" },
 		{ "tmpl/master/master.sln", "demo/master.sln" },
 		{ "tmpl/master/master.vcproj", "demo/master.vcproj" },
 		{ "tmpl/master/main_aio.cpp", "demo/main.cpp" },
@@ -116,6 +122,8 @@ static void create_master_aio()
 static void create_master_trigger()
 {
 	const FILE_FROM_TO tab[] = {
+		{ "tmpl/Makefile.in", "demo/Makefile.in" },
+		{ "tmpl/master/Makefile", "demo/Makefile" },
 		{ "tmpl/master/master.sln", "demo/master.sln" },
 		{ "tmpl/master/master.vcproj", "demo/master.vcproj" },
 		{ "tmpl/master/main_trigger.cpp", "demo/main.cpp" },
@@ -181,6 +189,8 @@ static void create_db()
 
 int main(int argc, char* argv[])
 {
+	(void) argc, (void) argv;
+
 	acl::acl_cpp_init();
 
 	acl_make_dirs("./demo", 0755);
