@@ -1,5 +1,10 @@
 修改历史列表：
 ------------------------------------------------------------------------
+138) 2012.12.14
+138.1) feature: socket_stream.cpp: get_peer()/get_local() 增加了一个控制参数，
+允许用户获得 IP:PORT 或 IP 格式的地址
+138.2) feature: socket_stream.cpp, 增加了两个函数 get_peer_ip/get_local_ip
+
 137) 2012.12.10
 137.1) performance: session 类增加了本地对象的缓存机制，提高了查询/添加/删除
 的性能
