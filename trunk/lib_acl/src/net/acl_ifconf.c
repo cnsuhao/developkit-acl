@@ -127,7 +127,6 @@ ACL_IFCONF *acl_get_ifaddrs()
 	}
 
 	if (j == 0) {
-acl_msg_info("len: %d\r\n", ifconf->length);
 		acl_myfree(ifconf->addrs);
 		acl_myfree(ifconf);
 		return (NULL);
