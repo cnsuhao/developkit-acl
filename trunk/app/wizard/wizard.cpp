@@ -41,6 +41,7 @@ static bool file_copy(const char* from, const char* to)
 		}
 	}
 
+	printf("create %s ok\r\n", to);
 	return true;
 }
 
@@ -71,7 +72,7 @@ static void create_master_threads()
 		if (file_copy(tab[i].from, tab[i].to) == false)
 			return;
 	}
-	printf("create ok!\r\n");
+	printf("create master_threads ok!\r\n");
 }
 
 static void create_master_proc()
@@ -95,7 +96,7 @@ static void create_master_proc()
 		if (file_copy(tab[i].from, tab[i].to) == false)
 			break;
 	}
-	printf("create ok!\r\n");
+	printf("create master_proc ok!\r\n");
 }
 
 static void create_master_aio()
@@ -119,7 +120,7 @@ static void create_master_aio()
 		if (file_copy(tab[i].from, tab[i].to) == false)
 			break;
 	}
-	printf("create ok!\r\n");
+	printf("create master_aio ok!\r\n");
 }
 
 static void create_master_trigger()
@@ -143,7 +144,7 @@ static void create_master_trigger()
 		if (file_copy(tab[i].from, tab[i].to) == false)
 			break;
 	}
-	printf("create ok!\r\n");
+	printf("create master_trigger ok!\r\n");
 }
 
 static void create_master()
@@ -184,6 +185,10 @@ static void create_master()
 		else
 			printf("unknown ch: %s\r\n", buf);
 	}
+	for (int i = 0; i < 78; i++)
+		putchar('-');
+	putchar('\r');
+	putchar('\n');
 }
 
 static void create_db()
