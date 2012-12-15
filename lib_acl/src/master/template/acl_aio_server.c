@@ -962,8 +962,6 @@ static void log_event_mode(int event_mode)
 		acl_msg_info("%s(%d): use select event", myname, __LINE__);
 		break;
 	}
-
-
 }
 
 /* 创建定时器 */

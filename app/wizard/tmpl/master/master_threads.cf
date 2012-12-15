@@ -31,13 +31,13 @@ service server {
 #	最大进程数
 	master_maxproc = 1
 #	进程程序名
-	master_command = master_threads
+	master_command = master_service
 #	进程日志记录文件
-	master_log = {install_path}/var/log/ioctl_echo.log
+	master_log = {install_path}/var/log/master_threads
 #	进程启动参数，只能为: -u [是否允许以某普通用户的身份运行]
 #	master_args =
 #	传递给服务子进程的环境变量, 可以通过 getenv("SERVICE_ENV") 获得此值
-	master_env = mempool_limit:512000000
+#	master_env = mempool_limit:512000000
 #	master_env = logme:FALSE, priority:E_LOG_INFO, action:E_LOG_PER_DAY, flush:sync_flush, imit_size:512,\
 #			sync_action:E_LOG_SEM, sem_name:/tmp/ioctl_echo.sem
 
@@ -107,8 +107,8 @@ service server {
 #	mysql_dbpass = 111111
 
 #	是否输出当前内存的状态信息
-	debug_mem = 1
+#	debug_mem = 1
 #	是否在一个线程中连接读
-	loop_read = 1
+#	loop_read = 1
 }
 
