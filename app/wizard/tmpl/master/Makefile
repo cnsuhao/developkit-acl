@@ -1,2 +1,2 @@
 include ./Makefile.in
-PROG = demo
+PROG = master_service
