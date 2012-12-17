@@ -1,3 +1,8 @@
+
+235) 2012.12.17
+235.1) feature:  smtp 协议模块增加了 smtp_greet 函数，通过它可以直接调用
+smtp_helo/smtp_ehlo
+
 234) 2012.11.7
 334.1) feature: 增加了 smtp 协议的支持
 

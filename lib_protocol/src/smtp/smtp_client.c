@@ -73,6 +73,14 @@ int smtp_get_banner(SMTP_CLIENT *client)
 	return 0;
 }
 
+int smtp_greet(SMTP_CLIENT *client, const char* name, int ehlo)
+{
+	if (ehlo)
+		return smtp_ehlo(client, name);
+	else
+		return smtp_helo(client, name);
+}
+
 /* 向服务器发送 HELO 命令 */
 
 int smtp_helo(SMTP_CLIENT *client, const char *helo)
