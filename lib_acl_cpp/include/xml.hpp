@@ -42,7 +42,6 @@ namespace acl {
 	private:
 		friend class xml_node;
 
-		string dummy_;
 		xml_node* node_;
 		ACL_XML_ATTR* attr_;
 

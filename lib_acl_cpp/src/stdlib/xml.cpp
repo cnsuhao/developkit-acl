@@ -6,7 +6,6 @@
 namespace acl {
 
 	xml_attr::xml_attr(void)
-		: dummy_(2)
 	{
 	}
 
@@ -20,7 +19,7 @@ namespace acl {
 		if (attr_->name)
 			return acl_vstring_str(attr_->name);
 		else
-			return dummy_.c_str();
+			return "";
 	}
 
 	const char* xml_attr::get_value(void) const
@@ -29,7 +28,7 @@ namespace acl {
 		if (attr_->value)
 			return acl_vstring_str(attr_->value);
 		else
-			return dummy_.c_str();
+			return "";
 	}
 
 	//////////////////////////////////////////////////////////////////////////
