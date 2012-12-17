@@ -23,8 +23,10 @@ namespace acl
 		/**
 		 * 获得客户端在服务端存储的 session 的字符串属性值
 		 * @param name {const char*} session 属性名，非空
-		 * @return {const char*} session 属性值，为空说明不存在
-		 *  或内部查询失败
+		 * @return {const char*} session 属性值，返回地址永远非空指针，用户
+		 *  可以通过判断返回地址是否为空串("\0")来判断是否存在或出错
+		 *  注：该函数返回非空数据后，用户应该立刻保留此返回值，因为下次
+		 *      的其它函数调用可能会清除该临时返回数据
 		 */
 		virtual const char* getAttribute(const char* name) const;
 
@@ -33,8 +35,10 @@ namespace acl
 		 * @param name {const char*} session 属性名，非空
 		 * @param size {size_t*} 该参数非空且属性值非空时，该指针地址
 		 *  存储返回属性值的大小
-		 * @return {const void*} session 属性值，为空说明不存在
+		 * @return {const void*} session 属性值，为空指针时说明不存在
 		 *  或内部查询失败
+		 *  注：该函数返回非空数据后，用户应该立刻保留此返回值，因为下次
+		 *      的其它函数调用可能会清除该临时返回数据
 		 */
 		virtual const void* getAttribute(const char* name, size_t* size) const;
 

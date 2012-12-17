@@ -8,6 +8,9 @@ namespace acl {
 
 	class socket_stream;
 
+	/**
+	 * memcached 客户端通信协议库，支持长连接与自动重连
+	 */
 	class ACL_CPP_API mem_cache
 	{
 	public:

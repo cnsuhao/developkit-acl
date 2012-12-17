@@ -243,7 +243,7 @@ const char* session::get(const char* name, bool local_cached /* = false */)
 {
 	const VBUF* bf = get_vbuf(name, local_cached);
 	if (bf == NULL)
-		return NULL;
+		return "";
 	return bf->buf;
 }
 
