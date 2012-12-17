@@ -57,6 +57,17 @@ SMTP_API void smtp_close(SMTP_CLIENT *client);
 SMTP_API int smtp_get_banner(SMTP_CLIENT *client);
 
 /**
+ * 向 SMTP 服务器发送 HELO/EHLO 命令
+ * @param client {SMTP_CLIENT*} SMTP 连接对象
+ * @param name {const char*} 握手信息，一般用域名
+ * @param ehlo {int} 非 0 时使用 EHLO，否则使用 HELO
+ * @return {int} 0 表示成功(SMTP_CLIENT::smtp_code 表示返回码，
+ *  SMTP_CLIENT::buf 存储响应内容)，否则表示出错，应该关闭连接对象
+ */
+
+SMTP_API int smtp_greet(SMTP_CLIENT *client, const char* name, int ehlo);
+
+/**
  * 向 SMTP 服务器发送 HELO 命令
  * @param client {SMTP_CLIENT*} SMTP 连接对象
  * @param helo {const char*} 握手信息，一般用域名

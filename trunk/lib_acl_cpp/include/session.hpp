@@ -58,6 +58,7 @@ namespace acl
 		/**
 		 * 设置本 session 对象的唯一 ID 标识
 		 * @param sid {const char*} 非空
+		 * 注：调用本函数后，会自动清除之前的中间缓存数据
 		 */
 		void set_sid(const char* sid);
 
@@ -101,6 +102,8 @@ namespace acl
 		 *  是本对象缓存的数据，而不是每次都要从后端取；否则，则每调用本函数
 		 *  都将从后端 cache 服务器取数据
 		 * @return {const char*} session 属性值，返回空时表示出错或不存在
+		 *  注：该函数返回非空数据后，用户应该立刻保留此返回值，因为下次
+		 *      的其它函数调用可能会清除该临时返回数据
 		 */
 		const char* get(const char* name, bool local_cached = false);
 
@@ -112,6 +115,8 @@ namespace acl
 		 *  是本对象缓存的数据，而不是每次都要从后端取；否则，则每调用本函数
 		 *  都将从后端 cache 服务器取数据
 		 * @return {const VBUF*} session 属性值，返回空时表示出错或不存在
+		 *  注：该函数返回非空数据后，用户应该立刻保留此返回值，因为下次
+		 *      的其它函数调用可能会清除该临时返回数据
 		 */
 		const VBUF* get_vbuf(const char* name, bool local_cached = false);
 

@@ -9,8 +9,6 @@ namespace acl
 
 VBUF* session::vbuf_new(const void* str, size_t len, todo_t todo)
 {
-	acl_assert(len > 0);
-
 	// 这样可以减少分配内存的次数
 	VBUF* buf = (VBUF*) acl_mymalloc(sizeof(VBUF) + len + 1);
 	buf->size = len + 1;
@@ -25,8 +23,6 @@ VBUF* session::vbuf_new(const void* str, size_t len, todo_t todo)
 
 VBUF* session::vbuf_set(VBUF* buf, const void* str, size_t len, todo_t todo)
 {
-	acl_assert(len > 0);
-
 	if (buf == NULL)
 	{
 		buf = (VBUF*) acl_mymalloc(sizeof(VBUF) + len + 1);
@@ -90,6 +86,9 @@ void session::set_sid(const char* sid)
 	// 有可能已经存储在后端 cache 服务端了
 	if (!sid_saved_)
 		sid_saved_ = true;
+
+	// 必须清除上次的中间结果
+	reset();
 }
 
 void session::reset()
