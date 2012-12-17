@@ -36,7 +36,7 @@ public:
 	{
 		// 如果 session 项不存在，则设置
 		const char* sid = req.getSession().getAttribute("sid");
-		if (sid == NULL || *sid == 0)
+		if (*sid == 0)
 			req.getSession().setAttribute("sid", "xxxxxx");
 
 		// 创建 HTTP 响应头

@@ -40,7 +40,7 @@ public:
 	virtual bool doPost(HttpServletRequest& req, HttpServletResponse& res)
 	{
 		const char* sid = req.getSession().getAttribute("sid");
-		if (sid == NULL || *sid == 0)
+		if (*sid == 0)
 			req.getSession().setAttribute("sid", "xxxxxx");
 		sid = req.getSession().getAttribute("sid");
 
