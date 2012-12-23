@@ -21,3 +21,4 @@ http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=270070
 14) 整合 thrift/buffer 协议到 acl_master 服务器框架中
 15) 应支持 redis 客户端协议
 16) 能支持 mysql 协议到 mongodb 协议的转换协议实现
+17) HttpServlet 支持 FCGI

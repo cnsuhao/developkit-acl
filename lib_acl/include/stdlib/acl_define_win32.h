@@ -98,7 +98,7 @@
 # define	ACL_DLL_HANDLE		HINSTANCE
 # define	ACL_DLL_FARPROC		FARPROC
 # ifndef	HAS_SSIZE_T
-#  define	ssize_t	int
+#  define	ssize_t	long
 # endif
 
 # define ACL_INTERNAL_LOCK	ACL_MYFLOCK_STYLE_FLOCK
