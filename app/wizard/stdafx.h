@@ -13,3 +13,5 @@
 #include "lib_acl.h"
 #include "lib_acl.hpp"
 #include "lib_protocol.h"
+
+using namespace acl;
