@@ -29,78 +29,78 @@ namespace acl
 		 * @param n {acl_int64} 数据体长度
 		 */
 #ifdef WIN32
-		void setContentLength(__int64 n);
+		HttpServletResponse& setContentLength(__int64 n);
 #else
-		void setContentLength(long long int n);
+		HttpServletResponse& setContentLength(long long int n);
 #endif
 
 		/**
 		 * 设置与 HTTP 客户端保持联系长连接
 		 * @param on {bool}
 		 */
-		void setKeepAlive(bool on);
+		HttpServletResponse& setKeepAlive(bool on);
 
 		/**
 		 * 设置 HTTP 响应数据体的 Content-Type 字段值，可字段值可以为：
 		 * text/html 或 text/html; charset=utf8 格式
 		 * @param value {const char*} 字段值
 		 */
-		void setContentType(const char* value);
+		HttpServletResponse& setContentType(const char* value);
 
 		/**
 		 * 设置 HTTP 响应数据体中字符集，当已经在 setContentType 设置
 		 * 了字符集，则就不必再调用本函数设置字符集
 		 * @param charset {const char*} 响应体数据的字符集
 		 */
-		void setCharacterEncoding(const char* charset);
+		HttpServletResponse& setCharacterEncoding(const char* charset);
 
 		/**
 		 * 设置 HTTP 响应头中的日期格式的字段
 		 * @param name {const char*} HTTP 响应头中的字段名
 		 * @param value {time_t} 时间值
 		 */
-		void setDateHeader(const char* name, time_t value);
+		HttpServletResponse& setDateHeader(const char* name, time_t value);
 
 		/**
 		 * 设置 HTTP 响应头中的字符串格式字段
 		 * @param name {const char*} HTTP 响应头中的字段名
 		 * @param value {const char*} 字段值
 		 */
-		void setHeader(const char* name, const char* value);
+		HttpServletResponse& setHeader(const char* name, const char* value);
 
 		/**
 		 * 设置 HTTP 响应头中的整数格式字段
 		 * @param name {const char*} HTTP 响应头中的字段名
 		 * @param value {int} 字段值
 		 */
-		void setHeader(const char* name, int value);
+		HttpServletResponse& setHeader(const char* name, int value);
 
 		/**
 		 * 设置 HTTP 响应头中的状态码：1xx, 2xx, 3xx, 4xx, 5xx
 		 * @param status {int} HTTP 响应状态码, 如：200
 		 */
-		void setStatus(int status);
+		HttpServletResponse& setStatus(int status);
 
 		/**
 		 * 设置为 CGI 模式，用户一般不需手工设置，因为 HttpServlet 类
 		 * 会自动设置是否是 CGI 模式
 		 * @param on {bool} 是否是 CGI 模式
 		 */
-		void setCgiMode(bool on);
+		HttpServletResponse& setCgiMode(bool on);
 
 		/**
 		 * 设置 HTTP 响应头中的重定向 location 字段
 		 * @param location {const char*} URL，非空
 		 * @param status {int} HTTP 响应状态码，一般为 3xx 类
 		 */
-		void setRedirect(const char* location, int status = 302);
+		HttpServletResponse& setRedirect(const char* location, int status = 302);
 
 		/**
 		 * 添加 cookie 对象，该对象必须是动态分配的，且用户自己不能
 		 * 再显示释放该对象，因为内部会自动释放
 		 * @param cookie {HttpCookie*}
 		 */
-		void addCookie(HttpCookie* cookie);
+		HttpServletResponse& addCookie(HttpCookie* cookie);
 
 		/**
 		 * 添加 cookie
@@ -111,7 +111,7 @@ namespace acl
 		 * @param expires {time_t} cookie 过期时间间隔，当当前时间加
 		 *  该值为 cookie 的过期时间截(秒)
 		 */
-		void addCookie(const char* name, const char* value,
+		HttpServletResponse& addCookie(const char* name, const char* value,
 			const char* domain = NULL, const char* path = NULL,
 			time_t expires = 0);
 

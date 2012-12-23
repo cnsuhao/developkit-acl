@@ -23,7 +23,7 @@
 //extern "C" { FILE _iob[3]; }
 //# endif
 # ifndef ssize_t
-#  define ssize_t int
+#  define ssize_t long
 # endif
 #else
 # ifdef HAVE_MEMCACHED

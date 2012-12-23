@@ -23,72 +23,84 @@ HttpServletResponse::~HttpServletResponse(void)
 	delete header_;
 }
 
-void HttpServletResponse::setRedirect(const char* location, int status /* = 302 */)
+HttpServletResponse& HttpServletResponse::setRedirect(const char* location, int status /* = 302 */)
 {
 	header_->add_entry("Location", location);
 	header_->set_status(status);
+	return *this;
 }
 
-void HttpServletResponse::setCharacterEncoding(const char* charset)
+HttpServletResponse& HttpServletResponse::setCharacterEncoding(const char* charset)
 {
 	snprintf(charset_, sizeof(charset_), "%s", charset);
+	return *this;
 }
 
-void HttpServletResponse::setKeepAlive(bool on)
+HttpServletResponse& HttpServletResponse::setKeepAlive(bool on)
 {
 	header_->set_keep_alive(on);
+	return *this;
 }
 
-void HttpServletResponse::setContentLength(acl_int64 n)
+HttpServletResponse& HttpServletResponse::setContentLength(acl_int64 n)
 {
 	header_->set_content_length(n);
+	return *this;
 }
 
-void HttpServletResponse::setContentType(const char* value)
+HttpServletResponse& HttpServletResponse::setContentType(const char* value)
 {
 	snprintf(content_type_, sizeof(content_type_), "%s", value);
+	return *this;
 }
 
-void HttpServletResponse::setDateHeader(const char* name, time_t value)
+HttpServletResponse& HttpServletResponse::setDateHeader(const char* name, time_t value)
 {
 	char buf[256];
 	header_->date_format(buf, sizeof(buf), value);
 	header_->add_entry(name, buf);
+	return *this;
 }
 
-void HttpServletResponse::setHeader(const char* name, int value)
+HttpServletResponse& HttpServletResponse::setHeader(const char* name, int value)
 {
 	char buf[32];
 	snprintf(buf, sizeof(buf), "%d", value);
 	header_->add_entry(name, buf);
+	return *this;
 }
 
-void HttpServletResponse::setHeader(const char* name, const char* value)
+HttpServletResponse& HttpServletResponse::setHeader(const char* name, const char* value)
 {
 	header_->add_entry(name, value);
+	return *this;
 }
 
-void HttpServletResponse::setStatus(int status)
+HttpServletResponse& HttpServletResponse::setStatus(int status)
 {
 	header_->set_status(status);
+	return *this;
 }
 
-void HttpServletResponse::setCgiMode(bool on)
+HttpServletResponse& HttpServletResponse::setCgiMode(bool on)
 {
 	header_->set_cgi_mode(on);
+	return *this;
 }
 
-void HttpServletResponse::addCookie(HttpCookie* cookie)
+HttpServletResponse& HttpServletResponse::addCookie(HttpCookie* cookie)
 {
 	header_->add_cookie(cookie);
+	return *this;
 }
 
-void HttpServletResponse::addCookie(const char* name, const char* value,
+HttpServletResponse& HttpServletResponse::addCookie(const char* name, const char* value,
 	const char* domain /* = NULL */, const char* path /* = NULL */,
 	time_t expires /* = 0 */)
 {
 	acl_assert(name && *name && value);
 	header_->add_cookie(name, value, domain, path, expires);
+	return *this;
 }
 
 http_header& HttpServletResponse::getHttpHeader(void) const

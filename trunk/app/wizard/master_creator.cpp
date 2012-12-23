@@ -81,7 +81,7 @@ static bool create_master_trigger()
 	return files_copy(name, tab, src_path_, dst_path_);
 }
 
-void create_master()
+void master_creator()
 {
 	acl_make_dirs(dst_path_, 0755);
 
@@ -123,6 +123,5 @@ void create_master()
 	}
 	for (int i = 0; i < 78; i++)
 		putchar('-');
-	putchar('\r');
-	putchar('\n');
+	printf("\r\n");
 }

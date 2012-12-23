@@ -26,7 +26,7 @@
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="3"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
+				Detect64BitPortabilityProblems="FALSE"
 				DebugInformationFormat="4"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -118,6 +118,9 @@
 				RelativePath=".\file_copy.cpp">
 			</File>
 			<File
+				RelativePath=".\http_creator.cpp">
+			</File>
+			<File
 				RelativePath=".\master_creator.cpp">
 			</File>
 			<File
@@ -136,6 +139,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\tpllib.cpp">
+			</File>
+			<File
 				RelativePath=".\wizard.cpp">
 			</File>
 		</Filter>
@@ -145,6 +151,12 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
 				RelativePath=".\file_copy.h">
+			</File>
+			<File
+				RelativePath=".\http_creator.h">
+			</File>
+			<File
+				RelativePath=".\lib_tpl.h">
 			</File>
 			<File
 				RelativePath=".\master_creator.h">

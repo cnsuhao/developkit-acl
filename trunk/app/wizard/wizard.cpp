@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include <stdio.h>
 #include "master_creator.h"
+#include "http_creator.h"
 
 static void create_db()
 {
@@ -19,7 +20,7 @@ int main(int argc, char* argv[])
 	while (true)
 	{
 		printf("select one below:\r\n");
-		printf("m: master_service; d: db; q: exit\r\n");
+		printf("m: master_service; d: db; h: http; q: exit\r\n");
 		printf(">"); fflush(stdout);
 
 		char buf[256];
@@ -27,9 +28,11 @@ int main(int argc, char* argv[])
 		if (n == ACL_VSTREAM_EOF)
 			break;
 		else if (strcasecmp(buf, "m") == 0)
-			create_master();
+			master_creator();
 		else if (strcasecmp(buf, "d") == 0)
 			create_db();
+		else if (strcasecmp(buf, "h") == 0)
+			http_creator();
 		else if (strcasecmp(buf, "q") == 0)
 			break;
 		else

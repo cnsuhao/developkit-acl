@@ -9,4 +9,3 @@ struct FILE_FROM_TO
 bool file_copy(const char* from, const char* to);
 bool files_copy(const char* name, const FILE_FROM_TO* tab,
 	const char* from_path, const char* to_path);
-
