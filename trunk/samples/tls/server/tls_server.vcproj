@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\lib_acl\include;..\..\..\..\lib_tls\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include;..\..\..\lib_tls\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;USE_TLS"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -69,7 +69,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\..\lib_acl\include;..\..\..\..\lib_tls\include"
+				AdditionalIncludeDirectories="..\..\..\lib_tls\include;..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;USE_TLS"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
@@ -119,7 +119,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\lib_acl\include;..\..\..\..\lib_tls\include"
+				AdditionalIncludeDirectories="..\..\..\lib_tls\include;..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;USE_TLS;TLS_DLL;ACL_DLL"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -169,7 +169,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\..\lib_acl\include;..\..\..\..\lib_tls\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include;..\..\..\lib_tls\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;USE_TLS;TLS_DLL;ACL_DLL"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -217,7 +217,7 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath="..\..\..\..\samples\tls\server\main.c">
+				RelativePath=".\main.c">
 			</File>
 		</Filter>
 		<Filter
