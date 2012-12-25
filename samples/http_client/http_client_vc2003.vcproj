@@ -20,7 +20,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\lib_acl\include;..\..\..\..\lib_protocol\include"
+				AdditionalIncludeDirectories="..\..\lib_acl\include;..\..\lib_protocol\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -76,7 +76,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\..\lib_acl\include;..\..\..\..\lib_protocol\include"
+				AdditionalIncludeDirectories="..\..\lib_protocol\include;..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
 				MinimalRebuild="FALSE"
 				RuntimeLibrary="0"
@@ -134,7 +134,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\lib_acl\include;..\..\..\..\lib_protocol\include"
+				AdditionalIncludeDirectories="..\..\lib_acl\include;..\..\lib_protocol\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;ACL_DLL"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -163,8 +163,9 @@
 				Name="VCPostBuildEventTool"/>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="copy ..\..\..\..\dist\lib\win32\lib_acl_d.dll $(OutDir)\ /Y
-copy ..\..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y"/>
+				CommandLine="copy ..\..\dist\lib\win32\lib_acl_d.dll $(OutDir)\ /Y
+copy ..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y
+"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -192,7 +193,7 @@ copy ..\..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y"/>
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\..\lib_acl\include;..\..\..\..\lib_protocol\include"
+				AdditionalIncludeDirectories="..\..\lib_acl\include;..\..\lib_protocol\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ACL_DLL;HTTP_DLL"
 				MinimalRebuild="FALSE"
 				RuntimeLibrary="2"
