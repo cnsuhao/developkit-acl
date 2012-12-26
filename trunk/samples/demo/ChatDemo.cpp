@@ -1,5 +1,4 @@
-#include "lib_acl.h"
-#include "StdAfx.h"
+#include "stdafx.h"
 #include ".\chatdemo.h"
 
 CChatDemo::CChatDemo(const char *s)
