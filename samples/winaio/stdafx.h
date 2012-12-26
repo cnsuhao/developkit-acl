@@ -15,7 +15,7 @@
 #endif
 
 #ifndef _WIN32_WINNT		// 允许使用 Windows NT 4 或更高版本的特定功能。
-#define _WIN32_WINNT 0x0400		//为 Windows98 和 Windows 2000 及更新版本改变为适当的值。
+#define _WIN32_WINNT 0x0500		//为 Windows98 和 Windows 2000 及更新版本改变为适当的值。
 #endif						
 
 #ifndef _WIN32_WINDOWS		// 允许使用 Windows 98 或更高版本的特定功能。

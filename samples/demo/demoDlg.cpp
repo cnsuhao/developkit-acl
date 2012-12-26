@@ -1,6 +1,5 @@
 // demoDlg.cpp : 实现文件
 //
-#include "lib_acl.h"
 #include "stdafx.h"
 #include "ChatDemo.h"
 #include "demo.h"

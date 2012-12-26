@@ -37,7 +37,7 @@ typedef pthread_once_t acl_pthread_once_t;
 #define acl_pthread_mutex_unlock        pthread_mutex_unlock
 #define acl_pthread_mutex_trylock       pthread_mutex_trylock
 #define acl_pthread_cond_init           pthread_cond_init
-#define acl_pthread_cond_create         pthread_cond_create
+/* #define acl_pthread_cond_create         pthread_cond_create */
 #define acl_pthread_cond_destroy        pthread_cond_destroy
 #define acl_pthread_cond_signal         pthread_cond_signal
 #define acl_pthread_cond_broadcast      pthread_cond_broadcast
