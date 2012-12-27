@@ -2036,7 +2036,7 @@ acl_off_t acl_vstream_fseek2(ACL_VSTREAM *stream, acl_off_t offset, int whence)
 
 	if (whence == SEEK_CUR) {
 		if (stream->read_cnt >= offset) {
-			stream->read_cnt -= offset;
+			stream->read_cnt -= (int) offset;
 			n = -stream->read_cnt;		/* 计算出真实的文件位置 */
 			stream->read_cnt = 0;
 		} else if (stream->read_cnt >= 0) {
@@ -2105,7 +2105,7 @@ acl_off_t acl_vstream_fseek(ACL_VSTREAM *stream, acl_off_t offset, int whence)
 			 * stream->read_ptr 依然在缓冲区内, 所以只需要移动读指针
 			 * 且减少缓冲区字节数、增加 stream->offset 偏移量即可.
 			 */
-			stream->read_cnt -= offset;
+			stream->read_cnt -= (int) offset;
 			stream->read_ptr += (int) offset;
 			stream->offset += offset;
 			return (stream->offset);
@@ -2152,13 +2152,13 @@ acl_off_t acl_vstream_fseek(ACL_VSTREAM *stream, acl_off_t offset, int whence)
 			n = stream->read_ptr - stream->read_buf;
 			stream->offset -= n;
 			stream->read_ptr = stream->read_buf;
-			stream->read_cnt += n;
+			stream->read_cnt += (int) n;
 		}
 
 		/* 判断请求的偏移位置是否在读缓存区间内 */
 		if (offset >= stream->offset && offset <= stream->sys_offset) {
 			n = offset - stream->offset;
-			stream->read_cnt -= n;
+			stream->read_cnt -= (int) n;
 			stream->read_ptr += n;
 			stream->offset += n;
 			return (stream->offset);
