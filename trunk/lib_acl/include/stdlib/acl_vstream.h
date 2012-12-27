@@ -79,13 +79,13 @@ struct ACL_VSTREAM {
 	acl_off_t offset;               /**< cached seek info */
 	acl_off_t sys_offset;           /**< cached seek info */
 
-	unsigned char wbuf[8192];       /**< used when call acl_vstream_buffed_writen */
-	acl_off_t wbuf_size;            /**< used when call acl_vstream_buffed_writen */
-	acl_off_t wbuf_dlen;            /**< used when call acl_vstream_buffed_writen */
+	unsigned char *wbuf;            /**< used when call acl_vstream_buffed_writen */
+	int   wbuf_size;                /**< used when call acl_vstream_buffed_writen */
+	int   wbuf_dlen;                /**< used when call acl_vstream_buffed_writen */
 
 	unsigned char *read_buf;        /**< read buff */
-	acl_off_t read_buf_len;         /**< read_buf's capacity */
-	acl_off_t read_cnt;             /**< data's length in read_buf */
+	int   read_buf_len;             /**< read_buf's capacity */
+	int   read_cnt;                 /**< data's length in read_buf */
 	unsigned char *read_ptr;        /**< pointer to next position in read_buf */
 	int   sys_read_ready;           /**< if the system buffer has some data */
 
