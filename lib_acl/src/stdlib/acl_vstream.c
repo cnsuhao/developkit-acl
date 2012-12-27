@@ -58,7 +58,7 @@ ACL_VSTREAM acl_vstream_fstd[] = {
 		ACL_VSTREAM_TYPE_FILE,          /* type */
 		0,                              /* offset */
 		0,                              /* sys_offset */
-		"\0",                           /* wbuf */
+		0,                              /* wbuf */
 		0,                              /* wbuf_size */
 		0,                              /* wbuf_dlen */
 		__vstream_stdin_buf,            /* read_buf */
@@ -108,7 +108,7 @@ ACL_VSTREAM acl_vstream_fstd[] = {
 		ACL_VSTREAM_TYPE_FILE,          /* type */
 		0,                              /* offset */
 		0,                              /* sys_offset */
-		"\0",                           /* wbuf */
+		0,                              /* wbuf */
 		0,                              /* wbuf_size */
 		0,                              /* wbuf_dlen */
 		__vstream_stdout_buf,           /* read_buf */
@@ -157,7 +157,7 @@ ACL_VSTREAM acl_vstream_fstd[] = {
 		ACL_VSTREAM_TYPE_FILE,          /* type */
 		0,                              /* offset */
 		0,                              /* sys_offset */
-		"\0",                           /* wbuf */
+		0,                              /* wbuf */
 		0,                              /* wbuf_size */
 		0,                              /* wbuf_dlen */
 		__vstream_stderr_buf,           /* read_buf */
@@ -1465,6 +1465,11 @@ int acl_vstream_buffed_writen(ACL_VSTREAM *stream, const void *vptr, size_t dlen
 	if (stream == NULL || vptr == NULL || dlen == 0)
 		return (ACL_VSTREAM_EOF);
 
+	if (stream->wbuf == NULL) {
+		stream->wbuf_size = 8192;
+		stream->wbuf = acl_mymalloc(stream->wbuf_size);
+	}
+
 	if (dlen >= (size_t) stream->wbuf_size) {
 		if (acl_vstream_fflush(stream) == ACL_VSTREAM_EOF)
 			return (ACL_VSTREAM_EOF);
@@ -1478,7 +1483,7 @@ int acl_vstream_buffed_writen(ACL_VSTREAM *stream, const void *vptr, size_t dlen
 	}
 
 	memcpy(stream->wbuf + (size_t) stream->wbuf_dlen, vptr, dlen);
-	stream->wbuf_dlen += dlen;
+	stream->wbuf_dlen += (int) dlen;
 	return(dlen);
 }
 
@@ -1623,7 +1628,8 @@ int acl_vstream_fflush(ACL_VSTREAM *stream)
 	if (stream == NULL) {
 		acl_msg_error("%s(%d): stream null", myname, __LINE__);
 		return (ACL_VSTREAM_EOF);
-	}
+	} else if (stream->wbuf == NULL || stream->wbuf_dlen == 0)
+		return 0;
 
 	ptr = stream->wbuf;
 	while (stream->wbuf_dlen > 0) {
@@ -1737,7 +1743,6 @@ ACL_VSTREAM *acl_vstream_fdopen(ACL_SOCKET fd, unsigned int oflags,
 			myname, __LINE__);
 	}
 
-	stream->wbuf_size        = sizeof(stream->wbuf);
 	stream->read_buf_len     = buflen;
 	stream->type             = fdtype;
 	ACL_VSTREAM_SOCK(stream) = fd;
@@ -1745,7 +1750,6 @@ ACL_VSTREAM *acl_vstream_fdopen(ACL_SOCKET fd, unsigned int oflags,
 	stream->iocp_sock        = ACL_SOCKET_INVALID;
 #endif
 
-	stream->read_cnt         = 0;
 	stream->read_ptr         = stream->read_buf;
 	stream->oflags           = oflags;
 	ACL_SAFE_STRNCPY(stream->errbuf, "OK", sizeof(stream->errbuf));
@@ -1767,9 +1771,6 @@ ACL_VSTREAM *acl_vstream_fdopen(ACL_SOCKET fd, unsigned int oflags,
 		stream->writev_fn = acl_socket_writev;
 		stream->close_fn = acl_socket_close;
 	}
-
-	stream->local_addr[0]  = 0;
-	stream->remote_addr[0] = 0;
 
 	stream->path = stream->remote_addr;   /* default */
 
@@ -1886,11 +1887,7 @@ ACL_VSTREAM *acl_vstream_fopen(const char *path, unsigned int oflags, int mode, 
 	if (fh == ACL_FILE_INVALID)
 		return (NULL);
 
-	fp = acl_vstream_fdopen(ACL_SOCKET_INVALID,
-				oflags,
-				buflen,
-				0,
-				ACL_VSTREAM_TYPE_FILE);
+	fp = acl_vstream_fdopen(ACL_SOCKET_INVALID, oflags, buflen, 0, ACL_VSTREAM_TYPE_FILE);
 	if (fp == NULL)
 		return (NULL);
 
@@ -2095,7 +2092,7 @@ acl_off_t acl_vstream_fseek(ACL_VSTREAM *stream, acl_off_t offset, int whence)
 		/* 必须严格检验 */
 		if (stream->offset + stream->read_cnt != stream->sys_offset) {
 			acl_msg_error("%s, %s(%d): offset(" ACL_FMT_I64D
-				") + read_cnt(" ACL_FMT_I64D ") != sys_offset("
+				") + read_cnt(%d) != sys_offset("
 				ACL_FMT_I64D ")", myname, __FILE__, __LINE__,
 				stream->offset, stream->read_cnt, stream->sys_offset);
 			stream->read_cnt = 0;
@@ -2143,7 +2140,7 @@ acl_off_t acl_vstream_fseek(ACL_VSTREAM *stream, acl_off_t offset, int whence)
 		/* 必须严格检验 */
 		if (stream->offset + stream->read_cnt != stream->sys_offset) {
 			acl_msg_error("%s, %s(%d): offset(" ACL_FMT_I64D
-				") + read_cnt(" ACL_FMT_I64D ") != sys_offset("
+				") + read_cnt(%d) != sys_offset("
 				ACL_FMT_I64D ")", myname, __FILE__, __LINE__,
 				stream->offset, stream->read_cnt, stream->sys_offset);
 			stream->read_cnt = 0;
@@ -2331,9 +2328,9 @@ void acl_vstream_free(ACL_VSTREAM *stream)
 
 	if (stream->read_buf != NULL)
 		acl_myfree(stream->read_buf);
+	if (stream->wbuf != NULL)
+		acl_myfree(stream->wbuf);
 
-	ACL_VSTREAM_SOCK(stream) = ACL_SOCKET_INVALID;
-	ACL_VSTREAM_FILE(stream) = ACL_FILE_INVALID;
 	acl_myfree(stream);
 }
 
@@ -2405,14 +2402,15 @@ int acl_vstream_close(ACL_VSTREAM *stream)
 		acl_array_destroy(stream->close_handle_lnk, NULL);
 	}
 
-	if (stream->read_buf != NULL)
-		acl_myfree(stream->read_buf);
 	if (ACL_VSTREAM_SOCK(stream) != ACL_SOCKET_INVALID && stream->close_fn)
 		ret = stream->close_fn(ACL_VSTREAM_SOCK(stream));
 	else if (ACL_VSTREAM_FILE(stream) != ACL_FILE_INVALID && stream->fclose_fn)
 		ret = stream->fclose_fn(ACL_VSTREAM_FILE(stream));
-	ACL_VSTREAM_SOCK(stream) = ACL_SOCKET_INVALID;
-	ACL_VSTREAM_FILE(stream) = ACL_FILE_INVALID;
+
+	if (stream->read_buf != NULL)
+		acl_myfree(stream->read_buf);
+	if (stream->wbuf != NULL)
+		acl_myfree(stream->wbuf);
 
 	acl_myfree(stream);
 	return (ret);

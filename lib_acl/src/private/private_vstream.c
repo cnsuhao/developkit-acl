@@ -468,6 +468,11 @@ int private_vstream_buffed_writen(ACL_VSTREAM *stream, const void *vptr, size_t 
 {
 	acl_assert(stream && vptr && dlen > 0);
 
+	if (stream->wbuf == NULL) {
+		stream->wbuf_size = 8192;
+		stream->wbuf = malloc(stream->wbuf_size);
+	}
+
 	if (dlen >= (size_t) stream->wbuf_size) {
 		if (private_vstream_fflush(stream) == ACL_VSTREAM_EOF)
 			return (ACL_VSTREAM_EOF);
@@ -491,6 +496,8 @@ int private_vstream_fflush(ACL_VSTREAM *stream)
 	int   n;
 
 	acl_assert(stream);
+	if (stream->wbuf == NULL || stream->wbuf_dlen == 0)
+		return 0;
 
 	ptr = stream->wbuf;
 	while (stream->wbuf_dlen > 0) {
@@ -555,7 +562,6 @@ ACL_VSTREAM *private_vstream_fdopen(ACL_SOCKET fd, unsigned int oflags,
 	if (fdtype == 0)
 		fdtype = ACL_VSTREAM_TYPE_SOCK;
 
-	stream->wbuf_size        = sizeof(stream->wbuf);
 	stream->read_buf_len     = buflen;
 	stream->type             = fdtype;
 	ACL_VSTREAM_SOCK(stream) = fd;
@@ -563,7 +569,6 @@ ACL_VSTREAM *private_vstream_fdopen(ACL_SOCKET fd, unsigned int oflags,
 	stream->iocp_sock        = ACL_SOCKET_INVALID;
 #endif
 
-	stream->read_cnt         = 0;
 	stream->read_ptr         = stream->read_buf;
 	stream->oflags           = oflags;
 	ACL_SAFE_STRNCPY(stream->errbuf, "OK", sizeof(stream->errbuf));
@@ -585,9 +590,6 @@ ACL_VSTREAM *private_vstream_fdopen(ACL_SOCKET fd, unsigned int oflags,
 		stream->writev_fn = acl_socket_writev;
 		stream->close_fn = acl_socket_close;
 	}
-
-	stream->local_addr[0]  = 0;
-	stream->remote_addr[0] = 0;
 
 	stream->path = stream->remote_addr;   /* default */
 
@@ -802,14 +804,14 @@ int private_vstream_close(ACL_VSTREAM *stream)
 		private_array_destroy(stream->close_handle_lnk, NULL);
 	}
 
-	if (stream->read_buf != NULL)
-		free(stream->read_buf);
 	if (ACL_VSTREAM_SOCK(stream) != ACL_SOCKET_INVALID && stream->close_fn)
 		ret = stream->close_fn(ACL_VSTREAM_SOCK(stream));
 	else if (ACL_VSTREAM_FILE(stream) != ACL_FILE_INVALID && stream->fclose_fn)
 		ret = stream->fclose_fn(ACL_VSTREAM_FILE(stream));
-	ACL_VSTREAM_SOCK(stream) = ACL_SOCKET_INVALID;
-	ACL_VSTREAM_FILE(stream) = ACL_FILE_INVALID;
+	if (stream->read_buf != NULL)
+		free(stream->read_buf);
+	if (stream->wbuf != NULL)
+		free(stream->wbuf);
 	free(stream);
 	return (ret);
 }
