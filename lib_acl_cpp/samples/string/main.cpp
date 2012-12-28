@@ -324,12 +324,37 @@ static void test_main(void)
 
 int main(void)
 {
+	const char* s[] = { "a.b", "a.", ".b", ".", "ab", "abcd.txt", NULL };
+	acl::string s1, s2, ss;
+	for (size_t i = 0;  s[i] != NULL; i++)
+	{
+		ss = s[i];
+		const char* p = strchr(ss.c_str(), '.');
+		if (p)
+		{
+			printf("----------------------------------------------------\r\n");
+			int n = (int) (p - ss.c_str());
+			printf("string: |%s|, pos: %d\r\n", ss.c_str(), n);
+
+			s1 = ss.left(n);
+			printf("left: |%s|, len: %d\r\n", s1.c_str(), (int) s1.length());
+
+			s2 = ss.right(n);
+			printf("right: |%s|, len: %d\r\n", s2.c_str(), (int) s2.length());
+		}
+	}
+	return 0;
+
 	acl_mem_slice_init(8, 1024, 1000000, ACL_SLICE_FLAG_GC2 | ACL_SLICE_FLAG_RTGC_OFF);
 	test_main();
 
 	test4();
 	test5();
 	test6();
+
+#ifdef WIN32
+	printf("enter any key to exit\r\n");
 	getchar();
+#endif
 	return (0);
 }
