@@ -19,6 +19,8 @@ namespace acl {
 
 	void string::init(size_t len)
 	{
+		if (len < 1)
+			len = 1;
 		m_pVbf = ALLOC(len);
 		m_psList = NULL;
 		m_psList2 = NULL;
@@ -49,8 +51,9 @@ namespace acl {
 
 	string::string(const void* s, size_t n) : m_bin(false)
 	{
-		init(n);
-		MCP(m_pVbf, (const char*) s, n + 1);
+		init(n + 1);
+		if (n > 0)
+			MCP(m_pVbf, (const char*) s, n);
 		TERM(m_pVbf);
 	}
 
@@ -712,13 +715,11 @@ namespace acl {
 
 	const string string::right(size_t npos)
 	{
+		npos++;
 		if (npos >= LEN(m_pVbf))
-			return (*this);
-
-		size_t  nLeft = LEN(m_pVbf) - npos;
-		char *ptr = STR(m_pVbf) + nLeft;
-
-		return (string(ptr, npos));
+			return string(1);
+		size_t nLeft = LEN(m_pVbf) - npos;
+		return (string(STR(m_pVbf) + npos, nLeft));
 	}
 
 	const std::list<acl::string>& string::split(const char* sep)
