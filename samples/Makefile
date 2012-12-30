@@ -66,6 +66,7 @@ all:
 #	@(cd dbpool; make)
 #	@(cd http_probe; make)
 	@(cd thread_pool_client; make)
+	@(cd smtp_client; make)
 clean:
 	@(cd master; make clean)
 	@(cd dlink; make clean)
@@ -134,3 +135,4 @@ clean:
 	@(cd http_probe; make clean)
 	@(cd thread_pool_client; make clean)
 	@(cd gc; make clean)
+	@(cd smtp_client; make clean)

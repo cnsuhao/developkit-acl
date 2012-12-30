@@ -42,7 +42,7 @@ ACL_FILE *acl_fopen(const char *filename, const char *mode)
 	default:
 		errno = EINVAL;
 		acl_msg_error("Invalid file open mode");
-		return (NULL);
+		return NULL;
 	}
 
 	/* There can be up to three more optional mode characters:
@@ -130,19 +130,19 @@ ACL_FILE *acl_fopen(const char *filename, const char *mode)
 		default:
 			errno = EINVAL;
 			acl_msg_error("Invalid file open mode");
-			return (NULL);
+			return NULL;
 		}
 	}
 
 	stream = acl_vstream_fopen(filename, oflags, 0644, 4096);
 	if (stream == NULL)
-		return (NULL);
+		return NULL;
 
 	fp = (ACL_FILE*) acl_mymalloc(sizeof(ACL_FILE));
 	fp->stream = stream;
 	fp->status = 0;
 	fp->errnum = 0;
-	return (fp);
+	return fp;
 }
 
 void acl_clearerr(ACL_FILE *fp)
@@ -157,13 +157,13 @@ int acl_fclose(ACL_FILE *fp)
 
 	acl_myfree(fp);
 	if (ret == ACL_VSTREAM_EOF || ret < 0)
-		return (EOF);
+		return EOF;
 	return (0);
 }
 
 int acl_feof(ACL_FILE *fp)
 {
-	return ((fp->status & ACL_FILE_EOF));
+	return (fp->status & ACL_FILE_EOF) != 0;
 }
 
 size_t acl_fread(void *buf, size_t size, size_t nitems, ACL_FILE *fp)
@@ -171,15 +171,15 @@ size_t acl_fread(void *buf, size_t size, size_t nitems, ACL_FILE *fp)
 	int   ret;
 
 	if (size == 0 || nitems == 0)
-		return (0);
+		return 0;
 
 	fp->status &= ~ACL_FILE_EOF;
 	fp->errnum = 0;
 
-	ret = acl_vstream_read(fp->stream, buf, size * nitems);
+	ret = acl_vstream_readn(fp->stream, buf, size * nitems);
 	if (ret == ACL_VSTREAM_EOF) {
 		fp->status |= ACL_FILE_EOF;
-		return (EOF);
+		return EOF;
 	}
 
 	ret /= size;
@@ -187,9 +187,9 @@ size_t acl_fread(void *buf, size_t size, size_t nitems, ACL_FILE *fp)
 		return (nitems);
 	else if (ret == 0) {
 		fp->status |= ACL_FILE_EOF;
-		return (EOF);
+		return EOF;
 	} else
-		return (ret);
+		return ret;
 }
 
 char *acl_fgets(char *buf, int size, ACL_FILE *fp)
@@ -202,9 +202,9 @@ char *acl_fgets(char *buf, int size, ACL_FILE *fp)
 	ret = acl_vstream_gets(fp->stream, buf, size);
 	if (ret == ACL_VSTREAM_EOF) {
 		fp->status |= ACL_FILE_EOF;
-		return (NULL);
+		return NULL;
 	}
-	return (buf);
+	return buf;
 }
 
 char *acl_fgets_nonl(char *buf, int size, ACL_FILE *fp)
@@ -217,9 +217,9 @@ char *acl_fgets_nonl(char *buf, int size, ACL_FILE *fp)
 	ret = acl_vstream_gets_nonl(fp->stream, buf, size);
 	if (ret == ACL_VSTREAM_EOF) {
 		fp->status |= ACL_FILE_EOF;
-		return (NULL);
+		return NULL;
 	}
-	return (buf);
+	return buf;
 }
 
 int acl_fgetc(ACL_FILE *fp)
@@ -231,72 +231,54 @@ int acl_fgetc(ACL_FILE *fp)
 
 	if (ret == ACL_VSTREAM_EOF) {
 		fp->status |= ACL_FILE_EOF;
-		return (EOF);
+		return EOF;
 	}
-	return (ret);
+	return ret;
 }
 
-char *acl_gets(char *buf)
+char *acl_gets(char *buf, size_t size)
 {
-	int   ret;
-	unsigned char *ptr = (unsigned char*) buf;
-
-	while (1) {
-		ret = ACL_VSTREAM_GETC(ACL_VSTREAM_IN);
-		if (ret == ACL_VSTREAM_EOF)
-			break;
-		*ptr++ = (unsigned char) ret;
-		if (ret == '\n')
-			break;
-	}
-
-	return (ptr == (unsigned char*) buf ? NULL : buf);
+	return acl_vstream_gets(ACL_VSTREAM_IN, buf, size)
+		== ACL_VSTREAM_EOF ? NULL : buf;
 }
 
-char *acl_gets_nonl(char *buf)
+char *acl_gets_nonl(char *buf, size_t size)
 {
-	int   ret;
-	char  __buf[8192];
-
-	ret = acl_vstream_gets_nonl(ACL_VSTREAM_IN, __buf, sizeof(__buf));
-	if (ret == ACL_VSTREAM_EOF) {
-		return (NULL);
-	}
-	memcpy(buf, __buf, ret);
-	return (buf);
+	return acl_vstream_gets_nonl(ACL_VSTREAM_IN, buf, size)
+		== ACL_VSTREAM_EOF ? NULL : buf;
 }
 
 int acl_getchar()
 {
-	return (acl_vstream_getc(ACL_VSTREAM_IN));
+	return acl_vstream_getc(ACL_VSTREAM_IN);
 }
 
-int acl_fprintf(ACL_FILE *fp, const char *format, ...)
+int acl_fprintf(ACL_FILE *fp, const char *fmt, ...)
 {
 	va_list ap;
 	int   ret;
 
-	va_start(ap, format);
-	ret  = acl_vfprintf(fp, format, ap);
+	va_start(ap, fmt);
+	ret  = acl_vfprintf(fp, fmt, ap);
 	va_end(ap);
 
-	return (ret);
+	return ret;
 }
 
-int acl_vfprintf(ACL_FILE *fp, const char *format, va_list ap)
+int acl_vfprintf(ACL_FILE *fp, const char *fmt, va_list ap)
 {
 	int   ret;
 
 	fp->status &= ~ACL_FILE_EOF;
 	fp->errnum = 0;
 
-	ret = acl_vstream_vfprintf(fp->stream, format, ap);
+	ret = acl_vstream_vfprintf(fp->stream, fmt, ap);
 	if (ret == ACL_VSTREAM_EOF) {
 		fp->status |= ACL_FILE_EOF;
-		return (EOF);
+		return EOF;
 	}
 
-	return (ret);
+	return ret;
 }
 
 size_t acl_fwrite(const void *ptr, size_t size, size_t nitems, ACL_FILE *fp)
@@ -304,7 +286,7 @@ size_t acl_fwrite(const void *ptr, size_t size, size_t nitems, ACL_FILE *fp)
 	int   ret;
 
 	if (size == 0 || nitems == 0)
-		return (0);
+		return 0;
 
 	fp->status &= ~ACL_FILE_EOF;
 	fp->errnum = 0;
@@ -312,10 +294,32 @@ size_t acl_fwrite(const void *ptr, size_t size, size_t nitems, ACL_FILE *fp)
 	ret = acl_vstream_writen(fp->stream, ptr, size * nitems);
 	if (ret == ACL_VSTREAM_EOF) {
 		fp->status |= ACL_FILE_EOF;
-		return (EOF);
+		return EOF;
 	}
 
-	return (nitems);
+	return nitems;
+}
+
+int acl_printf(const char *fmt, ...)
+{
+	va_list ap;
+	int   ret;
+
+	va_start(ap, fmt);
+	ret  = acl_vprintf(fmt, ap);
+	va_end(ap);
+
+	return ret;
+}
+
+int acl_vprintf(const char *fmt, va_list ap)
+{
+	int   ret;
+
+	ret = acl_vstream_vfprintf(ACL_VSTREAM_OUT, fmt, ap);
+	if (ret == ACL_VSTREAM_EOF)
+		return EOF;
+	return ret;
 }
 
 int acl_fputs(const char *s, ACL_FILE *fp)
@@ -328,10 +332,10 @@ int acl_fputs(const char *s, ACL_FILE *fp)
 	ret = acl_vstream_fputs(s, fp->stream);
 	if (ret == ACL_VSTREAM_EOF) {
 		fp->status |= ACL_FILE_EOF;
-		return (EOF);
+		return EOF;
 	}
 
-	return (ret);
+	return ret;
 }
 
 int acl_putc(int c, ACL_FILE *fp)
@@ -345,13 +349,13 @@ int acl_putc(int c, ACL_FILE *fp)
 	ret = ACL_VSTREAM_PUTC(ch, fp->stream);
 	if (ret == ACL_VSTREAM_EOF) {
 		fp->status |= ACL_FILE_EOF;
-		return (EOF);
+		return EOF;
 	}
 	if (acl_vstream_fflush(ACL_VSTREAM_OUT) == ACL_VSTREAM_EOF) {
 		fp->status |= ACL_FILE_EOF;
-		return (EOF);
+		return EOF;
 	}
-	return (ret);
+	return ret;
 }
 
 int acl_puts(const char *s)
@@ -360,8 +364,8 @@ int acl_puts(const char *s)
 
 	ret = acl_vstream_fputs(s, ACL_VSTREAM_OUT);
 	if (ret == ACL_VSTREAM_EOF)
-		return (EOF);
-	return (ret);
+		return EOF;
+	return ret;
 }
 
 int acl_putchar(int c)
@@ -371,13 +375,13 @@ int acl_putchar(int c)
 
 	ret = ACL_VSTREAM_PUTC(ch, ACL_VSTREAM_OUT);
 	if (ret == ACL_VSTREAM_EOF)
-		return (EOF);
+		return EOF;
 	if (acl_vstream_fflush(ACL_VSTREAM_OUT) == ACL_VSTREAM_EOF)
-		return (EOF);
-	return (ret);
+		return EOF;
+	return ret;
 }
 
 acl_off_t acl_fseek(ACL_FILE *fp, acl_off_t offset, int whence)
 {
-	return (acl_vstream_fseek(fp->stream, offset, whence));
+	return acl_vstream_fseek(fp->stream, offset, whence);
 }

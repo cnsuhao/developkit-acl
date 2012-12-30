@@ -132,6 +132,16 @@ SMTP_API int smtp_data(SMTP_CLIENT *client);
 SMTP_API int smtp_send(SMTP_CLIENT *client, const char* src, size_t len);
 
 /**
+ * 向 SMTP 服务器发送邮件体内容，可以循环调用本函数直至数据发送完毕
+ * @param client {SMTP_CLIENT*} SMTP 连接对象
+ * @param fmt {const char*} 格式字符串
+ * @param ... 变参
+ * @return {int} 0 表示成功(SMTP_CLIENT::smtp_code 表示返回码，
+ *  SMTP_CLIENT::buf 存储响应内容)，否则表示出错，应该关闭连接对象
+ */
+SMTP_API int smtp_printf(SMTP_CLIENT *client, const char* fmt, ...);
+
+/**
  * 发送完邮件内容后调用本函数告诉 SMTP 服务器邮件数据完毕
  * @param client {SMTP_CLIENT*} SMTP 连接对象
  * @return {int} 0 表示成功(SMTP_CLIENT::smtp_code 表示返回码，

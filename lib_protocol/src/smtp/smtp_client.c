@@ -463,6 +463,18 @@ int smtp_send(SMTP_CLIENT *client, const char* src, size_t len)
 	return 0;
 }
 
+int smtp_printf(SMTP_CLIENT *client, const char* fmt, ...)
+{
+	va_list ap;
+	int   ret;
+
+	va_start(ap, fmt);
+	ret = acl_vstream_vfprintf(client->conn, fmt, ap);
+	va_end(ap);
+
+	return ret == ACL_VSTREAM_EOF ? -1 : 0;
+}
+
 /* ·¢ËÍÓÊ¼şÄÚÈİ */
 
 int smtp_send_stream(SMTP_CLIENT *client, ACL_VSTREAM *in)

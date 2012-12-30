@@ -92,16 +92,18 @@ ACL_API int acl_fgetc(ACL_FILE *fp);
 /**
  * 从标准输入中读取一行数据
  * @param buf {char*} 缓存区地址
+ * @param size {int} buf 空间大小
  * @return {char*} NULL: 读结束或出错; !NULL: 应与 buf 相同地址
  */
-ACL_API char *acl_gets(char *buf);
+ACL_API char *acl_gets(char *buf, size_t size);
 
 /**
  * 从标准输入中读取一行数据, 但数据尾部不包含 "\r\n"
  * @param buf {char*} 缓存区地址
+ * @param size {int} buf 空间大小
  * @return {char*} NULL: 读结束或出错; !NULL: 应与 buf 相同地址
  */
-ACL_API char *acl_gets_nonl(char *buf);
+ACL_API char *acl_gets_nonl(char *buf, size_t size);
 
 /**
  * 从标准输入中读取一个字符
@@ -112,25 +114,25 @@ ACL_API int acl_getchar(void);
 /**
  * 向文件流中写入变参格式数据
  * @param fp {ACL_FILE*} 文件流句柄
- * @param format {const char*} 变参格式
+ * @param fmt {const char*} 变参格式
  * @param ... 变参
  * @return {size_t} 数据长度, 若出错则返回 EOF
  */
 #ifdef	WIN32
-ACL_API int acl_fprintf(ACL_FILE *fp, const char *format, ...);
+ACL_API int acl_fprintf(ACL_FILE *fp, const char *fmt, ...);
 #else
 ACL_API int __attribute__((format(printf,2,3)))
-	acl_fprintf(ACL_FILE *fp, const char *format, ...);
+	acl_fprintf(ACL_FILE *fp, const char *fmt, ...);
 #endif
 
 /**
  * 向文件流中写入变参格式数据
  * @param fp {ACL_FILE*} 文件流句柄
- * @param format {const char*} 变参格式
+ * @param fmt {const char*} 变参格式
  * @param ap {va_list} 变参列表
  * @return {size_t} 数据长度, 若出错则返回 EOF
  */
-ACL_API int acl_vfprintf(ACL_FILE *fp, const char *format, va_list ap);
+ACL_API int acl_vfprintf(ACL_FILE *fp, const char *fmt, va_list ap);
 
 /**
  * 向文件流中写入一些固定长度的数据块
@@ -149,6 +151,27 @@ ACL_API size_t acl_fwrite(const void *ptr, size_t size, size_t nitems, ACL_FILE 
  * @return {int} 写入的数据量(包含 "\r\n"), 若出错则返回 EOF
  */
 ACL_API int acl_fputs(const char *s, ACL_FILE *fp);
+
+/**
+ * 向标准输出流中写入变参格式数据
+ * @param fmt {const char*} 变参格式
+ * @param ... 变参
+ * @return {size_t} 数据长度, 若出错则返回 EOF
+ */
+#ifdef	WIN32
+ACL_API int acl_printf(const char *fmt, ...);
+#else
+ACL_API int __attribute__((format(printf,1,2)))
+	acl_printf(const char *fmt, ...);
+#endif
+
+/**
+ * 向标准输出流中写入变参格式数据
+ * @param fmt {const char*} 变参格式
+ * @param ap {va_list} 变参列表
+ * @return {size_t} 数据长度, 若出错则返回 EOF
+ */
+ACL_API int acl_vprintf(const char *fmt, va_list ap);
 
 /**
  * 向文件流中写入一个字节
