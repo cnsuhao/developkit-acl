@@ -1,8 +1,11 @@
-// smtp_client.cpp : 定义控制台应用程序的入口点。
-//
+/* smtp_client.cpp : 定义控制台应用程序的入口点 */
 
 #include "lib_acl.h"
 #include "lib_protocol.h"
+
+#ifdef WIN32
+#define snprintf _snprintf
+#endif
 
 static int smtp_sender(void)
 {
@@ -10,11 +13,16 @@ static int smtp_sender(void)
 	char  addr[128], line[256];
 
 	acl_printf("please enter smtp server addr: ");
-	if (acl_gets_nonl(addr, sizeof(addr)) == NULL)
+	if (acl_gets_nonl(line, sizeof(line)) == NULL)
 	{
 		acl_puts("invalid smtp server addr");
 		return -1;
 	}
+
+	if (strchr(line, ':') == NULL)
+		snprintf(addr, sizeof(addr), "%s:25", line);
+	else
+		snprintf(addr, sizeof(addr), line);
 
 	/* 连接 SMTP 服务器 */
 	conn = smtp_open(addr, 60, 1024);
@@ -23,6 +31,8 @@ static int smtp_sender(void)
 		acl_printf("connect %s error %s\r\n", addr, acl_last_serror());
 		return -1;
 	}
+	else
+		acl_printf("connect smtpd(%s) ok\r\n", addr);
 
 	/* 从 SMTP 服务器获得欢迎信息 */
 	if (smtp_get_banner(conn) != 0)
@@ -31,6 +41,18 @@ static int smtp_sender(void)
 		smtp_close(conn);
 		return -1;
 	}
+	else
+		acl_printf(">smtpd: %s\r\n", conn->buf);
+
+	/* 向 SMTP 服务器发送 EHLO/HELO 命令 */
+	if (smtp_greet(conn, "localhost", 0) != 0)
+	{
+		acl_printf("send ehlo cmd error: %s\r\n", conn->buf);
+		smtp_close(conn);
+		return -1;
+	}
+	else
+		acl_printf(">smtpd: %s\r\n", conn->buf);
 
 	/* 用户是否需要进行 SMTP 身份认证 */
 	acl_printf("Do you want to auth login? n[y|n]: ");
@@ -70,7 +92,7 @@ static int smtp_sender(void)
 			return -1;
 		}
 		else
-			acl_printf("smtp auth ok: %s\r\n", conn->buf);
+			acl_printf(">smtpd: %s\r\n", conn->buf);
 	}
 
 	/* 获得发件人邮箱地址 */
@@ -89,6 +111,8 @@ static int smtp_sender(void)
 		smtp_close(conn);
 		return -1;
 	}
+	else
+		acl_printf(">smtpd: %s\r\n", conn->buf);
 
 	/* 发送 RCPT TO: 命令 */
 	while (1)
@@ -109,6 +133,8 @@ static int smtp_sender(void)
 			smtp_close(conn);
 			return -1;
 		}
+		else
+			acl_printf(">smtpd: %s\r\n", conn->buf);
 
 		acl_printf("Do you want to add another recipients? n[y|n]: ");
 		if (acl_gets_nonl(line, sizeof(line)) == NULL)
@@ -129,6 +155,8 @@ static int smtp_sender(void)
 		smtp_close(conn);
 		return -1;
 	}
+	else
+		acl_printf(">smtpd: %s\r\n", conn->buf);
 
 	/* 从终端接收用户的输入的邮件内容并发往 SMTP 服务器 */
 	acl_puts("Please enter the email data below, end with \\r\\n.\\r\\n");
@@ -151,7 +179,7 @@ static int smtp_sender(void)
 		}
 	}
 
-	/* 发送 \r\n.\r\n */
+	/* 发送 \r\n.\r\n 表示邮件数据发送完毕 */
 	if (smtp_data_end(conn) != 0)
 	{
 		acl_printf("send . error: %s, code: %d\r\n",
@@ -160,9 +188,18 @@ static int smtp_sender(void)
 		return -1;
 	}
 	else
-		acl_printf("send ok: %s\r\n", conn->buf);
+		acl_printf(">smtpd: %s\r\n", conn->buf);
+
 	/* 发送 QUIT 命令 */
-	smtp_quit(conn);
+	if (smtp_quit(conn) != 0)
+	{
+		acl_printf("smtp QUIT error: %s\r\n", conn->buf);
+		smtp_close(conn);
+		return -1;
+	}
+	else
+		acl_printf(">smtpd: %s\r\n", conn->buf);
+
 	smtp_close(conn);
 	return 0;
 }
