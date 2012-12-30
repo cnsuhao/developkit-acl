@@ -47,6 +47,7 @@ help:
 all:
 	@(cd lib_acl; make $(MAKE_ARGS))
 	@(cd lib_protocol; make $(MAKE_ARGS))
+	@(cd lib_acl_cpp; make $(MAKE_ARGS))
 	@(cd unit_test; make $(MAKE_ARGS))
 	@(cd samples; make)
 #	@(cd lib_dict; make $(MAKE_ARGS))
@@ -54,6 +55,7 @@ all:
 clean:
 	@(cd lib_acl; make clean)
 	@(cd lib_protocol; make clean)
+	@(cd lib_acl_cpp; make clean)
 	@(cd unit_test; make clean)
 	@(cd samples; make clean)
 #	@(cd lib_dict; make clean)
