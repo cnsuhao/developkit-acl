@@ -19,6 +19,7 @@ CFLAGS = -c -g -W -Wall -Wcast-align \
 -Wno-long-long \
 -Wuninitialized \
 -D_POSIX_PTHREAD_SEMANTICS \
+-pedantic \
 -fPIC
 #-Winvalid-pch -DACL_PREPARE_COMPILE
 

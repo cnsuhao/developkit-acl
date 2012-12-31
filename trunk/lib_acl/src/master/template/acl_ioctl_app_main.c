@@ -66,7 +66,8 @@ static void __read_notify_callback(int event_type, ACL_IOCTL *h_ioctl,
 		} else if (ret == 0) {
 			if (acl_msg_verbose)
 				acl_msg_info("enable(%s), fd=%d, h_ioctl(%p)",
-					myname, ACL_VSTREAM_SOCK(cstream), h_ioctl);
+					myname, ACL_VSTREAM_SOCK(cstream),
+					(void*) h_ioctl);
 			acl_ioctl_enable_read(h_ioctl, cstream,
 				acl_var_ioctl_rw_timeout, __read_notify_callback,
 				(void *) app);
@@ -107,7 +108,7 @@ static void app_add_worker(ACL_IOCTL *h_ioctl, ACL_APP_HANDLE *app, ACL_VSTREAM 
 	/* 将客户端数据流的状态置入事件监控集合中 */
 	if (acl_msg_verbose)
 		acl_msg_info("%s(%d): ioctl=%p, fd=%d, timeout: %d",
-			myname, __LINE__, h_ioctl, ACL_VSTREAM_SOCK(cstream),
+			myname, __LINE__, (void*) h_ioctl, ACL_VSTREAM_SOCK(cstream),
 			acl_var_ioctl_rw_timeout);
 
 	acl_ioctl_enable_read(h_ioctl, cstream, acl_var_ioctl_rw_timeout,

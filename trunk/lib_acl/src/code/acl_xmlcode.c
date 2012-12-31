@@ -115,7 +115,7 @@ static acl_pthread_once_t __token_once = ACL_PTHREAD_ONCE_INIT;
 
 static const char* markup_unescape(const char* in, ACL_VSTRING* out)
 {
-	int   n;
+	unsigned int   n;
 	char  temp[2], buf[7];
 
 	while (*in != 0) {
