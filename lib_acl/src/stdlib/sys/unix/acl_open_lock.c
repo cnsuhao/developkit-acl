@@ -20,6 +20,7 @@
 #include "stdlib/acl_vstream.h"
 #include "stdlib/acl_vstring.h"
 #include "stdlib/acl_myflock.h"
+#include "stdlib/acl_msg.h"
 #include "stdlib/unix/acl_safe_open.h"
 #include "stdlib/unix/acl_open_lock.h"
 
@@ -38,7 +39,7 @@ ACL_VSTREAM *acl_open_lock(const char *path, int flags, int mode, ACL_VSTRING *w
 		return (0);
 	if (acl_myflock(ACL_VSTREAM_FILE(fp), ACL_INTERNAL_LOCK,
 			ACL_MYFLOCK_OP_EXCLUSIVE | ACL_MYFLOCK_OP_NOWAIT) < 0) {
-		acl_vstring_sprintf(why, "unable to set exclusive lock: %m");
+		acl_vstring_sprintf(why, "unable to set exclusive lock: %s", acl_last_serror());
 		acl_vstream_close(fp);
 		return (0);
 	}

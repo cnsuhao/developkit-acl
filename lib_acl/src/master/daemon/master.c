@@ -134,7 +134,7 @@ int     main(int argc, char **argv)
 	for (fd = 1; fd < 3; fd++) {
 		(void) close(fd);
 		if (open("/dev/null", O_RDWR, 0) != fd)
-			acl_msg_fatal("open /dev/null: %m");
+			acl_msg_fatal("open /dev/null: %s", acl_last_serror());
 	}
 
 	/*
@@ -149,7 +149,7 @@ int     main(int argc, char **argv)
 	for (n = 0; n < 5; n++) {
 		fd = dup(1);
 		if (acl_close_on_exec(fd, ACL_CLOSE_ON_EXEC) < 0)
-			acl_msg_fatal("dup(0): %m");
+			acl_msg_fatal("dup(0): %s", acl_last_serror());
 		if (acl_msg_verbose)
 			acl_msg_info("dup(0), fd = %d, n = %d", fd, n);
 	}

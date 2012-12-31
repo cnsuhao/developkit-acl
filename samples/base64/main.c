@@ -27,7 +27,7 @@ static void b64_decode(const char *ptr)
 
 #define DECODE(b,x,l) { \
 	if (acl_vstring_base64_decode((b),(x),(l)) == 0) { \
-		acl_msg_error("bad base64 encoded string: %s", (x)); \
+		printf("bad base64 encoded string: %s\r\n", (x)); \
 		exit (1); \
 	} \
 }

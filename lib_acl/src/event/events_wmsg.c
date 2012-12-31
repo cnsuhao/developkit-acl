@@ -59,8 +59,9 @@ static void stream_on_close(ACL_VSTREAM *stream, void *arg)
 	snprintf(key, sizeof(key), "%d", sockfd);
 	acl_htable_delete(ev->htbl, key, NULL);
 
-	// 虽然该设置能取消以后的读写消息，但依然不能取消因为
-	// closesocket 而产生的 FD_CLOSE 消息
+	/* 虽然该设置能取消以后的读写消息，但依然不能取消因为
+	 * closesocket 而产生的 FD_CLOSE 消息
+	 */
 	WSAAsyncSelect(sockfd, ev->hWnd, 0, 0);
 
 	/*
@@ -602,37 +603,38 @@ static BOOL InitApplication(const char *class_name, HINSTANCE hInstance)
 
 	if (GetClassInfoEx(hInstance, class_name, &wcx))
 	{
-		// class already registered
+		/* class already registered */
 		acl_msg_info("%s(%d): class(%s) already registered",
 			myname, __LINE__, class_name);
 		return TRUE;
 	}
 
-	// Fill in the window class structure with parameters
-	// that describe the main window.
+	/* Fill in the window class structure with parameters
+	 * that describe the main window.
+	 */
 
 	memset(&wcx, 0, sizeof(wcx));
 
-	wcx.cbSize = sizeof(wcx);          // size of structure
+	wcx.cbSize = sizeof(wcx);          /* size of structure */
 	wcx.style = CS_HREDRAW | CS_VREDRAW;
-	wcx.lpfnWndProc = WndProc;         // points to window procedure
-	wcx.cbClsExtra = 0;                // no extra class memory
-	wcx.cbWndExtra = 0;                // no extra window memory
-	wcx.hInstance = hInstance;         // handle to instance
+	wcx.lpfnWndProc = WndProc;         /* points to window procedure */
+	wcx.cbClsExtra = 0;                /* no extra class memory */
+	wcx.cbWndExtra = 0;                /* no extra window memory */
+	wcx.hInstance = hInstance;         /* handle to instance */
 
-	wcx.hIcon = LoadIcon(NULL, IDI_APPLICATION);    // predefined app. icon
-	wcx.hCursor = LoadCursor(NULL, IDC_ARROW);      // predefined arrow
-	wcx.hbrBackground = GetStockObject(WHITE_BRUSH); // white background brush
-	wcx.lpszMenuName =  NULL;          // name of menu resource
-	wcx.lpszClassName = class_name;       // name of window class
-	wcx.hIconSm = LoadImage(hInstance, // small class icon
+	wcx.hIcon = LoadIcon(NULL, IDI_APPLICATION);    /* predefined app. icon */
+	wcx.hCursor = LoadCursor(NULL, IDC_ARROW);      /* predefined arrow */
+	wcx.hbrBackground = GetStockObject(WHITE_BRUSH); /* white background brush */
+	wcx.lpszMenuName =  NULL;          /* name of menu resource */
+	wcx.lpszClassName = class_name;    /* name of window class */
+	wcx.hIconSm = LoadImage(hInstance, /* small class icon */
 		MAKEINTRESOURCE(5),
 		IMAGE_ICON,
 		GetSystemMetrics(SM_CXSMICON),
 		GetSystemMetrics(SM_CYSMICON),
 		LR_DEFAULTCOLOR);
 
-	// Register the window class. 
+	/* Register the window class. */
 	if (RegisterClassEx(&wcx) == 0) {
 		char  buf[256];
 
@@ -735,7 +737,7 @@ static VOID CALLBACK event_timer_callback(HWND hwnd, UINT uMsg,
 		SET_TIME(eventp->event_present);
 		delay = (int) (timer->when - eventp->event_present + 999) / 1000;
 
-		// 要求时间定时器的间隔最少是 1 毫秒
+		/* 要求时间定时器的间隔最少是 1 毫秒 */
 		if (delay < 1000)
 			delay = 1000;
 		SetTimer(ev->hWnd, ev->tid, delay, event_timer_callback);
@@ -750,7 +752,7 @@ static acl_int64 event_set_timer(ACL_EVENT *eventp, ACL_EVENT_NOTIFY_TIME callba
 	acl_int64 when;
 	acl_int64 first_delay;
 
-	// 要求时间定时器的间隔最少是 1 毫秒
+	/* 要求时间定时器的间隔最少是 1 毫秒 */
 	if (delay < 1000)
 		delay = 1000;
 
@@ -767,12 +769,12 @@ static acl_int64 event_set_timer(ACL_EVENT *eventp, ACL_EVENT_NOTIFY_TIME callba
 	when = event_timer_request(eventp, callback, context, delay, keep);
 
 	if (ev->timer_active == 0) {
-		// set the new timer
+		/* set the new timer */
 		SetTimer(ev->hWnd, ev->tid, (unsigned int) delay / 1000,
 			event_timer_callback);
 		ev->timer_active = 1;
 	} else if (first_delay > delay) {
-		// reset the old timer
+		/* reset the old timer */
 		SetTimer(ev->hWnd, ev->tid, (unsigned int) delay / 1000,
 			event_timer_callback);
 	}
