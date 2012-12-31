@@ -27,6 +27,8 @@ static ACL_CONFIG_INT_TABLE __conf_int_tab[] = {
 
 static char *__default_deny_info = "You are not welcome!\r\n";
 static char *__deny_info;
+static int (*__app_on_timeout)(ACL_VSTREAM *stream, void*) = NULL;
+static void (*__app_on_close)(ACL_VSTREAM *stream, void*) = NULL;
 /*----------------------------------------------------------------------------*/
 
 /**
@@ -62,20 +64,36 @@ static void __read_notify_callback(int event_type, ACL_IOCTL *h_ioctl,
 	case ACL_EVENT_READ:
 		ret = __run_fn(cstream, __run_ctx);
 		if (ret < 0) {
+			if (__app_on_close != NULL)
+				__app_on_close(cstream, __run_ctx);
 			acl_vstream_close(cstream);
 		} else if (ret == 0) {
 			if (acl_msg_verbose)
 				acl_msg_info("enable(%s), fd=%d, h_ioctl(%p)",
 					myname, ACL_VSTREAM_SOCK(cstream),
 					(void*) h_ioctl);
-			acl_ioctl_enable_read(h_ioctl, cstream,
-				acl_var_ioctl_rw_timeout, __read_notify_callback,
-				(void *) app);
+			acl_ioctl_enable_read(h_ioctl, cstream, acl_var_ioctl_rw_timeout,
+				__read_notify_callback, (void *) app);
 
 		}
 		break;
 	case ACL_EVENT_RW_TIMEOUT:
+		if (__app_on_timeout == NULL) {
+			if (__app_on_close != NULL)
+				__app_on_close(cstream, __run_ctx);
+			acl_vstream_close(cstream);
+		} else if (__app_on_timeout(cstream, __run_ctx) < 0) {
+			if (__app_on_close != NULL)
+				__app_on_close(cstream, __run_ctx);
+			acl_vstream_close(cstream);
+		} else {
+			acl_ioctl_enable_read(h_ioctl, cstream, acl_var_ioctl_rw_timeout,
+				__read_notify_callback, (void *) app);
+		}
+		break;
 	case ACL_EVENT_XCPT:
+		if (__app_on_close != NULL)
+			__app_on_close(cstream, __run_ctx);
 		acl_vstream_close(cstream);
 		break;
 	default:
@@ -327,6 +345,13 @@ void acl_ioctl_app_main(int argc, char *argv[],
 		case ACL_APP_CTL_ON_ACCEPT:
 			__app_on_accept = va_arg(ap, int (*)(ACL_VSTREAM*));
 			break;
+		case ACL_APP_CTL_ON_TIMEOUT:
+			__app_on_timeout = va_arg(ap, int (*)(ACL_VSTREAM*, void*));
+			break;
+		case ACL_APP_CTL_ON_CLOSE:
+			__app_on_close = va_arg(ap, void (*)(ACL_VSTREAM*, void*));
+			break;
+
 		case ACL_APP_CTL_INIT_FN:
 			__app_init_fn = va_arg(ap, ACL_APP_INIT_FN);
 			break;

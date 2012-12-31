@@ -59,6 +59,14 @@ namespace acl
 		virtual bool thread_on_accept(socket_stream* stream) { (void) stream; return true; }
 
 		/**
+		 * 当某个网络连接的 IO 读写超时时的回调函数，如果该函数返回 true 则表示继续等待下一次
+		 * 读写，否则则希望关闭该连接
+		 * @param stream {socket_stream*}
+		 * @return {bool} 如果返回 false 则表示子类要求关闭连接，否则则要求继续监听该连接
+		 */
+		virtual bool thread_on_timeout(socket_stream* stream) { (void) stream; return false; }
+
+		/**
 		 * 当与某个线程绑定的连接关闭时的回调函数
 		 * @param stream {socket_stream*}
 		 */
@@ -101,6 +109,9 @@ namespace acl
 
 		// 当接收到一个客户连接时的回调函数，可以进行一些初始化
 		static int service_on_accept(ACL_VSTREAM*);
+
+		// 当客户端连接读写超时时的回调函数
+		static int service_on_timeout(ACL_VSTREAM*, void*);
 
 		// 当客户端连接关闭时的回调函数
 		static void service_on_close(ACL_VSTREAM*, void*);

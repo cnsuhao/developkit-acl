@@ -35,20 +35,9 @@
 /* Define ZTS when building a PHP extension */
 /* Define WIN32 when compiling under MS Windows */
 
-#ifndef vsnprintf
-# ifdef WIN32
-#  define snprintf _snprintf
-#  define vsnprintf _vsnprintf
-# else
-#  ifndef HAVE_SNPRINTF
-/* Declare proto. The user program must link against additional library 
-   or include its own implementation of this function. */
-int snprintf(char *str, int length, const char *format, ...);
-#  endif
-#  ifndef HAVE_VSNPRINTF
-int vsnprintf(char *str, int length, const char *format, va_list arg);
-#  endif
-# endif
+#ifdef WIN32
+# define snprintf _snprintf
+# define vsnprintf _vsnprintf
 #endif
 
 #include "lib_tpl.h"
