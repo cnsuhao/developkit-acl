@@ -1,39 +1,5 @@
 #include "stdafx.h"
-#include "singleton.hpp"
-#include "acl_cpp_init.hpp"
 #include "master_service.h"
-
-static char *var_cfg_str;
-
-static acl::master_str_tbl var_conf_str_tab[] = {
-	{ "str", "test_msg", &var_cfg_str },
-
-	{ 0, 0, 0 }
-};
-
-static int  var_cfg_bool;
-
-static acl::master_bool_tbl var_conf_bool_tab[] = {
-	{ "bool", 1, &var_cfg_bool },
-
-	{ 0, 0, 0 }
-};
-
-static int  var_cfg_int;
-
-static acl::master_int_tbl var_conf_int_tab[] = {
-	{ "int", 120, &var_cfg_int, 0, 0 },
-
-	{ 0, 0 , 0 , 0, 0 }
-};
-
-static long long int  var_cfg_int64;
-
-static acl::master_int64_tbl var_conf_int64_tab[] = {
-	{ "int64", 120, &var_cfg_int64, 0, 0 },
-
-	{ 0, 0 , 0 , 0, 0 }
-};
 
 int main(int argc, char* argv[])
 {

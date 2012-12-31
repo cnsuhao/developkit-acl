@@ -28,6 +28,8 @@ namespace acl
 		// 调用 acl 服务器框架的多线程模板
 		acl_ioctl_app_main(argc, argv, service_main, NULL,
 			ACL_APP_CTL_ON_ACCEPT, service_on_accept,
+			ACL_APP_CTL_ON_TIMEOUT, service_on_timeout,
+			ACL_APP_CTL_ON_CLOSE, service_on_close,
 			ACL_APP_CTL_PRE_JAIL, service_pre_jail,
 			ACL_APP_CTL_INIT_FN, service_init,
 			ACL_APP_CTL_EXIT_FN, service_exit,
@@ -259,6 +261,16 @@ namespace acl
 			return -1;
 		}
 		return 0;
+	}
+
+	int master_threads::service_on_timeout(ACL_VSTREAM* client, void*)
+	{
+		socket_stream* stream = (socket_stream*) client->context;
+		if (stream == NULL)
+			logger_fatal("client->context is null!");
+
+		acl_assert(__mt != NULL);
+		return __mt->thread_on_timeout(stream) == true ? 0 : -1;
 	}
 
 	void master_threads::service_on_close(ACL_VSTREAM* client, void*)

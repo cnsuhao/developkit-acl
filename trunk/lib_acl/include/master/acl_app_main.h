@@ -50,6 +50,8 @@ typedef ACL_MASTER_SERVER_THREAD_EXIT_FN ACL_APP_THREAD_EXIT_FN;  /* void (*)(vo
 #define	ACL_APP_CTL_ON_ACCEPT		16	/* 设置回调函数来处理新接收到的远程连接 */
 #define	ACL_APP_CTL_PRE_JAIL		17	/* 设置进程切换身份前的回调函数 */
 #define	ACL_APP_CTL_PRE_JAIL_CTX	18	/* 设置进程切换身份前回调函数的参数 */
+#define	ACL_APP_CTL_ON_TIMEOUT		19	/* 当 IO 读写超时时控制的回调函数 */
+#define	ACL_APP_CTL_ON_CLOSE		20	/* 当 IO 关闭时控制的回调函数 */
 /*----------------------------------------------------------------------------*/
 /* in app_main.c */
 
