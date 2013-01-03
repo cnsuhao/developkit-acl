@@ -239,6 +239,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClCompile Include="src\master\master_proc.cpp" />
     <ClCompile Include="src\master\master_threads.cpp" />
     <ClCompile Include="src\master\master_trigger.cpp" />
+    <ClCompile Include="src\memcache\mem_cache.cpp" />
     <ClCompile Include="src\mime\internal\header_opts.cpp" />
     <ClCompile Include="src\mime\internal\header_token.cpp" />
     <ClCompile Include="src\mime\internal\is_header.cpp" />
@@ -265,6 +266,8 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClCompile Include="src\mime\mime_xxcode.cpp" />
     <ClCompile Include="src\mime\rfc2047.cpp" />
     <ClCompile Include="src\mime\rfc822.cpp" />
+    <ClCompile Include="src\session\memcache_session.cpp" />
+    <ClCompile Include="src\session\session.cpp" />
     <ClCompile Include="src\stdlib\charset_conv.cpp" />
     <ClCompile Include="src\stdlib\dns_service.cpp" />
     <ClCompile Include="src\stdlib\escape.cpp" />
@@ -274,10 +277,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClCompile Include="src\stdlib\log.cpp" />
     <ClCompile Include="src\stdlib\malloc.cpp" />
     <ClCompile Include="src\stdlib\md5.cpp" />
-    <ClCompile Include="src\stdlib\memcache_session.cpp" />
-    <ClCompile Include="src\stdlib\mem_cache.cpp" />
     <ClCompile Include="src\stdlib\pipe_stream.cpp" />
-    <ClCompile Include="src\stdlib\session.cpp" />
     <ClCompile Include="src\stdlib\snprintf.cpp" />
     <ClCompile Include="src\stdlib\string.cpp" />
     <ClCompile Include="src\stdlib\util.cpp" />

@@ -133,9 +133,6 @@
     <ClCompile Include="src\stdlib\malloc.cpp">
       <Filter>src\stdlib</Filter>
     </ClCompile>
-    <ClCompile Include="src\stdlib\mem_cache.cpp">
-      <Filter>src\stdlib</Filter>
-    </ClCompile>
     <ClCompile Include="src\stdlib\pipe_stream.cpp">
       <Filter>src\stdlib</Filter>
     </ClCompile>
@@ -271,9 +268,6 @@
     <ClCompile Include="src\http\http_mime.cpp">
       <Filter>src\http</Filter>
     </ClCompile>
-    <ClCompile Include="src\stdlib\session.cpp">
-      <Filter>src\stdlib</Filter>
-    </ClCompile>
     <ClCompile Include="src\http\http_pipe.cpp">
       <Filter>src\http</Filter>
     </ClCompile>
@@ -282,9 +276,6 @@
     </ClCompile>
     <ClCompile Include="src\master\master_conf.cpp">
       <Filter>src\master</Filter>
-    </ClCompile>
-    <ClCompile Include="src\stdlib\memcache_session.cpp">
-      <Filter>src\stdlib</Filter>
     </ClCompile>
     <ClCompile Include="src\http\http_download.cpp">
       <Filter>src\http</Filter>
@@ -297,6 +288,15 @@
     </ClCompile>
     <ClCompile Include="src\stdlib\md5.cpp">
       <Filter>src\stdlib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\session\memcache_session.cpp">
+      <Filter>src\session</Filter>
+    </ClCompile>
+    <ClCompile Include="src\session\session.cpp">
+      <Filter>src\session</Filter>
+    </ClCompile>
+    <ClCompile Include="src\memcache\mem_cache.cpp">
+      <Filter>src\memcache</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -474,9 +474,6 @@
     <ClInclude Include="include\malloc.hpp">
       <Filter>include\stdlib</Filter>
     </ClInclude>
-    <ClInclude Include="include\mem_cache.hpp">
-      <Filter>include\stdlib</Filter>
-    </ClInclude>
     <ClInclude Include="include\pipe_stream.hpp">
       <Filter>include\stdlib</Filter>
     </ClInclude>
@@ -582,14 +579,8 @@
     <ClInclude Include="include\rpc.hpp">
       <Filter>include\ipc</Filter>
     </ClInclude>
-    <ClInclude Include="include\memcache_session.hpp">
-      <Filter>include\stdlib</Filter>
-    </ClInclude>
     <ClInclude Include="include\charset_conv.hpp">
       <Filter>include\mime</Filter>
-    </ClInclude>
-    <ClInclude Include="include\session.hpp">
-      <Filter>include\stdlib</Filter>
     </ClInclude>
     <ClInclude Include="include\snprintf.hpp">
       <Filter>include\stdlib</Filter>
@@ -602,6 +593,15 @@
     </ClInclude>
     <ClInclude Include="include\singleton.hpp">
       <Filter>include\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="include\memcache_session.hpp">
+      <Filter>include\session</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mem_cache.hpp">
+      <Filter>include\memcache</Filter>
+    </ClInclude>
+    <ClInclude Include="include\session.hpp">
+      <Filter>include\session</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -672,6 +672,24 @@
     </Filter>
     <Filter Include="src\stdlib\internal">
       <UniqueIdentifier>{3ad8990a-bc3b-45e5-a95d-b39874cbd89b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\memcache">
+      <UniqueIdentifier>{9610edea-3618-48cb-b775-679afa95c809}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\redis">
+      <UniqueIdentifier>{38eae937-c68c-41ec-8f96-045799bf54f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\session">
+      <UniqueIdentifier>{3514e29b-4004-4e16-a72f-fd84cb24d059}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\memcache">
+      <UniqueIdentifier>{e12b6c03-0697-416d-864a-6a026e3453a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\redis">
+      <UniqueIdentifier>{10c86744-c545-4b37-a494-7d4a5b1a1174}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\session">
+      <UniqueIdentifier>{c6a1206e-5f76-4734-921d-2f535db47f05}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
