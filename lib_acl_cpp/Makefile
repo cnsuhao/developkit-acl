@@ -89,6 +89,8 @@ OBJS_DST = $(patsubst %.cpp, $(OBJ_PATH_DST)/%.o, $(notdir $(wildcard src/*.cpp)
 	   $(patsubst %.cpp, $(OBJ_PATH_DST)/%.o, $(notdir $(wildcard src/db/*.cpp))) \
 	   $(patsubst %.cpp, $(OBJ_PATH_DST)/%.o, $(notdir $(wildcard src/http/*.cpp))) \
 	   $(patsubst %.cpp, $(OBJ_PATH_DST)/%.o, $(notdir $(wildcard src/hsocket/*.cpp))) \
+	   $(patsubst %.cpp, $(OBJ_PATH_DST)/%.o, $(notdir $(wildcard src/memcache/*.cpp))) \
+	   $(patsubst %.cpp, $(OBJ_PATH_DST)/%.o, $(notdir $(wildcard src/session/*.cpp))) \
 	   $(patsubst %.cpp, $(OBJ_PATH_DST)/%.o, $(notdir $(wildcard src/mime/*.cpp))) \
 	   $(patsubst %.cpp, $(OBJ_PATH_DST)/%.o, $(notdir $(wildcard src/mime/internal/*.cpp)))
 
@@ -100,6 +102,8 @@ OBJS_DEF = $(patsubst %.cpp, $(DEF_PATH_DST)/%.inc, $(notdir $(wildcard src/*.cp
 	   $(patsubst %.cpp, $(DEF_PATH_DST)/%.inc, $(notdir $(wildcard src/db/*.cpp))) \
 	   $(patsubst %.cpp, $(DEF_PATH_DST)/%.inc, $(notdir $(wildcard src/http/*.cpp))) \
 	   $(patsubst %.cpp, $(DEF_PATH_DST)/%.inc, $(notdir $(wildcard src/hsocket/*.cpp))) \
+	   $(patsubst %.cpp, $(DEF_PATH_DST)/%.inc, $(notdir $(wildcard src/memcache/*.cpp))) \
+	   $(patsubst %.cpp, $(DEF_PATH_DST)/%.inc, $(notdir $(wildcard src/session/*.cpp))) \
 	   $(patsubst %.cpp, $(DEF_PATH_DST)/%.inc, $(notdir $(wildcard src/mime/*.cpp))) \
 	   $(patsubst %.cpp, $(DEF_PATH_DST)/%.inc, $(notdir $(wildcard src/mime/internal/*.cpp)))
 
@@ -161,6 +165,10 @@ $(OBJ_PATH_DST)/%.o: ./src/http/%.cpp
 	$(COMPILE_OBJ)
 $(OBJ_PATH_DST)/%.o: ./src/hsocket/%.cpp
 	$(COMPILE_OBJ)
+$(OBJ_PATH_DST)/%.o: ./src/memcache/%.cpp
+	$(COMPILE_OBJ)
+$(OBJ_PATH_DST)/%.o: ./src/session/%.cpp
+	$(COMPILE_OBJ)
 $(OBJ_PATH_DST)/%.o: ./src/mime/%.cpp
 	$(COMPILE_OBJ)
 
@@ -179,6 +187,10 @@ $(DEF_PATH_DST)/%.inc: ./src/db/%.cpp
 $(DEF_PATH_DST)/%.inc: ./src/http/%.cpp
 	$(CREATE_DEF)
 $(DEF_PATH_DST)/%.inc: ./src/hsocket/%.cpp
+	$(CREATE_DEF)
+$(DEF_PATH_DST)/%.inc: ./src/memcache/%.cpp
+	$(CREATE_DEF)
+$(DEF_PATH_DST)/%.inc: ./src/session/%.cpp
 	$(CREATE_DEF)
 $(DEF_PATH_DST)/%.inc: ./src/mime/%.cpp
 	$(CREATE_DEF)

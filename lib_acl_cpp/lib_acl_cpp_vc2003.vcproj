@@ -373,16 +373,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 					RelativePath=".\src\stdlib\md5.cpp">
 				</File>
 				<File
-					RelativePath=".\src\stdlib\mem_cache.cpp">
-				</File>
-				<File
-					RelativePath=".\src\stdlib\memcache_session.cpp">
-				</File>
-				<File
 					RelativePath=".\src\stdlib\pipe_stream.cpp">
-				</File>
-				<File
-					RelativePath=".\src\stdlib\session.cpp">
 				</File>
 				<File
 					RelativePath=".\src\stdlib\snprintf.cpp">
@@ -660,6 +651,27 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 					RelativePath=".\src\db\db_sqlite.cpp">
 				</File>
 			</Filter>
+			<Filter
+				Name="memcache"
+				Filter="">
+				<File
+					RelativePath=".\src\memcache\mem_cache.cpp">
+				</File>
+			</Filter>
+			<Filter
+				Name="redis"
+				Filter="">
+			</Filter>
+			<Filter
+				Name="session"
+				Filter="">
+				<File
+					RelativePath=".\src\session\memcache_session.cpp">
+				</File>
+				<File
+					RelativePath=".\src\session\session.cpp">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Í·ÎÄ¼þ"
@@ -757,19 +769,10 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 					RelativePath=".\include\md5.hpp">
 				</File>
 				<File
-					RelativePath=".\include\mem_cache.hpp">
-				</File>
-				<File
-					RelativePath=".\include\memcache_session.hpp">
-				</File>
-				<File
 					RelativePath=".\include\noncopyable.hpp">
 				</File>
 				<File
 					RelativePath=".\include\pipe_stream.hpp">
-				</File>
-				<File
-					RelativePath=".\include\session.hpp">
 				</File>
 				<File
 					RelativePath=".\include\singleton.hpp">
@@ -968,6 +971,27 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				</File>
 				<File
 					RelativePath=".\include\db_sqlite.hpp">
+				</File>
+			</Filter>
+			<Filter
+				Name="memcache"
+				Filter="">
+				<File
+					RelativePath=".\include\mem_cache.hpp">
+				</File>
+			</Filter>
+			<Filter
+				Name="redis"
+				Filter="">
+			</Filter>
+			<Filter
+				Name="session"
+				Filter="">
+				<File
+					RelativePath=".\include\memcache_session.hpp">
+				</File>
+				<File
+					RelativePath=".\include\session.hpp">
 				</File>
 			</Filter>
 		</Filter>
