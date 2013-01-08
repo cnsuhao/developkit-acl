@@ -39,14 +39,6 @@ bool http_servlet::doPost(HttpServletRequest& req, HttpServletResponse& res)
 
 	$<GET_COOKIES>
 
-	const char* cookie1 = req.getCookieValue("name1");
-	const char* cookie2 = req.getCookieValue("name2");
-
-	// 创建 HTTP 响应头
-	res.addCookie("name1", "value1");
-	res.addCookie("name2", "value2", ".test.com", "/", 3600 * 24);
-	//		res.setStatus(400);  // 可以设置返回的状态码
-
 	// 设置字符集
 	res.setContentType("text/xml; charset=$<CHARSET>");
 
@@ -55,26 +47,27 @@ bool http_servlet::doPost(HttpServletRequest& req, HttpServletResponse& res)
 
 	// 创建 xml 格式的数据体
 	xml body;
-	body.get_root().add_child("root", true)
-		.add_child("sessions", true)
-		.add_child("session", true)
-		.add_attr("sid", sid ? sid : "null")
-		.get_parent()
-		.get_parent()
-		.add_child("cookies", true)
-		.add_child("cookie", true)
-		.add_attr("name1", cookie1 ? cookie1 : "null")
-		.get_parent()
-		.add_child("cookie", true)
-		.add_attr("name2", cookie2 ? cookie2 : "null")
-		.get_parent()
-		.get_parent()
-		.add_child("params", true)
-		.add_child("param", true)
-		.add_attr("name1", param1 ? param1 : "null")
-		.get_parent()
-		.add_child("param", true)
-		.add_attr("name2", param2 ? param2 : "null");
+	body.get_root()
+		.add_child("root", true)
+			.add_child("sessions", true)
+				.add_child("session", true)
+					.add_attr("sid", sid ? sid : "null")
+				.get_parent()
+			.get_parent()
+			.add_child("cookies", true)
+				.add_child("cookie", true)
+					.add_attr("name1", cookie1 ? cookie1 : "null")
+				.get_parent()
+				.add_child("cookie", true)
+					.add_attr("name2", cookie2 ? cookie2 : "null")
+				.get_parent()
+			.get_parent()
+			.add_child("params", true)
+				.add_child("param", true)
+					.add_attr("name1", param1 ? param1 : "null")
+				.get_parent()
+				.add_child("param", true)
+					.add_attr("name2", param2 ? param2 : "null");
 	string buf;
 	body.build_xml(buf);
 
