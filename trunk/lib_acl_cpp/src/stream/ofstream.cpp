@@ -1,5 +1,5 @@
 #include "acl_stdafx.hpp"
-#include "ofstream.hpp"
+#include "acl_cpp/stream/ofstream.hpp"
 
 namespace acl {
 

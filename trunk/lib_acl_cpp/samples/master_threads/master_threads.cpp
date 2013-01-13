@@ -2,10 +2,10 @@
 //
 
 #include "stdafx.h"
-#include "log.hpp"
-#include "util.hpp"
-#include "master_threads.hpp"
-#include "socket_stream.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/util.hpp"
+#include "acl_cpp/master/master_threads.hpp"
+#include "acl_cpp/stream/socket_stream.hpp"
 
 static char *var_cfg_debug_msg;
 

@@ -1,8 +1,8 @@
 #include "acl_stdafx.hpp"
-#include "log.hpp"
-#include "string.hpp"
-#include "escape.hpp"
-#include "session.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/stdlib/escape.hpp"
+#include "acl_cpp/session/session.hpp"
 
 namespace acl
 {

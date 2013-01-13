@@ -132,7 +132,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl_d.lib ws2_32.lib vld.lib"
+				AdditionalDependencies="ws2_32.lib vld.lib"
 				OutputFile="rfc2047.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\lib"
@@ -183,7 +183,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl.lib ws2_32.lib vld.lib"
+				AdditionalDependencies="ws2_32.lib vld.lib"
 				OutputFile="rfc2047.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\lib"

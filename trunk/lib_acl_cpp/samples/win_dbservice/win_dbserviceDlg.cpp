@@ -2,9 +2,9 @@
 //
 
 #include "stdafx.h"
-#include "db_service_sqlite.hpp"
-#include "db_handle.hpp"
-#include "db_sqlite.hpp"
+#include "acl_cpp/db/db_service_sqlite.hpp"
+#include "acl_cpp/db/db_handle.hpp"
+#include "acl_cpp/db/db_sqlite.hpp"
 #include "win_dbservice.h"
 #include "win_dbserviceDlg.h"
 #include ".\win_dbservicedlg.h"

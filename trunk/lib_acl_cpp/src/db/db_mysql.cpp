@@ -1,11 +1,10 @@
 #include "acl_stdafx.hpp"
-#include "lib_acl.h"
 #include <assert.h>
 #include "mysql.h"
 #include "errmsg.h"
 #include "mysqld_error.h"
-#include "log.hpp"
-#include "db_mysql.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/db/db_mysql.hpp"
 
 //////////////////////////////////////////////////////////////////////////
 

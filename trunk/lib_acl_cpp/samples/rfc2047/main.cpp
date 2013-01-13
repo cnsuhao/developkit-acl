@@ -8,11 +8,11 @@
 #else
 #include <getopt.h>
 #endif
-#include "string.hpp"
-#include "fstream.hpp"
-#include "ifstream.hpp"
-#include "ofstream.hpp"
-#include "rfc2047.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/stream/fstream.hpp"
+#include "acl_cpp/stream/ifstream.hpp"
+#include "acl_cpp/stream/ofstream.hpp"
+#include "acl_cpp/mime/rfc2047.hpp"
 
 static int isvalidChinese(char c1, char c2)
 {

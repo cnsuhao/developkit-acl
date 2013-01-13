@@ -1,6 +1,6 @@
 #include "acl_stdafx.hpp"
-#include "session.hpp"
-#include "HttpSession.hpp"
+#include "acl_cpp/session/session.hpp"
+#include "acl_cpp/http/HttpSession.hpp"
 
 namespace acl
 {

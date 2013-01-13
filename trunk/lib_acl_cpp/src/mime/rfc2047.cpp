@@ -1,8 +1,8 @@
 #include "acl_stdafx.hpp"
-#include "mime_base64.hpp"
-#include "mime_quoted_printable.hpp"
-#include "charset_conv.hpp"
-#include "rfc2047.hpp"
+#include "acl_cpp/mime/mime_base64.hpp"
+#include "acl_cpp/mime/mime_quoted_printable.hpp"
+#include "acl_cpp/stdlib/charset_conv.hpp"
+#include "acl_cpp/mime/rfc2047.hpp"
 
 #define SCOPY(x, y) ACL_SAFE_STRNCPY((x), (y), sizeof(x))
 

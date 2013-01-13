@@ -1,8 +1,7 @@
 #include "acl_stdafx.hpp"
-#include "lib_acl.h"
-#include "locker.hpp"
-#include "hsclient.hpp"
-#include "hspool.hpp"
+#include "acl_cpp/stdlib/locker.hpp"
+#include "acl_cpp/hsocket/hsclient.hpp"
+#include "acl_cpp/hsocket/hspool.hpp"
 
 namespace acl
 {

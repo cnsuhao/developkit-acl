@@ -1,7 +1,7 @@
 #include "acl_stdafx.hpp"
-#include "log.hpp"
-#include "snprintf.hpp"
-#include "acl_cpp_test.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/snprintf.hpp"
+#include "acl_cpp/acl_cpp_test.hpp"
 
 namespace acl
 {

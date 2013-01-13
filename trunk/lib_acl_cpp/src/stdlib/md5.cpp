@@ -4,11 +4,11 @@
  */
 #include "acl_stdafx.hpp"
 #include <string.h>
-#include "istream.hpp"
-#include "ifstream.hpp"
-#include "log.hpp"
-#include "util.hpp"
-#include "md5.hpp"
+#include "acl_cpp/stream/istream.hpp"
+#include "acl_cpp/stream/ifstream.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/util.hpp"
+#include "acl_cpp/stdlib/md5.hpp"
 
 #ifdef WORDS_BIGENDIAN
 static void byteSwap(uint32_t * buf, unsigned words)

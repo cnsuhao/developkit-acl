@@ -1,12 +1,12 @@
 #include "acl_stdafx.hpp"
-#include "log.hpp"
-#include "socket_stream.hpp"
-#include "memcache_session.hpp"
-#include "http_header.hpp"
-#include "HttpSession.hpp"
-#include "HttpServletRequest.hpp"
-#include "HttpServletResponse.hpp"
-#include "HttpServlet.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stream/socket_stream.hpp"
+#include "acl_cpp/session/memcache_session.hpp"
+#include "acl_cpp/http/http_header.hpp"
+#include "acl_cpp/http/HttpSession.hpp"
+#include "acl_cpp/http/HttpServletRequest.hpp"
+#include "acl_cpp/http/HttpServletResponse.hpp"
+#include "acl_cpp/http/HttpServlet.hpp"
 
 namespace acl
 {

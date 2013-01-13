@@ -1,11 +1,11 @@
 #include "acl_stdafx.hpp"
 #include <assert.h>
-#include "string.hpp"
-#include "log.hpp"
-#include "ipc_client.hpp"
-#include "db_handle.hpp"
-#include "db_sqlite.hpp"
-#include "db_service.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/ipc/ipc_client.hpp"
+#include "acl_cpp/db/db_handle.hpp"
+#include "acl_cpp/db/db_sqlite.hpp"
+#include "acl_cpp/db/db_service.hpp"
 
 namespace acl
 {

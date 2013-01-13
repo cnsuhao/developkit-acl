@@ -133,7 +133,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib wsock32.lib lib_acl_d.lib"
+				AdditionalDependencies="ws2_32.lib wsock32.lib"
 				OutputFile="$(OutDir)/aio_dns.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\lib"
@@ -184,7 +184,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib wsock32.lib lib_acl.lib"
+				AdditionalDependencies="ws2_32.lib wsock32.lib"
 				OutputFile="$(OutDir)/aio_dns.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\lib"

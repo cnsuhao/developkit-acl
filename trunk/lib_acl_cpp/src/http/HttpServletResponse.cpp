@@ -1,10 +1,10 @@
 #include "acl_stdafx.hpp"
-#include "string.hpp"
-#include "ostream.hpp"
-#include "socket_stream.hpp"
-#include "http_header.hpp"
-#include "HttpServlet.hpp"
-#include "HttpServletResponse.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/stream/ostream.hpp"
+#include "acl_cpp/stream/socket_stream.hpp"
+#include "acl_cpp/http/http_header.hpp"
+#include "acl_cpp/http/HttpServlet.hpp"
+#include "acl_cpp/http/HttpServletResponse.hpp"
 
 namespace acl
 {

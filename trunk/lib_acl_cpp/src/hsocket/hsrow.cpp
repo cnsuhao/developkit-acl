@@ -1,9 +1,9 @@
 #include "acl_stdafx.hpp"
 #include <vector>
-#include "log.hpp"
-#include "string.hpp"
-#include "escape.hpp"
-#include "hsrow.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/stdlib/escape.hpp"
+#include "acl_cpp/hsocket/hsrow.hpp"
 
 namespace acl
 {

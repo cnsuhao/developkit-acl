@@ -132,7 +132,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib lib_acl_d.lib"
+				AdditionalDependencies="ws2_32.lib"
 				OutputFile="flock.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\lib"
@@ -183,7 +183,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl.lib ws2_32.lib"
+				AdditionalDependencies="ws2_32.lib"
 				OutputFile="flock.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\lib"

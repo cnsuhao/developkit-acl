@@ -1,6 +1,6 @@
 #include "acl_stdafx.hpp"
-#include "log.hpp"
-#include "http_utils.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/http/http_utils.hpp"
 
 namespace acl
 {

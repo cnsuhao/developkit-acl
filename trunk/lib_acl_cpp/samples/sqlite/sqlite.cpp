@@ -2,9 +2,9 @@
 //
 
 #include "stdafx.h"
-#include "string.hpp"
-#include "util.hpp"
-#include "db_sqlite.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/stdlib/util.hpp"
+#include "acl_cpp/db/db_sqlite.hpp"
 
 const char* CREATE_TBL =
 	"create table group_tbl\r\n"

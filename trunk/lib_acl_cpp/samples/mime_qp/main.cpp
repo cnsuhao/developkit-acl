@@ -1,7 +1,7 @@
 #include <string>
-#include "mime_code.hpp"
-#include "fstream.hpp"
-#include "mime_quoted_printable.hpp"
+#include "acl_cpp/mime/mime_code.hpp"
+#include "acl_cpp/stream/fstream.hpp"
+#include "acl_cpp/mime/mime_quoted_printable.hpp"
 
 int main(void)
 {

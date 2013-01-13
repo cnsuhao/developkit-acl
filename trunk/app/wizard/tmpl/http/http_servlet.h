@@ -1,5 +1,5 @@
 #pragma once
-#include "HttpServlet.hpp"
+#include "acl_cpp/http/HttpServlet.hpp"
 
 class acl::HttpServletRequest;
 class acl::HttpServletResponse;

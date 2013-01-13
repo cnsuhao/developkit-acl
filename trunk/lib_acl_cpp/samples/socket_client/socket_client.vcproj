@@ -134,7 +134,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl_d.lib ws2_32.lib"
+				AdditionalDependencies="ws2_32.lib"
 				OutputFile="$(OutDir)/socket_client.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\lib"
@@ -182,7 +182,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl.lib ws2_32.lib"
+				AdditionalDependencies="ws2_32.lib"
 				OutputFile="$(OutDir)/socket_client.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\lib"

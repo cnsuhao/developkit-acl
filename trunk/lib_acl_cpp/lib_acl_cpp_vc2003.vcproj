@@ -122,7 +122,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="acl_stdafx.hpp"
 				PrecompiledHeaderFile="$(IntDir)/$(TargetName).pch"
-				ProgramDataBaseFileName="$(OutDir)/$(ProjectName)d_dll.pdb"
+				ProgramDataBaseFileName="$(OutDir)/$(ProjectName)_d.pdb"
 				WarningLevel="3"
 				WarnAsError="TRUE"
 				Detect64BitPortabilityProblems="FALSE"
@@ -132,7 +132,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="lib_acl_d.lib lib_protocol_d.lib polarssl.lib"
-				OutputFile="$(OutDir)/$(ProjectName)d_dll.dll"
+				OutputFile="$(OutDir)/$(ProjectName)_d.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=".\lib;..\dist\lib\win32"
 				IgnoreDefaultLibraryNames="libc"
@@ -188,7 +188,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="acl_stdafx.hpp"
 				PrecompiledHeaderFile="$(IntDir)/$(TargetName).pch"
-				ProgramDataBaseFileName="$(OutDir)/$(ProjectName)_dll.pdb"
+				ProgramDataBaseFileName="$(OutDir)/$(ProjectName).pdb"
 				WarningLevel="3"
 				WarnAsError="TRUE"
 				Detect64BitPortabilityProblems="FALSE"
@@ -198,7 +198,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="lib_acl.lib polarssl.lib lib_protocol.lib"
-				OutputFile="$(OutDir)/$(ProjectName)_dll.dll"
+				OutputFile="$(OutDir)/$(ProjectName).dll"
 				AdditionalLibraryDirectories=".\lib;..\dist\lib\win32"
 				IgnoreDefaultLibraryNames="libcmt;libc"
 				ImportLibrary="$(OutDir)/$(TargetName).lib"
@@ -678,16 +678,16 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath=".\include\acl_cpp_define.hpp">
+				RelativePath=".\include\acl_cpp\acl_cpp_define.hpp">
 			</File>
 			<File
-				RelativePath=".\include\acl_cpp_init.hpp">
+				RelativePath=".\include\acl_cpp\acl_cpp_init.hpp">
 			</File>
 			<File
-				RelativePath=".\include\acl_cpp_test.hpp">
+				RelativePath=".\include\acl_cpp\acl_cpp_test.hpp">
 			</File>
 			<File
-				RelativePath=".\include\lib_acl.hpp">
+				RelativePath=".\include\acl_cpp\lib_acl.hpp">
 			</File>
 			<File
 				RelativePath=".\resource_vc2003.h">
@@ -696,302 +696,308 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				Name="stream"
 				Filter="">
 				<File
-					RelativePath=".\include\aio_handle.hpp">
+					RelativePath=".\include\acl_cpp\stream\aio_handle.hpp">
 				</File>
 				<File
-					RelativePath=".\include\aio_istream.hpp">
+					RelativePath=".\include\acl_cpp\stream\aio_istream.hpp">
 				</File>
 				<File
-					RelativePath=".\include\aio_listen_stream.hpp">
+					RelativePath=".\include\acl_cpp\stream\aio_listen_stream.hpp">
 				</File>
 				<File
-					RelativePath=".\include\aio_ostream.hpp">
+					RelativePath=".\include\acl_cpp\stream\aio_ostream.hpp">
 				</File>
 				<File
-					RelativePath=".\include\aio_socket_stream.hpp">
+					RelativePath=".\include\acl_cpp\stream\aio_socket_stream.hpp">
 				</File>
 				<File
-					RelativePath=".\include\aio_stream.hpp">
+					RelativePath=".\include\acl_cpp\stream\aio_stream.hpp">
 				</File>
 				<File
-					RelativePath=".\include\fstream.hpp">
+					RelativePath=".\include\acl_cpp\stream\fstream.hpp">
 				</File>
 				<File
-					RelativePath=".\include\ifstream.hpp">
+					RelativePath=".\include\acl_cpp\stream\ifstream.hpp">
 				</File>
 				<File
-					RelativePath=".\include\istream.hpp">
+					RelativePath=".\include\acl_cpp\stream\istream.hpp">
 				</File>
 				<File
-					RelativePath=".\include\ofstream.hpp">
+					RelativePath=".\include\acl_cpp\stream\ofstream.hpp">
 				</File>
 				<File
-					RelativePath=".\include\ostream.hpp">
+					RelativePath=".\include\acl_cpp\stream\ostream.hpp">
 				</File>
 				<File
-					RelativePath=".\include\socket_stream.hpp">
+					RelativePath=".\include\acl_cpp\stream\socket_stream.hpp">
 				</File>
 				<File
-					RelativePath=".\include\ssl_aio_stream.hpp">
+					RelativePath=".\include\acl_cpp\stream\ssl_aio_stream.hpp">
 				</File>
 				<File
-					RelativePath=".\include\ssl_stream.hpp">
+					RelativePath=".\include\acl_cpp\stream\ssl_stream.hpp">
 				</File>
 				<File
-					RelativePath=".\include\stream.hpp">
+					RelativePath=".\include\acl_cpp\stream\stream.hpp">
 				</File>
 			</Filter>
 			<Filter
 				Name="stdlib"
 				Filter="">
 				<File
-					RelativePath=".\include\dns_service.hpp">
+					RelativePath=".\include\acl_cpp\stdlib\charset_conv.hpp">
 				</File>
 				<File
-					RelativePath=".\include\escape.hpp">
+					RelativePath=".\include\acl_cpp\stdlib\dns_service.hpp">
 				</File>
 				<File
-					RelativePath=".\include\final_tpl.hpp">
+					RelativePath=".\include\acl_cpp\stdlib\escape.hpp">
 				</File>
 				<File
-					RelativePath=".\include\json.hpp">
+					RelativePath=".\include\acl_cpp\stdlib\final_tpl.hpp">
 				</File>
 				<File
-					RelativePath=".\include\locker.hpp">
+					RelativePath=".\include\acl_cpp\stdlib\json.hpp">
 				</File>
 				<File
-					RelativePath=".\include\log.hpp">
+					RelativePath=".\include\acl_cpp\stdlib\locker.hpp">
 				</File>
 				<File
-					RelativePath=".\include\malloc.hpp">
+					RelativePath=".\include\acl_cpp\stdlib\log.hpp">
 				</File>
 				<File
-					RelativePath=".\include\md5.hpp">
+					RelativePath=".\include\acl_cpp\stdlib\malloc.hpp">
 				</File>
 				<File
-					RelativePath=".\include\noncopyable.hpp">
+					RelativePath=".\include\acl_cpp\stdlib\md5.hpp">
 				</File>
 				<File
-					RelativePath=".\include\pipe_stream.hpp">
+					RelativePath=".\include\acl_cpp\stdlib\noncopyable.hpp">
 				</File>
 				<File
-					RelativePath=".\include\singleton.hpp">
+					RelativePath=".\include\acl_cpp\stdlib\pipe_stream.hpp">
 				</File>
 				<File
-					RelativePath=".\include\snprintf.hpp">
+					RelativePath=".\include\acl_cpp\stdlib\singleton.hpp">
 				</File>
 				<File
-					RelativePath=".\include\string.hpp">
+					RelativePath=".\include\acl_cpp\stdlib\snprintf.hpp">
 				</File>
 				<File
-					RelativePath=".\include\util.hpp">
+					RelativePath=".\include\acl_cpp\stdlib\string.hpp">
 				</File>
 				<File
-					RelativePath=".\include\xml.hpp">
+					RelativePath=".\include\acl_cpp\stdlib\util.hpp">
 				</File>
 				<File
-					RelativePath=".\include\zlib_stream.hpp">
+					RelativePath=".\include\acl_cpp\stdlib\vld.h">
+				</File>
+				<File
+					RelativePath=".\include\acl_cpp\stdlib\xml.hpp">
+				</File>
+				<File
+					RelativePath=".\include\acl_cpp\stdlib\zlib_stream.hpp">
 				</File>
 			</Filter>
 			<Filter
 				Name="mime"
 				Filter="">
 				<File
-					RelativePath=".\include\charset_conv.hpp">
+					RelativePath=".\include\acl_cpp\mime\mime.hpp">
 				</File>
 				<File
-					RelativePath=".\include\mime.hpp">
+					RelativePath=".\include\acl_cpp\mime\mime_attach.hpp">
 				</File>
 				<File
-					RelativePath=".\include\mime_attach.hpp">
+					RelativePath=".\include\acl_cpp\mime\mime_base64.hpp">
 				</File>
 				<File
-					RelativePath=".\include\mime_base64.hpp">
+					RelativePath=".\include\acl_cpp\mime\mime_body.hpp">
 				</File>
 				<File
-					RelativePath=".\include\mime_body.hpp">
+					RelativePath=".\include\acl_cpp\mime\mime_code.hpp">
 				</File>
 				<File
-					RelativePath=".\include\mime_code.hpp">
+					RelativePath=".\include\acl_cpp\mime\mime_define.hpp">
 				</File>
 				<File
-					RelativePath=".\include\mime_define.hpp">
+					RelativePath=".\include\acl_cpp\mime\mime_head.hpp">
 				</File>
 				<File
-					RelativePath=".\include\mime_head.hpp">
+					RelativePath=".\include\acl_cpp\mime\mime_image.hpp">
 				</File>
 				<File
-					RelativePath=".\include\mime_image.hpp">
+					RelativePath=".\include\acl_cpp\mime\mime_node.hpp">
 				</File>
 				<File
-					RelativePath=".\include\mime_node.hpp">
+					RelativePath=".\include\acl_cpp\mime\mime_quoted_printable.hpp">
 				</File>
 				<File
-					RelativePath=".\include\mime_quoted_printable.hpp">
+					RelativePath=".\include\acl_cpp\mime\mime_uucode.hpp">
 				</File>
 				<File
-					RelativePath=".\include\mime_uucode.hpp">
+					RelativePath=".\include\acl_cpp\mime\mime_xxcode.hpp">
 				</File>
 				<File
-					RelativePath=".\include\mime_xxcode.hpp">
+					RelativePath=".\include\acl_cpp\mime\rfc2047.hpp">
 				</File>
 				<File
-					RelativePath=".\include\rfc2047.hpp">
-				</File>
-				<File
-					RelativePath=".\include\rfc822.hpp">
+					RelativePath=".\include\acl_cpp\mime\rfc822.hpp">
 				</File>
 			</Filter>
 			<Filter
 				Name="master"
 				Filter="">
 				<File
-					RelativePath=".\include\master_aio.hpp">
+					RelativePath=".\include\acl_cpp\master\master_aio.hpp">
 				</File>
 				<File
-					RelativePath=".\include\master_base.hpp">
+					RelativePath=".\include\acl_cpp\master\master_base.hpp">
 				</File>
 				<File
-					RelativePath=".\include\master_conf.hpp">
+					RelativePath=".\include\acl_cpp\master\master_conf.hpp">
 				</File>
 				<File
-					RelativePath=".\include\master_proc.hpp">
+					RelativePath=".\include\acl_cpp\master\master_proc.hpp">
 				</File>
 				<File
-					RelativePath=".\include\master_threads.hpp">
+					RelativePath=".\include\acl_cpp\master\master_threads.hpp">
 				</File>
 				<File
-					RelativePath=".\include\master_trigger.hpp">
+					RelativePath=".\include\acl_cpp\master\master_trigger.hpp">
 				</File>
 			</Filter>
 			<Filter
 				Name="ipc"
 				Filter="">
 				<File
-					RelativePath=".\include\ipc_client.hpp">
+					RelativePath=".\include\acl_cpp\ipc\ipc_client.hpp">
 				</File>
 				<File
-					RelativePath=".\include\ipc_server.hpp">
+					RelativePath=".\include\acl_cpp\ipc\ipc_server.hpp">
 				</File>
 				<File
-					RelativePath=".\include\ipc_service.hpp">
+					RelativePath=".\include\acl_cpp\ipc\ipc_service.hpp">
 				</File>
 				<File
-					RelativePath=".\include\rpc.hpp">
+					RelativePath=".\include\acl_cpp\ipc\rpc.hpp">
 				</File>
 			</Filter>
 			<Filter
 				Name="http"
 				Filter="">
 				<File
-					RelativePath=".\include\http_client.hpp">
+					RelativePath=".\include\acl_cpp\http\http_client.hpp">
 				</File>
 				<File
-					RelativePath=".\include\http_ctype.hpp">
+					RelativePath=".\include\acl_cpp\http\http_ctype.hpp">
 				</File>
 				<File
-					RelativePath=".\include\http_download.hpp">
+					RelativePath=".\include\acl_cpp\http\http_download.hpp">
 				</File>
 				<File
-					RelativePath=".\include\http_header.hpp">
+					RelativePath=".\include\acl_cpp\http\http_header.hpp">
 				</File>
 				<File
-					RelativePath=".\include\http_mime.hpp">
+					RelativePath=".\include\acl_cpp\http\http_mime.hpp">
 				</File>
 				<File
-					RelativePath=".\include\http_pipe.hpp">
+					RelativePath=".\include\acl_cpp\http\http_pipe.hpp">
 				</File>
 				<File
-					RelativePath=".\include\http_request.hpp">
+					RelativePath=".\include\acl_cpp\http\http_request.hpp">
 				</File>
 				<File
-					RelativePath=".\include\http_response.hpp">
+					RelativePath=".\include\acl_cpp\http\http_response.hpp">
 				</File>
 				<File
-					RelativePath=".\include\http_service.hpp">
+					RelativePath=".\include\acl_cpp\http\http_service.hpp">
 				</File>
 				<File
-					RelativePath=".\include\http_utils.hpp">
+					RelativePath=".\include\acl_cpp\http\http_utils.hpp">
 				</File>
 				<File
-					RelativePath=".\include\HttpServlet.hpp">
+					RelativePath=".\include\acl_cpp\http\HttpServlet.hpp">
 				</File>
 				<File
-					RelativePath=".\include\HttpServletRequest.hpp">
+					RelativePath=".\include\acl_cpp\http\HttpServletRequest.hpp">
 				</File>
 				<File
-					RelativePath=".\include\HttpServletResponse.hpp">
+					RelativePath=".\include\acl_cpp\http\HttpServletResponse.hpp">
 				</File>
 				<File
-					RelativePath=".\include\HttpSession.hpp">
+					RelativePath=".\include\acl_cpp\http\HttpSession.hpp">
 				</File>
 			</Filter>
 			<Filter
 				Name="hsocket"
 				Filter="">
 				<File
-					RelativePath=".\include\hsclient.hpp">
+					RelativePath=".\include\acl_cpp\hsocket\hsclient.hpp">
 				</File>
 				<File
-					RelativePath=".\include\hserror.hpp">
+					RelativePath=".\include\acl_cpp\hsocket\hserror.hpp">
 				</File>
 				<File
-					RelativePath=".\include\hspool.hpp">
+					RelativePath=".\include\acl_cpp\hsocket\hspool.hpp">
 				</File>
 				<File
-					RelativePath=".\include\hsproto.hpp">
+					RelativePath=".\include\acl_cpp\hsocket\hsproto.hpp">
 				</File>
 				<File
-					RelativePath=".\include\hsrow.hpp">
+					RelativePath=".\include\acl_cpp\hsocket\hsrow.hpp">
 				</File>
 				<File
-					RelativePath=".\include\hstable.hpp">
+					RelativePath=".\include\acl_cpp\hsocket\hstable.hpp">
 				</File>
 			</Filter>
 			<Filter
 				Name="db"
 				Filter="">
 				<File
-					RelativePath=".\include\db_handle.hpp">
+					RelativePath=".\include\acl_cpp\db\db_handle.hpp">
 				</File>
 				<File
-					RelativePath=".\include\db_mysql.hpp">
+					RelativePath=".\include\acl_cpp\db\db_mysql.hpp">
 				</File>
 				<File
-					RelativePath=".\include\db_pool.hpp">
+					RelativePath=".\include\acl_cpp\db\db_pool.hpp">
 				</File>
 				<File
-					RelativePath=".\include\db_service.hpp">
+					RelativePath=".\include\acl_cpp\db\db_service.hpp">
 				</File>
 				<File
-					RelativePath=".\include\db_service_mysql.hpp">
+					RelativePath=".\include\acl_cpp\db\db_service_mysql.hpp">
 				</File>
 				<File
-					RelativePath=".\include\db_service_sqlite.hpp">
+					RelativePath=".\include\acl_cpp\db\db_service_sqlite.hpp">
 				</File>
 				<File
-					RelativePath=".\include\db_sqlite.hpp">
+					RelativePath=".\include\acl_cpp\db\db_sqlite.hpp">
 				</File>
 			</Filter>
 			<Filter
 				Name="memcache"
 				Filter="">
 				<File
-					RelativePath=".\include\mem_cache.hpp">
+					RelativePath=".\include\acl_cpp\memcache\mem_cache.hpp">
 				</File>
 			</Filter>
 			<Filter
 				Name="redis"
 				Filter="">
+				<File
+					RelativePath=".\include\acl_cpp\redis\redis_keys.hpp">
+				</File>
 			</Filter>
 			<Filter
 				Name="session"
 				Filter="">
 				<File
-					RelativePath=".\include\memcache_session.hpp">
+					RelativePath=".\include\acl_cpp\session\memcache_session.hpp">
 				</File>
 				<File
-					RelativePath=".\include\session.hpp">
+					RelativePath=".\include\acl_cpp\session\session.hpp">
 				</File>
 			</Filter>
 		</Filter>

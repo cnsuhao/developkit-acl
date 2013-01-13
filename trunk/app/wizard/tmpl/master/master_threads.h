@@ -1,6 +1,6 @@
 #pragma once
-#include "master_threads.hpp"
-#include "master_conf.hpp"
+#include "acl_cpp/master/master_threads.hpp"
+#include "acl_cpp/master/master_conf.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 // ÅäÖÃÄÚÈİÏî

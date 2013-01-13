@@ -1,6 +1,6 @@
 #include "lib_acl.h"
-#include "socket_stream.hpp"
-#include "string.hpp"
+#include "acl_cpp/stream/socket_stream.hpp"
+#include "acl_cpp/stdlib/string.hpp"
 #include <stdlib.h>
 #include <stdio.h>
 

@@ -131,7 +131,6 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl.lib"
 				OutputFile="$(OutDir)/mysql.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\lib"
@@ -183,7 +182,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl_d.lib libmysql.lib"
+				AdditionalDependencies="libmysql.lib"
 				OutputFile="$(OutDir)/mysql.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\lib"

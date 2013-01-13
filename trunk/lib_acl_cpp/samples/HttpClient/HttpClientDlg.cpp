@@ -2,8 +2,8 @@
 //
 
 #include "stdafx.h"
-#include "string.hpp"
-#include "aio_handle.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/stream/aio_handle.hpp"
 #include "HttpClient.h"
 #include "HttpClientDlg.h"
 #include "HttpDownload.h"

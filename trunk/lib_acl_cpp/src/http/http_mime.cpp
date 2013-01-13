@@ -1,12 +1,12 @@
 #include "acl_stdafx.hpp"
 #include "../mime/internal/mime_state.hpp"
 #include "../mime/internal/header_opts.hpp"
-#include "log.hpp"
-#include "util.hpp"
-#include "charset_conv.hpp"
-#include "ifstream.hpp"
-#include "http_header.hpp"
-#include "http_mime.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/util.hpp"
+#include "acl_cpp/stdlib/charset_conv.hpp"
+#include "acl_cpp/stream/ifstream.hpp"
+#include "acl_cpp/http/http_header.hpp"
+#include "acl_cpp/http/http_mime.hpp"
 
 namespace acl
 {

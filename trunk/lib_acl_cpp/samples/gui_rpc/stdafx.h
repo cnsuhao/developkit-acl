@@ -48,5 +48,5 @@
 
 #include <afxsock.h>		// MFC Ì×½Ó×ÖÀ©Õ¹
 #include "WndResizer.h"
-#include "lib_acl.hpp"
+#include "acl_cpp/lib_acl.hpp"
 #include "lib_acl.h"

@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include <stdio.h>
-#include "final_tpl.hpp"
+#include "acl_cpp/stdlib/final_tpl.hpp"
 //#include "lib_acl.hpp"
 
 class CMyFinalClass : public acl::final_tpl<CMyFinalClass>

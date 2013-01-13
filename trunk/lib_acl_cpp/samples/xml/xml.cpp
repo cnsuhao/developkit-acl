@@ -2,8 +2,8 @@
 //
 #include "stdafx.h"
 #include <list>
-#include "string.hpp"
-#include "xml.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/stdlib/xml.hpp"
 
 using namespace std;
 

@@ -8,15 +8,15 @@
 
 // TODO: 在此处引用程序要求的附加头文件
 
-#include "acl_cpp_define.hpp"
+#include "acl_cpp/acl_cpp_define.hpp"
 
 #include "lib_acl.h"
 #include "lib_protocol.h"
 
-#include "malloc.hpp"
+#include "acl_cpp/stdlib/malloc.hpp"
 
 #ifdef WIN32
-# include "snprintf.hpp"
+# include "acl_cpp/stdlib/snprintf.hpp"
 # ifdef _DEBUG
 #  ifndef _CRTDBG_MAP_ALLOC
 #   define _CRTDBG_MAP_ALLOC
@@ -35,5 +35,5 @@
 
 // 加入下面一行可以加快在 VC 下的编译速度
 #ifdef WIN32
-#include "lib_acl.hpp"
+#include "acl_cpp/lib_acl.hpp"
 #endif

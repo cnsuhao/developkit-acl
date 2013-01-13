@@ -1,5 +1,5 @@
 #include "acl_stdafx.hpp"
-#include "mime_quoted_printable.hpp"
+#include "acl_cpp/mime/mime_quoted_printable.hpp"
 
 namespace acl {
 

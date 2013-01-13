@@ -1,8 +1,8 @@
 #include "acl_stdafx.hpp"
 #include "zlib.h"
-#include "log.hpp"
-#include "string.hpp"
-#include "zlib_stream.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/stdlib/zlib_stream.hpp"
 
 #define HAVE_H_ZLIB
 

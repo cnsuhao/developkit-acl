@@ -1,6 +1,6 @@
 #include "StdAfx.h"
-#include "aio_handle.hpp"
-#include "string.hpp"
+#include "acl_cpp/stream/aio_handle.hpp"
+#include "acl_cpp/stdlib/string.hpp"
 
 #include ".\httpdownload.h"
 

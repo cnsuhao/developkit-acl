@@ -1,9 +1,9 @@
 #include <string>
-#include "mime_base64.hpp"
-#include "mime_uucode.hpp"
-#include "mime_xxcode.hpp"
-#include "fstream.hpp"
-#include "ifstream.hpp"
+#include "acl_cpp/mime/mime_base64.hpp"
+#include "acl_cpp/mime/mime_uucode.hpp"
+#include "acl_cpp/mime/mime_xxcode.hpp"
+#include "acl_cpp/stream/fstream.hpp"
+#include "acl_cpp/stream/ifstream.hpp"
 
 static void test1(void)
 {

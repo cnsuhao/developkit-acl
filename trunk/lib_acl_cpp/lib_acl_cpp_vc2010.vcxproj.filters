@@ -300,200 +300,11 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\acl_cpp_define.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\acl_cpp_init.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\acl_cpp_test.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="src\acl_stdafx.hpp">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="include\lib_acl.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="resource_vc2010.h">
       <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\aio_handle.hpp">
-      <Filter>include\stream</Filter>
-    </ClInclude>
-    <ClInclude Include="include\aio_istream.hpp">
-      <Filter>include\stream</Filter>
-    </ClInclude>
-    <ClInclude Include="include\aio_listen_stream.hpp">
-      <Filter>include\stream</Filter>
-    </ClInclude>
-    <ClInclude Include="include\aio_ostream.hpp">
-      <Filter>include\stream</Filter>
-    </ClInclude>
-    <ClInclude Include="include\aio_socket_stream.hpp">
-      <Filter>include\stream</Filter>
-    </ClInclude>
-    <ClInclude Include="include\aio_stream.hpp">
-      <Filter>include\stream</Filter>
-    </ClInclude>
-    <ClInclude Include="include\db_handle.hpp">
-      <Filter>include\db</Filter>
-    </ClInclude>
-    <ClInclude Include="include\db_sqlite.hpp">
-      <Filter>include\db</Filter>
-    </ClInclude>
-    <ClInclude Include="include\db_mysql.hpp">
-      <Filter>include\db</Filter>
-    </ClInclude>
-    <ClInclude Include="include\db_pool.hpp">
-      <Filter>include\db</Filter>
-    </ClInclude>
-    <ClInclude Include="include\db_service.hpp">
-      <Filter>include\db</Filter>
-    </ClInclude>
-    <ClInclude Include="include\final_tpl.hpp">
-      <Filter>include\stdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="include\hsclient.hpp">
-      <Filter>include\hsocket</Filter>
-    </ClInclude>
-    <ClInclude Include="include\hstable.hpp">
-      <Filter>include\hsocket</Filter>
-    </ClInclude>
-    <ClInclude Include="include\hserror.hpp">
-      <Filter>include\hsocket</Filter>
-    </ClInclude>
-    <ClInclude Include="include\hspool.hpp">
-      <Filter>include\hsocket</Filter>
-    </ClInclude>
-    <ClInclude Include="include\hsproto.hpp">
-      <Filter>include\hsocket</Filter>
-    </ClInclude>
-    <ClInclude Include="include\hsrow.hpp">
-      <Filter>include\hsocket</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dns_service.hpp">
-      <Filter>include\stdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="include\http_client.hpp">
-      <Filter>include\http</Filter>
-    </ClInclude>
-    <ClInclude Include="include\http_service.hpp">
-      <Filter>include\http</Filter>
-    </ClInclude>
-    <ClInclude Include="include\http_header.hpp">
-      <Filter>include\http</Filter>
-    </ClInclude>
-    <ClInclude Include="include\fstream.hpp">
-      <Filter>include\stream</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ifstream.hpp">
-      <Filter>include\stream</Filter>
-    </ClInclude>
-    <ClInclude Include="include\istream.hpp">
-      <Filter>include\stream</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ofstream.hpp">
-      <Filter>include\stream</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ostream.hpp">
-      <Filter>include\stream</Filter>
-    </ClInclude>
-    <ClInclude Include="include\socket_stream.hpp">
-      <Filter>include\stream</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ssl_aio_stream.hpp">
-      <Filter>include\stream</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ssl_stream.hpp">
-      <Filter>include\stream</Filter>
-    </ClInclude>
-    <ClInclude Include="include\stream.hpp">
-      <Filter>include\stream</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ipc_client.hpp">
-      <Filter>include\ipc</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ipc_server.hpp">
-      <Filter>include\ipc</Filter>
-    </ClInclude>
-    <ClInclude Include="include\master_aio.hpp">
-      <Filter>include\master</Filter>
-    </ClInclude>
-    <ClInclude Include="include\master_trigger.hpp">
-      <Filter>include\master</Filter>
-    </ClInclude>
-    <ClInclude Include="include\master_base.hpp">
-      <Filter>include\master</Filter>
-    </ClInclude>
-    <ClInclude Include="include\master_proc.hpp">
-      <Filter>include\master</Filter>
-    </ClInclude>
-    <ClInclude Include="include\master_threads.hpp">
-      <Filter>include\master</Filter>
-    </ClInclude>
-    <ClInclude Include="include\mime.hpp">
-      <Filter>include\mime</Filter>
-    </ClInclude>
-    <ClInclude Include="include\mime_xxcode.hpp">
-      <Filter>include\mime</Filter>
-    </ClInclude>
-    <ClInclude Include="include\mime_attach.hpp">
-      <Filter>include\mime</Filter>
-    </ClInclude>
-    <ClInclude Include="include\mime_base64.hpp">
-      <Filter>include\mime</Filter>
-    </ClInclude>
-    <ClInclude Include="include\mime_body.hpp">
-      <Filter>include\mime</Filter>
-    </ClInclude>
-    <ClInclude Include="include\mime_code.hpp">
-      <Filter>include\mime</Filter>
-    </ClInclude>
-    <ClInclude Include="include\mime_define.hpp">
-      <Filter>include\mime</Filter>
-    </ClInclude>
-    <ClInclude Include="include\mime_head.hpp">
-      <Filter>include\mime</Filter>
-    </ClInclude>
-    <ClInclude Include="include\mime_image.hpp">
-      <Filter>include\mime</Filter>
-    </ClInclude>
-    <ClInclude Include="include\mime_node.hpp">
-      <Filter>include\mime</Filter>
-    </ClInclude>
-    <ClInclude Include="include\mime_quoted_printable.hpp">
-      <Filter>include\mime</Filter>
-    </ClInclude>
-    <ClInclude Include="include\locker.hpp">
-      <Filter>include\stdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="include\log.hpp">
-      <Filter>include\stdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="include\malloc.hpp">
-      <Filter>include\stdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="include\pipe_stream.hpp">
-      <Filter>include\stdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="include\util.hpp">
-      <Filter>include\stdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="include\xml.hpp">
-      <Filter>include\stdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="include\string.hpp">
-      <Filter>include\stdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="include\zlib_stream.hpp">
-      <Filter>include\stdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="include\rfc2047.hpp">
-      <Filter>include\mime</Filter>
-    </ClInclude>
-    <ClInclude Include="include\rfc822.hpp">
-      <Filter>include\mime</Filter>
     </ClInclude>
     <ClInclude Include="src\mime\internal\trimblanks.hpp">
       <Filter>src\mime\internal</Filter>
@@ -531,77 +342,278 @@
     <ClInclude Include="src\stdlib\internal\win_iconv.hpp">
       <Filter>src\stdlib\internal</Filter>
     </ClInclude>
-    <ClInclude Include="include\db_service_mysql.hpp">
+    <ClInclude Include="include\acl_cpp\db\db_sqlite.hpp">
       <Filter>include\db</Filter>
     </ClInclude>
-    <ClInclude Include="include\db_service_sqlite.hpp">
+    <ClInclude Include="include\acl_cpp\db\db_handle.hpp">
       <Filter>include\db</Filter>
     </ClInclude>
-    <ClInclude Include="include\ipc_service.hpp">
+    <ClInclude Include="include\acl_cpp\db\db_mysql.hpp">
+      <Filter>include\db</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\db\db_pool.hpp">
+      <Filter>include\db</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\db\db_service.hpp">
+      <Filter>include\db</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\db\db_service_mysql.hpp">
+      <Filter>include\db</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\db\db_service_sqlite.hpp">
+      <Filter>include\db</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\hsocket\hstable.hpp">
+      <Filter>include\hsocket</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\hsocket\hsclient.hpp">
+      <Filter>include\hsocket</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\hsocket\hserror.hpp">
+      <Filter>include\hsocket</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\hsocket\hspool.hpp">
+      <Filter>include\hsocket</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\hsocket\hsproto.hpp">
+      <Filter>include\hsocket</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\hsocket\hsrow.hpp">
+      <Filter>include\hsocket</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\http\HttpSession.hpp">
+      <Filter>include\http</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\http\http_client.hpp">
+      <Filter>include\http</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\http\http_ctype.hpp">
+      <Filter>include\http</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\http\http_download.hpp">
+      <Filter>include\http</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\http\http_header.hpp">
+      <Filter>include\http</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\http\http_mime.hpp">
+      <Filter>include\http</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\http\http_pipe.hpp">
+      <Filter>include\http</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\http\http_request.hpp">
+      <Filter>include\http</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\http\http_response.hpp">
+      <Filter>include\http</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\http\http_service.hpp">
+      <Filter>include\http</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\http\http_utils.hpp">
+      <Filter>include\http</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\http\HttpServlet.hpp">
+      <Filter>include\http</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\http\HttpServletRequest.hpp">
+      <Filter>include\http</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\http\HttpServletResponse.hpp">
+      <Filter>include\http</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\ipc\rpc.hpp">
       <Filter>include\ipc</Filter>
     </ClInclude>
-    <ClInclude Include="include\mime_uucode.hpp">
-      <Filter>include\mime</Filter>
-    </ClInclude>
-    <ClInclude Include="include\json.hpp">
-      <Filter>include\stdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="include\HttpServlet.hpp">
-      <Filter>include\http</Filter>
-    </ClInclude>
-    <ClInclude Include="include\http_response.hpp">
-      <Filter>include\http</Filter>
-    </ClInclude>
-    <ClInclude Include="include\http_request.hpp">
-      <Filter>include\http</Filter>
-    </ClInclude>
-    <ClInclude Include="include\HttpSession.hpp">
-      <Filter>include\http</Filter>
-    </ClInclude>
-    <ClInclude Include="include\HttpServletResponse.hpp">
-      <Filter>include\http</Filter>
-    </ClInclude>
-    <ClInclude Include="include\HttpServletRequest.hpp">
-      <Filter>include\http</Filter>
-    </ClInclude>
-    <ClInclude Include="include\escape.hpp">
-      <Filter>include\stdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="include\http_mime.hpp">
-      <Filter>include\http</Filter>
-    </ClInclude>
-    <ClInclude Include="include\http_ctype.hpp">
-      <Filter>include\http</Filter>
-    </ClInclude>
-    <ClInclude Include="include\http_pipe.hpp">
-      <Filter>include\http</Filter>
-    </ClInclude>
-    <ClInclude Include="include\rpc.hpp">
+    <ClInclude Include="include\acl_cpp\ipc\ipc_client.hpp">
       <Filter>include\ipc</Filter>
     </ClInclude>
-    <ClInclude Include="include\charset_conv.hpp">
-      <Filter>include\mime</Filter>
+    <ClInclude Include="include\acl_cpp\ipc\ipc_server.hpp">
+      <Filter>include\ipc</Filter>
     </ClInclude>
-    <ClInclude Include="include\snprintf.hpp">
-      <Filter>include\stdlib</Filter>
+    <ClInclude Include="include\acl_cpp\ipc\ipc_service.hpp">
+      <Filter>include\ipc</Filter>
     </ClInclude>
-    <ClInclude Include="include\md5.hpp">
-      <Filter>include\stdlib</Filter>
+    <ClInclude Include="include\acl_cpp\master\master_trigger.hpp">
+      <Filter>include\master</Filter>
     </ClInclude>
-    <ClInclude Include="include\noncopyable.hpp">
-      <Filter>include\stdlib</Filter>
+    <ClInclude Include="include\acl_cpp\master\master_aio.hpp">
+      <Filter>include\master</Filter>
     </ClInclude>
-    <ClInclude Include="include\singleton.hpp">
-      <Filter>include\stdlib</Filter>
+    <ClInclude Include="include\acl_cpp\master\master_base.hpp">
+      <Filter>include\master</Filter>
     </ClInclude>
-    <ClInclude Include="include\memcache_session.hpp">
-      <Filter>include\session</Filter>
+    <ClInclude Include="include\acl_cpp\master\master_conf.hpp">
+      <Filter>include\master</Filter>
     </ClInclude>
-    <ClInclude Include="include\mem_cache.hpp">
+    <ClInclude Include="include\acl_cpp\master\master_proc.hpp">
+      <Filter>include\master</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\master\master_threads.hpp">
+      <Filter>include\master</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\memcache\mem_cache.hpp">
       <Filter>include\memcache</Filter>
     </ClInclude>
-    <ClInclude Include="include\session.hpp">
+    <ClInclude Include="include\acl_cpp\mime\rfc2047.hpp">
+      <Filter>include\mime</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\mime\mime.hpp">
+      <Filter>include\mime</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\mime\mime_attach.hpp">
+      <Filter>include\mime</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\mime\mime_base64.hpp">
+      <Filter>include\mime</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\mime\mime_body.hpp">
+      <Filter>include\mime</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\mime\mime_code.hpp">
+      <Filter>include\mime</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\mime\mime_define.hpp">
+      <Filter>include\mime</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\mime\mime_head.hpp">
+      <Filter>include\mime</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\mime\mime_image.hpp">
+      <Filter>include\mime</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\mime\mime_node.hpp">
+      <Filter>include\mime</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\mime\mime_quoted_printable.hpp">
+      <Filter>include\mime</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\mime\mime_uucode.hpp">
+      <Filter>include\mime</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\mime\mime_xxcode.hpp">
+      <Filter>include\mime</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\mime\rfc822.hpp">
+      <Filter>include\mime</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\session\session.hpp">
       <Filter>include\session</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\session\memcache_session.hpp">
+      <Filter>include\session</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stdlib\zlib_stream.hpp">
+      <Filter>include\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stdlib\charset_conv.hpp">
+      <Filter>include\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stdlib\dns_service.hpp">
+      <Filter>include\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stdlib\escape.hpp">
+      <Filter>include\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stdlib\final_tpl.hpp">
+      <Filter>include\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stdlib\json.hpp">
+      <Filter>include\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stdlib\locker.hpp">
+      <Filter>include\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stdlib\log.hpp">
+      <Filter>include\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stdlib\malloc.hpp">
+      <Filter>include\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stdlib\md5.hpp">
+      <Filter>include\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stdlib\noncopyable.hpp">
+      <Filter>include\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stdlib\pipe_stream.hpp">
+      <Filter>include\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stdlib\singleton.hpp">
+      <Filter>include\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stdlib\snprintf.hpp">
+      <Filter>include\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stdlib\string.hpp">
+      <Filter>include\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stdlib\util.hpp">
+      <Filter>include\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stdlib\vld.h">
+      <Filter>include\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stdlib\xml.hpp">
+      <Filter>include\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stream\stream.hpp">
+      <Filter>include\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stream\aio_handle.hpp">
+      <Filter>include\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stream\aio_istream.hpp">
+      <Filter>include\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stream\aio_listen_stream.hpp">
+      <Filter>include\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stream\aio_ostream.hpp">
+      <Filter>include\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stream\aio_socket_stream.hpp">
+      <Filter>include\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stream\aio_stream.hpp">
+      <Filter>include\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stream\fstream.hpp">
+      <Filter>include\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stream\ifstream.hpp">
+      <Filter>include\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stream\istream.hpp">
+      <Filter>include\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stream\ofstream.hpp">
+      <Filter>include\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stream\ostream.hpp">
+      <Filter>include\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stream\socket_stream.hpp">
+      <Filter>include\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stream\ssl_aio_stream.hpp">
+      <Filter>include\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stream\ssl_stream.hpp">
+      <Filter>include\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\lib_acl.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\acl_cpp_define.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\acl_cpp_init.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\acl_cpp_test.hpp">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

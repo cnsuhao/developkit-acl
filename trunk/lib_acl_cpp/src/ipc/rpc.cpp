@@ -1,7 +1,7 @@
 #include "acl_stdafx.hpp"
-#include "log.hpp"
-#include "ipc_client.hpp"
-#include "rpc.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/ipc/ipc_client.hpp"
+#include "acl_cpp/ipc/rpc.hpp"
 
 namespace acl
 {

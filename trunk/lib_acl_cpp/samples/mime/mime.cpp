@@ -2,25 +2,24 @@
 //
 
 #include "stdafx.h"
+#include "lib_acl.h"
 #ifdef WIN32
 #include <vld.h>
-#include "lib_acl.h"
 #else
-#include "lib_acl.h"
 #include <getopt.h>
 #endif
 #include <string>
 #include <errno.h>
 #include <string.h>
-#include "string.hpp"
-#include "ifstream.hpp"
-#include "ofstream.hpp"
-#include "charset_conv.hpp"
-#include "log.hpp"
-#include "mime.hpp"
-#include "mime_body.hpp"
-#include "rfc2047.hpp"
-#include "mime_attach.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/stream/ifstream.hpp"
+#include "acl_cpp/stream/ofstream.hpp"
+#include "acl_cpp/stdlib/charset_conv.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/mime/mime.hpp"
+#include "acl_cpp/mime/mime_body.hpp"
+#include "acl_cpp/mime/rfc2047.hpp"
+#include "acl_cpp/mime/mime_attach.hpp"
 
 using namespace std;
 using namespace acl;

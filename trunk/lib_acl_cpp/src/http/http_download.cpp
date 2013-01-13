@@ -1,9 +1,9 @@
 #include "acl_stdafx.hpp"
-#include "log.hpp"
-#include "http_utils.hpp"
-#include "http_request.hpp"
-#include "http_client.hpp"
-#include "http_download.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/http/http_utils.hpp"
+#include "acl_cpp/http/http_request.hpp"
+#include "acl_cpp/http/http_client.hpp"
+#include "acl_cpp/http/http_download.hpp"
 
 namespace acl
 {

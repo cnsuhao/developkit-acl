@@ -1,6 +1,6 @@
 #include "acl_stdafx.hpp"
-#include "log.hpp"
-#include "aio_ostream.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stream/aio_ostream.hpp"
 
 namespace acl
 {

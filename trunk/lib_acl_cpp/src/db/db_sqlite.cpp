@@ -1,8 +1,8 @@
 #include "acl_stdafx.hpp"
 #include "sqlite3.h"
-#include "charset_conv.hpp"
-#include "log.hpp"
-#include "db_sqlite.hpp"
+#include "acl_cpp/stdlib/charset_conv.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/db/db_sqlite.hpp"
 
 #ifdef HAS_SQLITE
 

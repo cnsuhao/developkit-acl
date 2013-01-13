@@ -1,6 +1,6 @@
 #include "acl_stdafx.hpp"
-#include "string.hpp"
-#include "mime_head.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/mime/mime_head.hpp"
 
 namespace acl {
 

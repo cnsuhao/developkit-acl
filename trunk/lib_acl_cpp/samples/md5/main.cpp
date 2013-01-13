@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include <assert.h>
-#include "md5.hpp"
+#include "acl_cpp/stdlib/md5.hpp"
 #include "md5_c.h"
 
 int main()
