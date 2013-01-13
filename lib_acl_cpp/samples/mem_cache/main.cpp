@@ -1,6 +1,6 @@
 #include "lib_acl.h"
-#include "mem_cache.hpp"
-#include "string.hpp"
+#include "acl_cpp/memcache/mem_cache.hpp"
+#include "acl_cpp/stdlib/string.hpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
