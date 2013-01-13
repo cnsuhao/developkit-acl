@@ -230,7 +230,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
-				RelativePath=".\src\snprintf.c">
+				RelativePath=".\src\proto_snprintf.c">
 			</File>
 			<File
 				RelativePath=".\src\StdAfx.c">

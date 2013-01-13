@@ -1,7 +1,7 @@
 #include "acl_stdafx.hpp"
-#include "log.hpp"
-#include "socket_stream.hpp"
-#include "master_threads.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stream/socket_stream.hpp"
+#include "acl_cpp/master/master_threads.hpp"
 
 namespace acl
 {

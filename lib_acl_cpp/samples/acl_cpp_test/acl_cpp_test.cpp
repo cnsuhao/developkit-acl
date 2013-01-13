@@ -2,7 +2,8 @@
 //
 
 #include "stdafx.h"
-#include "acl_cpp_test.hpp"
+#include "acl_cpp/acl_cpp_test.hpp"
+#include "acl_cpp/stdlib/noncopyable.hpp"
 
 using namespace acl;
 

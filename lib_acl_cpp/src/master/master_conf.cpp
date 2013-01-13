@@ -1,5 +1,5 @@
 #include "acl_stdafx.hpp"
-#include "master_conf.hpp"
+#include "acl_cpp/master/master_conf.hpp"
 
 namespace acl
 {

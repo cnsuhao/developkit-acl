@@ -2,7 +2,7 @@
 //
 
 #include "stdafx.h"
-#include "singleton.hpp"
+#include "acl_cpp/stdlib/singleton.hpp"
 
 // 跟踪调用过程的计数器
 static int __nstep = 0;

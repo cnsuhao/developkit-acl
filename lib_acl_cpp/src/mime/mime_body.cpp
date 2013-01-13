@@ -1,10 +1,10 @@
 #include "acl_stdafx.hpp"
-#include "log.hpp"
-#include "charset_conv.hpp"
-#include "ofstream.hpp"
-#include "xml.hpp"
-#include "mime_define.hpp"
-#include "mime_body.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/charset_conv.hpp"
+#include "acl_cpp/stream/ofstream.hpp"
+#include "acl_cpp/stdlib/xml.hpp"
+#include "acl_cpp/mime/mime_define.hpp"
+#include "acl_cpp/mime/mime_body.hpp"
 
 namespace acl {
 

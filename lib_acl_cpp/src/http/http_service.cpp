@@ -1,10 +1,10 @@
 #include "acl_stdafx.hpp"
-#include "log.hpp"
-#include "string.hpp"
-#include "aio_socket_stream.hpp"
-#include "socket_stream.hpp"
-#include "ipc_client.hpp"
-#include "http_service.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/stream/aio_socket_stream.hpp"
+#include "acl_cpp/stream/socket_stream.hpp"
+#include "acl_cpp/ipc/ipc_client.hpp"
+#include "acl_cpp/http/http_service.hpp"
 
 namespace acl
 {

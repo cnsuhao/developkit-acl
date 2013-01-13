@@ -36,7 +36,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/verbose:lib"
-				AdditionalDependencies="uxtheme.lib polarssl.lib lib_acl_d.lib lib_protocol_d.lib"
+				AdditionalDependencies="uxtheme.lib polarssl.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\lib;..\..\..\dist\lib\win32"
 				IgnoreDefaultLibraryNames="libc"
@@ -49,12 +49,7 @@
 				PreprocessorDefinitions="_DEBUG"
 				MkTypLibCompatible="FALSE"/>
 			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\bin\zlib.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_acl_d.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_protocol_d.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_acl_cpp_vc2003d_dll.dll $(OutDir)\ /Y
-"/>
+				Name="VCPostBuildEventTool"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -111,12 +106,7 @@ copy ..\..\lib\lib_acl_cpp_vc2003d_dll.dll $(OutDir)\ /Y
 				PreprocessorDefinitions="NDEBUG"
 				MkTypLibCompatible="FALSE"/>
 			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\bin\zlib.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_acl.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_protocol.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_acl_cpp_vc2003_dll.dll $(OutDir)\ /Y
-"/>
+				Name="VCPostBuildEventTool"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool

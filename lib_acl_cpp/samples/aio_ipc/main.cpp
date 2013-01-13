@@ -1,13 +1,11 @@
-#ifdef WIN32
 #include "lib_acl.h"
-#else
-#include "lib_acl.h"
+#ifndef WIN32
 #include <getopt.h>
 #endif
 #include <iostream>
-#include "aio_handle.hpp"
-#include "ipc_server.hpp"
-#include "ipc_client.hpp"
+#include "acl_cpp/stream/aio_handle.hpp"
+#include "acl_cpp/ipc/ipc_server.hpp"
+#include "acl_cpp/ipc/ipc_client.hpp"
 
 using namespace acl;
 

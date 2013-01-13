@@ -138,7 +138,7 @@ copy ..\..\bin\iconv.dll $(OutDir)\ /Y
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl_d.lib sqlite3.lib"
+				AdditionalDependencies="sqlite3.lib"
 				OutputFile="$(OutDir)/sqlite.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\lib"
@@ -149,12 +149,7 @@ copy ..\..\bin\iconv.dll $(OutDir)\ /Y
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\bin\sqlite3.dll $(OutDir)\ /Y
-copy ..\..\bin\iconv.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_acl_cpp_vc2003d_dll.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_acl_d.dll $(OutDir)\ /Y
-"/>
+				Name="VCPostBuildEventTool"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -194,7 +189,7 @@ copy ..\..\lib\lib_acl_d.dll $(OutDir)\ /Y
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl.lib sqlite3.lib"
+				AdditionalDependencies="sqlite3.lib"
 				OutputFile="$(OutDir)/sqlite.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\lib"
@@ -207,12 +202,7 @@ copy ..\..\lib\lib_acl_d.dll $(OutDir)\ /Y
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\lib\lib_acl.dll $(OutDir)\ /Y
-copy ..\..\bin\sqlite3.dll $(OutDir)\ /Y
-copy ..\..\bin\iconv.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_acl_cpp_vc2003_dll.dll $(OutDir)\ /Y
-"/>
+				Name="VCPostBuildEventTool"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool

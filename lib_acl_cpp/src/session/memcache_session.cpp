@@ -1,7 +1,7 @@
 #include "acl_stdafx.hpp"
-#include "log.hpp"
-#include "mem_cache.hpp"
-#include "memcache_session.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/memcache/mem_cache.hpp"
+#include "acl_cpp/session/memcache_session.hpp"
 
 namespace acl
 {

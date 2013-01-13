@@ -1,14 +1,10 @@
 #include <iostream>
 #include <assert.h>
-#ifdef	WIN32
 #include "lib_acl.h"
-#else
-#include "lib_acl.h"
-#endif
-#include "aio_handle.hpp"
-#include "aio_istream.hpp"
-#include "aio_listen_stream.hpp"
-#include "aio_socket_stream.hpp"
+#include "acl_cpp/stream/aio_handle.hpp"
+#include "acl_cpp/stream/aio_istream.hpp"
+#include "acl_cpp/stream/aio_listen_stream.hpp"
+#include "acl_cpp/stream/aio_socket_stream.hpp"
 
 using namespace acl;
 

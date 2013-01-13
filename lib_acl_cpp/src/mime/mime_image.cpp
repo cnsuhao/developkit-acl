@@ -1,5 +1,5 @@
 #include "acl_stdafx.hpp"
-#include "mime_image.hpp"
+#include "acl_cpp/mime/mime_image.hpp"
 
 namespace acl {
 

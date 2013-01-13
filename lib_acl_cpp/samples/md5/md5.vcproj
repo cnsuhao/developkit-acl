@@ -142,10 +142,7 @@
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\lib\lib_acl_cpp_vc2003d_dll.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_acl_d.dll $(OutDir)\ /Y
-"/>
+				Name="VCPostBuildEventTool"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -193,10 +190,7 @@ copy ..\..\lib\lib_acl_d.dll $(OutDir)\ /Y
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\lib\lib_acl_cpp_vc2003_dll.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_acl.dll $(OutDir)\ /Y
-"/>
+				Name="VCPostBuildEventTool"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool

@@ -1,6 +1,6 @@
 #include "acl_stdafx.hpp"
-#include "pipe_stream.hpp"
-#include "string.hpp"
+#include "acl_cpp/stdlib/pipe_stream.hpp"
+#include "acl_cpp/stdlib/string.hpp"
 
 namespace acl {
 

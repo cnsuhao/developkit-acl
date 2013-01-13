@@ -1,12 +1,10 @@
-#ifdef WIN32
 #include "lib_acl.h"
-#else
-#include "lib_acl.h"
+#ifndef WIN32
 #include <getopt.h>
 #endif
 #include <iostream>
-#include "aio_handle.hpp"
-#include "dns_service.hpp"
+#include "acl_cpp/stream/aio_handle.hpp"
+#include "acl_cpp/stdlib/dns_service.hpp"
 
 using namespace acl;
 

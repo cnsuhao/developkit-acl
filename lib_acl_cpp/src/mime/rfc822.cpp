@@ -1,10 +1,10 @@
 #include "acl_stdafx.hpp"
 #include <string.h>
-#include "log.hpp"
-#include "string.hpp"
-#include "rfc2047.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/mime/rfc2047.hpp"
 #include "internal/tok822.hpp"
-#include "rfc822.hpp"
+#include "acl_cpp/mime/rfc822.hpp"
 
 namespace acl {
 

@@ -1,5 +1,5 @@
 #include "acl_stdafx.hpp"
-#include "mime_uucode.hpp"
+#include "acl_cpp/mime/mime_uucode.hpp"
 
 namespace acl {
 

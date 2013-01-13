@@ -160,7 +160,7 @@ copy ..\..\..\dist\lib\win32\lib_protocol.dll $(OutDir)\ /Y
 			<Tool
 				Name="VCLinkerTool"
 				RegisterOutput="FALSE"
-				AdditionalDependencies="ws2_32.lib wsock32.lib lib_acl_d.lib lib_acl_cpp_vc2003d_dll.lib"
+				AdditionalDependencies="ws2_32.lib wsock32.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\lib"
 				IgnoreDefaultLibraryNames="libcmtd;libcd"
@@ -177,7 +177,7 @@ copy ..\..\..\dist\lib\win32\lib_protocol.dll $(OutDir)\ /Y
 			<Tool
 				Name="VCPostBuildEventTool"
 				CommandLine="copy ..\..\..\dist\lib\win32\lib_acl_d.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_acl_cpp_vc2003d_dll.dll $(OutDir)\ /Y
+copy ..\..\..\dist\lib\win32\lib_acl_cpp_vc2003d_dll.dll $(OutDir)\ /Y
 copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y
 "/>
 			<Tool
@@ -224,7 +224,7 @@ copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib wsock32.lib lib_acl.lib lib_acl_cpp_vc2003_dll.lib"
+				AdditionalDependencies="ws2_32.lib wsock32.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\lib"
 				IgnoreDefaultLibraryNames="libcmt"
@@ -238,12 +238,7 @@ copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y
 				PreprocessorDefinitions="_DEBUG"
 				MkTypLibCompatible="FALSE"/>
 			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\..\dist\lib\win32\lib_acl.dll $(OutDir)\ /Y
-copy ..\..\..\dist\lib\win32\lib_protocol.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_acl_cpp_vc2003_dll.dll $(OutDir)\ /Y
-copy ..\..\bin\vld.dll $(OutDir)\ /Y
-"/>
+				Name="VCPostBuildEventTool"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -327,9 +322,6 @@ copy ..\..\bin\vld.dll $(OutDir)\ /Y
 			</File>
 			<File
 				RelativePath=".\AioTimer.hpp">
-			</File>
-			<File
-				RelativePath=".\dbghelpapi.h">
 			</File>
 			<File
 				RelativePath=".\detours.h">

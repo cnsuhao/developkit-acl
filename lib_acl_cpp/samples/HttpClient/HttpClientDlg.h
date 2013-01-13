@@ -2,8 +2,8 @@
 //
 
 #pragma once
-#include "aio_handle.hpp"
-#include "http_service.hpp"
+#include "acl_cpp/stream/aio_handle.hpp"
+#include "acl_cpp/http/http_service.hpp"
 
 // CHttpClientDlg ¶Ô»°¿ò
 class CHttpClientDlg : public CDialog

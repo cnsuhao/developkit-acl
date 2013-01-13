@@ -2,7 +2,7 @@
 #define __MIME_STATE_INCLUDE__
 
 #include "lib_acl.h"
-#include "../include/mime_define.hpp"
+#include "acl_cpp/mime/mime_define.hpp"
 #include "header_token.hpp"
 
 typedef struct MIME_NODE MIME_NODE;

@@ -1,8 +1,8 @@
 #include "acl_stdafx.hpp"
 #include "polarssl/ssl.h"
 #include "polarssl/havege.h"
-#include "log.hpp"
-#include "ssl_stream.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stream/ssl_stream.hpp"
 
 //#ifndef HAS_POLARSSL
 //#define HAS_POLARSSL

@@ -1,9 +1,8 @@
 #include "acl_stdafx.hpp"
 #include <assert.h>
-#include "lib_acl.h"
-#include "log.hpp"
-#include "db_pool.hpp"
-#include "db_handle.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/db/db_pool.hpp"
+#include "acl_cpp/db/db_handle.hpp"
 
 namespace acl
 {

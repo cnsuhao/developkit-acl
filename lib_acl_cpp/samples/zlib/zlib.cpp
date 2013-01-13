@@ -2,14 +2,14 @@
 //
 
 #include "stdafx.h"
-#include "string.hpp"
-#include "log.hpp"
-#include "pipe_stream.hpp"
-#include "ofstream.hpp"
-#include "ifstream.hpp"
-#include "charset_conv.hpp"
-#include "malloc.hpp"
-#include "zlib_stream.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/pipe_stream.hpp"
+#include "acl_cpp/stream/ofstream.hpp"
+#include "acl_cpp/stream/ifstream.hpp"
+#include "acl_cpp/stdlib/charset_conv.hpp"
+#include "acl_cpp/stdlib/malloc.hpp"
+#include "acl_cpp/stdlib/zlib_stream.hpp"
 
 static int test_zip_stream(void)
 {

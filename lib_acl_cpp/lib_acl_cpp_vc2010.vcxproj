@@ -80,8 +80,8 @@
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectName)_vc2010d</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='DebugDll|Win32'">$(ProjectName)d_dll</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Releasedll|Win32'">$(ProjectName)_dll</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='DebugDll|Win32'">$(ProjectName)_d</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Releasedll|Win32'">$(ProjectName)</TargetName>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DebugDll|Win32'">true</LinkIncremental>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectName)_vc2010</TargetName>
   </PropertyGroup>
@@ -141,14 +141,14 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y</Command>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>acl_stdafx.hpp</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
-      <ProgramDataBaseFileName>$(OutDir)$(ProjectName)d_dll.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>$(OutDir)$(ProjectName)_d.pdb</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <AdditionalDependencies>lib_protocol_d.lib;lib_acl_d.lib;polarssl.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)$(ProjectName)d_dll.dll</OutputFile>
+      <OutputFile>$(OutDir)$(ProjectName)_d.dll</OutputFile>
       <AdditionalLibraryDirectories>.\lib;..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ImportLibrary>$(OutDir)$(TargetName).lib</ImportLibrary>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -174,14 +174,14 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>acl_stdafx.hpp</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
-      <ProgramDataBaseFileName>$(OutDir)$(ProjectName)_dll.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <AdditionalDependencies>lib_protocol.lib;lib_acl.lib;polarssl.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)$(ProjectName)_dll.dll</OutputFile>
+      <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <AdditionalLibraryDirectories>.\lib;..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ImportLibrary>$(OutDir)$(TargetName).lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>libcmt;libc</IgnoreSpecificDefaultLibraries>
@@ -300,93 +300,97 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClCompile Include="src\stream\stream.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\acl_cpp_define.hpp" />
-    <ClInclude Include="include\acl_cpp_init.hpp" />
-    <ClInclude Include="include\acl_cpp_test.hpp" />
-    <ClInclude Include="include\aio_handle.hpp" />
-    <ClInclude Include="include\aio_istream.hpp" />
-    <ClInclude Include="include\aio_listen_stream.hpp" />
-    <ClInclude Include="include\aio_ostream.hpp" />
-    <ClInclude Include="include\aio_socket_stream.hpp" />
-    <ClInclude Include="include\aio_stream.hpp" />
-    <ClInclude Include="include\charset_conv.hpp" />
-    <ClInclude Include="include\db_handle.hpp" />
-    <ClInclude Include="include\db_mysql.hpp" />
-    <ClInclude Include="include\db_pool.hpp" />
-    <ClInclude Include="include\db_service.hpp" />
-    <ClInclude Include="include\db_service_mysql.hpp" />
-    <ClInclude Include="include\db_service_sqlite.hpp" />
-    <ClInclude Include="include\db_sqlite.hpp" />
-    <ClInclude Include="include\dns_service.hpp" />
-    <ClInclude Include="include\escape.hpp" />
-    <ClInclude Include="include\final_tpl.hpp" />
-    <ClInclude Include="include\fstream.hpp" />
-    <ClInclude Include="include\hsclient.hpp" />
-    <ClInclude Include="include\hserror.hpp" />
-    <ClInclude Include="include\hspool.hpp" />
-    <ClInclude Include="include\hsproto.hpp" />
-    <ClInclude Include="include\hsrow.hpp" />
-    <ClInclude Include="include\hstable.hpp" />
-    <ClInclude Include="include\HttpServlet.hpp" />
-    <ClInclude Include="include\HttpServletRequest.hpp" />
-    <ClInclude Include="include\HttpServletResponse.hpp" />
-    <ClInclude Include="include\HttpSession.hpp" />
-    <ClInclude Include="include\http_client.hpp" />
-    <ClInclude Include="include\http_ctype.hpp" />
-    <ClInclude Include="include\http_header.hpp" />
-    <ClInclude Include="include\http_mime.hpp" />
-    <ClInclude Include="include\http_pipe.hpp" />
-    <ClInclude Include="include\http_request.hpp" />
-    <ClInclude Include="include\http_response.hpp" />
-    <ClInclude Include="include\http_service.hpp" />
-    <ClInclude Include="include\ifstream.hpp" />
-    <ClInclude Include="include\ipc_client.hpp" />
-    <ClInclude Include="include\ipc_server.hpp" />
-    <ClInclude Include="include\ipc_service.hpp" />
-    <ClInclude Include="include\istream.hpp" />
-    <ClInclude Include="include\json.hpp" />
-    <ClInclude Include="include\lib_acl.hpp" />
-    <ClInclude Include="include\locker.hpp" />
-    <ClInclude Include="include\log.hpp" />
-    <ClInclude Include="include\malloc.hpp" />
-    <ClInclude Include="include\master_aio.hpp" />
-    <ClInclude Include="include\master_base.hpp" />
-    <ClInclude Include="include\master_proc.hpp" />
-    <ClInclude Include="include\master_threads.hpp" />
-    <ClInclude Include="include\master_trigger.hpp" />
-    <ClInclude Include="include\md5.hpp" />
-    <ClInclude Include="include\memcache_session.hpp" />
-    <ClInclude Include="include\mem_cache.hpp" />
-    <ClInclude Include="include\mime.hpp" />
-    <ClInclude Include="include\mime_attach.hpp" />
-    <ClInclude Include="include\mime_base64.hpp" />
-    <ClInclude Include="include\mime_body.hpp" />
-    <ClInclude Include="include\mime_code.hpp" />
-    <ClInclude Include="include\mime_define.hpp" />
-    <ClInclude Include="include\mime_head.hpp" />
-    <ClInclude Include="include\mime_image.hpp" />
-    <ClInclude Include="include\mime_node.hpp" />
-    <ClInclude Include="include\mime_quoted_printable.hpp" />
-    <ClInclude Include="include\mime_uucode.hpp" />
-    <ClInclude Include="include\mime_xxcode.hpp" />
-    <ClInclude Include="include\noncopyable.hpp" />
-    <ClInclude Include="include\ofstream.hpp" />
-    <ClInclude Include="include\ostream.hpp" />
-    <ClInclude Include="include\pipe_stream.hpp" />
-    <ClInclude Include="include\rfc2047.hpp" />
-    <ClInclude Include="include\rfc822.hpp" />
-    <ClInclude Include="include\rpc.hpp" />
-    <ClInclude Include="include\session.hpp" />
-    <ClInclude Include="include\singleton.hpp" />
-    <ClInclude Include="include\snprintf.hpp" />
-    <ClInclude Include="include\socket_stream.hpp" />
-    <ClInclude Include="include\ssl_aio_stream.hpp" />
-    <ClInclude Include="include\ssl_stream.hpp" />
-    <ClInclude Include="include\stream.hpp" />
-    <ClInclude Include="include\string.hpp" />
-    <ClInclude Include="include\util.hpp" />
-    <ClInclude Include="include\xml.hpp" />
-    <ClInclude Include="include\zlib_stream.hpp" />
+    <ClInclude Include="include\acl_cpp\acl_cpp_define.hpp" />
+    <ClInclude Include="include\acl_cpp\acl_cpp_init.hpp" />
+    <ClInclude Include="include\acl_cpp\acl_cpp_test.hpp" />
+    <ClInclude Include="include\acl_cpp\db\db_handle.hpp" />
+    <ClInclude Include="include\acl_cpp\db\db_mysql.hpp" />
+    <ClInclude Include="include\acl_cpp\db\db_pool.hpp" />
+    <ClInclude Include="include\acl_cpp\db\db_service.hpp" />
+    <ClInclude Include="include\acl_cpp\db\db_service_mysql.hpp" />
+    <ClInclude Include="include\acl_cpp\db\db_service_sqlite.hpp" />
+    <ClInclude Include="include\acl_cpp\db\db_sqlite.hpp" />
+    <ClInclude Include="include\acl_cpp\hsocket\hsclient.hpp" />
+    <ClInclude Include="include\acl_cpp\hsocket\hserror.hpp" />
+    <ClInclude Include="include\acl_cpp\hsocket\hspool.hpp" />
+    <ClInclude Include="include\acl_cpp\hsocket\hsproto.hpp" />
+    <ClInclude Include="include\acl_cpp\hsocket\hsrow.hpp" />
+    <ClInclude Include="include\acl_cpp\hsocket\hstable.hpp" />
+    <ClInclude Include="include\acl_cpp\http\HttpServlet.hpp" />
+    <ClInclude Include="include\acl_cpp\http\HttpServletRequest.hpp" />
+    <ClInclude Include="include\acl_cpp\http\HttpServletResponse.hpp" />
+    <ClInclude Include="include\acl_cpp\http\HttpSession.hpp" />
+    <ClInclude Include="include\acl_cpp\http\http_client.hpp" />
+    <ClInclude Include="include\acl_cpp\http\http_ctype.hpp" />
+    <ClInclude Include="include\acl_cpp\http\http_download.hpp" />
+    <ClInclude Include="include\acl_cpp\http\http_header.hpp" />
+    <ClInclude Include="include\acl_cpp\http\http_mime.hpp" />
+    <ClInclude Include="include\acl_cpp\http\http_pipe.hpp" />
+    <ClInclude Include="include\acl_cpp\http\http_request.hpp" />
+    <ClInclude Include="include\acl_cpp\http\http_response.hpp" />
+    <ClInclude Include="include\acl_cpp\http\http_service.hpp" />
+    <ClInclude Include="include\acl_cpp\http\http_utils.hpp" />
+    <ClInclude Include="include\acl_cpp\ipc\ipc_client.hpp" />
+    <ClInclude Include="include\acl_cpp\ipc\ipc_server.hpp" />
+    <ClInclude Include="include\acl_cpp\ipc\ipc_service.hpp" />
+    <ClInclude Include="include\acl_cpp\ipc\rpc.hpp" />
+    <ClInclude Include="include\acl_cpp\lib_acl.hpp" />
+    <ClInclude Include="include\acl_cpp\master\master_aio.hpp" />
+    <ClInclude Include="include\acl_cpp\master\master_base.hpp" />
+    <ClInclude Include="include\acl_cpp\master\master_conf.hpp" />
+    <ClInclude Include="include\acl_cpp\master\master_proc.hpp" />
+    <ClInclude Include="include\acl_cpp\master\master_threads.hpp" />
+    <ClInclude Include="include\acl_cpp\master\master_trigger.hpp" />
+    <ClInclude Include="include\acl_cpp\memcache\mem_cache.hpp" />
+    <ClInclude Include="include\acl_cpp\mime\mime.hpp" />
+    <ClInclude Include="include\acl_cpp\mime\mime_attach.hpp" />
+    <ClInclude Include="include\acl_cpp\mime\mime_base64.hpp" />
+    <ClInclude Include="include\acl_cpp\mime\mime_body.hpp" />
+    <ClInclude Include="include\acl_cpp\mime\mime_code.hpp" />
+    <ClInclude Include="include\acl_cpp\mime\mime_define.hpp" />
+    <ClInclude Include="include\acl_cpp\mime\mime_head.hpp" />
+    <ClInclude Include="include\acl_cpp\mime\mime_image.hpp" />
+    <ClInclude Include="include\acl_cpp\mime\mime_node.hpp" />
+    <ClInclude Include="include\acl_cpp\mime\mime_quoted_printable.hpp" />
+    <ClInclude Include="include\acl_cpp\mime\mime_uucode.hpp" />
+    <ClInclude Include="include\acl_cpp\mime\mime_xxcode.hpp" />
+    <ClInclude Include="include\acl_cpp\mime\rfc2047.hpp" />
+    <ClInclude Include="include\acl_cpp\mime\rfc822.hpp" />
+    <ClInclude Include="include\acl_cpp\session\memcache_session.hpp" />
+    <ClInclude Include="include\acl_cpp\session\session.hpp" />
+    <ClInclude Include="include\acl_cpp\stdlib\charset_conv.hpp" />
+    <ClInclude Include="include\acl_cpp\stdlib\dns_service.hpp" />
+    <ClInclude Include="include\acl_cpp\stdlib\escape.hpp" />
+    <ClInclude Include="include\acl_cpp\stdlib\final_tpl.hpp" />
+    <ClInclude Include="include\acl_cpp\stdlib\json.hpp" />
+    <ClInclude Include="include\acl_cpp\stdlib\locker.hpp" />
+    <ClInclude Include="include\acl_cpp\stdlib\log.hpp" />
+    <ClInclude Include="include\acl_cpp\stdlib\malloc.hpp" />
+    <ClInclude Include="include\acl_cpp\stdlib\md5.hpp" />
+    <ClInclude Include="include\acl_cpp\stdlib\noncopyable.hpp" />
+    <ClInclude Include="include\acl_cpp\stdlib\pipe_stream.hpp" />
+    <ClInclude Include="include\acl_cpp\stdlib\singleton.hpp" />
+    <ClInclude Include="include\acl_cpp\stdlib\snprintf.hpp" />
+    <ClInclude Include="include\acl_cpp\stdlib\string.hpp" />
+    <ClInclude Include="include\acl_cpp\stdlib\util.hpp" />
+    <ClInclude Include="include\acl_cpp\stdlib\vld.h" />
+    <ClInclude Include="include\acl_cpp\stdlib\xml.hpp" />
+    <ClInclude Include="include\acl_cpp\stdlib\zlib_stream.hpp" />
+    <ClInclude Include="include\acl_cpp\stream\aio_handle.hpp" />
+    <ClInclude Include="include\acl_cpp\stream\aio_istream.hpp" />
+    <ClInclude Include="include\acl_cpp\stream\aio_listen_stream.hpp" />
+    <ClInclude Include="include\acl_cpp\stream\aio_ostream.hpp" />
+    <ClInclude Include="include\acl_cpp\stream\aio_socket_stream.hpp" />
+    <ClInclude Include="include\acl_cpp\stream\aio_stream.hpp" />
+    <ClInclude Include="include\acl_cpp\stream\fstream.hpp" />
+    <ClInclude Include="include\acl_cpp\stream\ifstream.hpp" />
+    <ClInclude Include="include\acl_cpp\stream\istream.hpp" />
+    <ClInclude Include="include\acl_cpp\stream\ofstream.hpp" />
+    <ClInclude Include="include\acl_cpp\stream\ostream.hpp" />
+    <ClInclude Include="include\acl_cpp\stream\socket_stream.hpp" />
+    <ClInclude Include="include\acl_cpp\stream\ssl_aio_stream.hpp" />
+    <ClInclude Include="include\acl_cpp\stream\ssl_stream.hpp" />
+    <ClInclude Include="include\acl_cpp\stream\stream.hpp" />
     <ClInclude Include="resource_vc2010.h" />
     <ClInclude Include="src\acl_stdafx.hpp" />
     <ClInclude Include="src\mime\internal\header_opts.hpp" />

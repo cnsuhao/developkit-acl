@@ -82,7 +82,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl_vc2003d.lib lib_protocol_vc2003d.lib polarssl.lib"
+				AdditionalDependencies="polarssl.lib"
 				OutputFile="$(OutDir)/rpc_download.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\lib;..\..\..\dist\lib\win32"
@@ -146,12 +146,7 @@
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\bin\zlib.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_acl_d.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_protocol_d.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_acl_cpp_vc2003d_dll.dll $(OutDir)\ /Y
-"/>
+				Name="VCPostBuildEventTool"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -188,7 +183,7 @@ copy ..\..\lib\lib_acl_cpp_vc2003d_dll.dll $(OutDir)\ /Y
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl_vc2003d.lib lib_protocol_vc2003d.lib polarssl.lib"
+				AdditionalDependencies="polarssl.lib"
 				OutputFile="$(OutDir)/rpc_download.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\lib"
@@ -200,12 +195,7 @@ copy ..\..\lib\lib_acl_cpp_vc2003d_dll.dll $(OutDir)\ /Y
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\bin\zlib.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_acl.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_protocol.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_acl_cpp_vc2003_dll.dll $(OutDir)\ /Y
-"/>
+				Name="VCPostBuildEventTool"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool

@@ -3,11 +3,11 @@
 
 #include "lib_acl.h"
 #include "lib_protocol.h"  // http 协议相关
-#include "aio_handle.hpp"
-#include "string.hpp"
-#include "ofstream.hpp"
-#include "acl_cpp_init.hpp"
-#include "http_service.hpp"
+#include "acl_cpp/stream/aio_handle.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/stream/ofstream.hpp"
+#include "acl_cpp/acl_cpp_init.hpp"
+#include "acl_cpp/http/http_service.hpp"
 
 class http_request : public acl::http_service_request
 {

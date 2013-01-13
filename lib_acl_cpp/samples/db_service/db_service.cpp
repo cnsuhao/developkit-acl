@@ -2,14 +2,14 @@
 //
 
 #include "stdafx.h"
-#include "acl_cpp_init.hpp"
 #include <iostream>
-#include "log.hpp"
-#include "string.hpp"
-#include "aio_handle.hpp"
-#include "db_handle.hpp"
-#include "db_sqlite.hpp"
-#include "db_service_sqlite.hpp"
+#include "acl_cpp/acl_cpp_init.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/stream/aio_handle.hpp"
+#include "acl_cpp/db/db_handle.hpp"
+#include "acl_cpp/db/db_sqlite.hpp"
+#include "acl_cpp/db/db_service_sqlite.hpp"
 
 class myquery : public acl::db_query
 {

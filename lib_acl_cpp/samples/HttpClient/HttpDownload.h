@@ -1,8 +1,8 @@
 #pragma once
 #include "lib_acl.h"
 #include "lib_protocol.h"  // http 协议相关
-#include "ofstream.hpp"
-#include "http_service.hpp"
+#include "acl_cpp/stream/ofstream.hpp"
+#include "acl_cpp/http/http_service.hpp"
 
 class acl::string;
 class acl::aio_handle;

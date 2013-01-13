@@ -1,6 +1,5 @@
 #include "acl_stdafx.hpp"
-#include "lib_acl.h"
-#include "hstable.hpp"
+#include "acl_cpp/hsocket/hstable.hpp"
 
 namespace acl
 {

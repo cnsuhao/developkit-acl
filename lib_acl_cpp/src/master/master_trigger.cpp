@@ -1,6 +1,6 @@
 #include "acl_stdafx.hpp"
-#include "log.hpp"
-#include "master_trigger.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/master/master_trigger.hpp"
 
 namespace acl
 {

@@ -1,13 +1,13 @@
 #include "acl_stdafx.hpp"
 #include <stdarg.h>
-#include "log.hpp"
-#include "string.hpp"
-#include "escape.hpp"
-#include "hsrow.hpp"
-#include "hstable.hpp"
-#include "hsproto.hpp"
-#include "hserror.hpp"
-#include "hsclient.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/stdlib/escape.hpp"
+#include "acl_cpp/hsocket/hsrow.hpp"
+#include "acl_cpp/hsocket/hstable.hpp"
+#include "acl_cpp/hsocket/hsproto.hpp"
+#include "acl_cpp/hsocket/hserror.hpp"
+#include "acl_cpp/hsocket/hsclient.hpp"
 
 namespace acl
 {

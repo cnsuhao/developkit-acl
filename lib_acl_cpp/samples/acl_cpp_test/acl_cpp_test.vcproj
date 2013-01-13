@@ -129,7 +129,6 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl.lib"
 				OutputFile="$(OutDir)/acl_cpp_test.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\lib"
@@ -181,7 +180,6 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl_d.lib"
 				OutputFile="$(OutDir)/acl_cpp_test.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\lib"

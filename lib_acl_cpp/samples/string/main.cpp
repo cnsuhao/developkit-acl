@@ -1,6 +1,6 @@
 #include "lib_acl.h"
-#include "ofstream.hpp"
-#include "string.hpp"
+#include "acl_cpp/stream/ofstream.hpp"
+#include "acl_cpp/stdlib/string.hpp"
 #include <stdio.h>
 #include <string>
 

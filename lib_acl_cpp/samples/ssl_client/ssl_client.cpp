@@ -4,11 +4,11 @@
 #include "stdafx.h"
 #include "lib_acl.h"
 #include <iostream>
-#include "acl_cpp_init.hpp"
-#include "http_header.hpp"
-#include "string.hpp"
-#include "ssl_stream.hpp"
-#include "http_client.hpp"
+#include "acl_cpp/acl_cpp_init.hpp"
+#include "acl_cpp/http/http_header.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/stream/ssl_stream.hpp"
+#include "acl_cpp/http/http_client.hpp"
 
 static void test0(int i)
 {

@@ -1,7 +1,7 @@
 #pragma once
-#include "rpc.hpp"
-#include "aio_socket_stream.hpp"
-#include "socket_stream.hpp"
+#include "acl_cpp/ipc/rpc.hpp"
+#include "acl_cpp/stream/aio_socket_stream.hpp"
+#include "acl_cpp/stream/socket_stream.hpp"
 //class acl::aio_socket_stream;
 //class acl::socket_stream;
 

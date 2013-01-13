@@ -1,11 +1,11 @@
 #include <iostream>
 #include <assert.h>
 #include "lib_acl.h"
-#include "string.hpp"
-#include "util.hpp"
-#include "aio_handle.hpp"
-#include "acl_cpp_init.hpp"
-#include "aio_socket_stream.hpp"
+#include "acl_cpp/acl_cpp_init.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/stdlib/util.hpp"
+#include "acl_cpp/stream/aio_handle.hpp"
+#include "acl_cpp/stream/aio_socket_stream.hpp"
 
 #ifdef WIN32
 # ifndef snprintf

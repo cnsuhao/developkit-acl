@@ -1,6 +1,6 @@
 #pragma once
-#include "rpc.hpp"
-#include "string.hpp"
+#include "acl_cpp/ipc/rpc.hpp"
+#include "acl_cpp/stdlib/string.hpp"
 
 class acl::aio_handle;
 class Cgui_rpcDlg;

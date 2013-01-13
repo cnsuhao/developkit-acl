@@ -132,7 +132,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl_d.lib ws2_32.lib"
+				AdditionalDependencies="ws2_32.lib"
 				OutputFile="$(OutDir)/json.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\lib"
@@ -143,11 +143,7 @@
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\lib\lib_protocol_d.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_acl_cpp_vc2003d_dll.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_protocol_d.pdb $(OutDir)\ /Y
-"/>
+				Name="VCPostBuildEventTool"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -184,7 +180,7 @@ copy ..\..\lib\lib_protocol_d.pdb $(OutDir)\ /Y
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib wsock32.lib lib_acl_vc2003.lib"
+				AdditionalDependencies="ws2_32.lib wsock32.lib"
 				OutputFile="$(OutDir)/json.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\lib"
@@ -196,11 +192,7 @@ copy ..\..\lib\lib_protocol_d.pdb $(OutDir)\ /Y
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\lib\lib_protocol.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_acl_cpp_vc2003_dll.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_protocol.pdb $(OutDir)\ /Y
-"/>
+				Name="VCPostBuildEventTool"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool

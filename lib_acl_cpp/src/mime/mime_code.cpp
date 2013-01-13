@@ -1,11 +1,11 @@
 #include "acl_stdafx.hpp"
-#include "log.hpp"
-#include "mime_define.hpp"
-#include "mime_base64.hpp"
-#include "mime_uucode.hpp"
-#include "mime_xxcode.hpp"
-#include "mime_quoted_printable.hpp"
-#include "mime_code.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/mime/mime_define.hpp"
+#include "acl_cpp/mime/mime_base64.hpp"
+#include "acl_cpp/mime/mime_uucode.hpp"
+#include "acl_cpp/mime/mime_xxcode.hpp"
+#include "acl_cpp/mime/mime_quoted_printable.hpp"
+#include "acl_cpp/mime/mime_code.hpp"
 
 namespace acl {
 

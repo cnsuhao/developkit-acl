@@ -1,12 +1,12 @@
 #include "acl_stdafx.hpp"
 #include <string.h>
 #include <stdio.h>
-#include "string.hpp"
-#include "log.hpp"
-#include "escape.hpp"
-#include "hsrow.hpp"
-#include "hserror.hpp"
-#include "hsproto.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/escape.hpp"
+#include "acl_cpp/hsocket/hsrow.hpp"
+#include "acl_cpp/hsocket/hserror.hpp"
+#include "acl_cpp/hsocket/hsproto.hpp"
 
 namespace acl
 {

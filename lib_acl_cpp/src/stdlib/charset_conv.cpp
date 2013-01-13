@@ -11,9 +11,9 @@
 # endif
 #endif
 
-#include "string.hpp"
-#include "log.hpp"
-#include "charset_conv.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/charset_conv.hpp"
 
 #define SCOPY ACL_SAFE_STRNCPY
 

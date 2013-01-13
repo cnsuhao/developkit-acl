@@ -1,14 +1,14 @@
 #include "acl_stdafx.hpp"
 #include "internal/header_opts.hpp"
 #include "internal/mime_state.hpp"
-#include "pipe_stream.hpp"
-#include "mime_define.hpp"
-#include "rfc2047.hpp"
-#include "log.hpp"
-#include "ifstream.hpp"
-#include "ofstream.hpp"
-#include "mime_code.hpp"
-#include "mime_node.hpp"
+#include "acl_cpp/stdlib/pipe_stream.hpp"
+#include "acl_cpp/mime/mime_define.hpp"
+#include "acl_cpp/mime/rfc2047.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stream/ifstream.hpp"
+#include "acl_cpp/stream/ofstream.hpp"
+#include "acl_cpp/mime/mime_code.hpp"
+#include "acl_cpp/mime/mime_node.hpp"
 
 #define	SCOPY(x, y)	ACL_SAFE_STRNCPY((x), (y), sizeof((x)))
 

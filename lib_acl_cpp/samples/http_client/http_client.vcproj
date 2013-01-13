@@ -132,7 +132,6 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl_d.lib lib_protocol_d.lib"
 				OutputFile="$(OutDir)/http_client.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\lib"
@@ -145,14 +144,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"
-				CommandLine="copy ..\..\lib\lib_acl_d.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_protocol_d.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_acl_cpp_vc2003d_dll.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_acl_d.pdb $(OutDir)\ /Y
-copy ..\..\lib\lib_protocol_d.pdb $(OutDir)\ /Y
-copy ..\..\lib\lib_acl_cpp_vc2003d_dll.pdb $(OutDir)\ /Y
-"/>
+				Name="VCPreBuildEventTool"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -187,7 +179,6 @@ copy ..\..\lib\lib_acl_cpp_vc2003d_dll.pdb $(OutDir)\ /Y
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl.lib lib_protocol.lib"
 				OutputFile="$(OutDir)/http_client.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\lib"
@@ -201,12 +192,7 @@ copy ..\..\lib\lib_acl_cpp_vc2003d_dll.pdb $(OutDir)\ /Y
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"
-				CommandLine="copy ..\..\lib\lib_acl.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_protocol.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_acl_cpp_vc2003_dll.dll $(OutDir)\ /Y
-
-"/>
+				Name="VCPreBuildEventTool"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool

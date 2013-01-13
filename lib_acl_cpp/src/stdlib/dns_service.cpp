@@ -1,11 +1,11 @@
 #include "acl_stdafx.hpp"
 #include "lib_acl.h"
 #include <list>
-#include "log.hpp"
-#include "string.hpp"
-#include "ipc_client.hpp"
-#include "ipc_service.hpp"
-#include "dns_service.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/ipc/ipc_client.hpp"
+#include "acl_cpp/ipc/ipc_service.hpp"
+#include "acl_cpp/stdlib/dns_service.hpp"
 
 namespace acl
 {

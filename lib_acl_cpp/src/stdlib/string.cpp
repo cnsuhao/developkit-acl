@@ -1,7 +1,7 @@
 #include "acl_stdafx.hpp"
 #include <utility>
 #include <stdarg.h>
-#include "string.hpp"
+#include "acl_cpp/stdlib/string.hpp"
 
 #define ALLOC(n) acl_vstring_alloc((n))
 #define FREE(x) acl_vstring_free((x))

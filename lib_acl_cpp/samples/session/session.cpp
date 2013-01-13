@@ -2,8 +2,8 @@
 //
 
 #include "stdafx.h"
-#include "acl_cpp_init.hpp"
-#include "memcache_session.hpp"
+#include "acl_cpp/acl_cpp_init.hpp"
+#include "acl_cpp/session/memcache_session.hpp"
 
 using namespace acl;
 

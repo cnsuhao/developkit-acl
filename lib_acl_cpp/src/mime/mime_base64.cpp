@@ -1,5 +1,5 @@
 #include "acl_stdafx.hpp"
-#include "mime_base64.hpp"
+#include "acl_cpp/mime/mime_base64.hpp"
 
 namespace acl {
 

@@ -1,7 +1,7 @@
 #include "acl_stdafx.hpp"
 #include "../mime/internal/header_token.hpp"
 #include "../mime/internal/mime_state.hpp"
-#include "http_ctype.hpp"
+#include "acl_cpp/http/http_ctype.hpp"
 
 namespace acl
 {
