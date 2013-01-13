@@ -1,9 +1,9 @@
 #include <assert.h>
 #include "lib_acl.h"
-#include "charset_conv.hpp"
-#include "mime_base64.hpp"
-#include "fstream.hpp"
-#include "ifstream.hpp"
+#include "acl_cpp/stdlib/charset_conv.hpp"
+#include "acl_cpp/mime/mime_base64.hpp"
+#include "acl_cpp/stream/fstream.hpp"
+#include "acl_cpp/stream/ifstream.hpp"
 #include <stdio.h>
 
 static int test1(void)
