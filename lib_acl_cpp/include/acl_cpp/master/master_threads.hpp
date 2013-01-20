@@ -55,6 +55,7 @@ namespace acl
 		 * @param stream {socket_stream*}
 		 * @return {bool} 如果返回 false 则表示子类要求关闭连接，而不
 		 *  必将该连接再传递至 thread_main 过程
+		 *  注：当本函数返回 false 流关闭时并不调用 thread_on_close 过程
 		 */
 		virtual bool thread_on_accept(socket_stream* stream) { (void) stream; return true; }
 
@@ -69,6 +70,8 @@ namespace acl
 		/**
 		 * 当与某个线程绑定的连接关闭时的回调函数
 		 * @param stream {socket_stream*}
+		 * 注：当在 thread_on_accept 返回 false 后流关闭时该函数并不会
+		 * 被调用
 		 */
 		virtual void thread_on_close(socket_stream* stream) { (void) stream; }
 
