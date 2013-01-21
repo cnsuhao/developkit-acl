@@ -39,7 +39,7 @@ namespace acl
 			(void) data;
 			(void) len;
 			return true;
-		};
+		}
 
 		/**
 		 * 读回调虚函数，该回调函数当满足了类 aio_istream 实例中的
@@ -58,7 +58,7 @@ namespace acl
 		virtual bool write_callback()
 		{
 			return true;
-		};
+		}
 
 		/**
 		 * 读回调虚函数，该回调函数当满足了类 aio_ostream 实例中的
