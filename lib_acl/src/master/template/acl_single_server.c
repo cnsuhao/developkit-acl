@@ -143,9 +143,10 @@ static void single_server_timeout(int event acl_unused, void *context acl_unused
 
 /* single_server_wakeup - wake up application */
 
-static void single_server_wakeup(int fd)
+static void single_server_wakeup(int fd,
+	const char *remote_addr, const char *local_addr)
 {
-	char  myname[] = "single_server_wakeup";
+	const char*  myname = "single_server_wakeup";
 	ACL_VSTREAM *stream;
 
 	/*
@@ -162,6 +163,13 @@ static void single_server_wakeup(int fd)
 	acl_close_on_exec(fd, ACL_CLOSE_ON_EXEC);
 	stream = acl_vstream_fdopen(fd, O_RDWR, acl_var_single_buf_size,
 			acl_var_single_rw_timeout, ACL_VSTREAM_TYPE_SOCK);
+	if (remote_addr)
+		ACL_SAFE_STRNCPY(stream->remote_addr, remote_addr,
+			sizeof(stream->remote_addr));
+	if (local_addr)
+		ACL_SAFE_STRNCPY(stream->local_addr, local_addr,
+			sizeof(stream->local_addr));
+
 	if (acl_master_notify(acl_var_single_pid, single_server_generation, ACL_MASTER_STAT_TAKEN) < 0)
 		single_server_abort(ACL_EVENT_NULL_TYPE, ACL_EVENT_NULL_CONTEXT);
 	if (single_server_in_flow_delay && acl_master_flow_get(1) < 0)
@@ -219,7 +227,7 @@ static void single_server_accept_local(int event acl_unused, void *context)
 				(acl_int64) time_left * 1000000, 0);
 		return;
 	}
-	single_server_wakeup(fd);
+	single_server_wakeup(fd, NULL, NULL);
 }
 
 #ifdef MASTER_XPORT_NAME_PASS
@@ -262,7 +270,7 @@ static void single_server_accept_pass(int event acl_unused, void *context)
 				(acl_int64) time_left * 1000000, 0);
 		return;
 	}
-	single_server_wakeup(fd);
+	single_server_wakeup(fd, NULL, NULL);
 }
 
 #endif
@@ -275,6 +283,7 @@ static void single_server_accept_inet(int event acl_unused, void *context)
 	int     listen_fd = ACL_VSTREAM_SOCK(stream);
 	int     time_left = -1;
 	int     fd;
+	char    remote_addr[64], local_addr[64];
 
 	/*
 	 * Be prepared for accept() to fail because some other process already
@@ -289,7 +298,7 @@ static void single_server_accept_inet(int event acl_unused, void *context)
 
 	if (single_server_pre_accept)
 		single_server_pre_accept(single_server_name, single_server_argv);
-	fd = acl_inet_accept(listen_fd);
+	fd = acl_inet_accept_ex(listen_fd, remote_addr, sizeof(remote_addr));
 	if (single_server_lock != 0
 	    && acl_myflock(ACL_VSTREAM_FILE(single_server_lock),
 		    	ACL_INTERNAL_LOCK,
@@ -305,9 +314,12 @@ static void single_server_accept_inet(int event acl_unused, void *context)
 				(acl_int64) time_left * 1000000, 0);
 		return;
 	}
+	if (acl_getsockname(fd, local_addr, sizeof(local_addr)) < 0)
+		memset(local_addr, 0, sizeof(local_addr));
+
 	/* ±ÜÃâ·¢ËÍÑÓ³ÙÏÖÏó */
 	acl_tcp_set_nodelay(fd);
-	single_server_wakeup(fd);
+	single_server_wakeup(fd, remote_addr, local_addr);
 }
 
 static void single_server_init(const char *procname)
@@ -395,7 +407,7 @@ static void usage(int argc, char *argv[])
 
 void acl_single_server_main(int argc, char **argv, ACL_SINGLE_SERVER_FN service,...)
 {
-	char   *myname = "single_server_main";
+	const char *myname = "single_server_main";
 	ACL_VSTREAM *stream = 0;
 	char   *root_dir = 0;
 	char   *user_name = 0;
