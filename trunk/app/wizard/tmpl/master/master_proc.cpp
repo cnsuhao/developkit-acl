@@ -42,6 +42,6 @@ master_service::~master_service()
 {
 }
 
-void master_service:: on_accept(acl::socket_stream*)
+void master_service::on_accept(acl::socket_stream*)
 {
 }

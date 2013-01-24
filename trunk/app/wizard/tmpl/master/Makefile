@@ -1,2 +1,2 @@
 include ./Makefile.in
-PROG = master_service
+PROG = $<PROGRAM>

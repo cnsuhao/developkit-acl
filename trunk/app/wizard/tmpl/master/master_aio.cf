@@ -31,7 +31,7 @@ service server {
 #	最大进程数
 	master_maxproc = 5
 #	进程程序名
-	master_command = master_service
+	master_command = $<PROGRAM>
 #	进程启动参数，只能为: -u [是否允许以某普通用户的身份运行]
 	master_args =
 #	传递给服务子进程的环境变量, 可以通过 getenv("SERVICE_ENV") 获得此值

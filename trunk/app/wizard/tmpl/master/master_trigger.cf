@@ -25,7 +25,7 @@ service master_trigger
 #	最大进程数
 	master_maxproc = 10
 #	进程程序名
-	master_command = master_service
+	master_command = $<PROGRAM>
 #	进程启动参数，只能为: -u [是否允许以某普通用户的身份运行]
 #	master_args = 
 #	进程日志记录文件

@@ -75,7 +75,8 @@ static tpl_t* open_tpl(const char* filename)
 	filepath.format("%s/%s", src_path_, filename);
 	if (tpl_load(tpl, filepath.c_str()) != TPL_OK)
 	{
-		printf("load file %s error: %s\r\n", filepath.c_str(), last_serror());
+		printf("load file %s error: %s\r\n",
+			filepath.c_str(), last_serror());
 		tpl_free(tpl);
 		return NULL;
 	}
@@ -112,7 +113,8 @@ static bool create_http_servlet()
 	filepath.format("%s/http_servlet.cpp", dst_path_);
 	if (tpl_save_as(tpl, filepath.c_str()) != TPL_OK)
 	{
-		printf("save to %s error: %s\r\n", filepath.c_str(), last_serror());
+		printf("save to %s error: %s\r\n", filepath.c_str(),
+			last_serror());
 		tpl_free(tpl);
 		return false;
 	}
