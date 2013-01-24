@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="master_service"
+	Name="$<PROGRAM>"
 	ProjectGUID="{58FE3581-C997-4BD5-9AC6-AEEB54A43D2C}"
 	Keyword="Win32Proj">
 	<Platforms>
@@ -33,11 +33,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="lib_acl_cpp_vc2003d.lib lib_acl_vc2003d.lib lib_protocol_vc2003d.lib"
-				OutputFile="$(OutDir)/master_service.exe"
+				OutputFile="$(OutDir)/$<PROGRAM>.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\..\dist\lib\win32"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/master_service.pdb"
+				ProgramDatabaseFile="$(OutDir)/$<PROGRAM>.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
@@ -81,7 +81,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="lib_acl_cpp_vc2003.lib lib_acl_vc2003.lib lib_protocol_vc2003.lib"
-				OutputFile="$(OutDir)/master_service.exe"
+				OutputFile="$(OutDir)/$<PROGRAM>.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\dist\lib\win32"
 				GenerateDebugInformation="TRUE"
@@ -130,7 +130,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="lib_acl_cpp_dll.lib lib_acl.lib lib_protocol.lib"
-				OutputFile="$(OutDir)/master_service.exe"
+				OutputFile="$(OutDir)/$<PROGRAM>.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\dist\lib\win32"
 				GenerateDebugInformation="TRUE"
@@ -185,11 +185,11 @@ copy ..\..\..\dist\lib\win32\lib_protocol.dll $(OutDir)\ /Y"/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="lib_acl_cppd_dll.lib lib_acl_d.lib lib_protocol_d.lib"
-				OutputFile="$(OutDir)/master_service.exe"
+				OutputFile="$(OutDir)/$<PROGRAM>.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\..\dist\lib\win32"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/master_service.pdb"
+				ProgramDatabaseFile="$(OutDir)/$<PROGRAM>.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
