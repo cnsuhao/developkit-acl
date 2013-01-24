@@ -19,7 +19,7 @@ extern acl::master_int64_tbl var_conf_int64_tab[];
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class acl::socket_stream;
+//class acl::socket_stream;
 
 class master_service : public acl::master_threads
 {
