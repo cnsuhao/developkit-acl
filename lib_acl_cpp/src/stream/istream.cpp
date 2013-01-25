@@ -70,7 +70,7 @@ namespace acl {
 		return (read(&ch, sizeof(ch), false) == (int) sizeof(ch));
 	}
 
-	bool istream::read(acl::string& s, bool loop /* = true */)
+	bool istream::read(string& s, bool loop /* = true */)
 	{
 		s.clear();
 		int   ret;
@@ -81,7 +81,18 @@ namespace acl {
 		return (true);
 	}
 
-	bool istream::gets(acl::string& s, bool nonl /* = true */)
+	bool istream::read(string& s, size_t max, bool loop /* = true */)
+	{
+		s.clear();
+		s.space(max);
+		int ret = read(s.buf(), max, loop);
+		if (ret == -1)
+			return false;
+		s.set_offset(ret);
+		return true;
+	}
+
+	bool istream::gets(string& s, bool nonl /* = true */)
 	{
 		char buf[8192];
 
@@ -99,7 +110,7 @@ namespace acl {
 		return (false);
 	}
 
-	bool istream::readtags(acl::string& s, const acl::string& tag)
+	bool istream::readtags(string& s, const string& tag)
 	{
 		char buf[8192];
 
@@ -134,7 +145,7 @@ namespace acl {
 		return (ret);
 	}
 
-	bool istream::gets_peek(acl::string& buf, bool nonl /* = true */,
+	bool istream::gets_peek(string& buf, bool nonl /* = true */,
 		bool clear /* = false */)
 	{
 		if (clear)
@@ -151,7 +162,7 @@ namespace acl {
 		return (ready ? true : false);
 	}
 
-	bool istream::read_peek(acl::string& buf, bool clear /* = false */)
+	bool istream::read_peek(string& buf, bool clear /* = false */)
 	{
 		if (clear)
 			buf.clear();
@@ -165,7 +176,7 @@ namespace acl {
 			return true;
 	}
 
-	bool istream::readn_peek(acl::string& buf, size_t cnt, bool clear /* = false */)
+	bool istream::readn_peek(string& buf, size_t cnt, bool clear /* = false */)
 	{
 		if (clear)
 			buf.clear();

@@ -672,6 +672,13 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 					RelativePath=".\src\session\session.cpp">
 				</File>
 			</Filter>
+			<Filter
+				Name="beanstalk"
+				Filter="">
+				<File
+					RelativePath=".\src\beanstalk\beanstalk.cpp">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Í·ÎÄ¼þ"
@@ -998,6 +1005,13 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				</File>
 				<File
 					RelativePath=".\include\acl_cpp\session\session.hpp">
+				</File>
+			</Filter>
+			<Filter
+				Name="beanstalk"
+				Filter="">
+				<File
+					RelativePath=".\include\acl_cpp\beanstalk\beanstalk.hpp">
 				</File>
 			</Filter>
 		</Filter>

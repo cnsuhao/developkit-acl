@@ -102,6 +102,15 @@ namespace acl {
 		bool read(string& s, bool loop = true);
 
 		/**
+		 * 从输入流中读数据至缓冲区中
+		 * @param s {string*} 缓冲区，内部会首先自动清空该缓冲区
+		 * @param max {size_t} 希望读到的数据的最大值
+		 * @param loop {bool} 是否读到要求的 max 字节数为止
+		 * @return {bool} 读数据是否成功
+		 */
+		bool read(string& s, size_t max, bool loop = true);
+
+		/**
 		 * 从输入流中读一行数据至缓冲区中
 		 * @param s {string&} 缓冲区，内部会首先自动清空该缓冲区
 		 * @param nonl {bool} 是否保留所读行数据中的 "\r\n" 或 "\n"
@@ -165,7 +174,7 @@ namespace acl {
 		 *  表示未读完所要求的数据长度，应该通过调用 stream->eof() 来检查
 		 *  输入流是否关闭
 		 */
-		bool readn_peek(acl::string& buf, size_t cnt, bool clear = false);
+		bool readn_peek(string& buf, size_t cnt, bool clear = false);
 
 		/* 以下几个函数重载了输入操作符，它们都是阻塞式操作过程，且需要
 		 * 调用 stream->eof() 来判断输入流是否关闭或是否读到了文件尾 */
