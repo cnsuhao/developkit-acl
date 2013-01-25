@@ -87,7 +87,7 @@ static void test1()
 	acl_pthread_join(tid2, NULL);
 }
 
-int main(int argc, char* argv[])
+int main()
 {
 #if WIN32
 	acl::acl_cpp_init();
