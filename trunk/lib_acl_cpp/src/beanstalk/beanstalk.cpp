@@ -8,8 +8,9 @@
 namespace acl
 {
 
-static ACL_ARGV* request(socket_stream& conn, const char* addr, int timeout,
-	bool retry, const string& cmdline, const void* data = NULL, size_t len = 0)
+static ACL_ARGV* request(socket_stream& conn, const char* addr,
+	int timeout, bool retry, const string& cmdline,
+	const void* data = NULL, size_t len = 0)
 {
 	string line(128);
 	bool retried = false;
@@ -38,7 +39,8 @@ static ACL_ARGV* request(socket_stream& conn, const char* addr, int timeout,
 		}
 
 		// 如果有数据体，则写入数据体
-		if (data && len > 0 && conn.write(data, len) == -1)
+		if (data && len > 0 && (conn.write(data, len) == -1
+			|| conn.write("\r\n", 2) == -1))
 		{
 			conn.close();
 			if (retry && !retried)
@@ -75,10 +77,8 @@ static ACL_ARGV* request(socket_stream& conn, const char* addr, int timeout,
 
 beanstalk::beanstalk(const char* addr, int conn_timeout,
 	bool retry /* = true */)
-: conn_timeout_(conn_timeout)
+: timeout_(conn_timeout)
 , retry_(retry)
-, id_(0)
-, watched_(1)
 {
 	addr_ = acl_mystrdup(addr);
 	errbuf_[0] = 0;
@@ -94,7 +94,7 @@ bool beanstalk::open()
 	if (conn_.opened())
 		return true;
 
-	if (conn_.open(addr_, conn_timeout_, 0) == false)
+	if (conn_.open(addr_, timeout_, 0) == false)
 	{
 		logger_error("connect beanstalkd %s error: %s",
 			addr_, last_serror());
@@ -112,7 +112,7 @@ bool beanstalk::use(const char* tube)
 {
 	string cmdline(128);
 	cmdline.format("use %s\r\n", tube);
-	ACL_ARGV* tokens = request(conn_, addr_, conn_timeout_, retry_, cmdline);
+	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
 	if (tokens == NULL)
 	{
 		logger_error("'%s' error", cmdline.c_str());
@@ -132,12 +132,12 @@ bool beanstalk::use(const char* tube)
 	return true;
 }
 
-bool beanstalk::put(const void* data, size_t n, unsigned int pri /* = 1024 */,
-		    int delay /* = 0 */, int ttr /* = 60 */)
+bool beanstalk::put(const void* data, size_t n, unsigned int* id /* = NULL */,
+	unsigned int pri /* = 1024 */, int delay /* = 0 */, int ttr /* = 60 */)
 {
 	string cmdline(128);
 	cmdline.format("put %d %d %d %d\r\n", pri, delay, ttr, (int) n);
-	ACL_ARGV* tokens = request(conn_, addr_, conn_timeout_, retry_,
+	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_,
 		cmdline, data, n);
 	if (tokens == NULL)
 	{
@@ -154,16 +154,17 @@ bool beanstalk::put(const void* data, size_t n, unsigned int pri /* = 1024 */,
 		return false;
 	}
 
-	id_ = (unsigned int) atoi(tokens->argv[1]);
+	if (id)
+		*id = (unsigned int) atoi(tokens->argv[1]);
 	acl_argv_free(tokens);
 	return true;
 }
 
-bool beanstalk::watch(const char* tube)
+bool beanstalk::watch(const char* tube, int* n /* = NULL */)
 {
 	string cmdline(128);
 	cmdline.format("watch %s\r\n", tube);
-	ACL_ARGV* tokens = request(conn_, addr_, conn_timeout_, retry_, cmdline);
+	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
 	if (tokens == NULL)
 	{
 		logger_error("'%s' error", cmdline.c_str());
@@ -178,16 +179,17 @@ bool beanstalk::watch(const char* tube)
 		return false;
 	}
 
-	watched_ = (unsigned int) atoi(tokens->argv[1]);
+	if (n)
+		*n = atoi(tokens->argv[1]);
 	acl_argv_free(tokens);
 	return true;
 }
 
-bool beanstalk::ignore(const char* tube)
+bool beanstalk::ignore(const char* tube, int* n)
 {
 	string cmdline(128);
 	cmdline.format("ignore %s\r\n", tube);
-	ACL_ARGV* tokens = request(conn_, addr_, conn_timeout_, retry_, cmdline);
+	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
 	if (tokens == NULL)
 	{
 		logger_error("'%s' error", cmdline.c_str());
@@ -202,19 +204,21 @@ bool beanstalk::ignore(const char* tube)
 		return false;
 	}
 
-	watched_ = (unsigned int) atoi(tokens->argv[1]);
+	if (n)
+		*n = atoi(tokens->argv[1]);
 	acl_argv_free(tokens);
 	return true;
 }
 
-bool beanstalk::reserve(string& buf, int timeout /* = 0 */)
+bool beanstalk::reserve(string& buf, unsigned int* id /* = NULL */,
+	int timeout /* = 0 */)
 {
 	string cmdline(128);
-	if (timeout > 0)
+	if (timeout >= 0)
 		cmdline.format("reserve-with-timeout %s\r\n", timeout);
 	else
 		cmdline.format("reserve\r\n");
-	ACL_ARGV* tokens = request(conn_, addr_, conn_timeout_, retry_, cmdline);
+	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
 	if (tokens == NULL)
 	{
 		logger_error("'%s' error", cmdline.c_str());
@@ -228,12 +232,15 @@ bool beanstalk::reserve(string& buf, int timeout /* = 0 */)
 		close();
 		return false;
 	}
-	id_ = (unsigned int) atoi(tokens->argv[1]);
+
+	if (id)
+		*id = (unsigned int) atoi(tokens->argv[1]);
 	unsigned short n = (unsigned short) atoi(tokens->argv[2]);
+	acl_argv_free(tokens);
+
 	if (n == 0)
 	{
 		logger_error("reserve data's length 0");
-		acl_argv_free(tokens);
 		close();
 		return false;
 	}
@@ -242,11 +249,15 @@ bool beanstalk::reserve(string& buf, int timeout /* = 0 */)
 	if (conn_.read(buf, n, true) == false)
 	{
 		logger_error("reserve read body failed");
-		acl_argv_free(tokens);
 		close();
 		return false;
 	}
-	acl_argv_free(tokens);
+	else if (conn_.gets(cmdline) == false)
+	{
+		logger_error("reserve: gets last line failed");
+		close();
+		return false;
+	}
 	return true;
 }
 
@@ -254,7 +265,7 @@ bool beanstalk::delete_id(unsigned int id)
 {
 	string cmdline(128);
 	cmdline.format("delete %u\r\n", id);
-	ACL_ARGV* tokens = request(conn_, addr_, conn_timeout_, retry_, cmdline);
+	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
 	if (tokens == NULL)
 	{
 		logger_error("'%s' error", cmdline.c_str());
@@ -276,7 +287,7 @@ bool beanstalk::release(unsigned int id, int pri /* = 1024 */, int delay /* = 0*
 {
 	string cmdline(128);
 	cmdline.format("release %u %d %d\r\n", id, pri, delay);
-	ACL_ARGV* tokens = request(conn_, addr_, conn_timeout_, retry_, cmdline);
+	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
 	if (tokens == NULL)
 	{
 		logger_error("'%s' error", cmdline.c_str());
@@ -298,7 +309,7 @@ bool beanstalk::bury(unsigned int id, int pri /* = 1024 */)
 {
 	string cmdline(128);
 	cmdline.format("bury %u %d %d\r\n", id, pri);
-	ACL_ARGV* tokens = request(conn_, addr_, conn_timeout_, retry_, cmdline);
+	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
 	if (tokens == NULL)
 	{
 		logger_error("'%s' error", cmdline.c_str());
@@ -320,7 +331,7 @@ bool beanstalk::touch(unsigned int id)
 {
 	string cmdline(128);
 	cmdline.format("touch %u\r\n", id);
-	ACL_ARGV* tokens = request(conn_, addr_, conn_timeout_, retry_, cmdline);
+	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
 	if (tokens == NULL)
 	{
 		logger_error("'%s' error", cmdline.c_str());
@@ -338,7 +349,7 @@ bool beanstalk::touch(unsigned int id)
 	return true;
 }
 
-bool beanstalk::peek_fmt(string& buf, const char* fmt, ...)
+bool beanstalk::peek_fmt(string& buf, unsigned int* id, const char* fmt, ...)
 {
 	string cmdline(128);
 	va_list ap;
@@ -346,7 +357,7 @@ bool beanstalk::peek_fmt(string& buf, const char* fmt, ...)
 	cmdline.vformat(fmt, ap);
 	va_end(ap);
 
-	ACL_ARGV* tokens = request(conn_, addr_, conn_timeout_, retry_, cmdline);
+	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
 	if (tokens == NULL)
 	{
 		logger_error("'%s' error", cmdline.c_str());
@@ -358,7 +369,8 @@ bool beanstalk::peek_fmt(string& buf, const char* fmt, ...)
 		acl_argv_free(tokens);
 		return false;
 	}
-	id_ = (unsigned int) atoi(tokens->argv[1]);
+	if (id)
+		*id = (unsigned int) atoi(tokens->argv[1]);
 	unsigned short n = (unsigned short) atoi(tokens->argv[2]);
 	acl_argv_free(tokens);
 
@@ -376,45 +388,51 @@ bool beanstalk::peek_fmt(string& buf, const char* fmt, ...)
 		close();
 		return false;
 	}
+	else if (conn_.gets(cmdline) == false)
+	{
+		logger_error("peek: gets last line falied");
+		close();
+		return false;
+	}
 	return true;
 }
 
 bool beanstalk::peek(string& buf, unsigned int id)
 {
-	return peek_fmt(buf, "peek %u\r\n", id);
+	return peek_fmt(buf, NULL, "peek %u\r\n", id);
 }
 
-bool beanstalk::peek_ready(string& buf)
+bool beanstalk::peek_ready(string& buf, unsigned int* id)
 {
-	return peek_fmt(buf, "peek-ready\r\n");
+	return peek_fmt(buf, id, "peek-ready\r\n");
 }
 
-bool beanstalk::peek_delayed(string& buf)
+bool beanstalk::peek_delayed(string& buf, unsigned int* id)
 {
-	return peek_fmt(buf, "peek-delayed\r\n");
+	return peek_fmt(buf, id, "peek-delayed\r\n");
 }
 
-bool beanstalk::peek_buried(string& buf)
+bool beanstalk::peek_buried(string& buf, unsigned int* id)
 {
-	return peek_fmt(buf, "peek-buried\r\n");
+	return peek_fmt(buf, id, "peek-buried\r\n");
 }
 
 int beanstalk::kick(int n)
 {
 	string cmdline(128);
 	cmdline.format("kick %d\r\n", n);
-	ACL_ARGV* tokens = request(conn_, addr_, conn_timeout_, retry_, cmdline);
+	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
 	if (tokens == NULL)
 	{
 		logger_error("'%s' error", cmdline.c_str());
-		return 0;
+		return -1;
 	}
 	if (strcasecmp(tokens->argv[0], "KICKED"))
 	{
 		logger_error("'%s' error %s", cmdline.c_str(), tokens->argv[0]);
 		ACL_SAFE_STRNCPY(errbuf_, tokens->argv[0], sizeof(errbuf_));
 		acl_argv_free(tokens);
-		return 0;
+		return -1;
 	}
 
 	int  ret;
@@ -430,7 +448,7 @@ bool beanstalk::list_tube_used(string& buf)
 {
 	string cmdline(128);
 	cmdline.format("list-tube-used\r\n");
-	ACL_ARGV* tokens = request(conn_, addr_, conn_timeout_, retry_, cmdline);
+	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
 	if (tokens == NULL)
 	{
 		logger_error("'%s' error", cmdline.c_str());
@@ -458,7 +476,7 @@ bool beanstalk::list_tubes_fmt(string& buf, const char* fmt, ...)
 	cmdline.vformat(fmt, ap);
 	va_end(ap);
 
-	ACL_ARGV* tokens = request(conn_, addr_, conn_timeout_, retry_, cmdline);
+	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
 	if (tokens == NULL)
 	{
 		logger_error("'%s' error", cmdline.c_str());
@@ -505,7 +523,7 @@ bool beanstalk::pause_tube(const char* tube, int delay)
 {
 	string cmdline(128);
 	cmdline.format("pause-tube %s %d\r\n", tube, delay);
-	ACL_ARGV* tokens = request(conn_, addr_, conn_timeout_, retry_, cmdline);
+	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
 	if (tokens == NULL)
 	{
 		logger_error("'%s' error", cmdline.c_str());
