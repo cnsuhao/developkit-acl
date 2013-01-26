@@ -133,10 +133,11 @@ bool beanstalk::use(const char* tube)
 }
 
 bool beanstalk::put(const void* data, size_t n, unsigned int* id /* = NULL */,
-	unsigned int pri /* = 1024 */, int delay /* = 0 */, int ttr /* = 60 */)
+	unsigned int pri /* = 1024 */, unsigned int delay /* = 0 */,
+	unsigned int ttr /* = 60 */)
 {
 	string cmdline(128);
-	cmdline.format("put %d %d %d %d\r\n", pri, delay, ttr, (int) n);
+	cmdline.format("put %u %u %u %u\r\n", pri, delay, ttr, (unsigned int) n);
 	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_,
 		cmdline, data, n);
 	if (tokens == NULL)
@@ -160,7 +161,7 @@ bool beanstalk::put(const void* data, size_t n, unsigned int* id /* = NULL */,
 	return true;
 }
 
-bool beanstalk::watch(const char* tube, int* n /* = NULL */)
+bool beanstalk::watch(const char* tube, unsigned int* n /* = NULL */)
 {
 	string cmdline(128);
 	cmdline.format("watch %s\r\n", tube);
@@ -185,7 +186,7 @@ bool beanstalk::watch(const char* tube, int* n /* = NULL */)
 	return true;
 }
 
-bool beanstalk::ignore(const char* tube, int* n)
+bool beanstalk::ignore(const char* tube, unsigned int* n)
 {
 	string cmdline(128);
 	cmdline.format("ignore %s\r\n", tube);
@@ -211,11 +212,11 @@ bool beanstalk::ignore(const char* tube, int* n)
 }
 
 bool beanstalk::reserve(string& buf, unsigned int* id /* = NULL */,
-	int timeout /* = 0 */)
+	int timeout /* = -1 */)
 {
 	string cmdline(128);
 	if (timeout >= 0)
-		cmdline.format("reserve-with-timeout %s\r\n", timeout);
+		cmdline.format("reserve-with-timeout %d\r\n", timeout);
 	else
 		cmdline.format("reserve\r\n");
 	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
@@ -283,10 +284,11 @@ bool beanstalk::delete_id(unsigned int id)
 	return true;
 }
 
-bool beanstalk::release(unsigned int id, int pri /* = 1024 */, int delay /* = 0*/)
+bool beanstalk::release(unsigned int id, unsigned int pri /* = 1024 */,
+	unsigned int delay /* = 0*/)
 {
 	string cmdline(128);
-	cmdline.format("release %u %d %d\r\n", id, pri, delay);
+	cmdline.format("release %u %u %u\r\n", id, pri, delay);
 	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
 	if (tokens == NULL)
 	{
@@ -305,10 +307,10 @@ bool beanstalk::release(unsigned int id, int pri /* = 1024 */, int delay /* = 0*
 	return true;
 }
 
-bool beanstalk::bury(unsigned int id, int pri /* = 1024 */)
+bool beanstalk::bury(unsigned int id, unsigned int pri /* = 1024 */)
 {
 	string cmdline(128);
-	cmdline.format("bury %u %d %d\r\n", id, pri);
+	cmdline.format("bury %u %u %u\r\n", id, pri);
 	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
 	if (tokens == NULL)
 	{
@@ -417,10 +419,10 @@ bool beanstalk::peek_buried(string& buf, unsigned int* id)
 	return peek_fmt(buf, id, "peek-buried\r\n");
 }
 
-int beanstalk::kick(int n)
+int beanstalk::kick(unsigned int n)
 {
 	string cmdline(128);
-	cmdline.format("kick %d\r\n", n);
+	cmdline.format("kick %u\r\n", n);
 	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
 	if (tokens == NULL)
 	{
@@ -519,10 +521,10 @@ bool beanstalk::list_tubes_watched(string& buf)
 	return list_tubes_fmt(buf, "list-tubes-watched\r\n");
 }
 
-bool beanstalk::pause_tube(const char* tube, int delay)
+bool beanstalk::pause_tube(const char* tube, unsigned int delay)
 {
 	string cmdline(128);
-	cmdline.format("pause-tube %s %d\r\n", tube, delay);
+	cmdline.format("pause-tube %s %u\r\n", tube, delay);
 	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
 	if (tokens == NULL)
 	{
