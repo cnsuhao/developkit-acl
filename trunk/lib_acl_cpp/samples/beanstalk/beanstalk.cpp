@@ -22,17 +22,17 @@ static void* producer(void* ctx)
 		printf("use %s ok\r\n", __tube);
 
 	acl::string data;
-	unsigned int id;
+	unsigned long long id;
 	for (int i = 0; i < __max; i++)
 	{
 		data.format("hello-%d", i);
-		if (conn.put(data.c_str(), data.length(), &id) == false)
+		if ((id = conn.put(data.c_str(), data.length())) == 0)
 		{
 			printf("put %s failed\r\n", data.c_str());
 			return NULL;
 		}
 		else
-			printf("put %s ok, id: %u\r\n", data.c_str(), id);
+			printf("put %s ok, id: %llu\r\n", data.c_str(), id);
 	}
 
 	return NULL;
@@ -50,10 +50,10 @@ static void* consumer(void* ctx)
 	}
 
 	acl::string buf;
-	unsigned int id;
+	unsigned long long id;
 	for (int i = 0; i < __max; i++)
 	{
-		if (conn.reserve(buf, &id) == false)
+		if ((id = conn.reserve(buf)) == 0)
 		{
 			printf("reserve failed\r\n");
 			return NULL;
@@ -74,12 +74,6 @@ static void* consumer(void* ctx)
 
 static void test1()
 {
-	printf("long long int size: %d, %d\r\n", sizeof(unsigned long long int), sizeof(long int));
-	acl::string buf;
-	buf.format("max uint64: %llu, max uint32: %u", (unsigned long long int) -1, (unsigned int) -1);
-	printf("%s\r\n", buf.c_str());
-	getchar();
-	return;
 	acl_pthread_attr_t attr;
 	acl_pthread_t tid1, tid2;
 
