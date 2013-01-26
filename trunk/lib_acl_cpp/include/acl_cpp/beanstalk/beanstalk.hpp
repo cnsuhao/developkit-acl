@@ -5,6 +5,20 @@
 namespace acl
 {
 
+/**
+ * 消息 ID 号从 1 开始递增(参加 beanstalkd 的 job.c 源程序中的如下内容：
+ *     static uint64 next_id = 1; 及 make_job_with_id() 中的
+ *     if (id) {
+ *         j->r.id = id;
+ *         if (id >= next_id) next_id = id + 1;
+ *     } else {
+ *         j->r.id = next_id++;
+ *     }
+ * 消息优先级 pri 的取值范围为 0 ~ 4,294,968,295(最大无符号整数值)，值越小
+ * 则优先级别越高，最高级别为 0 级
+ * 消息体默认最大长度为 65,535(最大无符号 short 值)，该值可以在启动 beanstalkd 指定
+ * 更多内容请参考本项目 doc/ 目录下的 <beanstalk协议介绍.pdf>
+ */
 class ACL_CPP_API beanstalk
 {
 public:
