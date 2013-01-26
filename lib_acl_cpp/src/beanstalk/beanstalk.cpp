@@ -8,6 +8,10 @@
 namespace acl
 {
 
+#ifdef WIN32
+#define atoll _atoi64
+#endif
+
 static ACL_ARGV* request(socket_stream& conn, const char* addr,
 	int timeout, bool retry, const string& cmdline,
 	const void* data = NULL, size_t len = 0)
@@ -132,8 +136,8 @@ bool beanstalk::use(const char* tube)
 	return true;
 }
 
-bool beanstalk::put(const void* data, size_t n, unsigned int* id /* = NULL */,
-	unsigned int pri /* = 1024 */, unsigned int delay /* = 0 */,
+unsigned long long beanstalk::put(const void* data, size_t n,
+	unsigned pri /* = 1024 */, unsigned delay /* = 0 */,
 	unsigned int ttr /* = 60 */)
 {
 	string cmdline(128);
@@ -143,7 +147,7 @@ bool beanstalk::put(const void* data, size_t n, unsigned int* id /* = NULL */,
 	if (tokens == NULL)
 	{
 		logger_error("'%s' error", cmdline.c_str());
-		return false;
+		return 0;
 	}
 
 	if (tokens->argc < 2 || strcasecmp(tokens->argv[0], "INSERTED"))
@@ -152,16 +156,15 @@ bool beanstalk::put(const void* data, size_t n, unsigned int* id /* = NULL */,
 		ACL_SAFE_STRNCPY(errbuf_, tokens->argv[0], sizeof(errbuf_));
 		acl_argv_free(tokens);
 		close();
-		return false;
+		return 0;
 	}
 
-	if (id)
-		*id = (unsigned int) atoi(tokens->argv[1]);
+	unsigned long long id = (unsigned long long) atoll(tokens->argv[1]);
 	acl_argv_free(tokens);
-	return true;
+	return id;
 }
 
-bool beanstalk::watch(const char* tube, unsigned int* n /* = NULL */)
+unsigned beanstalk::watch(const char* tube)
 {
 	string cmdline(128);
 	cmdline.format("watch %s\r\n", tube);
@@ -169,7 +172,7 @@ bool beanstalk::watch(const char* tube, unsigned int* n /* = NULL */)
 	if (tokens == NULL)
 	{
 		logger_error("'%s' error", cmdline.c_str());
-		return false;
+		return 0;
 	}
 	if (tokens->argc < 2 || strcasecmp(tokens->argv[0], "WATCHING"))
 	{
@@ -177,16 +180,15 @@ bool beanstalk::watch(const char* tube, unsigned int* n /* = NULL */)
 		ACL_SAFE_STRNCPY(errbuf_, tokens->argv[0], sizeof(errbuf_));
 		acl_argv_free(tokens);
 		close();
-		return false;
+		return 0;
 	}
 
-	if (n)
-		*n = atoi(tokens->argv[1]);
+	unsigned n = (unsigned) atoi(tokens->argv[1]);
 	acl_argv_free(tokens);
-	return true;
+	return n;
 }
 
-bool beanstalk::ignore(const char* tube, unsigned int* n)
+unsigned beanstalk::ignore(const char* tube)
 {
 	string cmdline(128);
 	cmdline.format("ignore %s\r\n", tube);
@@ -194,7 +196,7 @@ bool beanstalk::ignore(const char* tube, unsigned int* n)
 	if (tokens == NULL)
 	{
 		logger_error("'%s' error", cmdline.c_str());
-		return false;
+		return 0;
 	}
 	if (tokens->argc < 2 || strcasecmp(tokens->argv[0], "WATCHING"))
 	{
@@ -202,17 +204,15 @@ bool beanstalk::ignore(const char* tube, unsigned int* n)
 		ACL_SAFE_STRNCPY(errbuf_, tokens->argv[0], sizeof(errbuf_));
 		acl_argv_free(tokens);
 		close();
-		return false;
+		return 0;
 	}
 
-	if (n)
-		*n = atoi(tokens->argv[1]);
+	unsigned n = (unsigned) atoi(tokens->argv[1]);
 	acl_argv_free(tokens);
-	return true;
+	return n;
 }
 
-bool beanstalk::reserve(string& buf, unsigned int* id /* = NULL */,
-	int timeout /* = -1 */)
+unsigned long long beanstalk::reserve(string& buf, int timeout /* = -1 */)
 {
 	string cmdline(128);
 	if (timeout >= 0)
@@ -223,7 +223,7 @@ bool beanstalk::reserve(string& buf, unsigned int* id /* = NULL */,
 	if (tokens == NULL)
 	{
 		logger_error("'%s' error", cmdline.c_str());
-		return false;
+		return 0;
 	}
 	if (tokens->argc < 3 || strcasecmp(tokens->argv[0], "RESERVED"))
 	{
@@ -231,11 +231,10 @@ bool beanstalk::reserve(string& buf, unsigned int* id /* = NULL */,
 		ACL_SAFE_STRNCPY(errbuf_, tokens->argv[0], sizeof(errbuf_));
 		acl_argv_free(tokens);
 		close();
-		return false;
+		return 0;
 	}
 
-	if (id)
-		*id = (unsigned int) atoi(tokens->argv[1]);
+	unsigned long long id = (unsigned long long) atoll(tokens->argv[1]);
 	unsigned short n = (unsigned short) atoi(tokens->argv[2]);
 	acl_argv_free(tokens);
 
@@ -243,7 +242,7 @@ bool beanstalk::reserve(string& buf, unsigned int* id /* = NULL */,
 	{
 		logger_error("reserve data's length 0");
 		close();
-		return false;
+		return 0;
 	}
 
 	// 读取规定的字节数
@@ -251,21 +250,21 @@ bool beanstalk::reserve(string& buf, unsigned int* id /* = NULL */,
 	{
 		logger_error("reserve read body failed");
 		close();
-		return false;
+		return 0;
 	}
 	else if (conn_.gets(cmdline) == false)
 	{
 		logger_error("reserve: gets last line failed");
 		close();
-		return false;
+		return 0;
 	}
-	return true;
+	return id;
 }
 
-bool beanstalk::delete_id(unsigned int id)
+bool beanstalk::delete_id(unsigned long long id)
 {
 	string cmdline(128);
-	cmdline.format("delete %u\r\n", id);
+	cmdline.format("delete %llu\r\n", id);
 	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
 	if (tokens == NULL)
 	{
@@ -284,11 +283,11 @@ bool beanstalk::delete_id(unsigned int id)
 	return true;
 }
 
-bool beanstalk::release(unsigned int id, unsigned int pri /* = 1024 */,
-	unsigned int delay /* = 0*/)
+bool beanstalk::release(unsigned long long id, unsigned pri /* = 1024 */,
+	unsigned delay /* = 0*/)
 {
 	string cmdline(128);
-	cmdline.format("release %u %u %u\r\n", id, pri, delay);
+	cmdline.format("release %llu %u %u\r\n", id, pri, delay);
 	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
 	if (tokens == NULL)
 	{
@@ -307,10 +306,10 @@ bool beanstalk::release(unsigned int id, unsigned int pri /* = 1024 */,
 	return true;
 }
 
-bool beanstalk::bury(unsigned int id, unsigned int pri /* = 1024 */)
+bool beanstalk::bury(unsigned long long id, unsigned int pri /* = 1024 */)
 {
 	string cmdline(128);
-	cmdline.format("bury %u %u %u\r\n", id, pri);
+	cmdline.format("bury %llu %u %u\r\n", id, pri);
 	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
 	if (tokens == NULL)
 	{
@@ -329,10 +328,10 @@ bool beanstalk::bury(unsigned int id, unsigned int pri /* = 1024 */)
 	return true;
 }
 
-bool beanstalk::touch(unsigned int id)
+bool beanstalk::touch(unsigned long long id)
 {
 	string cmdline(128);
-	cmdline.format("touch %u\r\n", id);
+	cmdline.format("touch %llu\r\n", id);
 	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
 	if (tokens == NULL)
 	{
@@ -351,7 +350,7 @@ bool beanstalk::touch(unsigned int id)
 	return true;
 }
 
-bool beanstalk::peek_fmt(string& buf, unsigned int* id, const char* fmt, ...)
+unsigned long long beanstalk::peek_fmt(string& buf, const char* fmt, ...)
 {
 	string cmdline(128);
 	va_list ap;
@@ -363,16 +362,15 @@ bool beanstalk::peek_fmt(string& buf, unsigned int* id, const char* fmt, ...)
 	if (tokens == NULL)
 	{
 		logger_error("'%s' error", cmdline.c_str());
-		return false;
+		return 0;
 	}
 	if (tokens->argc < 3 || strcasecmp(tokens->argv[0], "FOUND"))
 	{
 		ACL_SAFE_STRNCPY(errbuf_, tokens->argv[0], sizeof(errbuf_));
 		acl_argv_free(tokens);
-		return false;
+		return 0;
 	}
-	if (id)
-		*id = (unsigned int) atoi(tokens->argv[1]);
+	unsigned long long id = (unsigned long long) atoll(tokens->argv[1]);
 	unsigned short n = (unsigned short) atoi(tokens->argv[2]);
 	acl_argv_free(tokens);
 
@@ -380,7 +378,7 @@ bool beanstalk::peek_fmt(string& buf, unsigned int* id, const char* fmt, ...)
 	{
 		logger_error("peek data's length 0");
 		close();
-		return false;
+		return 0;
 	}
 
 	// 读取规定的字节数
@@ -388,38 +386,38 @@ bool beanstalk::peek_fmt(string& buf, unsigned int* id, const char* fmt, ...)
 	{
 		logger_error("peek read body failed");
 		close();
-		return false;
+		return 0;
 	}
 	else if (conn_.gets(cmdline) == false)
 	{
 		logger_error("peek: gets last line falied");
 		close();
-		return false;
+		return 0;
 	}
-	return true;
+	return id;
 }
 
-bool beanstalk::peek(string& buf, unsigned int id)
+unsigned long long beanstalk::peek(string& buf, unsigned long long id)
 {
-	return peek_fmt(buf, NULL, "peek %u\r\n", id);
+	return peek_fmt(buf, "peek %llu\r\n", id);
 }
 
-bool beanstalk::peek_ready(string& buf, unsigned int* id)
+unsigned long long beanstalk::peek_ready(string& buf)
 {
-	return peek_fmt(buf, id, "peek-ready\r\n");
+	return peek_fmt(buf, "peek-ready\r\n");
 }
 
-bool beanstalk::peek_delayed(string& buf, unsigned int* id)
+unsigned long long beanstalk::peek_delayed(string& buf)
 {
-	return peek_fmt(buf, id, "peek-delayed\r\n");
+	return peek_fmt(buf, "peek-delayed\r\n");
 }
 
-bool beanstalk::peek_buried(string& buf, unsigned int* id)
+unsigned long long beanstalk::peek_buried(string& buf)
 {
-	return peek_fmt(buf, id, "peek-buried\r\n");
+	return peek_fmt(buf, "peek-buried\r\n");
 }
 
-int beanstalk::kick(unsigned int n)
+int beanstalk::kick(unsigned n)
 {
 	string cmdline(128);
 	cmdline.format("kick %u\r\n", n);
@@ -521,7 +519,7 @@ bool beanstalk::list_tubes_watched(string& buf)
 	return list_tubes_fmt(buf, "list-tubes-watched\r\n");
 }
 
-bool beanstalk::pause_tube(const char* tube, unsigned int delay)
+bool beanstalk::pause_tube(const char* tube, unsigned delay)
 {
 	string cmdline(128);
 	cmdline.format("pause-tube %s %u\r\n", tube, delay);
