@@ -74,6 +74,12 @@ static void* consumer(void* ctx)
 
 static void test1()
 {
+	printf("long long int size: %d, %d\r\n", sizeof(unsigned long long int), sizeof(long int));
+	acl::string buf;
+	buf.format("max uint64: %llu, max uint32: %u", (unsigned long long int) -1, (unsigned int) -1);
+	printf("%s\r\n", buf.c_str());
+	getchar();
+	return;
 	acl_pthread_attr_t attr;
 	acl_pthread_t tid1, tid2;
 

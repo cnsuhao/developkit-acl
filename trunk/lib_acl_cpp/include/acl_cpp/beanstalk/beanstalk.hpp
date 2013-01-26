@@ -34,13 +34,14 @@ public:
 	 * @param id {unsigned int*} 当正确添加一条消息后，若该指针非空，
 	 *  则用来存储所添加消息的ID号
 	 * @param pri {unsigned int} 优先级，值越小，优先级越高
-	 * @param delay {int} 表示将job放入ready队列需要等待的秒数
-	 * @param ttr {int} 表示允许一个worker执行该消息的秒数
+	 * @param delay {unsigned int} 表示将job放入ready队列需要等待的秒数
+	 * @param ttr {unsigned int} 表示允许一个worker执行该消息的秒数
 	 * @return {bool} 是否成功，如果成功，则可以通过 get_id()
 	 *  来获得队列服务器给本消息分配的消息号
 	 */
 	bool put(const void* data, size_t n, unsigned int* id = NULL,
-		unsigned int pri = 1024, int delay = 0, int ttr = 60);
+		unsigned int pri = 1024, unsigned int delay = 0,
+		unsigned int ttr = 60);
 
 	/////////////////////////////////////////////////////////////////////
 	// 消费者调用的接口
@@ -49,20 +50,20 @@ public:
 	 * 选择读取消息的管道，将其加入监控管理列表中，
 	 * 不调用本函数，则使用缺省的管道(default)
 	 * @param tube {const char*} 管理名称
-	 * @param n {int*} 如果该指针非空，则当命令成功返回后该地址存储
+	 * @param n {unsigned int*} 如果该指针非空，则当命令成功返回后该地址存储
 	 *  当前连接所关注的消息管道(tube)的数量
 	 * @return {bool} 是否成功
 	 */
-	bool watch(const char* tube, int* n = NULL);
+	bool watch(const char* tube, unsigned int* n = NULL);
 
 	/**
 	 * 取消关注(watch)一个接收消息的管道(tube)
 	 * @param tube {const char*} 管理名称
-	 * @param n {int*} 如果该指针非空，则当命令成功返回后该地址存储
+	 * @param n {unsigned int*} 如果该指针非空，则当命令成功返回后该地址存储
 	 *  当前连接所关注的消息管道(tube)的数量
 	 * @return {bool} 是否成功
 	 */
-	bool ignore(const char* tube, int* n = NULL);
+	bool ignore(const char* tube, unsigned int* n = NULL);
 
 	/**
 	 * 从消息输出管道中获取一条消息，但并不删除消息，可以设置
@@ -88,20 +89,20 @@ public:
 	 * 将一个已经被获取的消息重新放回ready队列(并将job状态置为 "ready")，
 	 * 让该job可以被其他客户端执行
 	 * @param id {unsigned int} 消息号
-	 * @param pri {int} 优先级别
-	 * @param delay {int} 表示在该消息被放入ready队列之前需要等待的秒数
+	 * @param pri {unsigned int} 优先级别
+	 * @param delay {unsigned int} 表示在该消息被放入ready队列之前需要等待的秒数
 	 * @return {bool} 是否成功
 	 */
-	bool release(unsigned int id, int pri = 1024, int delay = 0);
+	bool release(unsigned int id, unsigned int pri = 1024, unsigned int delay = 0);
 
 	/**
 	 * 命令将一个消息的状态置为 "buried", Buried 消息被放在一个FIFO的链表中，
 	 * 在客户端调用kick命令之前，这些消息将不会被服务端处理
 	 * @param id {unsigned int} 消息号
-	 * @param pri {int} 优先级别
+	 * @param pri {unsigned int} 优先级别
 	 * @return {bool} 是否成功
 	 */
-	bool bury(unsigned int id, int pri = 1024);
+	bool bury(unsigned int id, unsigned int pri = 1024);
 
 	/**
 	 * 命令允许一个worker请求在一个消息获取更多执行的时间。这对于那些需要
@@ -174,11 +175,11 @@ public:
 	/**
 	 * 该命令只能针对当前正在使用的tube执行；它将 buried
 	 * 或者 delayed 状态的消息移动到 ready 队列
-	 * @param n {int} 表示每次 kick 消息的上限，服务端将最多 kick
+	 * @param n {unsigned int} 表示每次 kick 消息的上限，服务端将最多 kick
 	 *  的消息数量
 	 * @return {int} 表示本次kick操作作用消息的数目，返回 -1 表示出错
 	 */
-	int  kick(int n);
+	int  kick(unsigned int n);
 
 	/**
 	 * 获得客户当前正在使用的消息管道
@@ -204,10 +205,10 @@ public:
 	/**
 	 * 给定时间内暂停从指定消息管道(tube)中获取消息
 	 * @param tube {const char*} 消息管道名
-	 * @param delay {int} 指定时间段
+	 * @param delay {unsigned int} 指定时间段
 	 * @return {bool} 是否成功
 	 */
-	bool pause_tube(const char* tube, int delay);
+	bool pause_tube(const char* tube, unsigned int delay);
 
 	/////////////////////////////////////////////////////////////////////
 	// 公共接口

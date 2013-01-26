@@ -52,6 +52,7 @@
   * floating-point numbers, use a similar estimate, and add DBL_MAX_10_EXP
   * just to be sure.
   */
+
 #define INT_SPACE	((CHAR_BIT * sizeof(acl_int64)) / 2)
 #define SIZE_T_SPACE	((CHAR_BIT * sizeof(size_t)) / 2)
 #define DBL_SPACE	((CHAR_BIT * sizeof(double)) / 2 + DBL_MAX_10_EXP)
@@ -66,13 +67,7 @@
 	    (bp)->ptr++, (bp)->cnt--; \
     }
 
-#define ACL_VSTRING_ADDNUM(vp, n) { \
-	ACL_VSTRING_SPACE(vp, INT_SPACE); \
-	snprintf(acl_vstring_end(vp), ACL_VSTRING_SIZE(vp), "%d", n); \
-	VBUF_SKIP(&vp->vbuf); \
-    }
-
-#define ACL_VBUF_STRCAT(bp, s) { \
+#define VBUF_STRCAT(bp, s) { \
 	const unsigned char *_cp = (const unsigned char *) (s); \
 	int _ch; \
 	while ((_ch = *_cp++) != 0) \
@@ -83,182 +78,194 @@
 
 ACL_VBUF *acl_vbuf_print(ACL_VBUF *bp, const char *format, va_list ap)
 {
-#if 0
-    static ACL_VSTRING *fmt;		/* format specifier */
-#endif
-    ACL_VSTRING *fmt = NULL;		/* format specifier */
-    const unsigned char *cp;
-    unsigned width;			/* field width */
-    unsigned prec;			/* numerical precision */
-    unsigned long_flag;			/* long or plain integer */
-    int     ch;
-    char   *s;
+	const unsigned char *cp;
+	unsigned width;			/* field width */
+	unsigned prec;			/* numerical precision */
+	unsigned long_flag;		/* long or plain integer */
+	int     ch;
+	char   *s;
+#define MAX_LEN	128
+	char fmt[MAX_LEN + 1];		/* format specifier */
+	int  i;
 
-#undef	RETURN
-#define	RETURN(x) {  \
-	if (fmt)  \
-		acl_vstring_free(fmt);  \
-	return (x);  \
-}
+#define	CHECK_OVERFLOW(_i, _max) do {  \
+	if (_i >= _max)  \
+		acl_msg_fatal("fmt overflow: i: %d MAX: %d", (_i), (_max));  \
+} while (0)
 
-    /*
-     * Assume that format strings are short.
-     * if (fmt == 0)
-     */
-
-    fmt = acl_vstring_alloc(INT_SPACE);
-
-    /*
-     * Iterate over characters in the format string, picking up arguments
-     * when format specifiers are found.
-     */
-    for (cp = (const unsigned char *) format; *cp; cp++) {
-	if (*cp != '%') {
-	    ACL_VBUF_PUT(bp, *cp);			/* ordinary character */
-	} else if (cp[1] == '%') {
-	    ACL_VBUF_PUT(bp, *cp++);		/* %% becomes % */
-	} else {
-		char ebuf[256];
-
-	    /*
-	     * Handle format specifiers one at a time, since we can only deal
-	     * with arguments one at a time. Try to determine the end of the
-	     * format specifier. We do not attempt to fully parse format
-	     * strings, since we are ging to let sprintf() do the hard work.
-	     * In regular expression notation, we recognize:
-	     * 
-	     * %-?0?([0-9]+|\*)?\.?([0-9]+|\*)?l?[a-zA-Z]
-	     * 
-	     * which includes some combinations that do not make sense. Garbage
-	     * in, garbage out.
-	     */
-	    ACL_VSTRING_RESET(fmt);		/* clear format string */
-	    ACL_VSTRING_ADDCH(fmt, *cp++);
-	    if (*cp == '-')			/* left-adjusted field? */
-		ACL_VSTRING_ADDCH(fmt, *cp++);
-	    if (*cp == '+')			/* signed field? */
-		ACL_VSTRING_ADDCH(fmt, *cp++);
-	    if (*cp == '0')			/* zero-padded field? */
-		ACL_VSTRING_ADDCH(fmt, *cp++);
-	    if (*cp == '*') {			/* dynamic field width */
-		width = va_arg(ap, int);
-		ACL_VSTRING_ADDNUM(fmt, width);
-		cp++;
-	    } else {				/* hard-coded field width */
-		for (width = 0; ACL_ISDIGIT(ch = *cp); cp++) {
-		    width = width * 10 + ch - '0';
-		    ACL_VSTRING_ADDCH(fmt, ch);
+	/*
+	 * Iterate over characters in the format string, picking up arguments
+	 * when format specifiers are found.
+	 */
+	for (cp = (const unsigned char *) format; *cp; cp++) {
+		if (*cp != '%') {
+			ACL_VBUF_PUT(bp, *cp);		/* ordinary character */
+			continue;
+		} else if (cp[1] == '%') {
+			ACL_VBUF_PUT(bp, *cp++);	/* %% becomes % */
+			continue;
 		}
-	    }
-	    if (*cp == '.')			/* width/precision separator */
-		ACL_VSTRING_ADDCH(fmt, *cp++);
-	    if (*cp == '*') {			/* dynamic precision */
-		prec = va_arg(ap, int);
-		ACL_VSTRING_ADDNUM(fmt, prec);
-		cp++;
-	    } else {				/* hard-coded precision */
-		for (prec = 0; ACL_ISDIGIT(ch = *cp); cp++) {
-		    prec = prec * 10 + ch - '0';
-		    ACL_VSTRING_ADDCH(fmt, ch);
+
+		/*
+		 * Handle format specifiers one at a time, since we can only
+		 * deal with arguments one at a time. Try to determine the end
+		 * of the format specifier. We do not attempt to fully parse
+		 * format strings, since we are ging to let sprintf() do the
+		 * hard work.
+		 * In regular expression notation, we recognize:
+		 * 
+		 * %-?0?([0-9]+|\*)?\.?([0-9]+|\*)?l?[a-zA-Z]
+		 * 
+		 * which includes some combinations that do not make sense.
+		 * Garbage in, garbage out.
+		 */
+		i = 0;				/* clear format string */
+		fmt[i++] = *cp++;
+		if (*cp == '-')			/* left-adjusted field? */
+			fmt[i++] = *cp++;
+		if (*cp == '+')			/* signed field? */
+			fmt[i++] = *cp++;
+		if (*cp == '0')			/* zero-padded field? */
+			fmt[i++] = *cp++;
+		if (*cp == '*') {		/* dynamic field width */
+			width = va_arg(ap, int);
+			sprintf(fmt + i, "%d", width);
+			i += sizeof(int);
+			cp++;
+		} else {			/* hard-coded field width */
+			for (width = 0; ACL_ISDIGIT(ch = *cp); cp++) {
+				width = width * 10 + ch - '0';
+				fmt[i++] = ch; 
+				CHECK_OVERFLOW(i, MAX_LEN);
+			}
 		}
-	    }
+		if (*cp == '.')			/* width/precision separator */
+			fmt[i++] = *cp++;
+		if (*cp == '*') {		/* dynamic precision */
+			prec = va_arg(ap, int);
+			sprintf(fmt + i, "%d", prec);
+			i += sizeof(int);
+			cp++;
+		} else {			/* hard-coded precision */
+			for (prec = 0; ACL_ISDIGIT(ch = *cp); cp++) {
+				prec = prec * 10 + ch - '0';
+				fmt[i++] = ch;
+				CHECK_OVERFLOW(i, MAX_LEN);
+			}
+		}
 #ifdef ACL_MS_WINDOWS
-	    if (*cp == 'l') {
-		    if (*(cp + 1) == 'l') {
-			    acl_vstring_strcat(fmt, "I64");
-			    cp += 2;
-			    long_flag = 2;
-		    } else {
-			ACL_VSTRING_ADDCH(fmt, *cp++);
+		if (*cp == 'l') {
+			if (*(cp + 1) == 'l') {
+				fmt[i++] = 'I';
+				fmt[i++] = '6';
+				fmt[i++] = '4';
+				cp += 2;
+				long_flag = 2;
+			} else {
+				fmt[i++] = *cp++;
+				long_flag = 1;
+			}
+		} else if (*cp == 'z') {
+			fmt[i++] = 'I';
+			cp++;
 			long_flag = 1;
-		    }
-	    } else if (*cp == 'z') {
-		    ACL_VSTRING_ADDCH(fmt, 'I');
-		    cp++;
-		    long_flag = 1;
-	    } else
-		    long_flag = 0;
+		} else
+			long_flag = 0;
 #else
-	    if (*cp == 'l') {			/* long whatever */
-		    if (*(cp + 1) == 'l') {
-			ACL_VSTRING_ADDCH(fmt, *cp++);
-			ACL_VSTRING_ADDCH(fmt, *cp++);
-			long_flag = 2;
-		    } else {
-			ACL_VSTRING_ADDCH(fmt, *cp++);
+		if (*cp == 'l') {		/* long whatever */
+			if (*(cp + 1) == 'l') {
+				fmt[i++] = *cp++;
+				fmt[i++] = *cp++;
+				long_flag = 2;
+			} else {
+				fmt[i++] = *cp++;
+				long_flag = 1;
+			}
+		} else if (*cp == 'z') {
+			fmt[i++] = *cp++;
 			long_flag = 1;
-		    }
-	    } else if (*cp == 'z') {
-		    ACL_VSTRING_ADDCH(fmt, *cp++);
-		    long_flag = 1;
-	    } else
-		    long_flag = 0;
+		} else
+			long_flag = 0;
 #endif
-	    if (*cp == 0)			/* premature end, punt */
-		break;
-	    ACL_VSTRING_ADDCH(fmt, *cp);		/* type (checked below) */
-	    ACL_VSTRING_TERMINATE(fmt);		/* null terminate */
+		if (*cp == 0)			/* premature end, punt */
+			break;
+		fmt[i++] = *cp;			/* type (checked below) */
+		fmt[i] = 0;			/* null terminate */
 
-	    /*
-	     * Execute the format string - let sprintf() do the hard work for
-	     * non-trivial cases only. For simple string conversions and for
-	     * long string conversions, do a direct copy to the output
-	     * buffer.
-	     */
-	    switch (*cp) {
-	    case 's':				/* string-valued argument */
-		s = va_arg(ap, char *);
-		if (prec > 0 || (width > 0 && width > strlen(s))) {
-		    if (ACL_VBUF_SPACE(bp, (width > prec ? width : prec) + INT_SPACE))
-			RETURN (bp);
-		    sprintf((char *) bp->ptr, acl_vstring_str(fmt), s);
-		    VBUF_SKIP(bp);
-		} else {
-		    ACL_VBUF_STRCAT(bp, s);
+		/*
+		 * Execute the format string - let sprintf() do the hard work
+		 * for non-trivial cases only. For simple string conversions
+		 * and for long string conversions, do a direct copy to the
+		 * output buffer.
+		 */
+		switch (*cp) {
+		case 's':			/* string-valued argument */
+			s = va_arg(ap, char *);
+			if (prec > 0 || (width > 0 && width > strlen(s))) {
+				if (ACL_VBUF_SPACE(bp, (width > prec
+					? width : prec) + INT_SPACE))
+				{
+					return bp;
+				}
+				sprintf((char *) bp->ptr, fmt, s);
+				VBUF_SKIP(bp);
+			} else {
+				VBUF_STRCAT(bp, s);
+			}
+			break;
+		case 'c':			/* integral-valued argument */
+		case 'd':
+		case 'u':
+		case 'o':
+		case 'x':
+		case 'X':
+			if (ACL_VBUF_SPACE(bp, (width > prec
+				? width : prec) + INT_SPACE))
+			{
+				return bp;
+			}
+			if (long_flag == 0)
+				sprintf((char *) bp->ptr, fmt, va_arg(ap, int));
+			else if (long_flag == 1)
+				sprintf((char *) bp->ptr, fmt, va_arg(ap, long));
+			else if (long_flag == 2)
+				sprintf((char *) bp->ptr, fmt, va_arg(ap, acl_int64));
+			else
+				acl_msg_panic("%s: unknown format type: %c,"
+					" long_flag: %d", __FUNCTION__,
+					*cp, long_flag);
+			VBUF_SKIP(bp);
+			break;
+		case 'e':			/* float-valued argument */
+		case 'f':
+		case 'g':
+			if (ACL_VBUF_SPACE(bp, (width > prec
+				? width : prec) + DBL_SPACE))
+			{
+				return bp;
+			}
+			sprintf((char *) bp->ptr, fmt, va_arg(ap, double));
+			VBUF_SKIP(bp);
+			break;
+		case 'm':
+			VBUF_STRCAT(bp, acl_last_serror());
+			break;
+		case 'p':
+			if (ACL_VBUF_SPACE(bp, (width > prec
+				? width : prec) + PTR_SPACE))
+			{
+				return bp;
+			}
+			sprintf((char *) bp->ptr, fmt, va_arg(ap, char *));
+			VBUF_SKIP(bp);
+			break;
+		default:			/* anything else is bad */
+			acl_msg_panic("%s: unknown format type: %c",
+				__FUNCTION__, *cp);
+			/* NOTREACHED */
+			break;
 		}
-		break;
-	    case 'c':				/* integral-valued argument */
-	    case 'd':
-	    case 'u':
-	    case 'o':
-	    case 'x':
-	    case 'X':
-		if (ACL_VBUF_SPACE(bp, (width > prec ? width : prec) + INT_SPACE))
-		    RETURN (bp);
-		if (long_flag == 0)
-		    sprintf((char *) bp->ptr, acl_vstring_str(fmt), va_arg(ap, int));
-		else if (long_flag == 1)
-		    sprintf((char *) bp->ptr, acl_vstring_str(fmt), va_arg(ap, long));
-		else if (long_flag == 2)
-		    sprintf((char *) bp->ptr, acl_vstring_str(fmt), va_arg(ap, acl_int64));
-		else
-			acl_msg_panic("vbuf_print: unknown format type: %c, long_flag: %d", *cp, long_flag);
-		VBUF_SKIP(bp);
-		break;
-	    case 'e':				/* float-valued argument */
-	    case 'f':
-	    case 'g':
-		if (ACL_VBUF_SPACE(bp, (width > prec ? width : prec) + DBL_SPACE))
-		    RETURN (bp);
-		sprintf((char *) bp->ptr, acl_vstring_str(fmt), va_arg(ap, double));
-		VBUF_SKIP(bp);
-		break;
-	    case 'm':
-		ACL_VBUF_STRCAT(bp, acl_last_strerror(ebuf, sizeof(ebuf)));
-		break;
-	    case 'p':
-		if (ACL_VBUF_SPACE(bp, (width > prec ? width : prec) + PTR_SPACE))
-		    RETURN (bp);
-		sprintf((char *) bp->ptr, acl_vstring_str(fmt), va_arg(ap, char *));
-		VBUF_SKIP(bp);
-		break;
-	    default:				/* anything else is bad */
-		acl_msg_panic("vbuf_print: unknown format type: %c", *cp);
-		/* NOTREACHED */
-		break;
-	    }
 	}
-    }
-    RETURN (bp);
-}
 
+	return bp;
+}

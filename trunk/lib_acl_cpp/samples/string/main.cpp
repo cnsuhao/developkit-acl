@@ -64,6 +64,8 @@ static void test3(void)
 		acl::string::parse_int(n2).c_str());
 }
 
+//////////////////////////////////////////////////////////////////////////
+
 static void test41(void)
 {
 	acl::string buf;
@@ -120,6 +122,8 @@ static void test4(void)
 	ACL_METER_TIME(">> end acl::string");
 }
 
+//////////////////////////////////////////////////////////////////////////
+
 static void test51(void)
 {
 	std::string buf;
@@ -175,6 +179,8 @@ static void test5(void)
 	}
 	ACL_METER_TIME(">> end std::string");
 }
+
+//////////////////////////////////////////////////////////////////////////
 
 static void test61(void)
 {
@@ -233,6 +239,29 @@ static void test6(void)
 	}
 	ACL_METER_TIME(">> end ACL_VSTRING");
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+static void test71(void)
+{
+	ACL_VSTRING* buf = acl_vstring_alloc(256);
+
+	acl_vstring_sprintf(buf, "max unsigned int: %u; max unsigned long long int: %llu",
+		(unsigned int) -1, (unsigned long long) -1);
+	acl_vstring_free(buf);
+}
+
+static void test7(void)
+{
+	ACL_METER_TIME(">> begin ACL_VSTRING: acl_vstring_sprintf");
+	for (int i = 0; i < 100000; i++)
+	{
+		test71();
+	}
+	ACL_METER_TIME(">> end ACL_VSTRING: acl_vstring_sprintf");
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 static void test_main(void)
 {
@@ -324,6 +353,20 @@ static void test_main(void)
 
 int main(void)
 {
+	//acl_mem_slice_init(8, 1024, 1000000, ACL_SLICE_FLAG_GC2 | ACL_SLICE_FLAG_RTGC_OFF);
+
+	acl::string buf;
+	const char* sss = "hello world!";
+	buf.format("max unsigned short: %30u\r\n", (unsigned short) -1);
+	buf.format_append("max unsigned int: %30u\r\n", (unsigned int) -1);
+	buf.format_append("max unsigned long long int: %30llu\r\n",
+		(unsigned long long int) -1);
+	buf.format_append("sss: %s, max unsigned int: %u", sss,
+		(unsigned int) -1);
+	printf(">>buf: %s\r\n", buf.c_str());
+	printf("enter any key to continue\r\n");
+	getchar();
+
 	const char* s[] = { "a.b", "a.", ".b", ".", "ab", "abcd.txt", NULL };
 	acl::string s1, s2, ss;
 	for (size_t i = 0;  s[i] != NULL; i++)
@@ -343,14 +386,15 @@ int main(void)
 			printf("right: |%s|, len: %d\r\n", s2.c_str(), (int) s2.length());
 		}
 	}
-	return 0;
+	printf("enter any key to continue ...\r\n");
+	getchar();
 
-	acl_mem_slice_init(8, 1024, 1000000, ACL_SLICE_FLAG_GC2 | ACL_SLICE_FLAG_RTGC_OFF);
 	test_main();
 
 	test4();
 	test5();
 	test6();
+	test7();
 
 #ifdef WIN32
 	printf("enter any key to exit\r\n");
