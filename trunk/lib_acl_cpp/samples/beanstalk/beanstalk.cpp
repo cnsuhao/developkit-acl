@@ -62,11 +62,11 @@ static void* consumer(void* ctx)
 			printf("reserved: %s\r\n", buf.c_str());
 		if (conn.delete_id(id) == false)
 		{
-			printf("delete id %u failed\r\n", id);
+			printf("delete id %llu failed\r\n", id);
 			return NULL;
 		}
 		else
-			printf("delete id %u ok\r\n", id);
+			printf("delete id %llu ok\r\n", id);
 	}
 
 	return NULL;
