@@ -185,6 +185,15 @@ unsigned beanstalk::watch(const char* tube)
 
 	unsigned n = (unsigned) atoi(tokens->argv[1]);
 	acl_argv_free(tokens);
+
+	// 如果服务器返回所关注的队列数为 0，肯定是出错了，因为至少还有一个
+	// 缺省队列：default，所以此时需要关闭连接，以尽量消除与本连接相关
+	// 的错误，下一个命令会自动进行重连操作以恢复操作过程
+	if (n == 0)
+	{
+		logger_error("'%s' error, tube watched is 0", cmdline.c_str());
+		close();
+	}
 	return n;
 }
 
@@ -209,11 +218,21 @@ unsigned beanstalk::ignore(const char* tube)
 
 	unsigned n = (unsigned) atoi(tokens->argv[1]);
 	acl_argv_free(tokens);
+
+	// 如果服务器返回所关注的队列数为 0，肯定是出错了，因为至少还有一个
+	// 缺省队列：default，所以此时需要关闭连接，以尽量消除与本连接相关
+	// 的错误，下一个命令会自动进行重连操作以恢复操作过程
+	if (n == 0)
+	{
+		logger_error("'%s' error, tube watched is 0", cmdline.c_str());
+		close();
+	}
 	return n;
 }
 
 unsigned long long beanstalk::reserve(string& buf, int timeout /* = -1 */)
 {
+	buf.clear(); // 虽然读操作过程也会清空缓存
 	string cmdline(128);
 	if (timeout >= 0)
 		cmdline.format("reserve-with-timeout %d\r\n", timeout);
@@ -352,6 +371,8 @@ bool beanstalk::touch(unsigned long long id)
 
 unsigned long long beanstalk::peek_fmt(string& buf, const char* fmt, ...)
 {
+	buf.clear(); // 虽然读操作过程也会清空缓存
+
 	string cmdline(128);
 	va_list ap;
 	va_start(ap, fmt);
@@ -446,6 +467,8 @@ int beanstalk::kick(unsigned n)
 
 bool beanstalk::list_tube_used(string& buf)
 {
+	buf.clear(); // 虽然读操作过程也会清空缓存
+
 	string cmdline(128);
 	cmdline.format("list-tube-used\r\n");
 	ACL_ARGV* tokens = request(conn_, addr_, timeout_, retry_, cmdline);
@@ -470,6 +493,8 @@ bool beanstalk::list_tube_used(string& buf)
 
 bool beanstalk::list_tubes_fmt(string& buf, const char* fmt, ...)
 {
+	buf.clear(); // 虽然读操作过程也会清空缓存
+
 	string cmdline(128);
 	va_list ap;
 	va_start(ap, fmt);

@@ -18,6 +18,7 @@ namespace acl
  * 则优先级别越高，最高级别为 0 级
  * 消息体默认最大长度为 65,535(最大无符号 short 值)，该值可以在启动 beanstalkd 指定
  * 更多内容请参考本项目 doc/ 目录下的 <beanstalk协议介绍.pdf>
+ * 本类中的命令过程内部会自动进行连接操作，所以一般来说不用显式调用 open 过程
  */
 class ACL_CPP_API beanstalk
 {
@@ -77,7 +78,7 @@ public:
 	/**
 	 * 从消息输出管道中获取一条消息，但并不删除消息，可以设置
 	 * 等待超时，如果设为 -1 则永远阻塞等待消息可用
-	 * @param buf {string&} 存储获得的一条消息
+	 * @param buf {string&} 存储获得的一条消息，函数内部会先清空该缓冲区
 	 * @param timeout {int} 等待队列服务器返回消息的超时值，当为 -1
 	 *  时，则无限期等待，当 > 0 时，则在该时间内若没有消息，则返回，
 	 *  当 == 0 时，则立即返回一条消息或返回超时
@@ -145,7 +146,7 @@ public:
 
 	/**
 	 * 获取消息队列中指定的消息号的数据
-	 * @param buf {string&} 如果消息存在则存储该条消息
+	 * @param buf {string&} 如果消息存在则存储该条消息，函数内部会先清空该缓冲区
 	 * @param id {unsigned long long} 指定的消息号
 	 * @return {unsigned long long} 返回取得的 ready 状态消息号，
 	 *  若返回值 > 0 则说明取得了一个消息，否则表示没有消息可用
@@ -155,7 +156,7 @@ public:
 	/**
 	 * 获得当前关注 (watch) 管道中的一条 ready 状态消息，
 	 * 如果消息不存在也立即返回
-	 * @param buf {string&} 如果消息存在则存储该条消息
+	 * @param buf {string&} 如果消息存在则存储该条消息，函数内部会先清空该缓冲区
 	 * @return {unsigned long long} 返回取得的 ready 状态消息号，
 	 *  若返回值 > 0 则说明取得了一个消息，否则表示没有消息可用
 	 */
@@ -164,7 +165,7 @@ public:
 	/**
 	 * 获得当前关注 (watch) 管道中的一条 delayed 状态消息，
 	 * 如果消息不存在也立即返回
-	 * @param buf {string&} 如果消息存在则存储该条消息
+	 * @param buf {string&} 如果消息存在则存储该条消息，函数内部会先清空该缓冲区
 	 * @return {unsigned long long} 返回取得的 delayed 状态消息号，
 	 *  若返回值 > 0 则说明取得了一个消息，否则表示没有消息可用
 	 */
@@ -173,7 +174,7 @@ public:
 	/**
 	 * 获得当前关注 (watch) 管道中的一条 buried 状态消息，
 	 * 如果消息不存在也立即返回
-	 * @param buf {string&} 如果消息存在则存储该条消息
+	 * @param buf {string&} 如果消息存在则存储该条消息，函数内部会先清空该缓冲区
 	 * @return {unsigned long long} 返回取得的 buried 状态消息号，
 	 *  若返回值 > 0 则说明取得了一个消息，否则表示没有消息可用
 	 */
@@ -190,21 +191,21 @@ public:
 
 	/**
 	 * 获得客户当前正在使用的消息管道
-	 * @param buf {string&} 存储当前使用的消息管道
+	 * @param buf {string&} 存储当前使用的消息管道，函数内部会先清空该缓冲区
 	 * @return {bool} 是否成功获得
 	 */
 	bool list_tube_used(string&buf);
 
 	/**
 	 * 获得已经存在的所有消息管道(tube)的列表集合
-	 * @param buf {string&} 存储结果
+	 * @param buf {string&} 存储结果，函数内部会先清空该缓冲区
 	 * @return {bool} 是否成功获得
 	 */
 	bool list_tubes(string& buf);
 
 	/**
 	 * 获得当前关注(watch)的消息管道的集合
-	 * @param buf {string&} 存储结果
+	 * @param buf {string&} 存储结果，函数内部会先清空该缓冲区
 	 * @return {bool} 是否成功获得
 	 */
 	bool list_tubes_watched(string& buf);

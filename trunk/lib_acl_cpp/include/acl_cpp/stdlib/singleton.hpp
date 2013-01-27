@@ -111,7 +111,7 @@ bool singleton_wrapper< T >::destroyed_ = false;
  * 开关，则有可能是线程不安全的，此时不能保证单例对象的构造函数在
  * main 之前执行.
  * 使用举例如下：
- * class singleton_test : acl::singleton<singlegon_test>
+ * class singleton_test : public acl::singleton<singlegon_test>
  * {
  * public:
  *   singleton_test() {}
@@ -121,7 +121,7 @@ bool singleton_wrapper< T >::destroyed_ = false;
 
  * int main()
  * {
- *   singleton_test& test = acl::singleton_test::get_instance();
+ *   singleton_test& test = singleton_test::get_instance();
  *   test.init();
  *   ...
  *   return 0;

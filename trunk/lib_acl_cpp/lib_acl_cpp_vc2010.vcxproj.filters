@@ -298,6 +298,9 @@
     <ClCompile Include="src\memcache\mem_cache.cpp">
       <Filter>src\memcache</Filter>
     </ClCompile>
+    <ClCompile Include="src\beanstalk\beanstalk.cpp">
+      <Filter>src\beanstalk</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\acl_stdafx.hpp">
@@ -615,6 +618,9 @@
     <ClInclude Include="include\acl_cpp\acl_cpp_test.hpp">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\acl_cpp\beanstalk\beanstalk.hpp">
+      <Filter>include\beanstalk</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="lib_acl_cpp_vc2010.rc" />
@@ -702,6 +708,12 @@
     </Filter>
     <Filter Include="include\session">
       <UniqueIdentifier>{c6a1206e-5f76-4734-921d-2f535db47f05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\beanstalk">
+      <UniqueIdentifier>{9660da6b-1d05-48a9-8d15-b459f15a14ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\beanstalk">
+      <UniqueIdentifier>{e9c69b7b-6c6c-4e0b-98af-1742e14371a8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
