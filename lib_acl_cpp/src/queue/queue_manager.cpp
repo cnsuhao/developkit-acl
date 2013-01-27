@@ -57,7 +57,7 @@ const char* queue_manager::get_queueName() const
 
 queue_file* queue_manager::create_file(const char* extName)
 {
-	queue_file* fp = new queue_file;
+	queue_file* fp = NEW queue_file;
 
 	if (fp->create(m_home.c_str(), m_queueName.c_str(),
 		extName, sub_width_) == false)
@@ -96,7 +96,7 @@ queue_file* queue_manager::open_file(const char* filePath, bool no_cache /* = tr
 	}
 
 	// 从磁盘打开已经存在的队列文件
-	fp = new queue_file;
+	fp = NEW queue_file;
 	if (fp->open(home.c_str(), queueName.c_str(), queueSub.c_str(),
 		partName.c_str(), extName.c_str()) == false)
 	{
@@ -406,7 +406,7 @@ queue_file* queue_manager::scan_next()
 
 		filePath.clear();
 		filePath << path << PATH_SEP << fileName;
-		fp = new queue_file;
+		fp = NEW queue_file;
 		// 从磁盘打开已经存在的队列文件
 		if (fp->open(filePath.c_str()) == false)
 		{

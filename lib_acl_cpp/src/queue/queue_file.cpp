@@ -73,7 +73,7 @@ bool queue_file::create(const char* home, const char* queueName,
 		buf << m_home << PATH_SEP << m_queueName << PATH_SEP << m_queueSub
 			<< PATH_SEP << m_partName << "." << extName;
 
-		fp = new acl::fstream;
+		fp = NEW fstream;
 
 		// 排它性创建唯一文件
 		if (fp->open(buf.c_str(), O_RDWR | O_CREAT | O_EXCL, 0600) == false)
@@ -132,7 +132,7 @@ bool queue_file::open(const char* home, const char* queueName,
 	m_filePath << home << PATH_SEP << queueName << PATH_SEP << queueSub
 		<< PATH_SEP << partName << "." << extName;
 
-	m_fp = new acl::fstream;
+	m_fp = NEW fstream;
 
 	if (m_fp->open(m_filePath.c_str(), O_RDWR, 0600) == false)
 	{
