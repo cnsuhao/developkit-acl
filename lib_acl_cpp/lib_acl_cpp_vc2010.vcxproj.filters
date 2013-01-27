@@ -301,6 +301,12 @@
     <ClCompile Include="src\beanstalk\beanstalk.cpp">
       <Filter>src\beanstalk</Filter>
     </ClCompile>
+    <ClCompile Include="src\queue\queue_file.cpp">
+      <Filter>src\queue</Filter>
+    </ClCompile>
+    <ClCompile Include="src\queue\queue_manager.cpp">
+      <Filter>src\queue</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\acl_stdafx.hpp">
@@ -621,6 +627,12 @@
     <ClInclude Include="include\acl_cpp\beanstalk\beanstalk.hpp">
       <Filter>include\beanstalk</Filter>
     </ClInclude>
+    <ClInclude Include="include\acl_cpp\queue\queue_file.hpp">
+      <Filter>include\queue</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\queue\queue_manager.hpp">
+      <Filter>include\queue</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="lib_acl_cpp_vc2010.rc" />
@@ -714,6 +726,12 @@
     </Filter>
     <Filter Include="src\beanstalk">
       <UniqueIdentifier>{e9c69b7b-6c6c-4e0b-98af-1742e14371a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\queue">
+      <UniqueIdentifier>{1df40883-a4d1-44f2-84bf-87f3d46fc8b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\queue">
+      <UniqueIdentifier>{9cf41123-21b3-46aa-bca8-5943eadfc59d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

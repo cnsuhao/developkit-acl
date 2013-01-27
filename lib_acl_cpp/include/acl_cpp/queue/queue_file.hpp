@@ -13,7 +13,7 @@ class acl::fstream;
 namespace acl
 {
 
-class queue_file
+class ACL_CPP_API queue_file
 {
 public:
 	queue_file();

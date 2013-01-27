@@ -272,7 +272,11 @@ int queue_file::read(void* buf, size_t len)
 bool queue_file::remove()
 {
 	this->close();
+#ifdef WIN32
+	if (_unlink(m_filePath.c_str()) != 0)
+#else
 	if (unlink(m_filePath.c_str()) != 0)
+#endif
 	{
 		logger_error("unlink %s error(%s)",
 			m_filePath.c_str(), acl_last_serror());

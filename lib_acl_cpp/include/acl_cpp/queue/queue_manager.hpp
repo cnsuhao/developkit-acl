@@ -13,7 +13,7 @@ namespace acl
 
 class queue_file;
 
-class queue_manager
+class ACL_CPP_API queue_manager
 {
 public:
 	/**
