@@ -1,5 +1,8 @@
 #include "acl_stdafx.hpp"
 #include <assert.h>
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/util.hpp"
+#include "acl_cpp/stream/fstream.hpp"
 #include "acl_cpp/queue/queue_manager.hpp"
 #include "acl_cpp/queue/queue_file.hpp"
 
