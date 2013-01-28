@@ -8,10 +8,10 @@
 #define MAXPATH255 255
 #endif
 
-class acl::fstream;
-
 namespace acl
 {
+
+class fstream;
 
 class ACL_CPP_API queue_file
 {
