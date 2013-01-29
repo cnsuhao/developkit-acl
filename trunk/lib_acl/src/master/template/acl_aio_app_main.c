@@ -70,7 +70,7 @@ static void __service(ACL_SOCKET fd, char *service acl_unused, char **argv acl_u
 
 		vstream = acl_vstream_fdopen(fd, O_RDWR, acl_var_aio_buf_size, 0, ACL_VSTREAM_TYPE_SOCK);
 		ACL_SAFE_STRNCPY(vstream->remote_addr, addr, sizeof(vstream->remote_addr));
-		acl_getsockname(fd, vstream->local_addr, sizeof(vstream->local_addr)));
+		acl_getsockname(fd, vstream->local_addr, sizeof(vstream->local_addr));
 		astream = acl_aio_open(acl_aio_server_handle(), vstream);
 		if (__run_fn(astream, __run_ctx) != 0)
 			acl_aio_iocp_close(astream);
