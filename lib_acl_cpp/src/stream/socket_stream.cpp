@@ -96,10 +96,14 @@ namespace acl {
 	{
 		if (peer_ip_[0] != 0)
 			return peer_ip_;
-		return const_cast<socket_stream*> (this)->get_ip(
-			ACL_VSTREAM_PEER(m_pStream),
-			const_cast<socket_stream*> (this)->peer_ip_,
-			sizeof(peer_ip_));
+		const char* ptr = ACL_VSTREAM_PEER(m_pStream);
+		if (*ptr == 0)
+			acl_getpeername(ACL_VSTREAM_SOCK(m_pStream),
+					m_pStream->remote_addr,
+					sizeof(m_pStream->remote_addr));
+		return const_cast<socket_stream*> (this)->get_ip(ptr,
+				const_cast<socket_stream*> (this)->peer_ip_,
+				sizeof(peer_ip_));
 	}
 
 	const char* socket_stream::get_local(bool full /* = false */) const

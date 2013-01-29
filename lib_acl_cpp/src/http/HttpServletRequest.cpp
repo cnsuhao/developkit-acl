@@ -303,13 +303,17 @@ const char* HttpServletRequest::getRemoteAddr(void) const
 		const char* ptr = acl_getenv("REMOTE_ADDR");
 		if (ptr && *ptr)
 			return ptr;
+		logger_warn("no REMOTE_ADDR from acl_getenv");
 		return NULL;
 	}
 	if (client_ == NULL)
 		return NULL;
 	const char* ptr = client_->get_stream().get_peer();
 	if (*ptr == 0)
+	{
+		logger_warn("get_peer return empty string");
 		return NULL;
+	}
 	snprintf(const_cast<HttpServletRequest*>(this)->remoteAddr_,
 		sizeof(remoteAddr_), "%s", ptr);
 	char* p = (char*) strchr(remoteAddr_, ':');
@@ -325,16 +329,23 @@ unsigned short HttpServletRequest::getRemotePort(void) const
 		const char* ptr = acl_getenv("REMOTE_PORT");
 		if (ptr && *ptr)
 			return atoi(ptr);
+		logger_warn("no REMOTE_PORT from acl_getenv");
 		return 0;
 	}
 	if (client_ == NULL)
 		return 0;
-	const char* ptr = client_->get_stream().get_peer();
+	const char* ptr = client_->get_stream().get_peer(true);
 	if (*ptr == 0)
+	{
+		logger_warn("get_peer return empty string");
 		return 0;
+	}
 	char* port = (char*) strchr(ptr, ':');
 	if (port == NULL || *(++port) == 0)
+	{
+		logger_warn("no port in addr: %s", ptr);
 		return 0;
+	}
 
 	return atoi(port);
 }
