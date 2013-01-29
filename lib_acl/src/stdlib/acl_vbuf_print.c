@@ -130,7 +130,7 @@ ACL_VBUF *acl_vbuf_print(ACL_VBUF *bp, const char *format, va_list ap)
 		if (*cp == '*') {		/* dynamic field width */
 			width = va_arg(ap, int);
 			sprintf(fmt + i, "%d", width);
-			i += sizeof(int);
+			i = strlen(fmt);	/* reset i to string length */
 			cp++;
 		} else {			/* hard-coded field width */
 			for (width = 0; ACL_ISDIGIT(ch = *cp); cp++) {
@@ -144,7 +144,7 @@ ACL_VBUF *acl_vbuf_print(ACL_VBUF *bp, const char *format, va_list ap)
 		if (*cp == '*') {		/* dynamic precision */
 			prec = va_arg(ap, int);
 			sprintf(fmt + i, "%d", prec);
-			i += sizeof(int);
+			i = strlen(fmt);	/* reset i to string length */
 			cp++;
 		} else {			/* hard-coded precision */
 			for (prec = 0; ACL_ISDIGIT(ch = *cp); cp++) {
@@ -180,6 +180,7 @@ ACL_VBUF *acl_vbuf_print(ACL_VBUF *bp, const char *format, va_list ap)
 			} else {
 				fmt[i++] = *cp++;
 				long_flag = 1;
+				fmt[i] = 0;
 			}
 		} else if (*cp == 'z') {
 			fmt[i++] = *cp++;
