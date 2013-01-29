@@ -34,7 +34,7 @@ static char *__deny_info;
 static void __service(ACL_SOCKET fd, char *service acl_unused, char **argv acl_unused)
 {
 	char  myname[] = "__service";
-	char  addr[64], *ptr;
+	char  addr[64], *ptr, ip[64];
 
 	/* Sanity check. This service takes no command-line arguments. */
 	if (argv[0])
@@ -54,14 +54,14 @@ static void __service(ACL_SOCKET fd, char *service acl_unused, char **argv acl_u
 		acl_socket_close(fd);
 		return;
 	}
-
-	ptr = strchr(addr, ':');
+	ACL_SAFE_STRNCPY(ip, addr, sizeof(ip));
+	ptr = strchr(ip, ':');
 	if (ptr)
 		*ptr = 0;
 
-	if (!acl_access_permit(addr)) {
+	if (!acl_access_permit(ip)) {
 		acl_msg_warn("%s, %s(%d): addr(%s) be denied",
-			__FILE__, myname, __LINE__, addr);
+			__FILE__, myname, __LINE__, ip);
 		acl_socket_write(fd, __deny_info, strlen(__deny_info), 0, 0);
 		acl_socket_close(fd);
 	} else if (__run_fn != NULL) {
@@ -69,6 +69,8 @@ static void __service(ACL_SOCKET fd, char *service acl_unused, char **argv acl_u
 		ACL_ASTREAM *astream;
 
 		vstream = acl_vstream_fdopen(fd, O_RDWR, acl_var_aio_buf_size, 0, ACL_VSTREAM_TYPE_SOCK);
+		ACL_SAFE_STRNCPY(vstream->remote_addr, addr, sizeof(vstream->remote_addr));
+		acl_getsockname(fd, vstream->local_addr, sizeof(vstream->local_addr)));
 		astream = acl_aio_open(acl_aio_server_handle(), vstream);
 		if (__run_fn(astream, __run_ctx) != 0)
 			acl_aio_iocp_close(astream);
