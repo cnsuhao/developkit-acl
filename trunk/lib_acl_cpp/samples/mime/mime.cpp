@@ -127,7 +127,7 @@ static void mime_test1(acl::mime& mime, const char* path, bool htmlFirst)
 
 	ACL_METER_TIME("---------------parse end  --------------------");
 
-	pBody = mime.get_body_node(htmlFirst);
+	pBody = mime.get_body_node(htmlFirst, true, "iso-2022-jp");
 
 	//////////////////////////////////////////////////////////////////////
 
@@ -167,6 +167,39 @@ static void mime_test1(acl::mime& mime, const char* path, bool htmlFirst)
 
 	//////////////////////////////////////////////////////////////////////
 
+	// 将邮件正文内容以 utf-8 存在磁盘上
+	if (pBody)
+	{
+		printf("\r\n");
+		ACL_METER_TIME("---------------save_body begin--------------------");
+		acl::charset_conv jp2utf8;
+		jp2utf8.update_begin("iso-2022-jp", "utf-8");
+
+		acl::pipe_string pipe_out;
+		acl::pipe_manager manager;
+
+		manager.push_front(&pipe_out);
+		manager.push_front(&jp2utf8);
+
+		pBody->save(manager);
+
+		ACL_METER_TIME("---------------save_body end1 --------------------");
+
+		acl::string& sbuf = pipe_out.get_buf();
+
+		fp_out.close();
+
+		if (fp_out.open_write("./var/body_utf8.txt"))
+		{
+			fp_out.write(sbuf.c_str(), sbuf.length());
+			fp_out.close();
+		}
+
+		ACL_METER_TIME("---------------save_body end2 --------------------");
+	}
+
+	//////////////////////////////////////////////////////////////////////
+
 	// 采用管道流模式将邮件正文内容进行字符集转换，且保存在磁盘上
 
 	if (pBody)
@@ -174,8 +207,8 @@ static void mime_test1(acl::mime& mime, const char* path, bool htmlFirst)
 		printf("\r\n");
 		ACL_METER_TIME("---------------save_body begin--------------------");
 		acl::charset_conv utf8ToGb, gbToBig5;
-		utf8ToGb.update_begin("utf-8", "gb2312");
-		gbToBig5.update_begin("gb2312", "big5");
+		utf8ToGb.update_begin("utf-8", "gbk");
+		gbToBig5.update_begin("gbk", "big5");
 
 		acl::pipe_string pipe_out;
 		acl::pipe_manager manager;
@@ -189,6 +222,8 @@ static void mime_test1(acl::mime& mime, const char* path, bool htmlFirst)
 		ACL_METER_TIME("---------------save_body end1 --------------------");
 
 		acl::string& sbuf = pipe_out.get_buf();
+
+		fp_out.close();
 
 		if (fp_out.open_write("./var/body_big5.txt"))
 		{
@@ -216,7 +251,7 @@ static void mime_test1(acl::mime& mime, const char* path, bool htmlFirst)
 		acl::rfc2047 rfc2047;
 		rfc2047.reset(true);
 		rfc2047.decode_update(buf, (int) buf.length());
-		rfc2047.decode_finish("gb2312", &attach_name);
+		rfc2047.decode_finish("utf-8", &attach_name);
 
 		printf(">>> attach file: |%s|, len: %d\n",
 			attach_name.c_str(), (int) attach_name.length());
