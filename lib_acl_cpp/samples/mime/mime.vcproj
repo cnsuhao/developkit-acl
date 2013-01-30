@@ -33,7 +33,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="lib_acl_vc2003d.lib ws2_32.lib"
-				OutputFile="$(OutDir)\mime.exe"
+				OutputFile="mime.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\lib;..\..\..\dist\lib\win32"
 				GenerateDebugInformation="TRUE"
@@ -225,6 +225,9 @@
 				RelativePath=".\mime.cpp">
 			</File>
 			<File
+				RelativePath=".\pipeline_string.cpp">
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -256,6 +259,9 @@
 			Name="Í·ÎÄ¼þ"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			<File
+				RelativePath=".\pipeline_string.h">
+			</File>
 			<File
 				RelativePath=".\stdafx.h">
 			</File>

@@ -21,6 +21,8 @@
 #include "acl_cpp/mime/rfc2047.hpp"
 #include "acl_cpp/mime/mime_attach.hpp"
 
+#include "pipeline_string.h"
+
 using namespace std;
 using namespace acl;
 
@@ -176,10 +178,12 @@ static void mime_test1(acl::mime& mime, const char* path, bool htmlFirst)
 		jp2utf8.update_begin("iso-2022-jp", "utf-8");
 
 		acl::pipe_string pipe_out;
+		pipeline_string pipeline;
 		acl::pipe_manager manager;
 
 		manager.push_front(&pipe_out);
 		manager.push_front(&jp2utf8);
+		manager.push_front(&pipeline);
 
 		pBody->save(manager);
 
