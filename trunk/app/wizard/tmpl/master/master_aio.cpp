@@ -46,3 +46,11 @@ bool master_service::on_accept(acl::aio_socket_stream*)
 {
 	return true;
 }
+
+void master_service::proc_on_init()
+{
+}
+
+void master_service::proc_on_exit()
+{
+}

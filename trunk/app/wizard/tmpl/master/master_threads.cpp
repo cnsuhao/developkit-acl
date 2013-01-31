@@ -68,3 +68,11 @@ void master_service::thread_on_init()
 void master_service::thread_on_exit()
 {
 }
+
+void master_service::proc_on_init()
+{
+}
+
+void master_service::proc_on_exit()
+{
+}

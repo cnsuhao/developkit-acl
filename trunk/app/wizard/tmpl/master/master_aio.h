@@ -35,4 +35,15 @@ protected:
 	 *  远程客户端连接，否则继续接收客户端连接
 	 */
 	bool on_accept(acl::aio_socket_stream* stream);
+
+	/**
+	 * 当进程切换用户身份后调用的回调函数，此函数被调用时，进程
+	 * 的权限为普通受限级别
+	 */
+	virtual void proc_on_init();
+
+	/**
+	 * 当进程退出前调用的回调函数
+	 */
+	virtual void proc_on_exit();
 };

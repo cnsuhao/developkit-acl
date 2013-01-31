@@ -45,3 +45,11 @@ master_service::~master_service()
 void master_service::on_accept(acl::socket_stream*)
 {
 }
+
+void master_service::proc_on_init()
+{
+}
+
+void master_service::proc_on_exit()
+{
+}

@@ -164,6 +164,34 @@ unsigned long long beanstalk::put(const void* data, size_t n,
 	return id;
 }
 
+unsigned long long beanstalk::format_put(unsigned pri, unsigned delay,
+	unsigned int ttr, const char* fmt, ...)
+{
+	va_list ap;
+	va_start(ap, fmt);
+	unsigned long long ret = vformat_put(fmt, ap, pri, delay, ttr);
+	va_end(ap);
+	return ret;
+}
+
+unsigned long long beanstalk::vformat_put(const char* fmt, va_list ap,
+	unsigned pri /* = 1024 */, unsigned delay /* = 0 */,
+	unsigned ttr /* = 60 */)
+{
+	string buf;
+	buf.vformat(fmt, ap);
+	return put(buf.c_str(), buf.length(), pri, delay, ttr);
+}
+
+unsigned long long beanstalk::format_put(const char* fmt, ...)
+{
+	va_list ap;
+	va_start(ap, fmt);
+	unsigned long long ret = vformat_put(fmt, ap);
+	va_end(ap);
+	return ret;
+}
+
 unsigned beanstalk::watch(const char* tube)
 {
 	string cmdline(128);

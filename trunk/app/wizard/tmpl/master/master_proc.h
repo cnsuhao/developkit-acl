@@ -34,4 +34,15 @@ protected:
 	 * 注：该函数返回后，流连接将会被关闭，用户不应主动关闭该流
 	 */
 	virtual void on_accept(acl::socket_stream* stream);
+
+	/**
+	 * 当进程切换用户身份后调用的回调函数，此函数被调用时，进程
+	 * 的权限为普通受限级别
+	 */
+	virtual void proc_on_init();
+
+	/**
+	 * 当进程退出前调用的回调函数
+	 */
+	virtual void proc_on_exit();
 };
