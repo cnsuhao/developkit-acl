@@ -1,4 +1,5 @@
 #pragma once
+#include <stdarg.h>
 #include "acl_cpp/acl_cpp_define.hpp"
 #include "acl_cpp/stream/socket_stream.hpp"
 
@@ -55,6 +56,31 @@ public:
 	 */
 	unsigned long long put(const void* data, size_t len,
 		unsigned pri = 1024, unsigned delay = 0, unsigned ttr = 60);
+
+	/**
+	 * 以格式字符串方式向所选管道或缺省管理中发送消息
+	 * @param pri {unsigned} 优先级，值越小，优先级越高
+	 * @param delay {unsigned} 表示将job放入ready队列需要等待的秒数
+	 * @param ttr {unsigned} 表示允许一个worker执行该消息的秒数
+	 * @param fmt {const char*} 格式字符串
+	 * @return {unsigned long long} 返回所添加消息的消息号，
+	 *  如果返回值 > 0 则表示添加成功，若 == 0 则表示添加失败
+	 *  (查看 beanstalkd 源码，可以看出消息号从 1 开始增加)
+	 */
+	unsigned long long format_put(unsigned pri, unsigned delay, unsigned ttr,
+		const char* fmt, ...);
+	unsigned long long vformat_put(const char* fmt, va_list ap,
+		unsigned pri = 1024, unsigned delay = 0, unsigned ttr = 60);
+
+	/**
+	 * 以格式字符串方式向所选管道或缺省管理中发送消息，其中的
+	 * 的 pri, delay, ttr 采用默认值
+	 * @param fmt {const char*} 格式字符串
+	 * @return {unsigned long long} 返回所添加消息的消息号，
+	 *  如果返回值 > 0 则表示添加成功，若 == 0 则表示添加失败
+	 *  (查看 beanstalkd 源码，可以看出消息号从 1 开始增加)
+	 */
+	unsigned long long format_put(const char* fmt, ...);
 
 	/////////////////////////////////////////////////////////////////////
 	// 消费者调用的接口
