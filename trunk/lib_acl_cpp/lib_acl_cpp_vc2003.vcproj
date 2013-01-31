@@ -661,6 +661,9 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 			<Filter
 				Name="redis"
 				Filter="">
+				<File
+					RelativePath=".\src\redis\redis.cpp">
+				</File>
 			</Filter>
 			<Filter
 				Name="session"
@@ -1004,7 +1007,13 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				Name="redis"
 				Filter="">
 				<File
-					RelativePath=".\include\acl_cpp\redis\redis_keys.hpp">
+					RelativePath=".\include\acl_cpp\redis\redis.hpp">
+				</File>
+				<File
+					RelativePath=".\include\acl_cpp\redis\redis_key.hpp">
+				</File>
+				<File
+					RelativePath=".\include\acl_cpp\redis\redis_response.hpp">
 				</File>
 			</Filter>
 			<Filter
