@@ -1,12 +1,11 @@
 #pragma once
 #include <vector>
 #include "acl_cpp/stdlib/string.hpp"
-#include "acl_cpp/redis/redis.hpp"
 
 namespace acl
 {
 
-class redis_key : public redis
+class redis_key
 {
 public:
 	redis_key();
