@@ -1,5 +1,5 @@
 #pragma once
-
+#include "acl_cpp/stdlib/string.hpp"
 
 typedef enum
 {
@@ -10,6 +10,9 @@ typedef enum
 	REDIS_KEY_ZSET,
 	REDIS_KEY_HASH
 } redis_key_t;
+
+namespace acl
+{
 
 class redis_response
 {
@@ -32,3 +35,5 @@ private:
 		redis_response* values;
 	};
 };
+
+} // end namespace acl

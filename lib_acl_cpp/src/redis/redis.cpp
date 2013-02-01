@@ -4,6 +4,9 @@
 #include "acl_cpp/stream/socket_stream.hpp"
 #include "acl_cpp/redis/redis.hpp"
 
+namespace acl
+{
+
 redis::redis(const char* addr, int conn_timeout /* = 60 */,
 	int rw_timeout /* = 30 */, bool retry /* = true */)
 : conn_timeout_(conn_timeout)
@@ -22,7 +25,7 @@ bool redis::open()
 {
 	if (conn_.opened())
 		return true;
-	if (conn_.open(addr_, conn_timeout, rw_timeout_) == false)
+	if (conn_.open(addr_, conn_timeout_, rw_timeout_) == false)
 	{
 		logger_error("connect redis %s error: %s",
 			addr_, last_serror());
@@ -39,12 +42,13 @@ void redis::close()
 void redis::clear()
 {
 	std::vector<redis_response*>::iterator it = res_.begin();
-	for (; it != res_.end(); ++res_)
+	for (; it != res_.end(); ++it)
 		delete *it;
 	res_.clear();
 }
 
-const std::vector<redis_response*>& redis::request(const char* cmd)
+const std::vector<redis_response*>& redis::request(const char* cmd,
+	const void* data, size_t len)
 {
 	string line(128);
 	bool retried = false;
@@ -76,17 +80,17 @@ const std::vector<redis_response*>& redis::request(const char* cmd)
 		}
 
 		// 如果有数据体，则写入数据体
-		if (data && len > 0 && (conn.write(data, len) == -1
-			|| conn.write("\r\n", 2) == -1))
+		if (data && len > 0 && (conn_.write(data, len) == -1
+			|| conn_.write("\r\n", 2) == -1))
 		{
-			conn.close();
-			if (retry && !retried)
+			conn_.close();
+			if (retry_ && !retried)
 			{
 				retried = true;
 				continue;
 			}
 			logger_error("write to redis(%s) error: %s",
-				addr, last_serror());
+				addr_, last_serror());
 			return res_;
 		}
 
@@ -106,6 +110,9 @@ const std::vector<redis_response*>& redis::request(const char* cmd)
 		break;
 	}
 
-	ACL_ARGV* tokens = acl_argv_split(line.c_str(), "\t ");
-	return tokens;
+	return res_;
+	//ACL_ARGV* tokens = acl_argv_split(line.c_str(), "\t ");
+	//return tokens;
 }
+
+} // end namespace acl

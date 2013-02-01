@@ -1,11 +1,10 @@
 #pragma once
+#include <vector>
 #include "acl_cpp/stream/socket_stream.hpp"
 #include "acl_cpp/redis/redis_response.hpp"
 
 namespace acl
 {
-
-class socket_stream;
 
 class redis
 {
@@ -16,7 +15,8 @@ public:
 
 	bool open();
 	void close();
-	const std::vector<redis_response*>& request(const char* cmd);
+	const std::vector<redis_response*>& request(const char* cmd,
+		const void* data, size_t len);
 	void clear();
 private:
 	socket_stream conn_;
