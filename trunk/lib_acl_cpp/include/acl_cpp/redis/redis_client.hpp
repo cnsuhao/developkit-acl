@@ -6,12 +6,12 @@
 namespace acl
 {
 
-class redis
+class redis_client
 {
 public:
-	redis(const char* addr, int conn_timeout = 60, int rw_timeout = 30,
+	redis_client(const char* addr, int conn_timeout = 60, int rw_timeout = 30,
 		bool retry = true);
-	virtual ~redis();
+	~redis_client();
 
 	bool open();
 	void close();

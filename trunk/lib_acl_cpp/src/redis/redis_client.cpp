@@ -2,12 +2,12 @@
 #include "acl_cpp/stdlib/util.hpp"
 #include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/stream/socket_stream.hpp"
-#include "acl_cpp/redis/redis.hpp"
+#include "acl_cpp/redis/redis_client.hpp"
 
 namespace acl
 {
 
-redis::redis(const char* addr, int conn_timeout /* = 60 */,
+redis_client::redis_client(const char* addr, int conn_timeout /* = 60 */,
 	int rw_timeout /* = 30 */, bool retry /* = true */)
 : conn_timeout_(conn_timeout)
 , rw_timeout_(rw_timeout)
@@ -16,12 +16,12 @@ redis::redis(const char* addr, int conn_timeout /* = 60 */,
 	addr_ = acl_mystrdup(addr);
 }
 
-redis::~redis()
+redis_client::~redis_client()
 {
 	acl_myfree(addr_);
 }
 
-bool redis::open()
+bool redis_client::open()
 {
 	if (conn_.opened())
 		return true;
@@ -34,12 +34,12 @@ bool redis::open()
 	return true;
 }
 
-void redis::close()
+void redis_client::close()
 {
 	conn_.close();
 }
 
-void redis::clear()
+void redis_client::clear()
 {
 	std::vector<redis_response*>::iterator it = res_.begin();
 	for (; it != res_.end(); ++it)
@@ -47,7 +47,7 @@ void redis::clear()
 	res_.clear();
 }
 
-const std::vector<redis_response*>& redis::request(const char* cmd,
+const std::vector<redis_response*>& redis_client::request(const char* cmd,
 	const void* data, size_t len)
 {
 	string line(128);
