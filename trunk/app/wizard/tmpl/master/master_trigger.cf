@@ -5,7 +5,7 @@ service master_trigger
 #	进程是否禁止运行
 	master_disable = no
 #	服务监听为域套接口
-	master_service = trigger.sock
+	master_service = $<PROGRAM>.sock
 #	服务类型
 	master_type = unix
 
@@ -29,7 +29,7 @@ service master_trigger
 #	进程启动参数，只能为: -u [是否允许以某普通用户的身份运行]
 #	master_args = 
 #	进程日志记录文件
-	master_log = {install_path}/var/log/trigger
+	master_log = {install_path}/var/log/$<PROGRAM>
 #	传递给服务子进程的环境变量, 可以通过 getenv("SERVICE_ENV") 获得此值
 #	master_env = logme:FALSE, priority:E_LOG_INFO, action:E_LOG_PER_DAY, flush:sync_flush, imit_size:512,\
 #			sync_action:E_LOG_SEM, sem_name:/tmp/trigger.sem
