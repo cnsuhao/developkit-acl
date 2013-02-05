@@ -1,3 +1,7 @@
+361) 2013.2.5
+361.1) bugfix: acl_scan_dir.c, acl_scan_dir_open() 原来采用 acl_mymalloc
+分配内存导致一些变量未初始化，现改成 acl_mycalloc
+
 360) 2013.1.29
 360.1) bugfix: acl_vbuf_print.c, 新改的代码中没有处理格式为 %* 的情形
 
