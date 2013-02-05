@@ -39,7 +39,7 @@ service server {
 #	master_env = logme:FALSE, priority:E_LOG_INFO, action:E_LOG_PER_DAY, flush:sync_flush, imit_size:512,\
 #			sync_action:E_LOG_SEM, sem_name:/tmp/aio_echo.sem
 #	进程日志记录文件
-	master_log = {install_path}/var/log/master_aio
+	master_log = {install_path}/var/log/$<PROGRAM>
 
 #	是否允许产生 core 文件
 #	aio_enable_core = 1
