@@ -1,7 +1,10 @@
 #pragma once
 #include <stdarg.h>
+#include <vector>
 #include "acl_cpp/acl_cpp_define.hpp"
 #include "acl_cpp/stream/socket_stream.hpp"
+
+struct ACL_ARGV;
 
 namespace acl
 {
@@ -19,7 +22,10 @@ namespace acl
  * 则优先级别越高，最高级别为 0 级
  * 消息体默认最大长度为 65,535(最大无符号 short 值)，该值可以在启动 beanstalkd 指定
  * 更多内容请参考本项目 doc/ 目录下的 <beanstalk协议介绍.pdf>
- * 本类中的命令过程内部会自动进行连接操作，所以一般来说不用显式调用 open 过程
+ * 本类中的命令过程内部会自动进行连接操作，在重连过程中，如果之前设置了 watch 及 use
+ * 队列，则会自动重试这些命令过程，所以一般来说不用显式调用 open 过程；当用户调用了
+ * close 函数后，不仅断开了与 beanstalkd 服务器的连接，同时会清除本类对象中存储的
+ * use 及 watch 队列
  */
 class ACL_CPP_API beanstalk
 {
@@ -161,7 +167,8 @@ public:
 	bool open();
 
 	/**
-	 * 显示关闭与 beanstalkd 的连接，当该类实例析构时会尝试调用关闭过程
+	 * 显示关闭与 beanstalkd 的连接，当该类实例析构时会尝试调用关闭过程，
+	 * 调用本函数后，类对象内部的 tube_used_ 及 tubes_watched_ 会被释放
 	 */
 	void close();
 
@@ -256,9 +263,17 @@ private:
 	int   timeout_;
 	bool  retry_;
 	char  errbuf_[128];
+	char* tube_used_;
+	std::vector<char*> tubes_watched_;
 	acl::socket_stream conn_;
 	unsigned long long peek_fmt(string& buf, const char* fmt, ...);
 	bool list_tubes_fmt(string& buf, const char* fmt, ...);
+
+	bool beanstalk_open();
+	bool beanstalk_use();
+	unsigned beanstalk_watch(const char* tube);
+	ACL_ARGV* beanstalk_request(const string& cmdline,
+		const void* data = NULL, size_t len = 0);
 };
 
 } // namespace acl
