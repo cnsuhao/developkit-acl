@@ -74,7 +74,7 @@ ACL_SCAN_DIR *acl_scan_dir_open(const char *path, int recursive)
 {
 	ACL_SCAN_DIR *scan;
 
-	scan = (ACL_SCAN_DIR *) acl_mymalloc(sizeof(*scan));
+	scan = (ACL_SCAN_DIR *) acl_mycalloc(1, sizeof(*scan));
 	scan->current = 0;
 	scan->recursive = recursive;
 
