@@ -167,8 +167,8 @@ ACL_API void acl_scan_dir_rm2(ACL_SCAN_DIR *scan);
  * 删除所给路径下所有的文件及目录
  * @param pathname {const char*} 路径名
  * @param recursive {int} 是否递归删除所有子目录及子目录下的文件
- * @param ndir {int*} 值参类型指针, 过程结束后 *ndir 等于总共删除的目录数目
- * @param nfile {int*} 值参类型指针, 过程结束后 *nfile 等于总共删除的文件数目
+ * @param ndir {int*} 若该参数非空，过程结束后 *ndir 等于总共删除的目录数目
+ * @param nfile {int*} 若该参数非空，过程结束后 *nfile 等于总共删除的文件数目
  * @return {acl_int64} >= 0: 实际删除的文件数与目录数的尺寸大小之和(字节); < 0: 出错.
  */
 ACL_API acl_int64 acl_scan_dir_rm(const char *pathname, int recursive,
