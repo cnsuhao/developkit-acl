@@ -1,4 +1,5 @@
 #include "acl_stdafx.hpp"
+#include "acl_cpp/http/http_header.hpp"
 #include "acl_cpp/http/HttpCookie.hpp"
 
 namespace acl
