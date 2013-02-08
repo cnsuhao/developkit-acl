@@ -216,6 +216,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClCompile Include="src\hsocket\hsproto.cpp" />
     <ClCompile Include="src\hsocket\hsrow.cpp" />
     <ClCompile Include="src\hsocket\hstable.cpp" />
+    <ClCompile Include="src\http\HttpCookie.cpp" />
     <ClCompile Include="src\http\HttpServlet.cpp" />
     <ClCompile Include="src\http\HttpServletRequest.cpp" />
     <ClCompile Include="src\http\HttpServletResponse.cpp" />
@@ -283,6 +284,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClCompile Include="src\stdlib\pipe_stream.cpp" />
     <ClCompile Include="src\stdlib\snprintf.cpp" />
     <ClCompile Include="src\stdlib\string.cpp" />
+    <ClCompile Include="src\stdlib\url_coder.cpp" />
     <ClCompile Include="src\stdlib\util.cpp" />
     <ClCompile Include="src\stdlib\xml.cpp" />
     <ClCompile Include="src\stdlib\zlib_stream.cpp" />
@@ -320,6 +322,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include="include\acl_cpp\hsocket\hsproto.hpp" />
     <ClInclude Include="include\acl_cpp\hsocket\hsrow.hpp" />
     <ClInclude Include="include\acl_cpp\hsocket\hstable.hpp" />
+    <ClInclude Include="include\acl_cpp\http\HttpCookie.hpp" />
     <ClInclude Include="include\acl_cpp\http\HttpServlet.hpp" />
     <ClInclude Include="include\acl_cpp\http\HttpServletRequest.hpp" />
     <ClInclude Include="include\acl_cpp\http\HttpServletResponse.hpp" />
@@ -333,6 +336,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include="include\acl_cpp\http\http_request.hpp" />
     <ClInclude Include="include\acl_cpp\http\http_response.hpp" />
     <ClInclude Include="include\acl_cpp\http\http_service.hpp" />
+    <ClInclude Include="include\acl_cpp\http\http_type.hpp" />
     <ClInclude Include="include\acl_cpp\http\http_utils.hpp" />
     <ClInclude Include="include\acl_cpp\ipc\ipc_client.hpp" />
     <ClInclude Include="include\acl_cpp\ipc\ipc_server.hpp" />
@@ -378,6 +382,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include="include\acl_cpp\stdlib\singleton.hpp" />
     <ClInclude Include="include\acl_cpp\stdlib\snprintf.hpp" />
     <ClInclude Include="include\acl_cpp\stdlib\string.hpp" />
+    <ClInclude Include="include\acl_cpp\stdlib\url_coder.hpp" />
     <ClInclude Include="include\acl_cpp\stdlib\util.hpp" />
     <ClInclude Include="include\acl_cpp\stdlib\vld.h" />
     <ClInclude Include="include\acl_cpp\stdlib\xml.hpp" />

@@ -22,6 +22,7 @@
 #include "acl_cpp/stdlib/charset_conv.hpp"
 #include "acl_cpp/stdlib/escape.hpp"
 #include "acl_cpp/stdlib/pipe_stream.hpp"
+#include "acl_cpp/stdlib/url_coder.hpp"
 
 #include "acl_cpp/memcache/mem_cache.hpp"
 
