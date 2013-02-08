@@ -34,9 +34,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include=".\src\snprintf.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include=".\src\StdAfx.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -105,6 +102,9 @@
     </ClCompile>
     <ClCompile Include=".\src\icmp\icmp_timer.c">
       <Filter>Source Files\icmp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\proto_snprintf.c">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
