@@ -9,6 +9,7 @@
 #include "acl_cpp/stdlib/pipe_stream.hpp"
 #include "acl_cpp/http/http_client.hpp"
 #include "acl_cpp/http/http_header.hpp"
+#include "acl_cpp/http/HttpCookie.hpp"
 #include "acl_cpp/http/http_ctype.hpp"
 #include "acl_cpp/http/http_pipe.hpp"
 #include "acl_cpp/http/http_request.hpp"

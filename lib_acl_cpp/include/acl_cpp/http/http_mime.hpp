@@ -4,18 +4,13 @@
 #include <list>
 #include "acl_cpp/stdlib/string.hpp"
 #include "acl_cpp/mime/mime_attach.hpp"
+#include "acl_cpp/http/http_type.hpp"
 
 struct MIME_STATE;
 struct MIME_NODE;
 
 namespace acl
 {
-
-	typedef enum
-	{
-		HTTP_MIME_PARAM,        // http mime 结点为参数类型
-		HTTP_MIME_FILE          // http mime 结点为文件类型
-	} http_mime_t;
 
 	/**
 	 * http mime 结点类，继承关系：

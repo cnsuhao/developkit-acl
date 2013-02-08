@@ -592,6 +592,9 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 					RelativePath=".\src\http\http_utils.cpp">
 				</File>
 				<File
+					RelativePath=".\src\http\HttpCookie.cpp">
+				</File>
+				<File
 					RelativePath=".\src\http\HttpServlet.cpp">
 				</File>
 				<File
@@ -934,7 +937,13 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 					RelativePath=".\include\acl_cpp\http\http_service.hpp">
 				</File>
 				<File
+					RelativePath=".\include\acl_cpp\http\http_type.hpp">
+				</File>
+				<File
 					RelativePath=".\include\acl_cpp\http\http_utils.hpp">
+				</File>
+				<File
+					RelativePath=".\include\acl_cpp\http\HttpCookie.hpp">
 				</File>
 				<File
 					RelativePath=".\include\acl_cpp\http\HttpServlet.hpp">
