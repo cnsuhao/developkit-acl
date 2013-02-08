@@ -307,6 +307,12 @@
     <ClCompile Include="src\queue\queue_manager.cpp">
       <Filter>src\queue</Filter>
     </ClCompile>
+    <ClCompile Include="src\http\HttpCookie.cpp">
+      <Filter>src\http</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stdlib\url_coder.cpp">
+      <Filter>src\stdlib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\acl_stdafx.hpp">
@@ -632,6 +638,15 @@
     </ClInclude>
     <ClInclude Include="include\acl_cpp\queue\queue_manager.hpp">
       <Filter>include\queue</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stdlib\url_coder.hpp">
+      <Filter>include\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\http\http_type.hpp">
+      <Filter>include\http</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\http\HttpCookie.hpp">
+      <Filter>include\http</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
