@@ -56,6 +56,7 @@
 #include "acl_cpp/http/http_response.hpp"
 #include "acl_cpp/http/http_service.hpp"
 #include "acl_cpp/http/http_mime.hpp"
+#include "acl_cpp/http/HttpCookie.hpp"
 #include "acl_cpp/http/HttpServlet.hpp"
 #include "acl_cpp/http/HttpSession.hpp"
 #include "acl_cpp/http/HttpServletRequest.hpp"

@@ -3,6 +3,7 @@
 #include <vector>
 #include "acl_cpp/http/http_header.hpp"
 #include "acl_cpp/http/http_ctype.hpp"
+#include "acl_cpp/http/http_type.hpp"
 
 namespace acl
 {
@@ -15,33 +16,6 @@ namespace acl
 	class HttpSession;
 	class HttpCookie;
 	class HttpServletResponse;
-
-	typedef enum
-	{
-		// Content-Type: application/x-www-form-urlencoded
-		HTTP_REQUEST_NORMAL,
-
-		// Content-Type: multipart/form-data; boundary=xxx
-		HTTP_REQUEST_MULTIPART_FORM,
-
-		// Content-Type: application/octet-stream
-		HTTP_REQUEST_OCTET_STREAM,
-
-		// 其它类型
-		HTTP_REQUEST_OTHER
-	} http_request_t;
-
-	typedef enum
-	{
-		// ok
-		HTTP_REQ_OK,
-
-		// network io error
-		HTTP_REQ_ERR_IO,
-
-		// invalid request method
-		HTTP_REQ_ERR_METHOD
-	} http_request_error_t;
 
 	/**
 	 * 与 HTTP 客户端请求相关的类，该类不应被继承，用户也不需要

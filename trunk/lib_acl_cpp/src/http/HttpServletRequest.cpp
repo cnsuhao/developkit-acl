@@ -6,6 +6,7 @@
 #include "acl_cpp/stream/socket_stream.hpp"
 #include "acl_cpp/stdlib/charset_conv.hpp"
 #include "acl_cpp/http/http_header.hpp"
+#include "acl_cpp/http/HttpCookie.hpp"
 #include "acl_cpp/http/http_client.hpp"
 #include "acl_cpp/http/http_mime.hpp"
 #include "acl_cpp/http/HttpSession.hpp"
