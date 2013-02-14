@@ -20,7 +20,7 @@ void pipeline_string::clear()
 }
 
 int pipeline_string::push_pop(const char* in, size_t len,
-	string* out, size_t max /* = 0 */)
+	string* out, size_t /* = 0 */)
 {
 	int   n = 0;
 
