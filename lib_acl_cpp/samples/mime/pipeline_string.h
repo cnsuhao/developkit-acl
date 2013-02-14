@@ -1,7 +1,7 @@
 #pragma once
 #include "acl_cpp/stdlib/pipe_stream.hpp"
 
-class acl::string;
+//class acl::string;
 
 class pipeline_string : public acl::pipe_stream
 {

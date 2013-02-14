@@ -118,7 +118,7 @@ static void session_delay_test(const char* addr)
 int main(int argc, char* argv[])
 {
 	char  addr[256];
-	int   n;
+	int   n = 10;
 
 	if (argc >= 2)
 	{
