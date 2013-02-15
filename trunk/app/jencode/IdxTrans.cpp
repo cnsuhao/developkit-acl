@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include ".\idxtrans.h"
+#include "IdxTrans.h"
 
 CIdxTrans::CIdxTrans(void)
 : m_nMsgTransing(0)

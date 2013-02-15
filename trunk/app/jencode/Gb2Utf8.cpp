@@ -1,8 +1,5 @@
 #include "StdAfx.h"
-#include "lib_acl.h"
-//#include "iconv.h"
-#include "gbandutf8.h"
-#include ".\gb2utf8.h"
+#include "Gb2Utf8.h"
 
 CGb2Utf8::CGb2Utf8(void)
 : m_hWnd(0)
@@ -66,7 +63,7 @@ int CGb2Utf8::TransformPath(CString *pFrom, CString *pTo)
 		fPath = acl_scan_dir_path(scan_src);
 		fPath += "\\";
 		fPath += fName;
-		TransformFile2(fPath.GetString(), NULL);
+		TransformFile(fPath.GetString(), NULL);
 	}
 	acl_scan_dir_close(scan_src);
 	return (0);
@@ -74,20 +71,15 @@ int CGb2Utf8::TransformPath(CString *pFrom, CString *pTo)
 
 int CGb2Utf8::TransformFile(const char *pFrom, const char *pTo)
 {
-	char *sBuf = NULL, *dBuf = NULL;
-	size_t iLen, oLen;
+	char *sBuf = NULL;
+	size_t iLen;
 	const char *toCode = "utf-8", *fromCode = "gb2312";
-	iconv_t id = (iconv_t) -1;
 
 #undef RETURN
 #define RETURN(_x_) do \
 { \
-	if (id != (iconv_t) -1) \
-		iconv_close(id); \
 	if (sBuf) \
 		acl_myfree(sBuf); \
-	if (dBuf) \
-		acl_myfree(dBuf); \
 	return(_x_); \
 } while(0);
 
@@ -98,67 +90,21 @@ int CGb2Utf8::TransformFile(const char *pFrom, const char *pTo)
 		RETURN (-1);
 
 	iLen = strlen(sBuf);
-	oLen = iLen * 2;
-	dBuf = (char*) acl_mycalloc(1, oLen);
 
-	const char *iptr = sBuf;
-	char *optr = dBuf;
-	size_t iSize = iLen, oSize = oLen;
-
-	id = iconv_open(toCode, fromCode);
-	if (id == (iconv_t)(-1))
+	acl::charset_conv conv;
+	acl::string buf;
+	if (conv.convert(fromCode, toCode, sBuf, iLen, &buf) == false)
+	{
+		logger_error("conver from %s to %s error: %s",
+			fromCode, toCode, conv.serror());
 		RETURN (-1);
-
-	int errnum = 0;
-	int ret = (int) iconv(id, (const char**)&iptr, &iSize, &optr, &oSize, &errnum);
-	if (ret == (size_t)(-1))
-		RETURN (-1);
+	}
 
 	ACL_VSTREAM *fp;
-
 	fp = acl_vstream_fopen(pFrom, O_RDWR | O_TRUNC | O_BINARY | O_APPEND, 0600, 1024);
 	if (fp == NULL)
 		RETURN (-1);
-	ret = acl_vstream_writen(fp, dBuf, oSize);
-	acl_vstream_close(fp);
-	RETURN (ret == ACL_VSTREAM_EOF ? -1 : 0);
-}
-
-int CGb2Utf8::TransformFile2(const char *pFrom, const char *pTo)
-{
-	char *sBuf = NULL, *dBuf = NULL;
-	size_t iLen, oLen;
-	const char *toCode = "utf-8", *fromCode = "gb2312";
-
-#undef RETURN
-#define RETURN(_x_) do \
-{ \
-	if (sBuf) \
-		acl_myfree(sBuf); \
-	if (dBuf) \
-		acl_myfree(dBuf); \
-	return(_x_); \
-} while(0);
-
-	sBuf = acl_vstream_loadfile(pFrom);
-	if (sBuf == NULL)
-		RETURN (-1);
-	if (*sBuf == 0)
-		RETURN (-1);
-
-	iLen = strlen(sBuf);
-	oLen = iLen * 2;
-	dBuf = (char*) acl_mycalloc(1, oLen);
-
-	int  ret = LC_GB2312ToUtf8(sBuf, (unsigned int) iLen, dBuf, (unsigned int) oLen);
-	if (ret < 0)
-		RETURN (-1);
-	ACL_VSTREAM *fp;
-
-	fp = acl_vstream_fopen(pFrom, O_RDWR | O_TRUNC | O_BINARY | O_APPEND, 0600, 1024);
-	if (fp == NULL)
-		RETURN (-1);
-	ret = acl_vstream_writen(fp, dBuf, ret);
+ 	int ret = acl_vstream_writen(fp, buf.c_str(), buf.length());
 	acl_vstream_close(fp);
 	RETURN (ret == ACL_VSTREAM_EOF ? -1 : 0);
 }
@@ -180,4 +126,3 @@ void CGb2Utf8::Run(void)
 		return;
 	acl_pthread_create(&tid, NULL, RunThread, this);
 }
-

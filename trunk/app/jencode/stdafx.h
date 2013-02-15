@@ -41,3 +41,4 @@
 #endif // _AFX_NO_AFXCMN_SUPPORT
 
 #include "lib_acl.h"
+#include "acl_cpp/lib_acl.hpp"

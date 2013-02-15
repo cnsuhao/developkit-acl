@@ -11,7 +11,6 @@ public:
 	void Run(void);
 	int TransformPath(CString *pFrom, CString *pTo);
 	int TransformFile(const char *pFrom, const char *pTo);
-	int TransformFile2(const char *pFrom, const char *pTo);
 private:
 	HWND m_hWnd;
 	CString m_sPath;

@@ -8,8 +8,8 @@ namespace acl
 class redis_key
 {
 public:
-	redis_key();
-	~redis_key();
+	redis_key() {}
+	~redis_key() {}
 
 	bool del_keys(const char* first_key, ...);
 	int  get_keys(const char* pattern, std::vector<acl::string>& out);

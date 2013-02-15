@@ -17,8 +17,8 @@ namespace acl
 class redis_response
 {
 public:
-	redis_response();
-	~redis_response();
+	redis_response() {}
+	~redis_response() {}
 
 	bool isString()
 	{

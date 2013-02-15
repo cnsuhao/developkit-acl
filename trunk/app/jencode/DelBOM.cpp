@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include ".\delbom.h"
+#include "DelBom.h"
 
 CDelBOM::CDelBOM(void)
 : m_nMsgDeleting(0)
