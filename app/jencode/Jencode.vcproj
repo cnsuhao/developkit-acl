@@ -13,7 +13,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="."
+			OutputDirectory="Debug"
 			IntermediateDirectory="Debug"
 			ConfigurationType="1"
 			UseOfMFC="2"
@@ -21,7 +21,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\lib_acl\include;..\..\include\iconv"
+				AdditionalIncludeDirectories="..\..\lib_acl_cpp\include;..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;VC2003"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -35,10 +35,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl_vc2003d.lib iconv.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib"
-				IgnoreDefaultLibraryNames="libcmtd"
+				AdditionalLibraryDirectories=""
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				TargetMachine="1"/>
@@ -47,10 +46,12 @@
 				PreprocessorDefinitions="_DEBUG"
 				MkTypLibCompatible="FALSE"/>
 			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\bin\iconv.dll $(OutDir)\ /Y"/>
+				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCPreBuildEventTool"
+				CommandLine="copy ..\..\dist\lib\win32\lib_acl_d.dll $(OutDir)\ /Y
+copy ..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y
+copy ..\..\dist\lib\win32\lib_acl_cpp_d.dll $(OutDir)\ /Y"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -78,13 +79,14 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
+				AdditionalIncludeDirectories="..\..\lib_acl\include;..\..\lib_acl_cpp\include"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;VC2003"
 				MinimalRebuild="FALSE"
 				RuntimeLibrary="2"
 				TreatWChar_tAsBuiltInType="TRUE"
 				UsePrecompiledHeader="3"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
+				Detect64BitPortabilityProblems="FALSE"
 				DebugInformationFormat="3"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -103,7 +105,10 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCPreBuildEventTool"
+				CommandLine="copy ..\..\dist\lib\win32\lib_acl.dll $(OutDir)\ /Y
+copy ..\..\dist\lib\win32\lib_protocol.dll $(OutDir)\ /Y
+copy ..\..\dist\lib\win32\lib_acl_cpp.dll $(OutDir)\ /Y"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -131,9 +136,6 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\_charsetfunc.cpp">
-			</File>
-			<File
 				RelativePath=".\AclTrans.cpp">
 			</File>
 			<File
@@ -141,9 +143,6 @@
 			</File>
 			<File
 				RelativePath=".\Gb2Utf8.cpp">
-			</File>
-			<File
-				RelativePath=".\gbandutf8.cpp">
 			</File>
 			<File
 				RelativePath=".\IdxTrans.cpp">
@@ -169,17 +168,11 @@
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
 			</File>
-			<File
-				RelativePath=".\utf8andunicode.cpp">
-			</File>
 		</Filter>
 		<Filter
 			Name="Í·ÎÄ¼þ"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
-			<File
-				RelativePath=".\_charsetfunc.h">
-			</File>
 			<File
 				RelativePath=".\AclTrans.h">
 			</File>
@@ -188,9 +181,6 @@
 			</File>
 			<File
 				RelativePath=".\Gb2Utf8.h">
-			</File>
-			<File
-				RelativePath=".\gbandutf8.h">
 			</File>
 			<File
 				RelativePath=".\IdxTrans.h">
@@ -206,9 +196,6 @@
 			</File>
 			<File
 				RelativePath=".\stdafx.h">
-			</File>
-			<File
-				RelativePath=".\utf8andunicode.h">
 			</File>
 		</Filter>
 		<Filter

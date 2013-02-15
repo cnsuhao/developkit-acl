@@ -8,7 +8,7 @@
 #include "IdxTrans.h"
 #include "JencodeDlg.h"
 #include "DelBOM.h"
-#include ".\jencodedlg.h"
+#include "JencodeDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

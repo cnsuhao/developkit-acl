@@ -1,6 +1,5 @@
 #include "StdAfx.h"
-#include "lib_acl.h"
-#include ".\acltrans.h"
+#include "AclTrans.h"
 
 CAclTrans::CAclTrans(void)
 : m_hWnd(0)
@@ -147,7 +146,8 @@ void CAclTrans::Restore(char *psBuf)
 void CAclTrans::Trans(char *psBuf)
 {
 	char *pTagBegin, *pTagEnd, *pNextChar;
-	int  len = (int) strlen("acl_"), n;
+	int  len = (int) strlen("acl_");
+	long int n;
 
 	while (1)
 	{
