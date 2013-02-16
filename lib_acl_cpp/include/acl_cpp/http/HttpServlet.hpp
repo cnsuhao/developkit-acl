@@ -116,17 +116,19 @@ namespace acl
 		/**
 		 * 当 HTTP 请求方法未知时的虚函数
 		 */
-		virtual void doUnknown(HttpServletRequest&, HttpServletResponse&)
+		virtual bool doUnknown(HttpServletRequest&, HttpServletResponse&)
 		{
 			logger_error("child not implement doUnknown yet!");
+			return false;
 		}
 
 		/**
 		 * 当 HTTP 请求出错时的虚函数
 		 */
-		virtual void doError(HttpServletRequest&, HttpServletResponse&)
+		virtual bool doError(HttpServletRequest&, HttpServletResponse&)
 		{
 			logger_error("child not implement doError yet!");
+			return false;
 		}
 
 	protected:
