@@ -56,7 +56,7 @@ void url_coder::reset()
 	buf_->clear();
 }
 
-void url_coder::encode(string& buf, bool clean /* = true */)
+void url_coder::encode(string& buf, bool clean /* = true */) const
 {
 	if (clean)
 		buf.clear();
@@ -74,7 +74,7 @@ void url_coder::encode(string& buf, bool clean /* = true */)
 	}
 }
 
-const string& url_coder::to_string()
+const string& url_coder::to_string() const
 {
 	encode(*buf_);
 	return *buf_;
