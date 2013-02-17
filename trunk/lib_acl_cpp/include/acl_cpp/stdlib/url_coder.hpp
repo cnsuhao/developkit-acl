@@ -35,13 +35,13 @@ public:
 	 * @param buf {string&} 存储编码后的结果
 	 * @param clean {bool} 是否清空传入的 buf 缓冲区
 	 */
-	void encode(string& buf, bool clean = true);
+	void encode(string& buf, bool clean = true) const;
 
 	/**
 	 * 获得将数组对象转换为编码后的字符串对象
 	 * @return {const string&}
 	 */
-	const string& to_string();
+	const string& to_string() const;
 
 	/**
 	 * 解析以 URL 编码的字符串
