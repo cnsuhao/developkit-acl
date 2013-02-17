@@ -262,12 +262,21 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "beanstalk", "lib_acl_cpp\sa
 		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "url_coder", "lib_acl_cpp\samples\url_coder\url_coder.vcproj", "{143ED97E-1EC6-4821-A5FA-A6728B69273E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC} = {6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD} = {FE724EF7-3763-4E78-BDF5-BCBC075719FD}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
 		DebugDll = DebugDll
 		Release = Release
 		Releasedll = Releasedll
+	EndGlobalSection
+	GlobalSection(ProjectDependencies) = postSolution
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
 		{41FA5224-3315-4CDA-9C44-19085049F179}.Debug.ActiveCfg = Debug|Win32
@@ -646,6 +655,14 @@ Global
 		{1509DA30-29B0-4B73-921A-BBBD9E5608BE}.Release.Build.0 = Release|Win32
 		{1509DA30-29B0-4B73-921A-BBBD9E5608BE}.Releasedll.ActiveCfg = ReleaseDll|Win32
 		{1509DA30-29B0-4B73-921A-BBBD9E5608BE}.Releasedll.Build.0 = ReleaseDll|Win32
+		{143ED97E-1EC6-4821-A5FA-A6728B69273E}.Debug.ActiveCfg = Debug|Win32
+		{143ED97E-1EC6-4821-A5FA-A6728B69273E}.Debug.Build.0 = Debug|Win32
+		{143ED97E-1EC6-4821-A5FA-A6728B69273E}.DebugDll.ActiveCfg = DebugDll|Win32
+		{143ED97E-1EC6-4821-A5FA-A6728B69273E}.DebugDll.Build.0 = DebugDll|Win32
+		{143ED97E-1EC6-4821-A5FA-A6728B69273E}.Release.ActiveCfg = Release|Win32
+		{143ED97E-1EC6-4821-A5FA-A6728B69273E}.Release.Build.0 = Release|Win32
+		{143ED97E-1EC6-4821-A5FA-A6728B69273E}.Releasedll.ActiveCfg = ReleaseDll|Win32
+		{143ED97E-1EC6-4821-A5FA-A6728B69273E}.Releasedll.Build.0 = ReleaseDll|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
