@@ -21,6 +21,13 @@ public:
 	 * @param nocase {bool} 当为 true 时表示参数名不区别大小写
 	 */
 	url_coder(bool nocase = true);
+
+	/**
+	 * 构造函数，通过类实例对象构造
+	 * @param coder {const url_coder&}
+	 */
+	url_coder(const url_coder& coder);
+
 	~url_coder();
 
 	/**
@@ -61,7 +68,21 @@ public:
 	 * @param name {const char*} 变量名
 	 * @return {const char*} 返回 NULL 表示不存在
 	 */
-	const char* get(const char* name);
+	const char* get(const char* name) const;
+
+	/**
+	 * 获得 URL 解码后 params_ 数组中某个变量名的值
+	 * @param name {const char*} 变量名
+	 * @return {const char*} 返回 NULL 表示不存在
+	 */
+	const char* operator[](const char* name) const;
+
+	/**
+	 * URL 编码器对象的拷贝
+	 * @param coder {const url_coder&} URL 源编码器对象
+	 * @return {const url_coder&}
+	 */
+	const url_coder& operator =(const url_coder& coder);
 
 	/**
 	 * 获得参数数组对象
@@ -83,6 +104,7 @@ public:
 	 * 重置解析器状态，清除内部缓存
 	 */
 	void reset();
+
 private:
 	bool nocase_;
 	std::vector<URL_NV*> params_;

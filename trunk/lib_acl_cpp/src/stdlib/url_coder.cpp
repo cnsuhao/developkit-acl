@@ -12,10 +12,32 @@ url_coder::url_coder(bool nocase /* = true */)
 	buf_ = NEW string(128);
 }
 
+url_coder::url_coder(const url_coder& coder)
+{
+	buf_ = NEW string(coder.buf_->c_str());
+	nocase_ = coder.nocase_;
+
+	std::vector<URL_NV*>::const_iterator cit = coder.params_.begin();
+	for (; cit != coder.params_.end(); ++cit)
+		set((*cit)->name, (*cit)->value);
+}
+
 url_coder::~url_coder()
 {
 	reset();
 	delete buf_;
+}
+
+const url_coder& url_coder::operator =(const url_coder& coder)
+{
+	nocase_ = coder.nocase_;
+	*buf_ = coder.buf_->c_str();
+
+	std::vector<URL_NV*>::const_iterator cit = coder.params_.begin();
+	for (; cit != coder.params_.end(); ++cit)
+		set((*cit)->name, (*cit)->value);
+
+	return *this;
 }
 
 void url_coder::free_param(URL_NV* param)
@@ -142,7 +164,7 @@ url_coder& url_coder::set(const char* name, const char* fmt, va_list ap,
 	return set(name, buf.c_str(), override);
 }
 
-const char* url_coder::get(const char* name)
+const char* url_coder::get(const char* name) const
 {
 	int (*cmp)(const char*, const char*) = nocase_ ? strcasecmp : strcmp;
 	std::vector<URL_NV*>::const_iterator cit = params_.begin();
@@ -154,6 +176,11 @@ const char* url_coder::get(const char* name)
 	}
 
 	return NULL;
+}
+
+const char* url_coder::operator [](const char* name) const
+{
+	return get(name);
 }
 
 bool url_coder::del(const char* name)
