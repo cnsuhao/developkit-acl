@@ -29,7 +29,7 @@ int main(void)
 	url_coder coder2;
 
 	coder2 = coder1;
-	coder2.set("name5", "value5");
+	coder2.set("name5", "&=value5=&");
 	ptr = coder2["name1"];
 	printf("--------------------------------------------------------\r\n");
 	printf("coder2 >> %s, name1: %s, name2: %s, name3: %s, name4: %s, name5: %s\r\n",
@@ -41,7 +41,7 @@ int main(void)
 	url_coder coder3(coder2);
 
 	coder3.set("name5", 5);
-	coder3.set("name6", "外国人");
+	coder3.set("name6", "=&外国人&=");
 	ptr = coder3["name1"];
 	printf("--------------------------------------------------------\r\n");
 	printf("coder3 >> %s, name1: %s, name2: %s, name3: %s, name4: %s, name5: %s, name6: %s\r\n",
