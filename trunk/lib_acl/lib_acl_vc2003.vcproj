@@ -1185,43 +1185,6 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 						RelativePath=".\src\master\daemon\master.c">
 					</File>
 				</Filter>
-				<Filter
-					Name="code"
-					Filter="">
-					<File
-						RelativePath=".\src\code\acl_base64.c">
-					</File>
-					<File
-						RelativePath=".\src\code\acl_gbcode.c">
-					</File>
-					<File
-						RelativePath=".\src\code\acl_htmlcode.c">
-					</File>
-					<File
-						RelativePath=".\src\code\acl_urlcode.c">
-					</File>
-					<File
-						RelativePath=".\src\code\acl_vstring_base64.c">
-					</File>
-					<File
-						RelativePath=".\src\code\acl_xmlcode.c">
-					</File>
-					<File
-						RelativePath=".\src\code\gb_ft2jt.h">
-					</File>
-					<File
-						RelativePath=".\src\code\gb_jt2ft.h">
-					</File>
-					<File
-						RelativePath=".\src\code\html_charset.h">
-					</File>
-					<File
-						RelativePath=".\src\code\uni2utf8.c">
-					</File>
-					<File
-						RelativePath=".\src\code\uni2utf8.h">
-					</File>
-				</Filter>
 			</Filter>
 			<Filter
 				Name="proctl"
@@ -1310,6 +1273,43 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				</File>
 				<File
 					RelativePath=".\src\json\acl_json_util.c">
+				</File>
+			</Filter>
+			<Filter
+				Name="code"
+				Filter="">
+				<File
+					RelativePath=".\src\code\acl_base64.c">
+				</File>
+				<File
+					RelativePath=".\src\code\acl_gbcode.c">
+				</File>
+				<File
+					RelativePath=".\src\code\acl_htmlcode.c">
+				</File>
+				<File
+					RelativePath=".\src\code\acl_urlcode.c">
+				</File>
+				<File
+					RelativePath=".\src\code\acl_vstring_base64.c">
+				</File>
+				<File
+					RelativePath=".\src\code\acl_xmlcode.c">
+				</File>
+				<File
+					RelativePath=".\src\code\gb_ft2jt.h">
+				</File>
+				<File
+					RelativePath=".\src\code\gb_jt2ft.h">
+				</File>
+				<File
+					RelativePath=".\src\code\html_charset.h">
+				</File>
+				<File
+					RelativePath=".\src\code\uni2utf8.c">
+				</File>
+				<File
+					RelativePath=".\src\code\uni2utf8.h">
 				</File>
 			</Filter>
 		</Filter>
