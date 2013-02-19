@@ -72,9 +72,8 @@ OBJ_PATH_DST = ./debug
 LIB_PATH_DST = ./lib
 
 INC_COMPILE = -I./include \
-	      -I/opt/import_lib/include/protocol \
-	      -I/opt/import_lib/include/acl
-
+	      -I../../../../lib_protocol/include \
+	      -I../../../../lib_acl/include
 CFLAGS += $(INC_COMPILE)
 
 #Project's objs
