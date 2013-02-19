@@ -77,8 +77,8 @@ endif
 ###########################################################
 BASE_PATH  = ../../../build
 
-INC_COMPILE = -I../include -I/opt/import_lib/include/acl
-LIB_COMPILE = -L../lib -l_gid -L/opt/import_lib/lib -l_protocol -l_acl
+INC_COMPILE = -I../include -I../../../../../lib_acl/include
+LIB_COMPILE = -L../lib -l_gid -L../../../../../lib_acl/lib -L../../../../../lib_protocol/lib -l_protocol -l_acl
 
 CFLAGS += $(INC_COMPILE)
 
