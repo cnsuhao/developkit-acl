@@ -68,6 +68,8 @@
 #include "acl_cpp/db/db_handle.hpp"
 #include "acl_cpp/db/db_mysql.hpp"
 #include "acl_cpp/db/db_pool.hpp"
+#include "acl_cpp/db/mysql_pool.hpp"
+#include "acl_cpp/db/sqlite_pool.hpp"
 #include "acl_cpp/db/db_service.hpp"
 #include "acl_cpp/db/db_service_mysql.hpp"
 #include "acl_cpp/db/db_service_sqlite.hpp"
