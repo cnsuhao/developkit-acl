@@ -36,19 +36,17 @@ static double stamp_sub(const struct timeval *from,
 	return (res.tv_sec * 1000.0 + res.tv_usec/1000.0);
 }
 
-using namespace acl;
-
 //////////////////////////////////////////////////////////////////////////
 
 // 子线程处理函数
-void rpc_download::rpc_run()
+void http_download::rpc_run()
 {
-	http_request req(addr_);  // HTTP 请求对象
+	acl::http_request req(addr_);  // HTTP 请求对象
 	// 设置 HTTP 请求头信息
 	req.request_header().set_url(url_.c_str())
 		.set_content_type("text/html")
 		.set_host(addr_.c_str())
-		.set_method(HTTP_METHOD_GET);
+		.set_method(acl::HTTP_METHOD_GET);
 
 	req.request_header().build_request(req_hdr_);
 	DOWN_CTX* ctx = new DOWN_CTX;
@@ -69,7 +67,7 @@ void rpc_download::rpc_run()
 	}
 
 	// 获得 HTTP 请求的连接对象
-	http_client* conn = req.get_client();
+	acl::http_client* conn = req.get_client();
 	assert(conn);
 
 	(void) conn->get_respond_head(&res_hdr_);
@@ -84,7 +82,7 @@ void rpc_download::rpc_run()
 	content_length_ = ctx->length;
 	rpc_signal(ctx);  // 通知主线程 HTTP 响应体数据长度
 
-	string buf(8192);
+	acl::string buf(8192);
 	int   real_size;
 	while (true)
 	{
@@ -115,14 +113,16 @@ void rpc_download::rpc_run()
 //////////////////////////////////////////////////////////////////////////
 
 // 主线程处理过程，收到子线程任务完成的消息
-void rpc_download::rpc_onover()
+void http_download::rpc_onover()
 {
+	logger("http download(%s) over, 共 %I64d 字节，耗时 %.3f 毫秒",
+		url_.c_str(), total_read_, total_spent_);
 	callback_->OnDownloadOver(total_read_, total_spent_);
-	delete this;
+	delete this;  // 销毁本对象
 }
 
 // 主线程处理过程，收到子线程的通知消息
-void rpc_download::rpc_wakeup(void* ctx)
+void http_download::rpc_wakeup(void* ctx)
 {
 	DOWN_CTX* down_ctx = (DOWN_CTX*) ctx;
 
