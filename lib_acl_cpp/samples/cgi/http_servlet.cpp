@@ -20,16 +20,17 @@ public:
 
 	}
 
-	virtual void doUnknown(HttpServletRequest&, HttpServletResponse& res)
+	virtual bool doUnknown(HttpServletRequest&, HttpServletResponse& res)
 	{
 		res.setStatus(400);
 		res.setContentType("text/xml; charset=gb2312");
 		// 发送 http 响应头
 		if (res.sendHeader() == false)
-			return;
+			return false;
 		// 发送 http 响应体
 		string buf("<root error='unkown request method' />\r\n");
 		(void) res.getOutputStream().write(buf);
+		return false;
 	}
 
 	virtual bool doGet(HttpServletRequest& req, HttpServletResponse& res)
