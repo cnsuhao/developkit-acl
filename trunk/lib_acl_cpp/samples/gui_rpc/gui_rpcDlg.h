@@ -3,12 +3,11 @@
 
 #pragma once
 #include "MeterBar.h"
-
-class acl::aio_handle;
-class acl::rpc_service;
+#include "rpc_download.h"
 
 // Cgui_rpcDlg 对话框
 class Cgui_rpcDlg : public CDialog
+	, public rpc_callback
 {
 // 构造
 public:
@@ -52,10 +51,18 @@ private:
 	acl::rpc_service* m_rpcService;
 
 public:
-	void OnDownload(int content_length, int total_read);
-	void SetRequestHdr(const char* hdr);
-	void SetResponseHdr(const char* hdr);
-	void DownloadOver(int total_read, double spent);
+	// 基类 rpc_callback 虚函数
+
+	// 设置 HTTP 请求头数据虚函数
+	virtual void SetRequestHdr(const char* hdr);
+	// 设置 HTTP 响应头数据虚函数
+	virtual void SetResponseHdr(const char* hdr);
+	// 下载过程中的回调函数虚函数
+	virtual void OnDownloading(long long int content_length,
+		long long int total_read);
+	// 下载完成时的回调函数虚函数
+	virtual void OnDownloadOver(long long int total_read,
+		double spent);
 public:
 	afx_msg void OnBnClickedButtonRun();
 	afx_msg void OnBnClickedClear();

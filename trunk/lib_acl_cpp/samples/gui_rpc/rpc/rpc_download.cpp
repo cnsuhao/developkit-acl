@@ -1,6 +1,5 @@
 #include "stdafx.h"
-#include "resource.h"
-#include "gui_rpcDlg.h"
+#include <assert.h>
 #include "rpc_download.h"
 
 typedef enum
@@ -15,9 +14,10 @@ typedef enum
 struct DOWN_CTX 
 {
 	ctx_t type;
-	int length;
+	long long int length;
 };
 
+// 用来精确计算时间截的函数
 static double stamp_sub(const struct timeval *from, const struct timeval *sub_by)
 {
 	struct timeval res;
@@ -37,10 +37,11 @@ static double stamp_sub(const struct timeval *from, const struct timeval *sub_by
 
 using namespace acl;
 
+//////////////////////////////////////////////////////////////////////////
+
 // 子线程处理函数
 void rpc_download::rpc_run()
 {
-	//http_request req(addr_, 60, 60, false);  // HTTP 请求对象
 	http_request req(addr_);  // HTTP 请求对象
 	// 设置 HTTP 请求头信息
 	req.request_header().set_url(url_.c_str())
@@ -48,12 +49,10 @@ void rpc_download::rpc_run()
 		.set_host(addr_.c_str())
 		.set_method(HTTP_METHOD_GET);
 
-	// 通知主线程 HTTP 请求头数据
-
 	req.request_header().build_request(req_hdr_);
 	DOWN_CTX* ctx = new DOWN_CTX;
 	ctx->type = CTX_T_REQ_HDR;
-	rpc_signal(ctx);
+	rpc_signal(ctx);  // 通知主线程 HTTP 请求头数据
 
 	struct timeval begin, end;;
 	gettimeofday(&begin, NULL);
@@ -61,7 +60,7 @@ void rpc_download::rpc_run()
 	// 发送 HTTP 请求数据
 	if (req.request(NULL, 0) == false)
 	{
-		printf("send request error\r\n");
+		logger_error("send request error");
 		error_ = false;
 		gettimeofday(&end, NULL);
 		total_spent_ = stamp_sub(&end, &begin);
@@ -70,22 +69,19 @@ void rpc_download::rpc_run()
 
 	// 获得 HTTP 请求的连接对象
 	http_client* conn = req.get_client();
-	ASSERT(conn);
-
-	// 通知主线程 HTTP 响应头数据
+	assert(conn);
 
 	(void) conn->get_respond_head(&res_hdr_);
 	ctx = new DOWN_CTX;
 	ctx->type = CTX_T_RES_HDR;
-	rpc_signal(ctx);
-
-	// 通知主线程 HTTP 响应体数据长度
+	rpc_signal(ctx);   // 通知主线程 HTTP 响应头数据
 
 	ctx = new DOWN_CTX;
 	ctx->type = CTX_T_CONTENT_LENGTH;
-	ctx->length = (int) conn->body_length();  // 获得 HTTP 响应数据的数据体长度
+	
+	ctx->length = conn->body_length();  // 获得 HTTP 响应数据的数据体长度
 	content_length_ = ctx->length;
-	rpc_signal(ctx);
+	rpc_signal(ctx);  // 通知主线程 HTTP 响应体数据长度
 
 	string buf(8192);
 	int   real_size;
@@ -98,25 +94,29 @@ void rpc_download::rpc_run()
 			ctx = new DOWN_CTX;
 			ctx->type = CTX_T_END;
 			ctx->length = ret;
-			// 通知主线程
-			rpc_signal(ctx);
+			rpc_signal(ctx);  // 通知主线程下载完毕
 			break;
 		}
 		ctx = new DOWN_CTX;
 		ctx->type = CTX_T_PARTIAL_LENGTH;
 		ctx->length = real_size;
-		// 通知主线程
+		// 通知主线程当前已经下载的大小
 		rpc_signal(ctx);
 	}
 
+	// 计算下载过程总时长
 	gettimeofday(&end, NULL);
 	total_spent_ = stamp_sub(&end, &begin);
+
+	// 至此，子线程运行完毕，主线程的 rpc_onover 过程将被调用
 }
+
+//////////////////////////////////////////////////////////////////////////
 
 // 主线程处理过程，收到子线程任务完成的消息
 void rpc_download::rpc_onover()
 {
-	m_dlg.DownloadOver(total_read_, total_spent_);
+	callback_->OnDownloadOver(total_read_, total_spent_);
 	delete this;
 }
 
@@ -124,26 +124,33 @@ void rpc_download::rpc_onover()
 void rpc_download::rpc_wakeup(void* ctx)
 {
 	DOWN_CTX* down_ctx = (DOWN_CTX*) ctx;
+
+	// 根据子线程中传来的不同的下载阶段进行处理
+
 	switch (down_ctx->type)
 	{
 	case CTX_T_REQ_HDR:
-		m_dlg.SetRequestHdr(req_hdr_.c_str());
+		callback_->SetRequestHdr(req_hdr_.c_str());
 		break;
 	case CTX_T_RES_HDR:
-		m_dlg.SetResponseHdr(res_hdr_.c_str());
+		callback_->SetResponseHdr(res_hdr_.c_str());
 		break;
 	case CTX_T_CONTENT_LENGTH:
 		break;
 	case CTX_T_PARTIAL_LENGTH:
 		total_read_ += down_ctx->length;
-		m_dlg.OnDownload(content_length_, total_read_);
+		callback_->OnDownloading(content_length_, total_read_);
 		break;
 	case CTX_T_END:
-		printf("%s: read over\r\n", addr_.c_str());
+		logger("%s: read over", addr_.c_str());
 		break;
 	default:
-		printf("%s: ERROR\r\n", addr_.c_str());
+		logger_error("%s: ERROR", addr_.c_str());
 		break;
 	}
+
+	// 删除在子线程中动态分配的对象
 	delete down_ctx;
 }
+
+//////////////////////////////////////////////////////////////////////////
