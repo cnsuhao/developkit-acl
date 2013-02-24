@@ -49,7 +49,11 @@
 				PreprocessorDefinitions="_DEBUG"
 				MkTypLibCompatible="FALSE"/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				CommandLine="copy ../../../dist/lib/win32/lib_acl_d.dll $(OutDir)/  /Y
+copy ../../../dist/lib/win32/lib_protocol_d.dll $(OutDir)/  /Y
+copy ../../../dist/lib/win32/lib_acl_cpp_d.dll $(OutDir)/  /Y
+copy ../../bin/zlib.dll $(OutDir)/ /Y"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -211,10 +215,10 @@
 			Name="rpc"
 			Filter="">
 			<File
-				RelativePath=".\rpc\rpc_download.cpp">
+				RelativePath=".\rpc\http_download.cpp">
 			</File>
 			<File
-				RelativePath=".\rpc\rpc_download.h">
+				RelativePath=".\rpc\http_download.h">
 			</File>
 		</Filter>
 		<File

@@ -3,7 +3,7 @@
 
 #pragma once
 #include "MeterBar.h"
-#include "rpc_download.h"
+#include "http_download.h"
 
 // Cgui_rpcDlg ¶Ô»°¿ò
 class Cgui_rpcDlg : public CDialog
