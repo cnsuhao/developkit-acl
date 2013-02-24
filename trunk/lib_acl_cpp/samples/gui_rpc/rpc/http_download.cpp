@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include <assert.h>
-#include "rpc_download.h"
+#include "http_download.h"
 
 typedef enum
 {
@@ -18,7 +18,8 @@ struct DOWN_CTX
 };
 
 // 用来精确计算时间截的函数
-static double stamp_sub(const struct timeval *from, const struct timeval *sub_by)
+static double stamp_sub(const struct timeval *from,
+	const struct timeval *sub_by)
 {
 	struct timeval res;
 
