@@ -1,19 +1,37 @@
 #pragma once
-#include "acl_cpp/ipc/rpc.hpp"
-#include "acl_cpp/stdlib/string.hpp"
 
-class acl::aio_handle;
-class Cgui_rpcDlg;
+//////////////////////////////////////////////////////////////////////////
+
+// 纯虚类，子类须实现该类中的纯虚接口
+class rpc_callback
+{
+public:
+	rpc_callback() {}
+	virtual ~rpc_callback() {}
+
+	// 设置 HTTP 请求头数据虚函数
+	virtual void SetRequestHdr(const char* hdr) = 0;
+	// 设置 HTTP 响应头数据虚函数
+	virtual void SetResponseHdr(const char* hdr) = 0;
+	// 下载过程中的回调函数虚函数
+	virtual void OnDownloading(long long int content_length,
+		long long int total_read) = 0;
+	// 下载完成时的回调函数虚函数
+	virtual void OnDownloadOver(long long int total_read,
+		double spent) = 0;
+};
+
+//////////////////////////////////////////////////////////////////////////
 
 class rpc_download : public acl::rpc_request
 {
 public:
 	rpc_download(acl::aio_handle& handle, const char* addr,
-		const char* url, Cgui_rpcDlg& dlg)
+		const char* url, rpc_callback* callback)
 		: handle_(handle)
 		, addr_(addr)
 		, url_(url)
-		, m_dlg(dlg)
+		, callback_(callback)
 		, error_(false)
 		, total_read_(0)
 		, content_length_(0)
@@ -37,9 +55,9 @@ private:
 	acl::string req_hdr_;
 	acl::string res_hdr_;
 	bool  error_;
-	int   total_read_;
-	int   content_length_;
+	long long int total_read_;
+	long long int content_length_;
 	double total_spent_;
 
-	Cgui_rpcDlg& m_dlg;
+	rpc_callback* callback_;
 };

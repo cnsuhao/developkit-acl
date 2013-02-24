@@ -5,7 +5,6 @@
 #include "gui_rpc.h"
 #include "rpc_download.h"
 #include "gui_rpcDlg.h"
-#include ".\gui_rpcdlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -263,7 +262,7 @@ void Cgui_rpcDlg::OnBnClickedButtonRun()
 	addr.AppendFormat(":%s", port.GetString());
 
 	rpc_download* down = new rpc_download(*m_handle, addr.GetString(),
-		url.GetString(), *this);
+		url.GetString(), this);
 	m_rpcService->rpc_fork(down);  // 发起一个阻塞会话过程
 	GetDlgItem(IDC_BUTTON_RUN)->EnableWindow(false);
 }
@@ -340,25 +339,28 @@ void Cgui_rpcDlg::OnEnChangeUrl()
 		GetDlgItem(IDC_PORT)->SetWindowText(port.GetString());
 }
 
-void Cgui_rpcDlg::OnDownload(int content_length, int total_read)
+//////////////////////////////////////////////////////////////////////////
+
+void Cgui_rpcDlg::OnDownloading(long long int content_length,
+	long long int total_read)
 {
 	if (content_length > 0)
 	{
 		int  nStept;
 
-		nStept = (total_read * 100) / (content_length);
+		nStept = (int) ((total_read * 100) / (content_length));
 		m_wndMeterBar.GetProgressCtrl().SetPos(nStept);
 	}
-
+ 
 	CString msg;
-	msg.Format("共 %d 字节", total_read);
+	msg.Format("共 %I64d 字节", total_read);
 	m_wndMeterBar.SetText(msg, 1, 0);
 }
 
-void Cgui_rpcDlg::DownloadOver(int total_read, double spent)
+void Cgui_rpcDlg::OnDownloadOver(long long int total_read, double spent)
 {
 	CString msg;
-	msg.Format("共 %d 字节，耗时 %.3f 毫秒", total_read, spent);
+	msg.Format("共 %I64d 字节，耗时 %.3f 毫秒", total_read, spent);
 	m_wndMeterBar.SetText(msg, 1, 0);
 	GetDlgItem(IDC_BUTTON_RUN)->EnableWindow(true);
 }
