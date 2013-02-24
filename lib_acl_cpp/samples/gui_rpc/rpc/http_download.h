@@ -23,29 +23,32 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
+/**
+ * http 请求过程类，该类对象在子线程中发起远程 HTTP 请求过程，将处理结果
+ * 返回给主线程
+ */
 class http_download : public acl::rpc_request
 {
 public:
+	/**
+	 * 构造函数
+	 * @param addr {const char*} HTTP 服务器地址，格式：domain:port
+	 * @param url {const char*} http url 地址
+	 * @param callback {rpc_callback*} http 请求结果通过此类对象
+	 *  通知主线程过程
+	 */
 	http_download(const char* addr, const char* url,
-		rpc_callback* callback)
-		: addr_(addr)
-		, url_(url)
-		, callback_(callback)
-		, error_(false)
-		, total_read_(0)
-		, content_length_(0)
-		, total_spent_(0)
-	{}
+		rpc_callback* callback);
 protected:
 	~http_download() {}
 
-	// 子线程处理函数
+	// 基类虚函数：子线程处理函数
 	virtual void rpc_run();
 
-	// 主线程处理过程，收到子线程任务完成的消息
+	// 基类虚函数：主线程处理过程，收到子线程任务完成的消息
 	virtual void rpc_onover();
 
-	// 主线程处理过程，收到子线程的通知消息
+	// 基类虚函数：主线程处理过程，收到子线程的通知消息
 	virtual void rpc_wakeup(void* ctx);
 private:
 	acl::string addr_;
