@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "gui_rpc.h"
-#include "rpc_download.h"
+#include "http_download.h"
 #include "gui_rpcDlg.h"
 
 #ifdef _DEBUG
@@ -247,6 +247,9 @@ void Cgui_rpcDlg::OnBnClickedButtonRun()
 		MessageBox("请输入正确的 URL!");
 		return;
 	}
+	const char* ptr = url.GetString();
+	if (strncasecmp(ptr, "http://", sizeof("http://") - 1) != 0)
+		url = "http://" + url;
 
 	CString addr;
 	GetDlgItem(IDC_IP)->GetWindowText(addr);
