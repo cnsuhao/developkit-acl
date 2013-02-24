@@ -170,6 +170,9 @@ copy ..\..\bin\zlib.dll $(OutDir)\ /Y"/>
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
+				RelativePath=".\gui_rpc.h">
+			</File>
+			<File
 				RelativePath=".\gui_rpcDlg.h">
 			</File>
 			<File
@@ -223,6 +226,12 @@ copy ..\..\bin\zlib.dll $(OutDir)\ /Y"/>
 			</File>
 			<File
 				RelativePath=".\rpc\http_download.h">
+			</File>
+			<File
+				RelativePath=".\rpc\rpc.cpp">
+			</File>
+			<File
+				RelativePath=".\rpc\rpc.h">
 			</File>
 		</Filter>
 		<File

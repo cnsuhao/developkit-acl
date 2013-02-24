@@ -20,7 +20,6 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
 
-
 // 实现
 protected:
 	HICON m_hIcon;
@@ -44,11 +43,6 @@ private:
 
 	CString m_serverIp;
 	CString m_serverPort;
-
-	// 异步消息句柄
-	acl::aio_handle* m_handle;
-	// 异步 RPC 通信服务句柄
-	acl::rpc_service* m_rpcService;
 
 public:
 	// 基类 rpc_callback 虚函数

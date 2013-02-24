@@ -23,13 +23,12 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class rpc_download : public acl::rpc_request
+class http_download : public acl::rpc_request
 {
 public:
-	rpc_download(acl::aio_handle& handle, const char* addr,
-		const char* url, rpc_callback* callback)
-		: handle_(handle)
-		, addr_(addr)
+	http_download(const char* addr, const char* url,
+		rpc_callback* callback)
+		: addr_(addr)
 		, url_(url)
 		, callback_(callback)
 		, error_(false)
@@ -38,7 +37,7 @@ public:
 		, total_spent_(0)
 	{}
 protected:
-	~rpc_download() {}
+	~http_download() {}
 
 	// 子线程处理函数
 	virtual void rpc_run();
@@ -49,7 +48,6 @@ protected:
 	// 主线程处理过程，收到子线程的通知消息
 	virtual void rpc_wakeup(void* ctx);
 private:
-	acl::aio_handle& handle_;
 	acl::string addr_;
 	acl::string url_;
 	acl::string req_hdr_;

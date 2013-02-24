@@ -3,7 +3,8 @@
 
 #include "stdafx.h"
 #include "gui_rpc.h"
-#include "http_download.h"
+#include "rpc/rpc.h"
+#include "rpc/http_download.h"
 #include "gui_rpcDlg.h"
 
 #ifdef _DEBUG
@@ -50,21 +51,10 @@ Cgui_rpcDlg::Cgui_rpcDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(Cgui_rpcDlg::IDD, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-	m_handle = new acl::aio_handle(acl::ENGINE_WINMSG);
-	m_rpcService = new acl::rpc_service(10, true);  // 创建 rpc 服务对象
-	// 打开消息服务器
-	if (m_rpcService->open(m_handle) == false)
-	{
-		printf("open service error: %s\r\n", acl::last_serror());
-		ASSERT(0);
-	}
 }
 
 Cgui_rpcDlg::~Cgui_rpcDlg()
 {
-	delete m_rpcService;
-	m_handle->check();
-	delete m_handle;
 }
 
 void Cgui_rpcDlg::DoDataExchange(CDataExchange* pDX)
@@ -264,9 +254,15 @@ void Cgui_rpcDlg::OnBnClickedButtonRun()
 
 	addr.AppendFormat(":%s", port.GetString());
 
-	rpc_download* down = new rpc_download(*m_handle, addr.GetString(),
+	// 在主线程中创建一个 HTTP 下载过程
+	http_download* down = new http_download(addr.GetString(),
 		url.GetString(), this);
-	m_rpcService->rpc_fork(down);  // 发起一个阻塞会话过程
+
+	// 通过子线程开始一个 HTTP 下载过程
+	rpc::get_instance().fork(down);
+
+	// 虽然可以同时发起多个 HTTP 下载过程，但此处为了简单，先禁止下一个
+	// HTTP 下载任务，直至上一个任务完毕
 	GetDlgItem(IDC_BUTTON_RUN)->EnableWindow(false);
 }
 
