@@ -2,22 +2,24 @@
 #include <assert.h>
 #include "http_download.h"
 
+// 由子线程动态创建的 DOWN_CTX 对象的数据类型
 typedef enum
 {
-	CTX_T_REQ_HDR,
-	CTX_T_RES_HDR,
-	CTX_T_CONTENT_LENGTH,
-	CTX_T_PARTIAL_LENGTH,
+	CTX_T_REQ_HDR,		// 为 HTTP 请求头数据
+	CTX_T_RES_HDR,		// 为 HTTP 响应头数据
+	CTX_T_CONTENT_LENGTH,	// 为 HTTP 响应体的长度
+	CTX_T_PARTIAL_LENGTH,	// 为 HTTP 下载数据体的长度
 	CTX_T_END
 } ctx_t;
 
+// 子线程动态创建的数据对象，主线程接收此数据
 struct DOWN_CTX 
 {
 	ctx_t type;
 	long long int length;
 };
 
-// 用来精确计算时间截的函数
+// 用来精确计算时间截间隔的函数，精确到毫秒级别
 static double stamp_sub(const struct timeval *from,
 	const struct timeval *sub_by)
 {
@@ -108,6 +110,21 @@ void http_download::rpc_run()
 	total_spent_ = stamp_sub(&end, &begin);
 
 	// 至此，子线程运行完毕，主线程的 rpc_onover 过程将被调用
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+http_download::http_download(const char* addr, const char* url,
+	rpc_callback* callback)
+	: addr_(addr)
+	, url_(url)
+	, callback_(callback)
+	, error_(false)
+	, total_read_(0)
+	, content_length_(0)
+	, total_spent_(0)
+{
+
 }
 
 //////////////////////////////////////////////////////////////////////////
