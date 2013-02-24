@@ -656,6 +656,12 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				<File
 					RelativePath=".\src\db\db_sqlite.cpp">
 				</File>
+				<File
+					RelativePath=".\src\db\mysql_pool.cpp">
+				</File>
+				<File
+					RelativePath=".\src\db\sqlite_pool.cpp">
+				</File>
 			</Filter>
 			<Filter
 				Name="memcache"
@@ -1009,6 +1015,12 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				</File>
 				<File
 					RelativePath=".\include\acl_cpp\db\db_sqlite.hpp">
+				</File>
+				<File
+					RelativePath=".\include\acl_cpp\db\mysql_pool.hpp">
+				</File>
+				<File
+					RelativePath=".\include\acl_cpp\db\sqlite_pool.hpp">
 				</File>
 			</Filter>
 			<Filter
