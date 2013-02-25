@@ -60,13 +60,10 @@ namespace acl
 		 * 构造函数
 		 * @param nthread {int} 如果该值 > 1 则内部自动采用线程池，否则
 		 *  则是一个请求一个线程
-		 * @param win32_gui {bool} 是否是窗口类的消息，如果是，则内部的
-		 *  通讯模式自动设置为基于 WIN32 的消息，否则依然采用通用的套接
-		 *  口通讯方式
 		 * @param ipc_keep {bool} 内部 IPC 消息流是否保持长连接，保持长
 		 *  连接有助于提高消息传递的效率
 		 */
-		ipc_service(int nthread, bool win32_gui = false, bool ipc_keep = true);
+		ipc_service(int nthread, bool ipc_keep = true);
 
 		virtual ~ipc_service();
 
@@ -108,14 +105,14 @@ namespace acl
 		HINSTANCE hInstance_;
 
 		/**
-		 * Windows 消息方式下，创建隐藏窗口句柄
+		 * 基类虚函数：Windows 消息方式下，创建隐藏窗口句柄
 		 */
-		void create_window(void);
+		virtual bool create_window(void);
 
 		/**
-		 * Windows 消息方式下，关闭隐藏窗口句柄
+		 * 基类虚函数：Windows 消息方式下，关闭隐藏窗口句柄
 		 */
-		void close_window(void);
+		virtual void close_window(void);
 #endif
 
 		locker lock_;

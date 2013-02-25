@@ -66,7 +66,20 @@ namespace acl
 		{
 			(void) client;
 		}
+
+#ifdef WIN32
+		/**
+		 * 对于基于 WIN32 窗口消息的情况，当调用 open 时，则内部
+		 * 会自动调用 create_windows 过程
+		 */
+		virtual bool create_window()
+		{
+			return false;
+		}
+#endif
+
 	private:
+		aio_handle* handle_;
 		aio_listen_stream* sstream_;
 
 		/**

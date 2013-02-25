@@ -53,7 +53,8 @@
 				CommandLine="copy ..\..\..\dist\lib\win32\lib_acl_d.dll $(OutDir)\  /Y
 copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\  /Y
 copy ..\..\..\dist\lib\win32\lib_acl_cpp_d.dll $(OutDir)\  /Y
-copy ..\..\bin\zlib.dll $(OutDir)\ /Y"/>
+copy ..\..\bin\zlib.dll $(OutDir)\ /Y
+"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -114,7 +115,8 @@ copy ..\..\bin\zlib.dll $(OutDir)\ /Y"/>
 				CommandLine="copy ..\..\..\dist\lib\win32\lib_acl.dll $(OutDir)\  /Y
 copy ..\..\..\dist\lib\win32\lib_protocol.dll $(OutDir)\  /Y
 copy ..\..\..\dist\lib\win32\lib_acl_cpp.dll $(OutDir)\  /Y
-copy ..\..\bin\zlib.dll $(OutDir)\ /Y"/>
+copy ..\..\bin\zlib.dll $(OutDir)\ /Y
+"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -228,10 +230,10 @@ copy ..\..\bin\zlib.dll $(OutDir)\ /Y"/>
 				RelativePath=".\rpc\http_download.h">
 			</File>
 			<File
-				RelativePath=".\rpc\rpc.cpp">
+				RelativePath=".\rpc\rpc_manager.cpp">
 			</File>
 			<File
-				RelativePath=".\rpc\rpc.h">
+				RelativePath=".\rpc\rpc_manager.h">
 			</File>
 		</Filter>
 		<File

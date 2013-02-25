@@ -9,7 +9,8 @@ namespace acl
 {
 
 	ipc_server::ipc_server()
-		: sstream_(NULL)
+		: handle_(NULL)
+		, sstream_(NULL)
 	{
 
 	}
@@ -24,6 +25,15 @@ namespace acl
 	{
 		if (handle == NULL)
 			logger_fatal("handle null");
+		else
+			handle_ = handle;
+
+#ifdef WIN32
+		// 如果事件引擎是基于 WIN32 窗口消息，则直接返回
+		if (handle->get_engine_type() == ENGINE_WINMSG)
+			return create_window();
+#endif
+
 		if (addr == NULL)
 			addr = "127.0.0.1:0";
 		sstream_ = NEW aio_listen_stream(handle);
@@ -74,7 +84,7 @@ namespace acl
 
 	aio_handle& ipc_server::get_handle() const
 	{
-		return (get_stream()->get_handle());
+		return (*handle_);
 	}
 
 }

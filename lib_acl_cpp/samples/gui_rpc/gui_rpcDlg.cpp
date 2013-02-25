@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "gui_rpc.h"
-#include "rpc/rpc.h"
+#include "rpc/rpc_manager.h"
 #include "rpc/http_download.h"
 #include "gui_rpcDlg.h"
 
@@ -259,7 +259,7 @@ void Cgui_rpcDlg::OnBnClickedButtonRun()
 		url.GetString(), this);
 
 	// 通过子线程开始一个 HTTP 下载过程
-	rpc::get_instance().fork(down);
+	rpc_manager::get_instance().fork(down);
 
 	// 虽然可以同时发起多个 HTTP 下载过程，但此处为了简单，先禁止下一个
 	// HTTP 下载任务，直至上一个任务完毕
