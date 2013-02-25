@@ -1,10 +1,4 @@
 #pragma once
-#include "acl_cpp/stdlib/singleton.hpp"
-#include "acl_cpp/lib_acl.hpp"
-
-//class acl::rpc_request;
-//class acl::aio_handle;
-//class acl::rpc_service;
 
 /**
  * 本类对象将阻塞任务交给子线程处理；为了方便使用，将该类声明为单例类
