@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "rpc.h"
 
-rpc::rpc(int max_threads /* = 10 */)
+rpc_manager::rpc_manager(int max_threads /* = 10 */)
 {
 	// 创建非阻塞框架句柄，并采用 WIN32 消息模式：acl::ENGINE_WINMSG
 	handle_ = new acl::aio_handle(acl::ENGINE_WINMSG);
@@ -12,7 +12,7 @@ rpc::rpc(int max_threads /* = 10 */)
 		logger_fatal("open service error: %s", acl::last_serror());
 }
 
-rpc::~rpc()
+rpc_manager::~rpc_manager()
 {
 	delete service_;
 	handle_->check();
@@ -20,7 +20,7 @@ rpc::~rpc()
 	logger("rpc service destroy ok!");
 }
 
-void rpc::fork(acl::rpc_request* req)
+void rpc_manager::fork(acl::rpc_request* req)
 {
 	service_->rpc_fork(req);
 }
