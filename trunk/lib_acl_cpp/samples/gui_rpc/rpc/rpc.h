@@ -1,17 +1,23 @@
 #pragma once
+#include "acl_cpp/stdlib/singleton.hpp"
+#include "acl_cpp/lib_acl.hpp"
+
+//class acl::rpc_request;
+//class acl::aio_handle;
+//class acl::rpc_service;
 
 /**
  * 本类对象将阻塞任务交给子线程处理；为了方便使用，将该类声明为单例类
  */
-class rpc : public acl::singleton<rpc>
+class rpc_manager : public acl::singleton<rpc_manager>
 {
 public:
 	/**
 	 * 构造函数
 	 * @param max_threads {int} 子线程池的最大线程数量
 	 */
-	rpc(int max_threads = 10);
-	~rpc();
+	rpc_manager(int max_threads = 10);
+	~rpc_manager();
 
 	/**
 	 * 发起一个阻塞过程，将该过程交由子线程处理
