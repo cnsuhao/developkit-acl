@@ -52,6 +52,7 @@ BEGIN_MESSAGE_MAP(CHttpOption, CDialog)
 	ON_BN_CLICKED(IDC_CHECK_ZIP, OnBnClickedCheckZip)
 	ON_BN_CLICKED(IDC_CHECK_KEEP_ALIVE, OnBnClickedCheckKeepAlive)
 	ON_BN_CLICKED(IDC_POST_METHOD, OnBnClickedPostMethod)
+	ON_BN_CLICKED(IDOK, OnBnClickedOk)
 END_MESSAGE_MAP()
 
 
@@ -102,4 +103,10 @@ void CHttpOption::OnBnClickedPostMethod()
 		m_bPostMethod = TRUE;
 	else
 		m_bPostMethod = FALSE;
+}
+
+void CHttpOption::OnBnClickedOk()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	OnOK();
 }

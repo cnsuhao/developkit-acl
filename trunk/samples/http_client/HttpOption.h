@@ -37,4 +37,5 @@ public:
 	BOOL m_bForwardAuto;
 	UINT m_nMaxTry;
 	afx_msg void OnBnClickedPostMethod();
+	afx_msg void OnBnClickedOk();
 };
