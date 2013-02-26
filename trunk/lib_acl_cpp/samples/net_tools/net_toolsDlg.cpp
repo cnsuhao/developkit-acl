@@ -92,6 +92,7 @@ BEGIN_MESSAGE_MAP(Cnet_toolsDlg, CDialog)
 	ON_BN_CLICKED(IDC_LOAD_DOMAIN, OnBnClickedLoadDomain)
 	ON_BN_CLICKED(IDC_NSLOOKUP, OnBnClickedNslookup)
 	ON_BN_CLICKED(IDC_OPEN_DOS, OnBnClickedOpenDos)
+	ON_BN_CLICKED(IDC_UPLOAD, OnBnClickedUpload)
 END_MESSAGE_MAP()
 
 
@@ -309,4 +310,9 @@ void Cnet_toolsDlg::OnBnClickedOpenDos()
 		acl::log::stdout_open(false);
 		logger_open("net_tools.txt", "net_tools");
 	}
+}
+
+void Cnet_toolsDlg::OnBnClickedUpload()
+{
+	// TODO: 在此添加控件通知处理程序代码
 }
