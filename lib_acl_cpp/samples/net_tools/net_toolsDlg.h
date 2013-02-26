@@ -56,4 +56,5 @@ public:
 	virtual void enable_ping();
 	virtual void enable_nslookup();
 	afx_msg void OnBnClickedOpenDos();
+	afx_msg void OnBnClickedUpload();
 };
