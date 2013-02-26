@@ -1,8 +1,8 @@
 #include "StdAfx.h"
 #include "ping.h"
 
-ping::ping(const char* filepath, rpc_callback* callback,
-	int npkt /* = 10 */, int delay /* = 1*/, int timeout /* = 5 */)
+ping::ping(const char* filepath, ping_callback* callback,
+	int npkt, int delay, int timeout)
 : filepath_(filepath)
 , callback_(callback)
 , npkt_(npkt)
@@ -18,6 +18,7 @@ ping::ping(const char* filepath, rpc_callback* callback,
 void ping::rpc_onover()
 {
 	callback_->enable_ping();
+	delete this;
 }
 
 void ping::rpc_wakeup(void* ctx)

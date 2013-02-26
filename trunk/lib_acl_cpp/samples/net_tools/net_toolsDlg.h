@@ -3,10 +3,12 @@
 
 #pragma once
 #include "ping/ping.h"
+#include "dns/nslookup.h"
 
 // Cnet_toolsDlg 对话框
 class Cnet_toolsDlg : public CDialog
-	, public rpc_callback
+	, public ping_callback
+	, public nslookup_callback
 {
 // 构造
 public:
@@ -36,13 +38,22 @@ public:
 	afx_msg void OnBnClickedNslookup();
 
 private:
+	// ping 相关参数
 	UINT m_nPkt;
 	UINT m_delay;
-	UINT m_timeout;
+	UINT m_pingTimeout;
 	FILE* m_dosFp;
+
+	// dns 相关参数
+	CString m_dnsIp;
+	UINT m_dnsPort;
+	UINT m_lookupTimeout;
+
+public:
 	void DisableAll();
 
 public:
 	virtual void enable_ping();
+	virtual void enable_nslookup();
 	afx_msg void OnBnClickedOpenDos();
 };

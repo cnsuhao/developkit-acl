@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "net_tools.h"
 #include "ping/ping.h"
+#include "dns/nslookup.h"
 #include "rpc/rpc_manager.h"
 #include "net_toolsDlg.h"
 #include ".\net_toolsdlg.h"
@@ -52,8 +53,11 @@ Cnet_toolsDlg::Cnet_toolsDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(Cnet_toolsDlg::IDD, pParent)
 	, m_nPkt(10)
 	, m_delay(1)
-	, m_timeout(5)
+	, m_pingTimeout(5)
 	, m_dosFp(NULL)
+	, m_dnsIp("8.8.8.8")
+	, m_dnsPort(53)
+	, m_lookupTimeout(10)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -72,7 +76,10 @@ void Cnet_toolsDlg::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	DDX_Text(pDX, IDC_NPKT, m_nPkt);
 	DDX_Text(pDX, IDC_DELAY, m_delay);
-	DDX_Text(pDX, IDC_TIMEOUT, m_timeout);
+	DDX_Text(pDX, IDC_TIMEOUT, m_pingTimeout);
+	DDX_Text(pDX, IDC_DNS_IP, m_dnsIp);
+	DDX_Text(pDX, IDC_DNS_PORT, m_dnsPort);
+	DDX_Text(pDX, IDC_LOOKUP_TIMEOUT, m_lookupTimeout);
 }
 
 BEGIN_MESSAGE_MAP(Cnet_toolsDlg, CDialog)
@@ -197,7 +204,6 @@ void Cnet_toolsDlg::OnBnClickedLoadIp()
 void Cnet_toolsDlg::OnBnClickedPing()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	//Invalidate(TRUE);
 	UpdateData();
 
 	GetDlgItem(IDC_PING)->EnableWindow(FALSE);
@@ -213,10 +219,10 @@ void Cnet_toolsDlg::OnBnClickedPing()
 
 	GetDlgItem(IDC_LOAD_IP)->EnableWindow(FALSE);
 	logger("npkt: %d, delay: %d, timeout: %d",
-		m_nPkt, m_delay, m_timeout);
+		m_nPkt, m_delay, m_pingTimeout);
 
 	ping* p = new ping(filePath.GetString(), this,
-		m_nPkt, m_delay, m_timeout);
+		m_nPkt, m_delay, m_pingTimeout);
 	rpc_manager::get_instance().fork(p);
 }
 
@@ -248,6 +254,9 @@ void Cnet_toolsDlg::OnBnClickedLoadDomain()
 void Cnet_toolsDlg::OnBnClickedNslookup()
 {
 	// TODO: 在此添加控件通知处理程序代码
+
+	UpdateData();
+
 	CString filePath;
 	GetDlgItem(IDC_DOMAIN_FILE)->GetWindowText(filePath);
 	if (filePath.IsEmpty())
@@ -255,6 +264,27 @@ void Cnet_toolsDlg::OnBnClickedNslookup()
 		MessageBox("请先选择域名列表配置文件！");
 		return;
 	}
+
+	GetDlgItem(IDC_NSLOOKUP)->EnableWindow(FALSE);
+	GetDlgItem(IDC_LOAD_DOMAIN)->EnableWindow(FALSE);
+
+	logger("dns_ip: %s, dns_port: %d, dns_timeout: %d",
+		m_dnsIp.GetString(), m_dnsPort, m_lookupTimeout);
+
+	nslookup* dns = new nslookup(filePath.GetString(), this,
+		m_dnsIp.GetString(), m_dnsPort, m_lookupTimeout);
+	rpc_manager::get_instance().fork(dns);
+}
+
+void Cnet_toolsDlg::enable_nslookup()
+{
+	GetDlgItem(IDC_LOAD_DOMAIN)->EnableWindow(TRUE);
+	CString filePath;
+	GetDlgItem(IDC_DOMAIN_FILE)->GetWindowText(filePath);
+	if (filePath.IsEmpty())
+		GetDlgItem(IDC_NSLOOKUP)->EnableWindow(FALSE);
+	else
+		GetDlgItem(IDC_NSLOOKUP)->EnableWindow(TRUE);
 }
 
 void Cnet_toolsDlg::OnBnClickedOpenDos()

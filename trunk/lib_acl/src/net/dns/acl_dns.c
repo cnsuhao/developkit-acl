@@ -685,7 +685,7 @@ END_FOREACH_TAG:
 	}
 
 	/* 分配新的查询对象 */
-	handle = (ACL_DNS_REQ*) acl_mymalloc(sizeof(ACL_DNS_REQ));
+	handle = (ACL_DNS_REQ*) acl_mycalloc(1, sizeof(ACL_DNS_REQ));
 	handle->dns = dns;
 	handle->callback = callback;
 	handle->ctx = ctx;
@@ -725,7 +725,8 @@ const char *acl_dns_serror(int errnum)
 		const char *msg;
 	};
 	static const struct __ERRMSG errmsg[] = {
-		{ ACL_DNS_OK, "No error condition" },
+		{ ACL_DNS_OK, "OK, No error condition" },
+		{ ACL_DNS_OK_CACHE, "OK, in cache" },
 		{ ACL_DNS_ERR_FMT, "Format Error: The name server was unable to "
 			"interpret the query." },
 		{ ACL_DNS_ERR_SVR, "Server Failure: The name server was "
@@ -749,10 +750,15 @@ const char *acl_dns_serror(int errnum)
 		{ ACL_DNS_ERR_TIMEOUT, "The DNS reply timeout" },
 		{ ACL_DNS_ERR_EXIST, "The same DNS search exist" },
 		{ ACL_DNS_ERR_BUILD_REQ, "Can't build query packet" },
+		{ 0, 0 }
 	};
 	const char *unknown = "Unknown Error";
+	size_t i;
 
-	if (errnum < 0 || errnum > ACL_DNS_ERR_BUILD_REQ)
-		return (unknown);
-	return (errmsg[errnum].msg);
+	for (i = 0; errmsg[i].msg != NULL; ++i)
+	{
+		if (errnum == errmsg[i].errnum)
+			return errmsg[i].msg;
+	}
+	return unknown;
 }

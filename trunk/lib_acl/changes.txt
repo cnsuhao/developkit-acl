@@ -1,3 +1,8 @@
+362) 2013.2.26
+362.1) bugfix: acl_dns.c, acl_dns_serror() 函数中返回字符串描述信息时查询方式有误
+362.2) bugfix: acl_dns.c, acl_dns_lookup() 函数中创建 ACL_DNS_REQ 对象时，部分变量
+未清零
+
 361) 2013.2.5
 361.1) bugfix: acl_scan_dir.c, acl_scan_dir_open() 原来采用 acl_mymalloc
 分配内存导致一些变量未初始化，现改成 acl_mycalloc
