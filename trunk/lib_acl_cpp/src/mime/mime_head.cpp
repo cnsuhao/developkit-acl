@@ -1,6 +1,7 @@
 #include "acl_stdafx.hpp"
 #include "internal/mime_state.hpp"
 #include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/mime/rfc822.hpp"
 #include "acl_cpp/mime/mime_head.hpp"
 
 namespace acl {
@@ -369,7 +370,7 @@ namespace acl {
 		if (m_subject)
 			out.format_append("Subject: %s\r\n", m_subject);
 		out.append("MIME-Version: 1.0\r\n");
-		out.format_append("Content-Type: %s/%s", get_ctype(), get_stype);
+		out.format_append("Content-Type: %s/%s", get_ctype(), get_stype());
 		if (m_boundary)
 			out.format_append(";\r\n\tboundary=\"%s\"\r\n",
 				m_boundary->c_str());
