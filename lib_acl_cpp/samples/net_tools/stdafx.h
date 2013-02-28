@@ -39,6 +39,10 @@
 #ifndef _AFX_NO_AFXCMN_SUPPORT
 #include <afxcmn.h>			// Windows 公共控件的 MFC 支持
 #endif // _AFX_NO_AFXCMN_SUPPORT
+#include <afxtempl.h>
+#include <afxdlgs.h>
+#include <atlbase.h>
+#include <atlwin.h>
 
 #include <afxsock.h>		// MFC 套接字扩展
 
@@ -47,3 +51,4 @@
 #include "lib_protocol.h"
 #include "acl_cpp/lib_acl.hpp"
 
+//#include "WndResizer.h"

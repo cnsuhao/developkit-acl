@@ -5,7 +5,7 @@ class domain_info;
 class dns_store : public acl::rpc_request
 {
 public:
-	dns_store(std::vector<domain_info*>* domains);
+	dns_store(std::vector<domain_info*>* domain_list);
 protected:
 private:
 	~dns_store();
@@ -18,8 +18,8 @@ private:
 
 private:
 	bool ok_;
-	std::vector<domain_info*>* domains_;
+	std::vector<domain_info*>* domain_list_;
 	bool create_tbl(acl::db_handle& db);
-	void insert_one(acl::db_handle& db, const domain_info* info);
 	void insert_tbl(acl::db_handle& db);
+	void insert_one(acl::db_handle& db, const domain_info* info);
 };

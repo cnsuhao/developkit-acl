@@ -1,4 +1,5 @@
 #include "acl_stdafx.hpp"
+#include "internal/mime_state.hpp"
 #include "acl_cpp/stdlib/string.hpp"
 #include "acl_cpp/mime/mime_head.hpp"
 
@@ -21,6 +22,8 @@ namespace acl {
 		m_returnpath = NULL;
 		m_subject = NULL;
 		m_boundary = NULL;
+		m_ctype = MIME_CTYPE_OTHER;
+		m_stype = MIME_STYPE_OTHER;
 	}
 
 	mime_head::~mime_head()
@@ -102,6 +105,16 @@ namespace acl {
 		}
 
 		return (*this);
+	}
+
+	const char* mime_head::get_ctype() const
+	{
+		return mime_ctype_name(m_ctype);
+	}
+
+	const char* mime_head::get_stype() const
+	{
+		return mime_stype_name(m_stype);
 	}
 
 	const acl::string& mime_head::sender() const
@@ -279,7 +292,7 @@ namespace acl {
 		return (*this);
 	}
 
-	mime_head& mime_head::set_type(int ctype, int stype)
+	mime_head& mime_head::set_type(size_t ctype, size_t stype)
 	{
 		m_ctype = ctype;
 		m_stype = stype;
@@ -304,4 +317,66 @@ namespace acl {
 		else
 			return (__dummy);
 	}
+
+	static void append_recipients(string& out, const char* tagname,
+		const std::list<char*>& recipients)
+	{
+		if (recipients.empty())
+			return;
+		std::list<char*>::const_iterator cit = recipients.begin();
+		out.format_append("%s: %s", tagname, *cit);
+		++cit;
+		if (cit == recipients.end())
+		{
+			out.append("\r\n");
+			return;
+		}
+		for (; cit != recipients.end(); ++cit)
+			out.format_append(",\r\n %s", *cit);
+		out.append("\r\n");
+	}
+
+	void mime_head::build_head(string& out, bool clean)
+	{
+		if (clean)
+			out.clear();
+		if (m_headers)
+		{
+			std::list<HEADER*>::const_iterator cit = m_headers->begin();
+			for (; cit != m_headers->end(); ++cit)
+			{
+				out.format_append("%s: %s\r\n",
+					(*cit)->name, (*cit)->value);
+			}
+		}
+		char buf[64];
+		rfc822 rfc;
+		rfc.mkdate_cst(time(NULL), buf, sizeof(buf));
+		out.format_append("Date: %s\r\n", buf);
+
+		if (m_from)
+			out.format_append("From: %s\r\n", m_from);
+		if (m_replyto)
+			out.format_append("Reply-To: %s\r\n", m_replyto);
+		if (m_returnpath)
+			out.format_append("Return-Path: %s\r\n", m_returnpath);
+		if (m_tos)
+			append_recipients(out, "To", *m_tos);
+		if (m_ccs)
+			append_recipients(out, "Cc", *m_ccs);
+		if (m_bccs)
+			append_recipients(out, "Bcc", *m_bccs);
+		if (m_subject)
+			out.format_append("Subject: %s\r\n", m_subject);
+		out.append("MIME-Version: 1.0\r\n");
+		out.format_append("Content-Type: %s/%s", get_ctype(), get_stype);
+		if (m_boundary)
+			out.format_append(";\r\n\tboundary=\"%s\"\r\n",
+				m_boundary->c_str());
+		else
+			out.append("\r\n");
+
+		out.append("\r\n");
+	}
+
 } // namespace acl

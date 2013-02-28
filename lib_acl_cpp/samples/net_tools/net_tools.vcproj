@@ -26,6 +26,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				TreatWChar_tAsBuiltInType="TRUE"
+				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
@@ -56,7 +57,8 @@ copy ..\..\..\lib_acl\lib_acl_d.map $(OutDir)\ /Y
 copy ..\..\..\lib_protocol\lib_protocol_d.map $(OutDir)\ /Y
 copy ..\..\..\lib_acl_cpp\lib_acl_cpp_d.map $(OutDir)\ /Y
 copy ..\..\bin\zlib.dll $(OutDir)\ /Y
-copy ..\..\..\lib_acl_cpp\bin\sqlite3.dll $(OutDir)\ /Y"/>
+copy ..\..\..\lib_acl_cpp\bin\sqlite3.dll $(OutDir)\ /Y
+"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -86,11 +88,12 @@ copy ..\..\..\lib_acl_cpp\bin\sqlite3.dll $(OutDir)\ /Y"/>
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\include;..\..\..\lib_acl\include;..\..\..\lib_protocol\include;."
+				AdditionalIncludeDirectories="..\..\include;..\..\..\lib_acl\include;..\..\..\lib_protocol\include;.;.\ui"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;VC2003"
 				MinimalRebuild="FALSE"
 				RuntimeLibrary="2"
 				TreatWChar_tAsBuiltInType="TRUE"
+				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
@@ -120,7 +123,8 @@ copy ..\..\..\dist\lib\win32\lib_acl.pdb $(OutDir)\  /Y
 copy ..\..\..\dist\lib\win32\lib_protocol.pdb $(OutDir)\  /Y
 copy ..\..\..\dist\lib\win32\lib_acl_cpp.pdb $(OutDir)\  /Y
 copy ..\..\bin\zlib.dll $(OutDir)\ /Y
-copy ..\..\..\lib_acl_cpp\bin\sqlite3.dll $(OutDir)\ /Y"/>
+copy ..\..\..\lib_acl_cpp\bin\sqlite3.dll $(OutDir)\ /Y
+"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -221,6 +225,12 @@ copy ..\..\..\lib_acl_cpp\bin\sqlite3.dll $(OutDir)\ /Y"/>
 			<File
 				RelativePath=".\ping\ping.h">
 			</File>
+			<File
+				RelativePath=".\ping\ping_store.cpp">
+			</File>
+			<File
+				RelativePath=".\ping\ping_store.h">
+			</File>
 		</Filter>
 		<Filter
 			Name="dns"
@@ -236,6 +246,44 @@ copy ..\..\..\lib_acl_cpp\bin\sqlite3.dll $(OutDir)\ /Y"/>
 			</File>
 			<File
 				RelativePath=".\dns\nslookup.h">
+			</File>
+		</Filter>
+		<Filter
+			Name="ui"
+			Filter="">
+			<File
+				RelativePath=".\ui\MeterBar.cpp">
+			</File>
+			<File
+				RelativePath=".\ui\MeterBar.h">
+			</File>
+			<File
+				RelativePath=".\ui\MeterCtrl.cpp">
+			</File>
+			<File
+				RelativePath=".\ui\MeterCtrl.h">
+			</File>
+			<File
+				RelativePath=".\ui\WndResizer.cpp">
+			</File>
+			<File
+				RelativePath=".\ui\WndResizer.h">
+			</File>
+		</Filter>
+		<Filter
+			Name="upload"
+			Filter="">
+			<File
+				RelativePath=".\upload\mime_creator.cpp">
+			</File>
+			<File
+				RelativePath=".\upload\mime_creator.h">
+			</File>
+			<File
+				RelativePath=".\upload\upload.cpp">
+			</File>
+			<File
+				RelativePath=".\upload\upload.h">
 			</File>
 		</Filter>
 		<File

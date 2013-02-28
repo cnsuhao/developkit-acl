@@ -2,13 +2,16 @@
 //
 
 #pragma once
+#include "ui/MeterBar.h"
 #include "ping/ping.h"
+#include "upload/upload.h"
 #include "dns/nslookup.h"
 
 // Cnet_toolsDlg 对话框
 class Cnet_toolsDlg : public CDialog
 	, public ping_callback
 	, public nslookup_callback
+	, public upload_callback
 {
 // 构造
 public:
@@ -24,6 +27,7 @@ public:
 // 实现
 protected:
 	HICON m_hIcon;
+	CMeterBar m_wndMeterBar;
 
 	// 生成的消息映射函数
 	virtual BOOL OnInitDialog();
@@ -42,15 +46,30 @@ private:
 	UINT m_nPkt;
 	UINT m_delay;
 	UINT m_pingTimeout;
+	UINT m_pktSize;
 	FILE* m_dosFp;
+	BOOL m_pingBusy;
+	CString m_pingDbPath;
 
 	// dns 相关参数
 	CString m_dnsIp;
 	UINT m_dnsPort;
 	UINT m_lookupTimeout;
+	BOOL m_dnsBusy;
+	CString m_dnsDbPath;
 
-public:
+	// 上传日志相关参数
+	CString m_smtpAddr;
+	int m_connecTimeout;
+	int m_rwTimeout;
+	CString m_smtpUser;
+	CString m_smtpPass;
+
+protected:
 	void DisableAll();
+	virtual void ping_report(size_t total, size_t curr, size_t nerror);
+	virtual void nslookup_report(size_t total, size_t curr);
+	virtual void upload_report();
 
 public:
 	virtual void enable_ping();

@@ -2,8 +2,8 @@
 #include "nslookup.h"
 #include "dns_store.h"
 
-dns_store::dns_store(std::vector<domain_info*>* domains)
-: domains_(domains)
+dns_store::dns_store(std::vector<domain_info*>* domain_list)
+: domain_list_(domain_list)
 , ok_(false)
 {
 
@@ -11,7 +11,7 @@ dns_store::dns_store(std::vector<domain_info*>* domains)
 
 dns_store::~dns_store()
 {
-	delete domains_;
+	delete domain_list_;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -38,14 +38,18 @@ const char* CREATE_TBL =
 
 void dns_store::rpc_run()
 {
+	const char* path = acl_getcwd();
 	const char* dbname = "dns_store.db";
-	acl::db_sqlite db(dbname);
+	acl::string dbpath;
+	dbpath << path << '/' << dbname;
+	acl::db_sqlite db(dbpath.c_str());
 	if (db.open() == false)
-		logger_error("open db: %s failed", dbname);
+		logger_error("open db: %s failed", dbpath.c_str());
 	else if (create_tbl(db) == false)
-		logger_error("create table failed for %s", dbname);
+		logger_error("create table failed for %s", dbpath.c_str());
 	else
 	{
+		logger("open db(%s) ok", dbpath.c_str());
 		insert_tbl(db);
 		ok_ = true;
 	}
@@ -72,8 +76,8 @@ bool dns_store::create_tbl(acl::db_handle& db)
 
 void dns_store::insert_tbl(acl::db_handle& db)
 {
-	std::vector<domain_info*>::const_iterator cit = domains_->begin();
-	for (; cit != domains_->end(); ++cit)
+	std::vector<domain_info*>::const_iterator cit = domain_list_->begin();
+	for (; cit != domain_list_->end(); ++cit)
 		insert_one(db, *cit);
 }
 
