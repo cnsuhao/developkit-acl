@@ -18,7 +18,8 @@ namespace acl {
 		~mime_head();
 
 		const string& get_boundary(void) const;
-
+		const char* get_ctype() const;
+		const char* get_stype() const;
 		const string& sender(void) const;
 		const string& from(void) const;
 		const string& replyto(void) const;
@@ -42,9 +43,10 @@ namespace acl {
 		mime_head& add_bcc(const char*);
 		mime_head& add_rcpt(const char*);
 		mime_head& add_header(const char*, const char*);
-
-		mime_head& set_type(int, int);
+		mime_head& set_type(size_t, size_t);
 		mime_head& set_boundary(const char*, int);
+
+		void build_head(string& buf, bool clean);
 
 		mime_head& reset(void);
 
@@ -62,8 +64,8 @@ namespace acl {
 		string* m_returnpath;
 		string* m_subject;
 
-		int   m_ctype;
-		int   m_stype;
+		size_t m_ctype;
+		size_t m_stype;
 	};
 
 } // namespace acl

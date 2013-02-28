@@ -9,6 +9,7 @@ public:
 	virtual ~nslookup_callback() {}
 
 	virtual void enable_nslookup() = 0;
+	virtual void nslookup_report(size_t total, size_t curr) = 0;
 protected:
 private:
 };
@@ -44,11 +45,6 @@ public:
 		return end_;
 	}
 
-	nslookup& get_nslookup() const
-	{
-		return ns_;
-	}
-
 	void set_begin();
 	void set_end();
 	void add_ip(const char* ip, int ttl);
@@ -57,6 +53,13 @@ public:
 		return ip_list_;
 	}
 
+private:
+	// get_nslookup 函数只可以被 nslookup 类实例调用
+	friend class nslookup;
+	nslookup& get_nslookup() const
+	{
+		return ns_;
+	}
 private:
 	nslookup& ns_;
 	char domain_[256];
@@ -82,6 +85,7 @@ protected:
 
 	// 基类虚函数：主线程处理过程，收到子线程的通知消息
 	virtual void rpc_wakeup(void* ctx);
+
 private:
 	acl::string filepath_;
 	nslookup_callback* callback_;

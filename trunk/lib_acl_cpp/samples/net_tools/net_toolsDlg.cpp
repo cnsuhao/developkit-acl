@@ -5,6 +5,7 @@
 #include "net_tools.h"
 #include "ping/ping.h"
 #include "dns/nslookup.h"
+#include "upload/upload.h"
 #include "rpc/rpc_manager.h"
 #include "net_toolsDlg.h"
 #include ".\net_toolsdlg.h"
@@ -54,10 +55,16 @@ Cnet_toolsDlg::Cnet_toolsDlg(CWnd* pParent /*=NULL*/)
 	, m_nPkt(10)
 	, m_delay(1)
 	, m_pingTimeout(5)
+	, m_pingBusy(FALSE)
 	, m_dosFp(NULL)
 	, m_dnsIp("8.8.8.8")
 	, m_dnsPort(53)
 	, m_lookupTimeout(10)
+	, m_pktSize(64)
+	, m_dnsBusy(FALSE)
+	, m_smtpAddr("smtp.263.net")
+	, m_connecTimeout(60)
+	, m_rwTimeout(60)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -80,6 +87,7 @@ void Cnet_toolsDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_DNS_IP, m_dnsIp);
 	DDX_Text(pDX, IDC_DNS_PORT, m_dnsPort);
 	DDX_Text(pDX, IDC_LOOKUP_TIMEOUT, m_lookupTimeout);
+	DDX_Text(pDX, IDC_PKT_SIZE, m_pktSize);
 }
 
 BEGIN_MESSAGE_MAP(Cnet_toolsDlg, CDialog)
@@ -128,6 +136,17 @@ BOOL Cnet_toolsDlg::OnInitDialog()
 	//ShowWindow(SW_MAXIMIZE);
 
 	// TODO: 在此添加额外的初始化代码
+
+	// 添加状态栏
+	int aWidths[3] = {50, 300, -1};
+	m_wndMeterBar.SetParts(3, aWidths);
+
+	m_wndMeterBar.Create(WS_CHILD | WS_VISIBLE | WS_BORDER
+		| CCS_BOTTOM | SBARS_SIZEGRIP,
+		CRect(0,0,0,0), this, 0); 
+	m_wndMeterBar.SetText("就绪", 0, 0);
+	m_wndMeterBar.SetText("", 1, 0);
+	m_wndMeterBar.SetText("", 2, 0);
 
 	DisableAll();
 
@@ -205,6 +224,9 @@ void Cnet_toolsDlg::OnBnClickedLoadIp()
 void Cnet_toolsDlg::OnBnClickedPing()
 {
 	// TODO: 在此添加控件通知处理程序代码
+	if (m_pingBusy)
+		return;
+
 	UpdateData();
 
 	GetDlgItem(IDC_PING)->EnableWindow(FALSE);
@@ -218,17 +240,36 @@ void Cnet_toolsDlg::OnBnClickedPing()
 		return;
 	}
 
+	m_pingBusy = TRUE;
+
 	GetDlgItem(IDC_LOAD_IP)->EnableWindow(FALSE);
 	logger("npkt: %d, delay: %d, timeout: %d",
 		m_nPkt, m_delay, m_pingTimeout);
 
 	ping* p = new ping(filePath.GetString(), this,
-		m_nPkt, m_delay, m_pingTimeout);
+		m_nPkt, m_delay, m_pingTimeout, m_pktSize);
 	rpc_manager::get_instance().fork(p);
+}
+
+void Cnet_toolsDlg::ping_report(size_t total, size_t curr, size_t nerror)
+{
+	if (total > 0)
+	{
+		int  nStept;
+
+		nStept = (int) ((curr * 100) / total);
+		m_wndMeterBar.GetProgressCtrl().SetPos(nStept);
+	}
+
+	CString msg;
+	msg.Format("%d/%d; failed: %d", curr, total, nerror);
+	m_wndMeterBar.SetText(msg, 1, 0);
 }
 
 void Cnet_toolsDlg::enable_ping()
 {
+	m_pingBusy = FALSE;
+
 	GetDlgItem(IDC_LOAD_IP)->EnableWindow(TRUE);
 	CString filePath;
 	GetDlgItem(IDC_IP_FILE_PATH)->GetWindowText(filePath);
@@ -256,7 +297,12 @@ void Cnet_toolsDlg::OnBnClickedNslookup()
 {
 	// TODO: 在此添加控件通知处理程序代码
 
+	if (m_dnsBusy)
+		return;
+
 	UpdateData();
+
+	GetDlgItem(IDC_NSLOOKUP)->EnableWindow(FALSE);
 
 	CString filePath;
 	GetDlgItem(IDC_DOMAIN_FILE)->GetWindowText(filePath);
@@ -266,7 +312,8 @@ void Cnet_toolsDlg::OnBnClickedNslookup()
 		return;
 	}
 
-	GetDlgItem(IDC_NSLOOKUP)->EnableWindow(FALSE);
+	m_dnsBusy = TRUE;
+
 	GetDlgItem(IDC_LOAD_DOMAIN)->EnableWindow(FALSE);
 
 	logger("dns_ip: %s, dns_port: %d, dns_timeout: %d",
@@ -277,8 +324,25 @@ void Cnet_toolsDlg::OnBnClickedNslookup()
 	rpc_manager::get_instance().fork(dns);
 }
 
+void Cnet_toolsDlg::nslookup_report(size_t total, size_t curr)
+{
+	if (total > 0)
+	{
+		int  nStept;
+
+		nStept = (int) ((curr * 100) / total);
+		m_wndMeterBar.GetProgressCtrl().SetPos(nStept);
+	}
+
+	CString msg;
+	msg.Format("共 %d 个域名, 完成 %d 个域名", total, curr);
+	m_wndMeterBar.SetText(msg, 1, 0);
+}
+
 void Cnet_toolsDlg::enable_nslookup()
 {
+	m_dnsBusy = FALSE;
+
 	GetDlgItem(IDC_LOAD_DOMAIN)->EnableWindow(TRUE);
 	CString filePath;
 	GetDlgItem(IDC_DOMAIN_FILE)->GetWindowText(filePath);
@@ -297,6 +361,8 @@ void Cnet_toolsDlg::OnBnClickedOpenDos()
 		AllocConsole();
 		m_dosFp = freopen("CONOUT$","w+t",stdout);
 		printf("DOS opened now!\r\n");
+		const char* path = acl_getcwd();
+		printf("current path: %s\r\n", path);
 		GetDlgItem(IDC_OPEN_DOS)->SetWindowText("关闭 DOS 窗口");
 		acl::log::stdout_open(true);
 		logger_close();
@@ -308,11 +374,24 @@ void Cnet_toolsDlg::OnBnClickedOpenDos()
 		FreeConsole();
 		GetDlgItem(IDC_OPEN_DOS)->SetWindowText("打开 DOS 窗口");
 		acl::log::stdout_open(false);
-		logger_open("net_tools.txt", "net_tools");
+		const char* path = acl_getcwd();
+		acl::string logpath;
+		logpath.format("%s/net_tools.txt", path);
+		printf("current path: %s\r\n", path);
+		logger_open(logpath.c_str(), "net_tools");
 	}
 }
 
 void Cnet_toolsDlg::OnBnClickedUpload()
 {
 	// TODO: 在此添加控件通知处理程序代码
+	upload* up = new upload(this, m_pingDbPath.GetString(),
+		m_dnsDbPath.GetString(), m_smtpAddr.GetString(),
+		m_connecTimeout, m_rwTimeout);
+	rpc_manager::get_instance().fork(up);
+}
+
+void Cnet_toolsDlg::upload_report()
+{
+
 }

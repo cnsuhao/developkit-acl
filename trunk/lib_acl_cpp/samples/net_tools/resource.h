@@ -19,10 +19,11 @@
 #define IDC_TIMEOUT                     1008
 #define IDC_BUTTON4                     1009
 #define IDC_OPEN_DOS                    1009
+#define IDC_NPKT_SIZE                   1010
+#define IDC_PKT_SIZE                    1010
 #define IDC_DNS_IP                      1011
 #define IDC_DNS_PORT                    1012
 #define IDC_LOOKUP_TIMEOUT              1013
-#define IDC_BUTTON1                     1014
 #define IDC_UPLOAD                      1014
 
 // Next default values for new objects

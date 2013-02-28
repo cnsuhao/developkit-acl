@@ -63,6 +63,7 @@ nslookup::~nslookup()
 
 void nslookup::rpc_onover()
 {
+	callback_->nslookup_report(domain_list_->size(), domain_list_->size());
 	callback_->enable_nslookup();
 	dns_store* ds = new dns_store(domain_list_);
 	domain_list_ = NULL;
@@ -70,9 +71,9 @@ void nslookup::rpc_onover()
 	delete this;
 }
 
-void nslookup::rpc_wakeup(void* ctx)
+void nslookup::rpc_wakeup(void*)
 {
-
+	callback_->nslookup_report(domain_list_->size(), nresult_);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -129,6 +130,10 @@ void nslookup::lookup_all()
 	ACL_DNS* dns = acl_dns_create(aio, timeout_);
 	acl_dns_add_dns(dns, dns_ip_.c_str(), dns_port_, 24);
 
+	rpc_signal(NULL);
+
+	time_t last_signal = time(NULL), t;
+
 	// 添加目标 domain 地址
 	std::vector<domain_info*>::iterator it = domain_list_->begin();
 	for (; it != domain_list_->end(); ++it)
@@ -147,6 +152,13 @@ void nslookup::lookup_all()
 			logger("DNS lookup over: %d, %d",
 				(int) domain_list_->size(), (int) nresult_);
 			break;
+		}
+
+		t = time(NULL);
+		if (t - last_signal >= 1)
+		{
+			last_signal = t;
+			rpc_signal(NULL);
 		}
 	}
 
