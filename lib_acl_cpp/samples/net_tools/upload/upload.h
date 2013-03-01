@@ -18,9 +18,8 @@ private:
 class upload : public acl::rpc_request
 {
 public:
-	upload(upload_callback* callback, const char* pingDb,
-		const char* dnsDb, const char* smtpAddr,
-		int connectTimeout, int rwTimeout);
+	upload(upload_callback* callback, const char* dbpath,
+		const char* smtpAddr, int connectTimeout, int rwTimeout);
 protected:
 	~upload();
 
@@ -34,5 +33,15 @@ protected:
 	virtual void rpc_wakeup(void* ctx);
 private:
 	upload_callback* callback_;
+	acl::string dbpath_;
+	acl::string smtp_addr_;
+	int connect_timeout_;
+	int rw_timeout_;
+	acl::string auth_account_;
+	acl::string auth_passwd_;
+	acl::string mail_from_;
+	std::list<acl::string> recipients_;
+	acl::string subject_;
+	acl::string mailpath_;
 };
 //////////////////////////////////////////////////////////////////////////

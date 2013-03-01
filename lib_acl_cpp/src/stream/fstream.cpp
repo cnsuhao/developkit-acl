@@ -55,6 +55,11 @@ namespace acl {
 		return (true);
 	}
 
+	const char* fstream::file_path() const
+	{
+		return m_pStream ? m_pStream->path : NULL;
+	}
+
 	bool fstream::open_trunc(const char* path)
 	{
 		return (open(path, O_RDWR | O_CREAT | O_TRUNC, 0700));

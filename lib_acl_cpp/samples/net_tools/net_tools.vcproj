@@ -274,10 +274,10 @@ copy ..\..\..\lib_acl_cpp\bin\sqlite3.dll $(OutDir)\ /Y
 			Name="upload"
 			Filter="">
 			<File
-				RelativePath=".\upload\mime_creator.cpp">
+				RelativePath=".\upload\mime_builder.cpp">
 			</File>
 			<File
-				RelativePath=".\upload\mime_creator.h">
+				RelativePath=".\upload\mime_builder.hpp">
 			</File>
 			<File
 				RelativePath=".\upload\upload.cpp">

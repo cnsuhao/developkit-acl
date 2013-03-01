@@ -44,7 +44,7 @@ namespace acl {
 		mime_head& add_rcpt(const char*);
 		mime_head& add_header(const char*, const char*);
 		mime_head& set_type(size_t, size_t);
-		mime_head& set_boundary(const char*, int);
+		mime_head& set_boundary(const char*);
 
 		void build_head(string& buf, bool clean);
 

@@ -16,7 +16,7 @@ namespace acl {
 		 * @param addInvalid {bool} 流式解码时是否遇到非法字符是否原样拷贝
 		 */
 		mime_code(bool addCrlf, bool addInvalid);
-		virtual ~mime_code();
+		virtual ~mime_code() = 0;
 
 		/* 流式编码函数，使用方法： encode_update->encode_update->...->encode_finish */
 

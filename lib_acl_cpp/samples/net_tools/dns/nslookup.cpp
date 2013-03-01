@@ -63,9 +63,11 @@ nslookup::~nslookup()
 
 void nslookup::rpc_onover()
 {
-	callback_->nslookup_report(domain_list_->size(), domain_list_->size());
-	callback_->enable_nslookup();
-	dns_store* ds = new dns_store(domain_list_);
+	callback_->nslookup_report(domain_list_->size(),
+		domain_list_->size());
+	// 将结果存入数据库，同时将回调接口传入
+	dns_store* ds = new dns_store(domain_list_, *callback_);
+	// 因为该变量已经被接管，所以此处需要置空以免被重复释放
 	domain_list_ = NULL;
 	rpc_manager::get_instance().fork(ds);
 	delete this;
