@@ -36,11 +36,13 @@ typedef struct SMTP_CLIENT {
 /**
  * 远程连接 SMTP 服务器
  * @param addr {const char*} SMTP 服务器地址，格式：domain:port
- * @param timeout {int} 连接超时时间及IO读写超时时间
+ * @param conn_timeout {int} 连接超时时间
+ * @param rw_timeout {int} IO读写超时时间
  * @param line_limit {int} SMTP 会话过程中每行的最大长度限制
  * @return {SMTP_CLIENT*} 连接成功返回非空值，否则返回 NULL
  */
-SMTP_API SMTP_CLIENT *smtp_open(const char *addr, int timeout, int line_limit);
+SMTP_API SMTP_CLIENT *smtp_open(const char *addr, int conn_timeout,
+	int rw_timeout, int line_limit);
 
 /**
  * 关闭由 smtp_open 打开的 SMTP 连接并释放对象

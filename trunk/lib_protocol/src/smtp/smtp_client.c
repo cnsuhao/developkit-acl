@@ -6,12 +6,14 @@
 
 /* 创建 SMTP_CLIENT 对象并连接远程邮件服务器地址 */
 
-SMTP_CLIENT *smtp_open(const char *addr, int timeout, int line_limit)
+SMTP_CLIENT *smtp_open(const char *addr, int conn_timeout,
+	int rw_timeout, int line_limit)
 {
 	SMTP_CLIENT *client;
 	ACL_VSTREAM *conn;
 
-	conn = acl_vstream_connect(addr, ACL_BLOCKING, timeout, timeout, 4096);
+	conn = acl_vstream_connect(addr, ACL_BLOCKING, conn_timeout,
+		rw_timeout, 4096);
 	if (conn == NULL) {
 		acl_msg_error("%s(%d): connect %s error(%s)",
 			__FUNCTION__, __LINE__, addr,

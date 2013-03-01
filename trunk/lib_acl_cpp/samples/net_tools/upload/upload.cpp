@@ -11,6 +11,8 @@ upload::upload(upload_callback* callback, const char* dbpath,
 	, connect_timeout_(connectTimeout)
 	, rw_timeout_(rwTimeout)
 {
+	const char* s = "网络状态数据信息";
+	acl::rfc2047::encode(s, strlen(s), &subject_, "utf-8");
 
 }
 
@@ -76,21 +78,22 @@ void upload::rpc_run()
 	}
 	else if (smtp_greet(conn, "localhost", 1) != 0)
 	{
-		logger_error("send EHLO error to server %s", smtp_addr_);
+		logger_error("send EHLO error(%d:%s) to server %s",
+			conn->smtp_code, conn->buf, smtp_addr_);
 		smtp_close(conn);
 		return;
 	}
 	else if (smtp_auth(conn, auth_account_, auth_passwd_) != 0)
 	{
-		logger_error("smtp auth failed from server(%s), account: %s, passwd: %s",
-			smtp_addr_, auth_account_, auth_passwd_);
+		logger_error("smtp auth error(%d:%s) from server(%s), account: %s, passwd: %s",
+			conn->smtp_code, conn->buf, smtp_addr_, auth_account_, auth_passwd_);
 		smtp_close(conn);
 		return;
 	}
 	else if (smtp_mail(conn, mail_from_) != 0)
 	{
-		logger_error("smtp MAIL FROM error, from: %s, server: %s",
-			mail_from_, smtp_addr_);
+		logger_error("smtp MAIL FROM error(%d:%s), from: %s, server: %s",
+			mail_from_, conn->smtp_code, conn->buf, smtp_addr_);
 		smtp_close(conn);
 		return;
 	}
@@ -100,8 +103,8 @@ void upload::rpc_run()
 	{
 		if (smtp_rcpt(conn, *cit) != 0)
 		{
-			logger_error("smtp RCPT TO error, to: %s, server: %s",
-				*cit, smtp_addr_);
+			logger_error("smtp RCPT TO error(%d:%s), to: %s, server: %s",
+				*cit, conn->smtp_code, conn->buf, smtp_addr_);
 			smtp_close(conn);
 			return;
 		}
@@ -109,7 +112,8 @@ void upload::rpc_run()
 
 	if (smtp_data(conn) != 0)
 	{
-		logger_error("smtp DATA to server %s error", smtp_addr_);
+		logger_error("smtp DATA to server %s error(%d:%s)",
+			smtp_addr_, conn->smtp_code, conn->buf);
 		smtp_close(conn);
 		return;
 	}
@@ -118,16 +122,16 @@ void upload::rpc_run()
 	acl::ifstream in;
 	if (in.open_read(mailpath_.c_str()) == false)
 	{
-		logger_error("open email file(%s) error(%s)",
-			mailpath_.c_str(), acl::last_serror());
+		logger_error("open email file(%s) error(%d:%s)",
+			mailpath_.c_str(), conn->smtp_code, conn->buf);
 		smtp_close(conn);
 		return;
 	}
 
 	if (smtp_send_file(conn, mailpath_.c_str()) <= 0)
 	{
-		logger_error("send email(%s) error(%s)",
-			mailpath_.c_str(), acl::last_serror());
+		logger_error("send email(%s) error(%d:%s)",
+			mailpath_.c_str(), conn->smtp_code, conn->buf);
 		smtp_close(conn);
 		return;
 	}
