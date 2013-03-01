@@ -300,10 +300,8 @@ namespace acl {
 		return (*this);
 	}
 
-	mime_head& mime_head::set_boundary(const char* s, int len)
+	mime_head& mime_head::set_boundary(const char* s)
 	{
-		(void) len;
-
 		if (m_boundary == NULL)
 			m_boundary = NEW acl::string(s);
 		else

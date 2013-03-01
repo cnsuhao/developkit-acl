@@ -2,8 +2,10 @@
 #include "nslookup.h"
 #include "dns_store.h"
 
-dns_store::dns_store(std::vector<domain_info*>* domain_list)
+dns_store::dns_store(std::vector<domain_info*>* domain_list,
+	nslookup_callback& callback)
 : domain_list_(domain_list)
+, callback_(callback)
 , ok_(false)
 {
 
@@ -20,6 +22,7 @@ dns_store::~dns_store()
 void dns_store::rpc_onover()
 {
 	logger("store domain lookup results %s!", ok_ ? "OK" : "Failed");
+	callback_.enable_nslookup(dbpath_.empty() ? NULL : dbpath_.c_str());
 	delete this;
 }
 
@@ -38,18 +41,15 @@ const char* CREATE_TBL =
 
 void dns_store::rpc_run()
 {
-	const char* path = acl_getcwd();
-	const char* dbname = "dns_store.db";
-	acl::string dbpath;
-	dbpath << path << '/' << dbname;
-	acl::db_sqlite db(dbpath.c_str());
+	dbpath_.format("%s/dns_store_%ld.db", acl_process_path(), time(NULL));
+	acl::db_sqlite db(dbpath_.c_str());
 	if (db.open() == false)
-		logger_error("open db: %s failed", dbpath.c_str());
+		logger_error("open db: %s failed", dbpath_.c_str());
 	else if (create_tbl(db) == false)
-		logger_error("create table failed for %s", dbpath.c_str());
+		logger_error("create table failed for %s", dbpath_.c_str());
 	else
 	{
-		logger("open db(%s) ok", dbpath.c_str());
+		logger("open db(%s) ok", dbpath_.c_str());
 		insert_tbl(db);
 		ok_ = true;
 	}

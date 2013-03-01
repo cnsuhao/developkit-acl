@@ -2,9 +2,6 @@
 #include "acl_cpp/acl_cpp_define.hpp"
 #include "acl_cpp/mime/mime_head.hpp"
 
-namespace acl
-{
-
 class mime_builder
 {
 public:
@@ -13,11 +10,11 @@ public:
 
 	/**
 	 * 获得邮件头
-	 * @return {mime_head&}
+	 * @return {acl::mime_head&}
 	 */
-	mime_head& primary_header(void)
+	acl::mime_head& primary_header(void)
 	{
-		return (primary_header_);
+		return (header_);
 	}
 
 	/**
@@ -41,11 +38,30 @@ public:
 	 * @param filepath {const char*} 附件文件路径
 	 * @return {mime_builder&}
 	 */
-	mime_builder& add_attach(const char* filepath);
+	mime_builder& add_file(const char* filepath);
+
+	/**
+	 * 创建邮件内容，并转存至文件中
+	 * @param to {const char*} 目标文件
+	 * @return {bool}
+	 */
+	bool save_as(const char* to);
+
+	/**
+	 * 创建邮件内容，并转存至文件中
+	 * @param fp {acl::ofstream&} 目标文件句柄
+	 * @return {bool}
+	 */
+	bool save_as(acl::ofstream& fp);
 
 private:
-	mime_head primary_header_;
+	acl::mime_head header_;
+	char* body_text_;
+	char* body_html_;
 	std::vector<char*> attachs_;
-};
+	acl::string delimeter_;
 
-} // namespace acl
+	bool add_body(acl::ofstream& fp);
+	bool add_boundary(acl::ofstream& fp, bool end = false);
+	bool add_attach(acl::ofstream& fp, const char* filepath);
+};

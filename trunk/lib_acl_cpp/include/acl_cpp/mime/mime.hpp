@@ -285,12 +285,11 @@ public:
 	/**
 	 * 设置邮件头部的分隔符
 	 * @param s {const char*} 分隔串
-	 * @param len {int} 分隔串长度
 	 * @return {mime&}
 	 */
-	mime& set_boundary(const char* s, int len)
+	mime& set_boundary(const char* s)
 	{
-		m_primaryHeader.set_boundary(s, len);
+		m_primaryHeader.set_boundary(s);
 		return (*this);
 	}
 

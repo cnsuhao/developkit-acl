@@ -100,7 +100,6 @@ BEGIN_MESSAGE_MAP(Cnet_toolsDlg, CDialog)
 	ON_BN_CLICKED(IDC_LOAD_DOMAIN, OnBnClickedLoadDomain)
 	ON_BN_CLICKED(IDC_NSLOOKUP, OnBnClickedNslookup)
 	ON_BN_CLICKED(IDC_OPEN_DOS, OnBnClickedOpenDos)
-	ON_BN_CLICKED(IDC_UPLOAD, OnBnClickedUpload)
 END_MESSAGE_MAP()
 
 
@@ -339,7 +338,7 @@ void Cnet_toolsDlg::nslookup_report(size_t total, size_t curr)
 	m_wndMeterBar.SetText(msg, 1, 0);
 }
 
-void Cnet_toolsDlg::enable_nslookup()
+void Cnet_toolsDlg::enable_nslookup(const char* dbpath)
 {
 	m_dnsBusy = FALSE;
 
@@ -350,6 +349,14 @@ void Cnet_toolsDlg::enable_nslookup()
 		GetDlgItem(IDC_NSLOOKUP)->EnableWindow(FALSE);
 	else
 		GetDlgItem(IDC_NSLOOKUP)->EnableWindow(TRUE);
+
+	if (dbpath)
+	{
+		// 将数据库文件发邮件至服务器
+		upload* up = new upload(this, dbpath, m_smtpAddr.GetString(),
+			m_connecTimeout, m_rwTimeout);
+		rpc_manager::get_instance().fork(up);
+	}
 }
 
 void Cnet_toolsDlg::OnBnClickedOpenDos()
@@ -380,15 +387,6 @@ void Cnet_toolsDlg::OnBnClickedOpenDos()
 		printf("current path: %s\r\n", path);
 		logger_open(logpath.c_str(), "net_tools");
 	}
-}
-
-void Cnet_toolsDlg::OnBnClickedUpload()
-{
-	// TODO: 在此添加控件通知处理程序代码
-	upload* up = new upload(this, m_pingDbPath.GetString(),
-		m_dnsDbPath.GetString(), m_smtpAddr.GetString(),
-		m_connecTimeout, m_rwTimeout);
-	rpc_manager::get_instance().fork(up);
 }
 
 void Cnet_toolsDlg::upload_report()

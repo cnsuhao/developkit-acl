@@ -61,6 +61,11 @@ namespace acl {
 		long long int fsize(void) const;
 		int file_handle() const;
 #endif
+		/**
+		 * 获得文件的全路径
+		 * @return {const char*} 若返回空则表示文件还未打开或出错
+		 */
+		const char* file_path() const;
 	};
 
 } // namespace acl
