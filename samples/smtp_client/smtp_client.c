@@ -25,7 +25,7 @@ static int smtp_sender(void)
 		snprintf(addr, sizeof(addr), line);
 
 	/* 连接 SMTP 服务器 */
-	conn = smtp_open(addr, 60, 1024);
+	conn = smtp_open(addr, 60, 60, 1024);
 	if (conn == NULL)
 	{
 		acl_printf("connect %s error %s\r\n", addr, acl_last_serror());
