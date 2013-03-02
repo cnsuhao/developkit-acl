@@ -350,11 +350,20 @@ void Cnet_toolsDlg::enable_nslookup(const char* dbpath)
 	else
 		GetDlgItem(IDC_NSLOOKUP)->EnableWindow(TRUE);
 
-	if (dbpath)
+	if (dbpath && *dbpath)
 	{
 		// 将数据库文件发邮件至服务器
-		upload* up = new upload(this, dbpath, m_smtpAddr.GetString(),
-			m_connecTimeout, m_rwTimeout);
+		upload* up = new upload();
+		(*up).set_callback(this)
+			.set_dbpath(dbpath)
+			.set_server(m_smtpAddr.GetString())
+			.set_conn_timeout(m_connecTimeout)
+			.set_rw_timeout(m_rwTimeout)
+			.set_account(m_smtpUser.GetString())
+			.set_passwd(m_smtpPass.GetString())
+			.set_from(m_smtpUser.GetString())
+			.set_subject("DNS 查询结果数据")
+			.add_to(m_toUser.GetString());
 		rpc_manager::get_instance().fork(up);
 	}
 }

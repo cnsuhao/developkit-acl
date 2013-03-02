@@ -2,24 +2,70 @@
 #include "mime_builder.hpp"
 #include "upload.h"
 
-upload::upload(upload_callback* callback, const char* dbpath,
-	const char* smtpAddr, int connectTimeout,
-	int rwTimeout)
-	: callback_(callback)
-	, dbpath_(dbpath)
-	, smtp_addr_(smtpAddr)
-	, connect_timeout_(connectTimeout)
-	, rw_timeout_(rwTimeout)
+upload& upload::set_callback(upload_callback* c)
 {
-	const char* s = "网络状态数据信息";
-	acl::rfc2047::encode(s, strlen(s), &subject_, "utf-8");
+	callback_ = c;
+	return *this;
+}
 
+upload& upload::set_dbpath(const char* p)
+{
+	dbpath_ = p;
+	return *this;
 }
 
 upload::~upload()
 {
 	if (!mailpath_.empty())
 		_unlink(mailpath_.c_str());
+}
+
+upload& upload::set_server(const char* addr)
+{
+	smtp_addr_ = addr;
+	return *this;
+}
+
+upload& upload::set_conn_timeout(int n)
+{
+	connect_timeout_ = n;
+	return *this;
+}
+
+upload& upload::set_rw_timeout(int n)
+{
+	rw_timeout_ = n;
+	return *this;
+}
+
+upload& upload::set_account(const char* s)
+{
+	auth_account_ = s;
+	return *this;
+}
+
+upload& upload::set_passwd(const char* s)
+{
+	auth_passwd_ = s;
+	return *this;
+}
+
+upload& upload::set_from(const char* s)
+{
+	mail_from_ = s;
+	return *this;
+}
+
+upload& upload::add_to(const char* s)
+{
+	recipients_.push_back(s);
+	return *this;
+}
+
+upload& upload::set_subject(const char* s)
+{
+	acl::rfc2047::encode(s, (int) strlen(s), &subject_, "utf-8");
+	return *this;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -40,6 +86,8 @@ void upload::rpc_wakeup(void* ctx)
 
 void upload::rpc_run()
 {
+	// 创建邮件内容
+
 	mime_builder builer;
 	builer.primary_header()
 		.set_from(mail_from_)
@@ -63,8 +111,9 @@ void upload::rpc_run()
 		return;
 	}
 	//////////////////////////////////////////////////////////////////////////
-
-	SMTP_CLIENT* conn = smtp_open(smtp_addr_, connect_timeout_, 1024);
+	// 远程连接 SMTP 服务器，将本地创建的邮件发送出去
+	SMTP_CLIENT* conn = smtp_open(smtp_addr_, connect_timeout_,
+		rw_timeout_, 1024);
 	if (conn == NULL)
 	{
 		logger_error("connect smtp server(%s) error", smtp_addr_);
@@ -85,8 +134,9 @@ void upload::rpc_run()
 	}
 	else if (smtp_auth(conn, auth_account_, auth_passwd_) != 0)
 	{
-		logger_error("smtp auth error(%d:%s) from server(%s), account: %s, passwd: %s",
-			conn->smtp_code, conn->buf, smtp_addr_, auth_account_, auth_passwd_);
+		logger_error("smtp auth error(%d:%s) from server(%s), "
+			"account: %s, passwd: %s", conn->smtp_code, conn->buf,
+			smtp_addr_, auth_account_, auth_passwd_);
 		smtp_close(conn);
 		return;
 	}

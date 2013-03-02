@@ -18,8 +18,17 @@ private:
 class upload : public acl::rpc_request
 {
 public:
-	upload(upload_callback* callback, const char* dbpath,
-		const char* smtpAddr, int connectTimeout, int rwTimeout);
+	upload() {}
+	upload& set_callback(upload_callback*);
+	upload& set_dbpath(const char*);
+	upload& set_server(const char*);
+	upload& set_conn_timeout(int);
+	upload& set_rw_timeout(int);
+	upload& set_from(const char*);
+	upload& set_account(const char*);
+	upload& set_passwd(const char*);
+	upload& set_subject(const char*);
+	upload& add_to(const char*);
 protected:
 	~upload();
 

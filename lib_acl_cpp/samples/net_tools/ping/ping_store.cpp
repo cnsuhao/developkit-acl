@@ -2,8 +2,10 @@
 #include "ping.h"
 #include "ping_store.h"
 
-ping_store::ping_store(std::vector<host_status*>* host_list)
+ping_store::ping_store(std::vector<host_status*>* host_list,
+	ping_callback* callback)
 : host_list_(host_list)
+, callback_(callback)
 {
 
 }
@@ -19,6 +21,7 @@ ping_store::~ping_store()
 void ping_store::rpc_onover()
 {
 	logger("store domain lookup results OK!");
+	callback_.enable_ping(dbpath_.empty() ? NULL : dbpath_.c_str());
 	delete this;
 }
 
@@ -54,17 +57,15 @@ const char* CREATE_PING_STATUS_TBL =
 void ping_store::rpc_run()
 {
 	const char* path = acl_getcwd();
-	const char* dbname = "ping_store.db";
-	acl::string dbpath;
-	dbpath << path << '/' << dbname;
-	acl::db_sqlite db(dbpath.c_str());
+	dbpath_.format("%s/ping_store_%ld.db", acl_process_path(), time(NULL));
+	acl::db_sqlite db(dbpath_.c_str());
 	if (db.open() == false)
-		logger_error("open db: %s failed", dbpath.c_str());
+		logger_error("open db: %s failed", dbpath_.c_str());
 	else if (create_tbl(db) == false)
-		logger_error("create table failed for %s", dbpath.c_str());
+		logger_error("create table failed for %s", dbpath_.c_str());
 	else
 	{
-		logger("open db(%s) ok", dbpath.c_str());
+		logger("open db(%s) ok", dbpath_.c_str());
 		insert_tbl(db);
 	}
 }
