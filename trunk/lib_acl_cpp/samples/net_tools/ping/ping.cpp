@@ -83,8 +83,7 @@ ping::~ping()
 void ping::rpc_onover()
 {
 	callback_->ping_report(total_pkt_, total_pkt_, error_pkt_);
-	callback_->enable_ping();
-	ping_store* s = new ping_store(host_list_);
+	ping_store* s = new ping_store(host_list_, callback_);
 	host_list_ = NULL;
 	rpc_manager::get_instance().fork(s);
 	delete this;

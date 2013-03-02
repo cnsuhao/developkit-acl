@@ -9,7 +9,7 @@ public:
 	ping_callback() {}
 	virtual ~ping_callback() {}
 
-	virtual void enable_ping() = 0;
+	virtual void enable_ping(const char* dbpath) = 0;
 	virtual void ping_report(size_t total, size_t curr, size_t nerr) = 0;
 };
 

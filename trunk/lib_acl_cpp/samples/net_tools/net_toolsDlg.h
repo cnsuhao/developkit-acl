@@ -64,6 +64,7 @@ private:
 	int m_rwTimeout;
 	CString m_smtpUser;
 	CString m_smtpPass;
+	CString m_toUser;
 
 protected:
 	void DisableAll();
