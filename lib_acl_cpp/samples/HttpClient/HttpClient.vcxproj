@@ -107,8 +107,8 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>lib_acl_vc2010d.lib;lib_protocol_vc2003d.lib;lib_acl_cpp_vc2010d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\lib;..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>lib_acl_d.lib;lib_protocol_d.lib;lib_acl_cpp_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\lib\win32;..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -173,7 +173,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalLibraryDirectories>..\..\lib;..\..\..\dist\lib\win32</AdditionalLibraryDirectories>
-      <AdditionalDependencies>lib_acl_vc2010.lib;lib_protocol_vc2003.lib;lib_acl_cpp_vc2010.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>lib_acl.lib;lib_protocol.lib;lib_acl_cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>libcmt</IgnoreSpecificDefaultLibraries>
     </Link>
     <Midl>
@@ -217,8 +217,8 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <PostBuildEvent>
-      <Command>copy ..\..\lib\lib_acl.dll $(OutDir)\ /Y
-copy ..\..\lib\lib_acl_cpp_vc2010_dll.dll $(OutDir)\ /Y</Command>
+      <Command>copy ..\..\..\dist\lib\win32\lib_acl.dll $(OutDir)\ /Y
+copy ..\..\..\dist\lib\win32\lib_acl_cpp.dll $(OutDir)\ /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

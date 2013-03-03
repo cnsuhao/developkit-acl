@@ -107,8 +107,8 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>lib_acl_cpp_vc2010d_dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\lib;..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>lib_acl_cpp_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\lib\win32;..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -145,7 +145,7 @@ copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir) /Y
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>lib_acl_cpp_vc2010_dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>lib_acl_cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\lib;..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -198,10 +198,9 @@ copy ..\..\..\dist\lib\win32\lib_protocol.dll $(OutDir) /Y
     </Midl>
     <PostBuildEvent>
       <Command>copy ..\..\..\dist\lib\win32\lib_acl_d.dll $(OutDir) /Y
-copy ..\..\bin\sqlite3.dll $(OutDir) /Y
-copy ..\..\bin\iconv.dll $(OutDir) /Y
-copy ..\..\lib\lib_acl_cpp_vc2010d_dll.dll $(OutDir) /Y
-copy ..\..\lib\lib_acl_cpp_vc2010d_dll.pdb $(OutDir) /Y
+copy ..\..\..\lib\win32\sqlite3.dll $(OutDir) /Y
+copy ..\..\..\dist\lib\win32\lib_acl_cpp_vc2010d_dll.dll $(OutDir) /Y
+copy ..\..\..\dist\lib\win32\lib_acl_cpp_vc2010d_dll.pdb $(OutDir) /Y
 copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir) /Y
 </Command>
     </PostBuildEvent>
@@ -237,9 +236,9 @@ copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir) /Y
     </Midl>
     <PostBuildEvent>
       <Command>copy ..\..\..\dist\lib\win32\lib_acl.dll $(OutDir) /Y
-copy ..\..\bin\sqlite3.dll $(OutDir) /Y
-copy ..\..\bin\iconv.dll $(OutDir) /Y
-copy ..\..\lib\lib_acl_cpp_vc2010_dll.dll $(OutDir) /Y
+copy ..\..\..\lib\win32\sqlite3.dll $(OutDir) /Y
+copy ..\..\..\lib\win32\iconv.dll $(OutDir) /Y
+copy ..\..\..\dist\lib\win32\lib_acl_cpp_vc2010_dll.dll $(OutDir) /Y
 copy ..\..\..\dist\lib\win32\lib_protocol.dll $(OutDir) /Y
 </Command>
     </PostBuildEvent>

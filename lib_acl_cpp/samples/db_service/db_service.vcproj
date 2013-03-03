@@ -35,7 +35,7 @@
 				AdditionalDependencies="lib_acl_vc2003d.lib sqlite3.lib libmysql.lib"
 				OutputFile="$(OutDir)/db_service.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib;..\..\..\dist\lib\win32"
+				AdditionalLibraryDirectories="..\..\..\lib\win32;..\..\..\dist\lib\win32"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/db_service.pdb"
 				SubSystem="1"
@@ -44,8 +44,8 @@
 				Name="VCMIDLTool"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\bin\sqlite3.dll $(OutDir)\ /Y
-copy ..\..\bin\iconv.dll $(OutDir)\ /Y
+				CommandLine="copy ..\..\..\lib\win32\sqlite3.dll $(OutDir)\ /Y
+copy ..\..\..\lib\win32\iconv.dll $(OutDir)\ /Y
 "/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
@@ -83,10 +83,10 @@ copy ..\..\bin\iconv.dll $(OutDir)\ /Y
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl_vc2003.lib sqlite3.lib iconv.lib"
+				AdditionalDependencies="sqlite3.lib iconv.lib"
 				OutputFile="$(OutDir)/db_service.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\lib;..\..\..\dist\lib\win32"
+				AdditionalLibraryDirectories="..\..\..\lib\win32;..\..\..\dist\lib\win32"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -96,8 +96,8 @@ copy ..\..\bin\iconv.dll $(OutDir)\ /Y
 				Name="VCMIDLTool"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\bin\sqlite3.dll $(OutDir)\ /Y
-copy ..\..\bin\iconv.dll $(OutDir)\ /Y
+				CommandLine="copy ..\..\..\lib\win32\sqlite3.dll $(OutDir)\ /Y
+copy ..\..\..\lib\win32\iconv.dll $(OutDir)\ /Y
 "/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
@@ -140,7 +140,7 @@ copy ..\..\bin\iconv.dll $(OutDir)\ /Y
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/db_service.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib"
+				AdditionalLibraryDirectories="..\..\..\lib\win32"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/db_service.pdb"
 				SubSystem="1"
@@ -190,7 +190,7 @@ copy ..\..\bin\iconv.dll $(OutDir)\ /Y
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/db_service.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\lib"
+				AdditionalLibraryDirectories="..\..\..\lib\win32"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/$(ProjectName).pdb"
 				SubSystem="1"

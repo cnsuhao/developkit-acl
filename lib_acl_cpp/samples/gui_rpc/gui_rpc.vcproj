@@ -36,9 +36,9 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/verbose:lib"
-				AdditionalDependencies="uxtheme.lib polarssl.lib"
+				AdditionalDependencies="uxtheme.lib polarssl.lib lib_acl_d.lib lib_protocol_d.lib lib_acl_cpp_d.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\lib;..\..\..\dist\lib\win32"
+				AdditionalLibraryDirectories="..\..\..\lib\win32;..\..\..\dist\lib\win32"
 				IgnoreDefaultLibraryNames="libc"
 				AddModuleNamesToAssembly=""
 				GenerateDebugInformation="TRUE"
@@ -53,7 +53,7 @@
 				CommandLine="copy ..\..\..\dist\lib\win32\lib_acl_d.dll $(OutDir)\  /Y
 copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\  /Y
 copy ..\..\..\dist\lib\win32\lib_acl_cpp_d.dll $(OutDir)\  /Y
-copy ..\..\bin\zlib.dll $(OutDir)\ /Y
+copy ..\..\..\lib\win32\zlib.dll $(OutDir)\ /Y
 "/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
@@ -98,9 +98,9 @@ copy ..\..\bin\zlib.dll $(OutDir)\ /Y
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="uxtheme.lib polarssl.lib lib_acl.lib lib_protocol.lib"
+				AdditionalDependencies="uxtheme.lib polarssl.lib lib_acl.lib lib_protocol.lib lib_acl_cpp.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\lib;..\..\..\dist\lib\win32"
+				AdditionalLibraryDirectories="..\..\..\lib\win32;..\..\..\dist\lib\win32"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -115,7 +115,7 @@ copy ..\..\bin\zlib.dll $(OutDir)\ /Y
 				CommandLine="copy ..\..\..\dist\lib\win32\lib_acl.dll $(OutDir)\  /Y
 copy ..\..\..\dist\lib\win32\lib_protocol.dll $(OutDir)\  /Y
 copy ..\..\..\dist\lib\win32\lib_acl_cpp.dll $(OutDir)\  /Y
-copy ..\..\bin\zlib.dll $(OutDir)\ /Y
+copy ..\..\..\lib\win32\zlib.dll $(OutDir)\ /Y
 "/>
 			<Tool
 				Name="VCPreBuildEventTool"/>

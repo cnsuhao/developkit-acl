@@ -35,7 +35,7 @@
 				AdditionalDependencies="lib_acl_vc2003d.lib"
 				OutputFile="$(OutDir)/zlib.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib;..\..\..\dist\lib\win32"
+				AdditionalLibraryDirectories="..\..\..\lib\win32;..\..\..\dist\lib\win32"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/zlib.pdb"
@@ -45,7 +45,7 @@
 				Name="VCMIDLTool"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\bin\zlib.dll $(OutDir)\ /Y
+				CommandLine="copy ..\..\..\lib\win32\zlib.dll $(OutDir)\ /Y
 "/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
@@ -86,7 +86,7 @@
 				AdditionalDependencies="lib_acl_vc2003.lib"
 				OutputFile="$(OutDir)/zlib.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\lib;..\..\..\dist\lib\win32"
+				AdditionalLibraryDirectories="..\..\..\lib\win32;..\..\..\dist\lib\win32"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -96,7 +96,7 @@
 				Name="VCMIDLTool"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\bin\zlib.dll $(OutDir)\ /Y
+				CommandLine="copy ..\..\..\lib\win32\zlib.dll $(OutDir)\ /Y
 "/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
