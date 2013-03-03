@@ -64,7 +64,6 @@ private:
 	int m_rwTimeout;
 	CString m_smtpUser;
 	CString m_smtpPass;
-	CString m_toUser;
 
 	CString m_pop3Addr;
 	CString m_recipients;

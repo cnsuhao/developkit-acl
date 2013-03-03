@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#include "global/global.h"
 #include "nslookup.h"
 #include "dns_store.h"
 
@@ -41,7 +42,9 @@ const char* CREATE_TBL =
 
 void dns_store::rpc_run()
 {
-	dbpath_.format("%s/dns_store_%ld.db", acl_process_path(), time(NULL));
+	const char* path = global::get_instance().get_path();
+	dbpath_.format("%s/dns_store_%ld.db", path, time(NULL));
+
 	acl::db_sqlite db(dbpath_.c_str());
 	if (db.open() == false)
 		logger_error("open db: %s failed", dbpath_.c_str());

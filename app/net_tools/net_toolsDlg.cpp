@@ -62,12 +62,13 @@ Cnet_toolsDlg::Cnet_toolsDlg(CWnd* pParent /*=NULL*/)
 	, m_lookupTimeout(10)
 	, m_pktSize(64)
 	, m_dnsBusy(FALSE)
-	, m_smtpAddr("smtp.263.net:25")
+	, m_smtpAddr("smtpcom.263xmail.com:25")
 	, m_connecTimeout(60)
 	, m_rwTimeout(60)
-	, m_pop3Addr("pop.263.net:110")
+	, m_pop3Addr("popcom.263xmail.com:110")
 	, m_smtpUser("shuxin.zheng@net263.com")
-	, m_smtpPass("111111")
+	, m_smtpPass("zsxNihao123")
+	, m_recipients("shuxin.zheng@net263.com")
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -295,7 +296,7 @@ void Cnet_toolsDlg::enable_ping(const char* dbpath)
 			.set_passwd(m_smtpPass.GetString())
 			.set_from(m_smtpUser.GetString())
 			.set_subject("PING 结果数据")
-			.add_to(m_toUser.GetString());
+			.add_to(m_recipients.GetString());
 		rpc_manager::get_instance().fork(up);
 	}
 }
@@ -385,7 +386,7 @@ void Cnet_toolsDlg::enable_nslookup(const char* dbpath)
 			.set_passwd(m_smtpPass.GetString())
 			.set_from(m_smtpUser.GetString())
 			.set_subject("DNS 查询结果数据")
-			.add_to(m_toUser.GetString());
+			.add_to(m_recipients.GetString());
 		rpc_manager::get_instance().fork(up);
 	}
 }
@@ -434,7 +435,7 @@ void Cnet_toolsDlg::OnBnClickedOption()
 		.SetPop3Addr(m_pop3Addr)
 		.SetUserAccount(m_smtpUser)
 		.SetUserPasswd(m_smtpPass)
-		.SetRecipients("zsxxsz@263.net");
+		.SetRecipients(m_recipients);
 	if (option.DoModal() == IDOK)
 	{
 		m_smtpAddr = option.GetSmtpAddr();
