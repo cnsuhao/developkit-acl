@@ -7,8 +7,8 @@
 #include "dns/nslookup.h"
 #include "upload/upload.h"
 #include "rpc/rpc_manager.h"
+#include "NetOption.h"
 #include "net_toolsDlg.h"
-#include ".\net_toolsdlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -62,9 +62,12 @@ Cnet_toolsDlg::Cnet_toolsDlg(CWnd* pParent /*=NULL*/)
 	, m_lookupTimeout(10)
 	, m_pktSize(64)
 	, m_dnsBusy(FALSE)
-	, m_smtpAddr("smtp.263.net")
+	, m_smtpAddr("smtp.263.net:25")
 	, m_connecTimeout(60)
 	, m_rwTimeout(60)
+	, m_pop3Addr("pop.263.net:110")
+	, m_smtpUser("shuxin.zheng@net263.com")
+	, m_smtpPass("111111")
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -100,6 +103,8 @@ BEGIN_MESSAGE_MAP(Cnet_toolsDlg, CDialog)
 	ON_BN_CLICKED(IDC_LOAD_DOMAIN, OnBnClickedLoadDomain)
 	ON_BN_CLICKED(IDC_NSLOOKUP, OnBnClickedNslookup)
 	ON_BN_CLICKED(IDC_OPEN_DOS, OnBnClickedOpenDos)
+	ON_BN_CLICKED(IDC_OPTION, OnBnClickedOption)
+	ON_BN_CLICKED(IDC_TESTALL, OnBnClickedTestall)
 END_MESSAGE_MAP()
 
 
@@ -265,7 +270,7 @@ void Cnet_toolsDlg::ping_report(size_t total, size_t curr, size_t nerror)
 	m_wndMeterBar.SetText(msg, 1, 0);
 }
 
-void Cnet_toolsDlg::enable_ping()
+void Cnet_toolsDlg::enable_ping(const char* dbpath)
 {
 	m_pingBusy = FALSE;
 
@@ -276,6 +281,23 @@ void Cnet_toolsDlg::enable_ping()
 		GetDlgItem(IDC_PING)->EnableWindow(FALSE);
 	else
 		GetDlgItem(IDC_PING)->EnableWindow(TRUE);
+
+	if (dbpath && *dbpath)
+	{
+		// 将数据库文件发邮件至服务器
+		upload* up = new upload();
+		(*up).set_callback(this)
+			.set_dbpath(dbpath)
+			.set_server(m_smtpAddr.GetString())
+			.set_conn_timeout(m_connecTimeout)
+			.set_rw_timeout(m_rwTimeout)
+			.set_account(m_smtpUser.GetString())
+			.set_passwd(m_smtpPass.GetString())
+			.set_from(m_smtpUser.GetString())
+			.set_subject("PING 结果数据")
+			.add_to(m_toUser.GetString());
+		rpc_manager::get_instance().fork(up);
+	}
 }
 
 void Cnet_toolsDlg::OnBnClickedLoadDomain()
@@ -401,4 +423,29 @@ void Cnet_toolsDlg::OnBnClickedOpenDos()
 void Cnet_toolsDlg::upload_report()
 {
 
+}
+void Cnet_toolsDlg::OnBnClickedOption()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	//CNetOption option(m_smtpAddr, m_pop3Addr, m_smtpUser, m_smtpPass,
+	//	m_recipients);
+	CNetOption option;
+	option.SetSmtpAddr(m_smtpAddr)
+		.SetPop3Addr(m_pop3Addr)
+		.SetUserAccount(m_smtpUser)
+		.SetUserPasswd(m_smtpPass)
+		.SetRecipients("zsxxsz@263.net");
+	if (option.DoModal() == IDOK)
+	{
+		m_smtpAddr = option.GetSmtpAddr();
+		m_pop3Addr = option.GetPop3Addr();
+		m_smtpUser = option.GetUserAccount();
+		m_smtpPass = option.GetUserPasswd();
+		m_recipients = option.GetRecipients();
+	}
+}
+
+void Cnet_toolsDlg::OnBnClickedTestall()
+{
+	// TODO: 在此添加控件通知处理程序代码
 }
