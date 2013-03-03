@@ -19,6 +19,7 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "string", "lib_acl_cpp\samples\string\string.vcproj", "{C94BEF01-706C-49A7-9FF1-9D87FA5BB8E7}"
 	ProjectSection(ProjectDependencies) = postProject
 		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC} = {6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fstream", "lib_acl_cpp\samples\fstream\fstream.vcproj", "{7680672C-4C9B-4BE8-8BAE-BB23B951AAA0}"
@@ -62,8 +63,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "aio_client", "lib_acl_cpp\s
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winaio", "lib_acl_cpp\samples\winaio\winaio.vcproj", "{ADE6F714-BD52-432D-AB86-62FA59AB6746}"
 	ProjectSection(ProjectDependencies) = postProject
-		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC} = {6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "aio_ipc", "lib_acl_cpp\samples\aio_ipc\aio_ipc.vcproj", "{956FA905-A77F-41FE-A4BE-C3BD3B5B3E83}"
@@ -124,11 +123,11 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "db_service", "lib_acl_cpp\samples\db_service\db_service.vcproj", "{82C00ED0-AEF5-4E5B-9581-1EA052CBEA01}"
 	ProjectSection(ProjectDependencies) = postProject
 		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC} = {6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "win_dbservice", "lib_acl_cpp\samples\win_dbservice\win_dbservice.vcproj", "{DC7E75E5-FE42-4529-9D9A-19D240B8727B}"
 	ProjectSection(ProjectDependencies) = postProject
-		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC} = {6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "lib_acl_cpp\samples\zlib\zlib.vcproj", "{F6292B2C-2C57-40E1-805F-86D9FB1C3251}"
@@ -206,13 +205,12 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rpc_download", "lib_acl_cpp\samples\rpc_download\rpc_download.vcproj", "{349F7822-A752-42F0-BB13-4A28497D68DF}"
 	ProjectSection(ProjectDependencies) = postProject
 		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC} = {6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}
+		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
+		{FE724EF7-3763-4E78-BDF5-BCBC075719FD} = {FE724EF7-3763-4E78-BDF5-BCBC075719FD}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gui_rpc", "lib_acl_cpp\samples\gui_rpc\gui_rpc.vcproj", "{F37E8828-252D-4F3E-A5B6-E3770750042F}"
 	ProjectSection(ProjectDependencies) = postProject
-		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC} = {6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD} = {FE724EF7-3763-4E78-BDF5-BCBC075719FD}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "acl_cpp_test", "lib_acl_cpp\samples\acl_cpp_test\acl_cpp_test.vcproj", "{C8CED6EB-DCC8-4CEE-921F-3190C879B116}"
@@ -263,13 +261,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "beanstalk", "lib_acl_cpp\sa
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "url_coder", "lib_acl_cpp\samples\url_coder\url_coder.vcproj", "{143ED97E-1EC6-4821-A5FA-A6728B69273E}"
-	ProjectSection(ProjectDependencies) = postProject
-		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC} = {6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD} = {FE724EF7-3763-4E78-BDF5-BCBC075719FD}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "net_tools", "lib_acl_cpp\samples\net_tools\net_tools.vcproj", "{45276293-D169-4D73-8930-F255C09DA976}"
 	ProjectSection(ProjectDependencies) = postProject
 		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC} = {6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}
 		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
@@ -668,14 +659,6 @@ Global
 		{143ED97E-1EC6-4821-A5FA-A6728B69273E}.Release.Build.0 = Release|Win32
 		{143ED97E-1EC6-4821-A5FA-A6728B69273E}.Releasedll.ActiveCfg = ReleaseDll|Win32
 		{143ED97E-1EC6-4821-A5FA-A6728B69273E}.Releasedll.Build.0 = ReleaseDll|Win32
-		{45276293-D169-4D73-8930-F255C09DA976}.Debug.ActiveCfg = Debug|Win32
-		{45276293-D169-4D73-8930-F255C09DA976}.Debug.Build.0 = Debug|Win32
-		{45276293-D169-4D73-8930-F255C09DA976}.DebugDll.ActiveCfg = Debug|Win32
-		{45276293-D169-4D73-8930-F255C09DA976}.DebugDll.Build.0 = Debug|Win32
-		{45276293-D169-4D73-8930-F255C09DA976}.Release.ActiveCfg = Release|Win32
-		{45276293-D169-4D73-8930-F255C09DA976}.Release.Build.0 = Release|Win32
-		{45276293-D169-4D73-8930-F255C09DA976}.Releasedll.ActiveCfg = Release|Win32
-		{45276293-D169-4D73-8930-F255C09DA976}.Releasedll.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

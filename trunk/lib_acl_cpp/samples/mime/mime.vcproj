@@ -35,7 +35,7 @@
 				AdditionalDependencies="lib_acl_vc2003d.lib ws2_32.lib"
 				OutputFile="mime.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib;..\..\..\dist\lib\win32"
+				AdditionalLibraryDirectories="..\..\..\lib\win32;..\..\..\dist\lib\win32"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/mime.pdb"
 				SubSystem="1"
@@ -43,8 +43,7 @@
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\bin\iconv.dll $(OutDir)\ /Y"/>
+				Name="VCPostBuildEventTool"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -84,7 +83,7 @@
 				AdditionalDependencies="ws2_32.lib wsock32.lib lib_acl_vc2003.lib"
 				OutputFile="$(OutDir)/mime.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\lib;..\..\..\dist\lib\win32"
+				AdditionalLibraryDirectories="..\..\..\lib\win32;..\..\..\dist\lib\win32"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -136,7 +135,7 @@
 				AdditionalDependencies="ws2_32.lib"
 				OutputFile="mime.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib"
+				AdditionalLibraryDirectories="..\..\..\lib\win32"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/mime.pdb"
 				SubSystem="1"
@@ -187,7 +186,7 @@
 				AdditionalDependencies="ws2_32.lib"
 				OutputFile="mime.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib"
+				AdditionalLibraryDirectories="..\..\..\lib\win32"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/mime.pdb"
 				SubSystem="1"

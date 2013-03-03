@@ -35,7 +35,7 @@
 				AdditionalDependencies="lib_acl_vc2003d.lib libmysql.lib"
 				OutputFile="$(OutDir)/mysql.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib;..\..\..\dist\lib\win32"
+				AdditionalLibraryDirectories="..\..\..\lib\win32;..\..\..\dist\lib\win32"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/mysql.pdb"
 				SubSystem="1"
@@ -44,7 +44,7 @@
 				Name="VCMIDLTool"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\bin\libmysql.dll $(OutDir)\ /Y
+				CommandLine="copy ..\..\..\lib\win32\libmysql.dll $(OutDir)\ /Y
 "/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
@@ -85,7 +85,7 @@
 				AdditionalDependencies="lib_acl_vc2003.lib lib_protocol_vc2003.lib"
 				OutputFile="$(OutDir)/mysql.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\lib;..\..\..\dist\lib\win32"
+				AdditionalLibraryDirectories="..\..\..\lib\win32;..\..\..\dist\lib\win32"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -133,7 +133,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/mysql.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\lib"
+				AdditionalLibraryDirectories="..\..\..\lib\win32"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -185,7 +185,7 @@
 				AdditionalDependencies="libmysql.lib"
 				OutputFile="$(OutDir)/mysql.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib"
+				AdditionalLibraryDirectories="..\..\..\lib\win32"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/mysql.pdb"
 				SubSystem="1"
@@ -194,7 +194,7 @@
 				Name="VCMIDLTool"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\bin\libmysql.dll $(OutDir)\ /Y
+				CommandLine="copy ..\..\..\lib\win32\libmysql.dll $(OutDir)\ /Y
 "/>
 			<Tool
 				Name="VCPreBuildEventTool"/>

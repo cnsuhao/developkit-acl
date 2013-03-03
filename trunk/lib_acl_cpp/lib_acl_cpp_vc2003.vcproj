@@ -134,7 +134,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				AdditionalDependencies="lib_acl_d.lib lib_protocol_d.lib polarssl.lib"
 				OutputFile="$(OutDir)/$(ProjectName)_d.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories=".\lib;..\dist\lib\win32"
+				AdditionalLibraryDirectories="..\lib\win32;..\dist\lib\win32"
 				IgnoreDefaultLibraryNames="libc"
 				ModuleDefinitionFile=""
 				GenerateDebugInformation="TRUE"
@@ -199,7 +199,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				Name="VCLinkerTool"
 				AdditionalDependencies="lib_acl.lib polarssl.lib lib_protocol.lib"
 				OutputFile="$(OutDir)/$(ProjectName).dll"
-				AdditionalLibraryDirectories=".\lib;..\dist\lib\win32"
+				AdditionalLibraryDirectories="..\lib\win32;..\dist\lib\win32"
 				IgnoreDefaultLibraryNames="libcmt;libc"
 				ImportLibrary="$(OutDir)/$(TargetName).lib"
 				TargetMachine="1"/>

@@ -97,7 +97,7 @@
     <Link>
       <AdditionalDependencies>lib_acl_vc2010d.lib;lib_acl_cpp_vc2010d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)md5.exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\lib;..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\lib\win32;..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)md5.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
@@ -146,9 +146,8 @@
       <AdditionalDependencies>lib_acl_cpp_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy ..\..\lib\lib_acl_cpp_vc2010d_dll.dll $(OutDir) /Y
-copy ..\..\..\dist\lib\win32\lib_acl_d.dll $(OutDir) /Y
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDll|Win32'">
@@ -171,9 +170,8 @@ copy ..\..\..\dist\lib\win32\lib_acl_d.dll $(OutDir) /Y
       <AdditionalDependencies>lib_acl_cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy ..\..\lib\lib_acl_cpp_vc2010_dll.dll $(OutDir) /Y
-copy ..\..\..\dist\lib\win32\lib_acl.dll $(OutDir) /Y
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

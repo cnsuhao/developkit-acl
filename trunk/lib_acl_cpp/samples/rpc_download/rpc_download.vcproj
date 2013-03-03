@@ -35,7 +35,7 @@
 				AdditionalDependencies="lib_acl_vc2003d.lib lib_protocol_vc2003d.lib polarssl.lib"
 				OutputFile="$(OutDir)/rpc_download.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib;..\..\..\dist\lib\win32"
+				AdditionalLibraryDirectories="..\..\..\lib\win32;..\..\..\dist\lib\win32"
 				IgnoreDefaultLibraryNames="libc"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/rpc_download.pdb"
@@ -45,7 +45,7 @@
 				Name="VCMIDLTool"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\bin\zlib.dll $(OutDir)\ /Y"/>
+				CommandLine="copy ..\..\..\lib\win32\zlib.dll $(OutDir)\ /Y"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -85,7 +85,8 @@
 				AdditionalDependencies="polarssl.lib"
 				OutputFile="$(OutDir)/rpc_download.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\lib;..\..\..\dist\lib\win32"
+				AdditionalLibraryDirectories="..\..\..\lib\win32;..\..\..\dist\lib\win32"
+				IgnoreDefaultLibraryNames="libc"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -95,7 +96,7 @@
 				Name="VCMIDLTool"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\bin\zlib.dll $(OutDir)\ /Y"/>
+				CommandLine="copy ..\..\..\lib\win32\zlib.dll $(OutDir)\ /Y"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -138,7 +139,7 @@
 				AdditionalDependencies="polarssl.lib"
 				OutputFile="$(OutDir)/rpc_download.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib"
+				AdditionalLibraryDirectories="..\..\..\lib\win32"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/rpc_download.pdb"
 				SubSystem="1"
@@ -146,7 +147,8 @@
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				CommandLine="copy ..\..\..\lib\win32\zlib.dll $(OutDir)\ /Y"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -186,7 +188,7 @@
 				AdditionalDependencies="polarssl.lib"
 				OutputFile="$(OutDir)/rpc_download.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\lib"
+				AdditionalLibraryDirectories="..\..\..\lib\win32"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -195,7 +197,8 @@
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				CommandLine="copy ..\..\..\lib\win32\zlib.dll $(OutDir)\ /Y"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
