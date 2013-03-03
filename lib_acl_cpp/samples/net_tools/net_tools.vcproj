@@ -160,6 +160,9 @@ copy ..\..\..\lib_acl_cpp\bin\sqlite3.dll $(OutDir)\ /Y
 				RelativePath=".\net_toolsDlg.cpp">
 			</File>
 			<File
+				RelativePath=".\NetOption.cpp">
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -184,6 +187,9 @@ copy ..\..\..\lib_acl_cpp\bin\sqlite3.dll $(OutDir)\ /Y
 			</File>
 			<File
 				RelativePath=".\net_toolsDlg.h">
+			</File>
+			<File
+				RelativePath=".\NetOption.h">
 			</File>
 			<File
 				RelativePath=".\Resource.h">
@@ -286,6 +292,10 @@ copy ..\..\..\lib_acl_cpp\bin\sqlite3.dll $(OutDir)\ /Y
 				RelativePath=".\upload\upload.h">
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\HttpOption.htm"
+			DeploymentContent="TRUE">
+		</File>
 		<File
 			RelativePath=".\res\net_tools.manifest">
 		</File>

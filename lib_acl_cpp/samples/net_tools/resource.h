@@ -7,7 +7,9 @@
 #define IDS_ABOUTBOX                    101
 #define IDD_NET_TOOLS_DIALOG            102
 #define IDP_SOCKETS_INIT_FAILED         103
+#define IDR_HTML_HTTPOPTION             104
 #define IDR_MAINFRAME                   128
+#define IDD_OPTION                      131
 #define IDC_PING                        1000
 #define IDC_NSLOOKUP                    1001
 #define IDC_IP_FILE_PATH                1002
@@ -25,14 +27,23 @@
 #define IDC_DNS_PORT                    1012
 #define IDC_LOOKUP_TIMEOUT              1013
 #define IDC_UPLOAD                      1014
+#define IDC_TESTALL                     1015
+#define IDC_OPTION                      1016
+#define IDC_SMTP_ADDR                   1017
+#define IDC_SMTP_PORT                   1018
+#define IDC_POP3_ADDR                   1019
+#define IDC_POP3_PORT                   1020
+#define IDC_USER_ACCOUNT                1021
+#define IDC_USER_PASSWD                 1022
+#define IDC_RECIPIENTS                  1023
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        129
+#define _APS_NEXT_RESOURCE_VALUE        132
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1015
-#define _APS_NEXT_SYMED_VALUE           101
+#define _APS_NEXT_CONTROL_VALUE         1019
+#define _APS_NEXT_SYMED_VALUE           105
 #endif
 #endif

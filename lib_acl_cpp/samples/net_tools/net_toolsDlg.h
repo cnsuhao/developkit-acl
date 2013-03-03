@@ -66,6 +66,9 @@ private:
 	CString m_smtpPass;
 	CString m_toUser;
 
+	CString m_pop3Addr;
+	CString m_recipients;
+
 protected:
 	void DisableAll();
 	virtual void ping_report(size_t total, size_t curr, size_t nerror);
@@ -73,7 +76,9 @@ protected:
 	virtual void upload_report();
 
 public:
-	virtual void enable_ping();
+	virtual void enable_ping(const char* dbpath);
 	virtual void enable_nslookup(const char* dbpath);
 	afx_msg void OnBnClickedOpenDos();
+	afx_msg void OnBnClickedOption();
+	afx_msg void OnBnClickedTestall();
 };
