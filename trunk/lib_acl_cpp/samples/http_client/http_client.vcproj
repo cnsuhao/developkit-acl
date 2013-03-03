@@ -110,8 +110,8 @@
 		</Configuration>
 		<Configuration
 			Name="DebugDll|Win32"
-			OutputDirectory="$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="DebugDll"
+			IntermediateDirectory="DebugDll"
 			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
@@ -160,8 +160,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseDll|Win32"
-			OutputDirectory="$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="ReleaseDll"
+			IntermediateDirectory="ReleaseDll"
 			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
