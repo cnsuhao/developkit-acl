@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#include "global/global.h"
 #include "mime_builder.hpp"
 
 mime_builder::mime_builder()
@@ -119,6 +120,17 @@ bool mime_builder::add_body(acl::ofstream& fp)
 		logger_error("no body!");
 		return false;
 	}
+
+	int ret = fp.format("Content-Type: text/%s; charset=\"utf-8\"\r\n"
+		"Content-Transfer-Encoding: base64\r\n\r\n",
+		body_html_ ? "html" : "plain");
+	if (ret == -1)
+	{
+		logger_error("write body header to %s error %s",
+			fp.file_path(), acl::last_serror());
+		return false;
+	}
+
 	len = strlen(ptr);
 	acl::mime_base64::encode(ptr, (int) len, &buf);
 	if (fp.write(buf) == -1)
@@ -147,7 +159,7 @@ bool mime_builder::add_boundary(acl::ofstream& fp, bool end /* = false */)
 	}
 	else if (end)
 	{
-		if (fp.format("\r\n") == -1)
+		if (fp.format("--\r\n\r\n") == -1)
 		{
 			logger_error("write boundary endline error(%s) to %s",
 				acl::last_serror(), fp.file_path());
@@ -156,7 +168,7 @@ bool mime_builder::add_boundary(acl::ofstream& fp, bool end /* = false */)
 		else
 			return true;
 	}
-	else if (fp.format("--\r\n\r\n") == -1)
+	else if (fp.format("\r\n") == -1)
 	{
 		logger_error("write boundary end error(%s) to %s",
 			acl::last_serror(), fp.file_path());
@@ -168,6 +180,31 @@ bool mime_builder::add_boundary(acl::ofstream& fp, bool end /* = false */)
 
 bool mime_builder::add_attach(acl::ofstream& fp, const char* filepath)
 {
+	//////////////////////////////////////////////////////////////////////////
+	// 创建头部分信息并写入邮件中
+
+	acl::string filebuf;
+	global::get_filename(filepath, filebuf);
+	acl::string filename;
+	acl::rfc2047::encode(filebuf.c_str(), (int) filebuf.length(),
+		&filename, "utf-8", 'B', false);
+	acl::string header;
+	header.format("Content-Type: application/octet-stream;\r\n"
+		"\tname=\"%s\r\n"
+		"Content-Disposition: attachment;\r\n"
+		"\tfilename=\"%s\"\r\n"
+		"Content-Transfer-Encoding: base64\r\n\r\n",
+		filename.c_str(), filename.c_str());
+	if (fp.write(header) == -1)
+	{
+		logger_error("write header to file %s error %s",
+			fp.file_path(), acl::last_serror());
+		return false;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	// 读取附件数据并写入邮件中
+
 	acl::ifstream in;
 	if (in.open_read(filepath) == false)
 	{
@@ -175,6 +212,7 @@ bool mime_builder::add_attach(acl::ofstream& fp, const char* filepath)
 			filepath, acl::last_serror());
 		return false;
 	}
+
 	acl::mime_base64 coder;
 
 	char inbuf[8192];

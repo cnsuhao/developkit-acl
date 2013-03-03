@@ -292,6 +292,16 @@ copy ..\..\lib\win32\sqlite3.dll $(OutDir)\ /Y
 				RelativePath=".\upload\upload.h">
 			</File>
 		</Filter>
+		<Filter
+			Name="global"
+			Filter="">
+			<File
+				RelativePath=".\global\global.cpp">
+			</File>
+			<File
+				RelativePath=".\global\global.h">
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\HttpOption.htm"
 			DeploymentContent="TRUE">

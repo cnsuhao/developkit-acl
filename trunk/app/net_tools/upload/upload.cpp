@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#include "global/global.h"
 #include "mime_builder.hpp"
 #include "upload.h"
 
@@ -64,7 +65,8 @@ upload& upload::add_to(const char* s)
 
 upload& upload::set_subject(const char* s)
 {
-	acl::rfc2047::encode(s, (int) strlen(s), &subject_, "utf-8");
+	acl::rfc2047::encode(s, (int) strlen(s), &subject_,
+		"utf-8", 'B', false);
 	return *this;
 }
 
@@ -90,19 +92,20 @@ void upload::rpc_run()
 
 	mime_builder builer;
 	builer.primary_header()
-		.set_from(mail_from_)
-		.set_sender(mail_from_);
+		.set_from(mail_from_.c_str())
+		.set_sender(mail_from_.c_str());
 
 	std::list<acl::string>::const_iterator cit1 = recipients_.begin();
 	for (; cit1 != recipients_.end(); ++cit1)
-			builer.primary_header().add_to((*cit1).c_str());
-	builer.primary_header().set_subject(subject_);
+		builer.primary_header().add_to((*cit1).c_str());
+	builer.primary_header().set_subject(subject_.c_str());
 
 	acl::string body_text("error info");
 	builer.set_body_text(body_text.c_str(), body_text.length());
 	builer.add_file(dbpath_.c_str());
 
-	mailpath_.format("%s/%ld.eml", acl_process_path(), time(NULL));
+	mailpath_.format("%s/%ld.eml", global::get_instance().get_path(),
+		time(NULL));
 	if (builer.save_as(mailpath_.c_str()) == false)
 	{
 		logger_error("build email(%s) error(%s)",
@@ -112,7 +115,7 @@ void upload::rpc_run()
 	}
 	//////////////////////////////////////////////////////////////////////////
 	// 远程连接 SMTP 服务器，将本地创建的邮件发送出去
-	SMTP_CLIENT* conn = smtp_open(smtp_addr_, connect_timeout_,
+	SMTP_CLIENT* conn = smtp_open(smtp_addr_.c_str(), connect_timeout_,
 		rw_timeout_, 1024);
 	if (conn == NULL)
 	{
@@ -128,22 +131,25 @@ void upload::rpc_run()
 	else if (smtp_greet(conn, "localhost", 1) != 0)
 	{
 		logger_error("send EHLO error(%d:%s) to server %s",
-			conn->smtp_code, conn->buf, smtp_addr_);
+			conn->smtp_code, conn->buf, smtp_addr_.c_str());
 		smtp_close(conn);
 		return;
 	}
-	else if (smtp_auth(conn, auth_account_, auth_passwd_) != 0)
+	else if (smtp_auth(conn, auth_account_.c_str(),
+		auth_passwd_.c_str()) != 0)
 	{
 		logger_error("smtp auth error(%d:%s) from server(%s), "
 			"account: %s, passwd: %s", conn->smtp_code, conn->buf,
-			smtp_addr_, auth_account_, auth_passwd_);
+			smtp_addr_.c_str(), auth_account_.c_str(),
+			auth_passwd_.c_str());
 		smtp_close(conn);
 		return;
 	}
-	else if (smtp_mail(conn, mail_from_) != 0)
+	else if (smtp_mail(conn, mail_from_.c_str()) != 0)
 	{
 		logger_error("smtp MAIL FROM error(%d:%s), from: %s, server: %s",
-			mail_from_, conn->smtp_code, conn->buf, smtp_addr_);
+			mail_from_.c_str(), conn->smtp_code,
+			conn->buf, smtp_addr_.c_str());
 		smtp_close(conn);
 		return;
 	}
@@ -151,10 +157,11 @@ void upload::rpc_run()
 	std::list<acl::string>::const_iterator cit = recipients_.begin();
 	for (; cit != recipients_.end(); ++cit)
 	{
-		if (smtp_rcpt(conn, *cit) != 0)
+		if (smtp_rcpt(conn, (*cit).c_str()) != 0)
 		{
 			logger_error("smtp RCPT TO error(%d:%s), to: %s, server: %s",
-				*cit, conn->smtp_code, conn->buf, smtp_addr_);
+				conn->smtp_code, conn->buf, (*cit).c_str(),
+				smtp_addr_.c_str());
 			smtp_close(conn);
 			return;
 		}
@@ -163,22 +170,14 @@ void upload::rpc_run()
 	if (smtp_data(conn) != 0)
 	{
 		logger_error("smtp DATA to server %s error(%d:%s)",
-			smtp_addr_, conn->smtp_code, conn->buf);
+			smtp_addr_.c_str(), conn->smtp_code, conn->buf);
 		smtp_close(conn);
 		return;
 	}
 
 	// 发送邮件内容
-	acl::ifstream in;
-	if (in.open_read(mailpath_.c_str()) == false)
-	{
-		logger_error("open email file(%s) error(%d:%s)",
-			mailpath_.c_str(), conn->smtp_code, conn->buf);
-		smtp_close(conn);
-		return;
-	}
 
-	if (smtp_send_file(conn, mailpath_.c_str()) <= 0)
+	if (smtp_send_file(conn, mailpath_.c_str()) != 0)
 	{
 		logger_error("send email(%s) error(%d:%s)",
 			mailpath_.c_str(), conn->smtp_code, conn->buf);

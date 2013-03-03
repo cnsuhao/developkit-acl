@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#include "global/global.h"
 #include "ping.h"
 #include "ping_store.h"
 
@@ -20,7 +21,7 @@ ping_store::~ping_store()
 
 void ping_store::rpc_onover()
 {
-	logger("store domain lookup results OK!");
+	logger("store ping results OK!");
 	callback_->enable_ping(dbpath_.empty() ? NULL : dbpath_.c_str());
 	delete this;
 }
@@ -56,8 +57,9 @@ const char* CREATE_PING_STATUS_TBL =
 
 void ping_store::rpc_run()
 {
-	const char* path = acl_getcwd();
-	dbpath_.format("%s/ping_store_%ld.db", acl_process_path(), time(NULL));
+	const char* path = global::get_instance().get_path();
+	dbpath_.format("%s/ping_store_%ld.db", path, time(NULL));
+
 	acl::db_sqlite db(dbpath_.c_str());
 	if (db.open() == false)
 		logger_error("open db: %s failed", dbpath_.c_str());

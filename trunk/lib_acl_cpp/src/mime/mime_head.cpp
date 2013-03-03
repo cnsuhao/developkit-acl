@@ -354,11 +354,11 @@ namespace acl {
 		out.format_append("Date: %s\r\n", buf);
 
 		if (m_from)
-			out.format_append("From: %s\r\n", m_from);
+			out.format_append("From: %s\r\n", m_from->c_str());
 		if (m_replyto)
-			out.format_append("Reply-To: %s\r\n", m_replyto);
+			out.format_append("Reply-To: %s\r\n", m_replyto->c_str());
 		if (m_returnpath)
-			out.format_append("Return-Path: %s\r\n", m_returnpath);
+			out.format_append("Return-Path: %s\r\n", m_returnpath->c_str());
 		if (m_tos)
 			append_recipients(out, "To", *m_tos);
 		if (m_ccs)
@@ -366,7 +366,7 @@ namespace acl {
 		if (m_bccs)
 			append_recipients(out, "Bcc", *m_bccs);
 		if (m_subject)
-			out.format_append("Subject: %s\r\n", m_subject);
+			out.format_append("Subject: %s\r\n", m_subject->c_str());
 		out.append("MIME-Version: 1.0\r\n");
 		out.format_append("Content-Type: %s/%s", get_ctype(), get_stype());
 		if (m_boundary)
