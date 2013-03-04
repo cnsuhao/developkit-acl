@@ -7,9 +7,10 @@
 #define IDS_ABOUTBOX                    101
 #define IDD_NET_TOOLS_DIALOG            102
 #define IDP_SOCKETS_INIT_FAILED         103
-#define IDR_HTML_HTTPOPTION             104
 #define IDR_MAINFRAME                   128
 #define IDD_OPTION                      131
+#define IDR_RT_MANIFEST1                139
+#define IDR_241                         1
 #define IDC_PING                        1000
 #define IDC_NSLOOKUP                    1001
 #define IDC_IP_FILE_PATH                1002
@@ -41,9 +42,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        132
+#define _APS_NEXT_RESOURCE_VALUE        141
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         1019
-#define _APS_NEXT_SYMED_VALUE           105
+#define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif
