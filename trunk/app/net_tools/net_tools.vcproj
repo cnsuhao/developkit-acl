@@ -203,6 +203,9 @@ copy ..\..\lib\win32\sqlite3.dll $(OutDir)\ /Y
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}">
 			<File
+				RelativePath=".\res\bin242.bin">
+			</File>
+			<File
 				RelativePath=".\res\net_tools.ico">
 			</File>
 			<File
@@ -210,6 +213,9 @@ copy ..\..\lib\win32\sqlite3.dll $(OutDir)\ /Y
 			</File>
 			<File
 				RelativePath=".\res\net_tools.rc2">
+			</File>
+			<File
+				RelativePath=".\res\rt_manif.bin">
 			</File>
 		</Filter>
 		<Filter
@@ -303,11 +309,7 @@ copy ..\..\lib\win32\sqlite3.dll $(OutDir)\ /Y
 			</File>
 		</Filter>
 		<File
-			RelativePath=".\HttpOption.htm"
-			DeploymentContent="TRUE">
-		</File>
-		<File
-			RelativePath=".\res\net_tools.manifest">
+			RelativePath=".\net_tools.manifest">
 		</File>
 		<File
 			RelativePath=".\ReadMe.txt">
