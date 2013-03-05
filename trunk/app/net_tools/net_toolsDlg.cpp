@@ -7,8 +7,12 @@
 #include "dns/nslookup.h"
 #include "upload/upload.h"
 #include "rpc/rpc_manager.h"
+#include "ui/TrayIcon.h"
 #include "NetOption.h"
+#include "net_store.h"
+#include "util.h"
 #include "net_toolsDlg.h"
+#include ".\net_toolsdlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -69,6 +73,8 @@ Cnet_toolsDlg::Cnet_toolsDlg(CWnd* pParent /*=NULL*/)
 	, m_smtpUser("shuxin.zheng@net263.com")
 	, m_smtpPass("zsxNihao123")
 	, m_recipients("shuxin.zheng@net263.com")
+	, m_trayIcon(IDR_MENU_ICON)
+	, m_bShutdown(FALSE)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -106,6 +112,12 @@ BEGIN_MESSAGE_MAP(Cnet_toolsDlg, CDialog)
 	ON_BN_CLICKED(IDC_OPEN_DOS, OnBnClickedOpenDos)
 	ON_BN_CLICKED(IDC_OPTION, OnBnClickedOption)
 	ON_BN_CLICKED(IDC_TESTALL, OnBnClickedTestall)
+	ON_COMMAND(ID_OPEN_MAIN, OnOpenMain)
+	ON_COMMAND(ID_QUIT, OnQuit)
+	ON_WM_CLOSE()
+	ON_WM_NCPAINT()
+	ON_MESSAGE(WM_MY_TRAY_NOTIFICATION, OnTrayNotification)
+	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
 
@@ -152,6 +164,19 @@ BOOL Cnet_toolsDlg::OnInitDialog()
 	m_wndMeterBar.SetText("就绪", 0, 0);
 	m_wndMeterBar.SetText("", 1, 0);
 	m_wndMeterBar.SetText("", 2, 0);
+
+	// 取得本机的DNS服务器
+	std::vector<acl::string> dns_list;
+	if (util::get_dns(dns_list) > 0)
+	{
+		m_dnsIp = dns_list[0];
+		UpdateData(FALSE);
+	}
+
+	// 从数据库中读取配置项
+	net_store* ns = new net_store(m_smtpAddr, m_pop3Addr, m_smtpUser,
+		m_smtpPass, m_recipients, this);
+	rpc_manager::get_instance().fork(ns);
 
 	DisableAll();
 
@@ -210,6 +235,25 @@ void Cnet_toolsDlg::OnPaint()
 HCURSOR Cnet_toolsDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
+}
+
+void Cnet_toolsDlg::load_db_callback(const char* smtp_addr,
+	const char* pop3_addr, const char* user,
+	const char* pass, const char* recipients, bool store)
+{
+	if (smtp_addr && *smtp_addr)
+		m_smtpAddr = smtp_addr;
+	if (pop3_addr && *pop3_addr)
+		m_pop3Addr = pop3_addr;
+	if (user && *user)
+		m_smtpUser = user;
+	if (pass && *pass)
+		m_smtpPass = pass;
+	if (recipients && *recipients)
+		m_recipients = recipients;
+
+	if (store == false)
+		UpdateData(FALSE);
 }
 
 void Cnet_toolsDlg::OnBnClickedLoadIp()
@@ -421,10 +465,19 @@ void Cnet_toolsDlg::OnBnClickedOpenDos()
 	}
 }
 
-void Cnet_toolsDlg::upload_report()
+void Cnet_toolsDlg::upload_report(const char* msg, size_t total, size_t curr)
 {
+	if (total > 0)
+	{
+		int  nStept;
 
+		nStept = (int) ((curr * 100) / total);
+		m_wndMeterBar.GetProgressCtrl().SetPos(nStept);
+	}
+
+	m_wndMeterBar.SetText(msg, 1, 0);
 }
+
 void Cnet_toolsDlg::OnBnClickedOption()
 {
 	// TODO: 在此添加控件通知处理程序代码
@@ -443,10 +496,74 @@ void Cnet_toolsDlg::OnBnClickedOption()
 		m_smtpUser = option.GetUserAccount();
 		m_smtpPass = option.GetUserPasswd();
 		m_recipients = option.GetRecipients();
+		net_store* ns = new net_store(m_smtpAddr.GetString(),
+			m_pop3Addr.GetString(), m_smtpUser.GetString(),
+			m_smtpPass.GetString(), m_recipients.GetString(),
+			this, true);
+		rpc_manager::get_instance().fork(ns);
 	}
 }
 
 void Cnet_toolsDlg::OnBnClickedTestall()
 {
 	// TODO: 在此添加控件通知处理程序代码
+}
+
+void Cnet_toolsDlg::OnOpenMain()
+{
+	// TODO: 在此添加命令处理程序代码
+	ShowWindow(SW_NORMAL);
+}
+
+void Cnet_toolsDlg::OnQuit()
+{
+	// TODO: 在此添加命令处理程序代码
+	m_bShutdown = TRUE;
+	SendMessage(WM_CLOSE);
+}
+
+void Cnet_toolsDlg::OnClose()
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+
+	//__super::OnClose();
+	if (m_bShutdown) {
+		CDialog::OnClose();
+	} else {
+		ShowWindow(SW_HIDE);
+	}
+}
+
+void Cnet_toolsDlg::OnNcPaint()
+{
+	// TODO: 在此处添加消息处理程序代码
+	// 不为绘图消息调用 __super::OnNcPaint()
+	//static int i = 2;
+	//if(i > 0)
+	//{
+	//	i --;
+	//	ShowWindow(SW_HIDE);
+	//} else
+	//{
+		CDialog::OnNcPaint();
+	//}
+}
+
+int Cnet_toolsDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	if (__super::OnCreate(lpCreateStruct) == -1)
+		return -1;
+
+	// TODO:  在此添加您专用的创建代码
+
+	m_trayIcon.SetNotificationWnd(this, WM_MY_TRAY_NOTIFICATION);
+	m_trayIcon.SetIcon(IDI_ICON_MIN);
+
+	return 0;
+}
+
+afx_msg LRESULT Cnet_toolsDlg::OnTrayNotification(WPARAM uID, LPARAM lEvent)
+{
+	// let tray icon do default stuff
+	return m_trayIcon.OnTrayNotification(uID, lEvent);
 }

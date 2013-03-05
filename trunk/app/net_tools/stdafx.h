@@ -39,10 +39,6 @@
 #ifndef _AFX_NO_AFXCMN_SUPPORT
 #include <afxcmn.h>			// Windows 公共控件的 MFC 支持
 #endif // _AFX_NO_AFXCMN_SUPPORT
-#include <afxtempl.h>
-#include <afxdlgs.h>
-#include <atlbase.h>
-#include <atlwin.h>
 
 #include <afxsock.h>		// MFC 套接字扩展
 
@@ -53,3 +49,5 @@
 #include <afxdhtml.h>
 
 //#include "WndResizer.h"
+
+#define WM_MY_TRAY_NOTIFICATION WM_USER + 1

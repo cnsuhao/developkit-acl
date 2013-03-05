@@ -3,15 +3,18 @@
 
 #pragma once
 #include "ui/MeterBar.h"
+#include "ui/TrayIcon.h"
 #include "ping/ping.h"
 #include "upload/upload.h"
 #include "dns/nslookup.h"
+#include "net_store.h"
 
 // Cnet_toolsDlg 对话框
 class Cnet_toolsDlg : public CDialog
 	, public ping_callback
 	, public nslookup_callback
 	, public upload_callback
+	, public net_store_callback
 {
 // 构造
 public:
@@ -28,6 +31,8 @@ public:
 protected:
 	HICON m_hIcon;
 	CMeterBar m_wndMeterBar;
+	CTrayIcon m_trayIcon;
+	BOOL m_bShutdown;
 
 	// 生成的消息映射函数
 	virtual BOOL OnInitDialog();
@@ -72,12 +77,24 @@ protected:
 	void DisableAll();
 	virtual void ping_report(size_t total, size_t curr, size_t nerror);
 	virtual void nslookup_report(size_t total, size_t curr);
-	virtual void upload_report();
+	virtual void upload_report(const char* msg, size_t total, size_t curr);
+	virtual void load_db_callback(const char* smtp_addr,
+		const char* pop3_addr,
+		const char* user, const char* pass,
+		const char* recipients, bool store);
 
 public:
 	virtual void enable_ping(const char* dbpath);
 	virtual void enable_nslookup(const char* dbpath);
+
+public:
 	afx_msg void OnBnClickedOpenDos();
 	afx_msg void OnBnClickedOption();
 	afx_msg void OnBnClickedTestall();
+	afx_msg void OnOpenMain();
+	afx_msg void OnQuit();
+	afx_msg void OnClose();
+	afx_msg void OnNcPaint();
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg LRESULT OnTrayNotification(WPARAM uID, LPARAM lEvent);
 };

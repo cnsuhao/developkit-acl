@@ -29,7 +29,7 @@ void ping_store::rpc_onover()
 //////////////////////////////////////////////////////////////////////////
 // 子线程运行过程
 
-const char* CREATE_HOST_STATUS_TBL =
+static const char* CREATE_HOST_STATUS_TBL =
 "create table host_status_tbl\r\n"
 "(\r\n"
 "ip varchar(32) not null default '',\r\n"

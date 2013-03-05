@@ -3,6 +3,12 @@
 #include "mime_builder.hpp"
 #include "upload.h"
 
+upload::upload()
+: callback_(NULL)
+{
+
+}
+
 upload& upload::set_callback(upload_callback* c)
 {
 	callback_ = c;
@@ -65,22 +71,28 @@ upload& upload::add_to(const char* s)
 
 upload& upload::set_subject(const char* s)
 {
-	acl::charset_conv conv;
 	acl::string buf;
-	if (conv.convert("gbk", "utf-8", s, strlen(s), &buf) == false)
-		logger_error("convert from gbk to utf-8 failed");
-	else
-	{
-		acl::string buf2;
-		conv.convert("utf-8", "gbk", buf.c_str(),
-			(int) buf.length(), &buf2);
-		printf(">>>buf: %s, buf2: %s\r\n", buf.c_str(), buf2.c_str());
-	}
-	//buf = s;
-	acl::rfc2047::encode(s, (int) buf.length(), &subject_,
-		"gbk", 'B', false);
+	//acl::charset_conv conv;
+	//if (conv.convert("gbk", "utf-8", s, strlen(s), &buf) == false)
+	//	logger_error("convert from gbk to utf-8 failed");
+	//else
+	//{
+	//	acl::string buf2;
+	//	conv.convert("utf-8", "gbk", buf.c_str(),
+	//		(int) buf.length(), &buf2);
+	//	printf(">>>buf: %s, buf2: %s\r\n", buf.c_str(), buf2.c_str());
+	//}
+	buf = s;
+	acl::rfc2047::encode(s, (int) buf.length(), &subject_, "gbk", 'B', false);
 	return *this;
 }
+
+struct UP_CTX
+{
+	acl::string msg;
+	size_t total;
+	size_t curr;
+};
 
 //////////////////////////////////////////////////////////////////////////
 // 主线程中运行
@@ -92,7 +104,10 @@ void upload::rpc_onover()
 
 void upload::rpc_wakeup(void* ctx)
 {
+	UP_CTX* up = (UP_CTX*) ctx;
 
+	callback_->upload_report(up->msg.c_str(), up->total, up->curr);
+	delete up;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -125,8 +140,23 @@ void upload::rpc_run()
 		mailpath_.clear();
 		return;
 	}
+
+	acl::ifstream in;
+	if (in.open_read(mailpath_.c_str()) == false)
+	{
+		logger_error("open %s error %s", mailpath_.c_str(),
+			acl::last_serror());
+		mailpath_.clear();
+		return;
+	}
 	//////////////////////////////////////////////////////////////////////////
 	// 远程连接 SMTP 服务器，将本地创建的邮件发送出去
+	UP_CTX* up = new UP_CTX;
+	up->curr = 0;
+	up->total = (size_t) in.fsize();
+	up->msg.format("连接 SMTP 服务器 ...");
+	rpc_signal(up);
+
 	SMTP_CLIENT* conn = smtp_open(smtp_addr_.c_str(), connect_timeout_,
 		rw_timeout_, 1024);
 	if (conn == NULL)
@@ -134,7 +164,14 @@ void upload::rpc_run()
 		logger_error("connect smtp server(%s) error", smtp_addr_);
 		return;
 	}
-	else if (smtp_get_banner(conn) != 0)
+
+	up = new UP_CTX;
+	up->curr = 0;
+	up->total = (size_t) in.fsize();
+	up->msg.format("接收 SMTP 服务器欢迎信息 ...");
+	rpc_signal(up);
+
+	if (smtp_get_banner(conn) != 0)
 	{
 		logger_error("get smtpd banner error");
 		smtp_close(conn);
@@ -147,7 +184,14 @@ void upload::rpc_run()
 		smtp_close(conn);
 		return;
 	}
-	else if (smtp_auth(conn, auth_account_.c_str(),
+
+	up = new UP_CTX;
+	up->curr = 0;
+	up->total = (size_t) in.fsize();
+	up->msg.format("认证用户身份 ...");
+	rpc_signal(up);
+
+	if (smtp_auth(conn, auth_account_.c_str(),
 		auth_passwd_.c_str()) != 0)
 	{
 		logger_error("smtp auth error(%d:%s) from server(%s), "
@@ -157,7 +201,14 @@ void upload::rpc_run()
 		smtp_close(conn);
 		return;
 	}
-	else if (smtp_mail(conn, mail_from_.c_str()) != 0)
+
+	up = new UP_CTX;
+	up->curr = 0;
+	up->total = (size_t) in.fsize();
+	up->msg.format("发送邮件信封 ...");
+	rpc_signal(up);
+
+	if (smtp_mail(conn, mail_from_.c_str()) != 0)
 	{
 		logger_error("smtp MAIL FROM error(%d:%s), from: %s, server: %s",
 			mail_from_.c_str(), conn->smtp_code,
@@ -189,12 +240,27 @@ void upload::rpc_run()
 
 	// 发送邮件内容
 
-	if (smtp_send_file(conn, mailpath_.c_str()) != 0)
+	char buf[8192];
+	int  ret;
+	int  n = 0;
+	while (!in.eof())
 	{
-		logger_error("send email(%s) error(%d:%s)",
-			mailpath_.c_str(), conn->smtp_code, conn->buf);
-		smtp_close(conn);
-		return;
+		ret = in.read(buf, sizeof(buf), false);
+		if (ret == -1)
+			break;
+		if (acl_vstream_writen(conn->conn, buf, ret) == ACL_VSTREAM_EOF)
+		{
+			logger_error("smtp send data to server %s error(%d:%s)",
+				smtp_addr_.c_str(), conn->smtp_code, conn->buf);
+			smtp_close(conn);
+			return;
+		}
+		n += ret;
+		up = new UP_CTX;
+		up->curr = n;
+		up->total = (size_t) in.fsize();
+		up->msg.format("发送邮件中(%d/%d 字节) ...", up->curr, up->total);
+		rpc_signal(up);
 	}
 
 	/* 发送 \r\n.\r\n 表示邮件数据发送完毕 */
@@ -204,4 +270,10 @@ void upload::rpc_run()
 			conn->buf, conn->smtp_code);
 		smtp_close(conn);
 	}
+
+	up = new UP_CTX;
+	up->curr = (size_t) in.fsize();
+	up->total = (size_t) in.fsize();
+	up->msg.format("发送邮件 (%d/%d 字节) 成功！", up->curr, up->total);
+	rpc_signal(up);
 }
