@@ -30,7 +30,7 @@ void dns_store::rpc_onover()
 //////////////////////////////////////////////////////////////////////////
 // 子线程过程
 
-const char* CREATE_TBL =
+static const char* CREATE_TBL =
 "create table dns_tbl\r\n"
 "(\r\n"
 "domain varchar(128) not null,\r\n"

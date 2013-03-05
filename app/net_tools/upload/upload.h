@@ -8,7 +8,7 @@ public:
 	upload_callback() {}
 	virtual ~upload_callback() {}
 
-	virtual void upload_report() = 0;
+	virtual void upload_report(const char* msg, size_t total, size_t curr) = 0;
 protected:
 private:
 };
@@ -18,7 +18,7 @@ private:
 class upload : public acl::rpc_request
 {
 public:
-	upload() {}
+	upload();
 	upload& set_callback(upload_callback*);
 	upload& set_dbpath(const char*);
 	upload& set_server(const char*);

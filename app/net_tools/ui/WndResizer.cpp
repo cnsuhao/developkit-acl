@@ -11,6 +11,11 @@ This disclaimer should not be removed and should exist in any reproduction of th
 */
 
 #include "StdAfx.h"
+#include <afxtempl.h>
+#include <afxdlgs.h>
+#include <atlbase.h>
+#include <atlwin.h>
+
 #include "WndResizer.h"
 
 

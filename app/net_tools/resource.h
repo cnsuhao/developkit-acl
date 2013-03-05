@@ -2,6 +2,8 @@
 // Microsoft Visual C++ generated include file.
 // Used by net_tools.rc
 //
+#define IDR_241                         1
+#define IDR_MENU_ICON                   4
 #define IDM_ABOUTBOX                    0x0010
 #define IDD_ABOUTBOX                    100
 #define IDS_ABOUTBOX                    101
@@ -10,7 +12,8 @@
 #define IDR_MAINFRAME                   128
 #define IDD_OPTION                      131
 #define IDR_RT_MANIFEST1                139
-#define IDR_241                         1
+#define IDI_ICON1                       142
+#define IDI_ICON_MIN                    142
 #define IDC_PING                        1000
 #define IDC_NSLOOKUP                    1001
 #define IDC_IP_FILE_PATH                1002
@@ -37,13 +40,15 @@
 #define IDC_USER_ACCOUNT                1021
 #define IDC_USER_PASSWD                 1022
 #define IDC_RECIPIENTS                  1023
+#define ID_OPEN_MAIN                    32773
+#define ID_QUIT                         32774
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        141
-#define _APS_NEXT_COMMAND_VALUE         32771
+#define _APS_NEXT_RESOURCE_VALUE        143
+#define _APS_NEXT_COMMAND_VALUE         32775
 #define _APS_NEXT_CONTROL_VALUE         1019
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
