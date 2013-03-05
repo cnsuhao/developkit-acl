@@ -17,8 +17,8 @@ upload& upload::set_dbpath(const char* p)
 
 upload::~upload()
 {
-	if (!mailpath_.empty())
-		_unlink(mailpath_.c_str());
+	//if (!mailpath_.empty())
+	//	_unlink(mailpath_.c_str());
 }
 
 upload& upload::set_server(const char* addr)
@@ -65,8 +65,20 @@ upload& upload::add_to(const char* s)
 
 upload& upload::set_subject(const char* s)
 {
-	acl::rfc2047::encode(s, (int) strlen(s), &subject_,
-		"utf-8", 'B', false);
+	acl::charset_conv conv;
+	acl::string buf;
+	if (conv.convert("gbk", "utf-8", s, strlen(s), &buf) == false)
+		logger_error("convert from gbk to utf-8 failed");
+	else
+	{
+		acl::string buf2;
+		conv.convert("utf-8", "gbk", buf.c_str(),
+			(int) buf.length(), &buf2);
+		printf(">>>buf: %s, buf2: %s\r\n", buf.c_str(), buf2.c_str());
+	}
+	//buf = s;
+	acl::rfc2047::encode(s, (int) buf.length(), &subject_,
+		"gbk", 'B', false);
 	return *this;
 }
 
