@@ -89,7 +89,7 @@ copy ..\..\lib\win32\sqlite3.dll $(OutDir)\ /Y
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\lib_acl_cpp\include;..\..\lib_acl\include;..\..\lib_protocol\include;.;.\ui"
+				AdditionalIncludeDirectories="..\..\lib_acl_cpp\include;..\..\lib_acl\include;..\..\lib_protocol\include;.;..\..\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;VC2003"
 				MinimalRebuild="FALSE"
 				RuntimeLibrary="2"
@@ -103,9 +103,10 @@ copy ..\..\lib\win32\sqlite3.dll $(OutDir)\ /Y
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="uxtheme.lib polarssl.lib"
+				AdditionalDependencies="uxtheme.lib polarssl.lib Iphlpapi.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\lib\win32;..\..\dist\lib\win32"
+				IgnoreDefaultLibraryNames="libc"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				OptimizeReferences="2"
