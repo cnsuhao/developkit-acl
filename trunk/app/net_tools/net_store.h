@@ -8,8 +8,8 @@ public:
 	net_store_callback() {}
 	virtual ~net_store_callback() {}
 
-	virtual void load_db_callback(const char* smtp_addr,
-		const char* pop3_addr,
+	virtual void load_db_callback(const char* smtp_addr, int smtp_port,
+		const char* pop3_addr, int pop3_port,
 		const char* user, const char* pass,
 		const char* recipients, bool store) = 0;
 private:
@@ -19,7 +19,8 @@ private:
 class net_store : public acl::rpc_request
 {
 public:
-	net_store(const char* smtp_addr, const char* pop3_addr,
+	net_store(const char* smtp_addr, int smtp_port,
+		const char* pop3_addr, int pop3_port,
 		const char* user, const char* pass,
 		const char* recipients, net_store_callback* callback,
 		bool store = false);
@@ -33,7 +34,9 @@ protected:
 	virtual void rpc_onover();
 private:
 	acl::string smtp_addr_;
+	int smtp_port_;
 	acl::string pop3_addr_;
+	int pop3_port_;
 	acl::string user_;
 	acl::string pass_;
 	acl::string recipients_;

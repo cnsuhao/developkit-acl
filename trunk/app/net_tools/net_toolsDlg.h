@@ -65,12 +65,14 @@ private:
 
 	// 上传日志相关参数
 	CString m_smtpAddr;
+	int m_smtpPort;
 	int m_connecTimeout;
 	int m_rwTimeout;
 	CString m_smtpUser;
 	CString m_smtpPass;
 
 	CString m_pop3Addr;
+	int m_pop3Port;
 	CString m_recipients;
 
 protected:
@@ -78,8 +80,8 @@ protected:
 	virtual void ping_report(size_t total, size_t curr, size_t nerror);
 	virtual void nslookup_report(size_t total, size_t curr);
 	virtual void upload_report(const char* msg, size_t total, size_t curr);
-	virtual void load_db_callback(const char* smtp_addr,
-		const char* pop3_addr,
+	virtual void load_db_callback(const char* smtp_addr, int smtp_port,
+		const char* pop3_addr, int pop3_port,
 		const char* user, const char* pass,
 		const char* recipients, bool store);
 
@@ -97,4 +99,6 @@ public:
 	afx_msg void OnNcPaint();
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg LRESULT OnTrayNotification(WPARAM uID, LPARAM lEvent);
+	afx_msg void OnBnClickedLoadFile();
+	afx_msg void OnBnClickedSendMail();
 };

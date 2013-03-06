@@ -37,9 +37,13 @@
 #define IDC_SMTP_PORT                   1018
 #define IDC_POP3_ADDR                   1019
 #define IDC_POP3_PORT                   1020
+#define IDC_MAIL_CHECK                  1020
+#define IDC_SEND_MAIL                   1020
 #define IDC_USER_ACCOUNT                1021
 #define IDC_USER_PASSWD                 1022
 #define IDC_RECIPIENTS                  1023
+#define IDC_LOAD_FILE                   1023
+#define IDC_FILE                        1025
 #define ID_OPEN_MAIN                    32773
 #define ID_QUIT                         32774
 
@@ -49,7 +53,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        143
 #define _APS_NEXT_COMMAND_VALUE         32775
-#define _APS_NEXT_CONTROL_VALUE         1019
+#define _APS_NEXT_CONTROL_VALUE         1026
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

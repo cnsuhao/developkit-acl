@@ -232,6 +232,13 @@ bool mime_builder::add_attach(acl::ofstream& fp, const char* filepath)
 		}
 		outbuf.clear();
 	}
+	coder.encode_finish(&outbuf);
+	if (outbuf.empty() == false && fp.write(outbuf) == -1)
+	{
+		logger_error("write to %s error %s", fp.file_path(),
+			acl::last_serror());
+		return false;
+	}
 
 	if (fp.format("\r\n") == -1)
 	{

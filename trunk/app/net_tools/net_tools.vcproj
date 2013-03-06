@@ -182,9 +182,6 @@ copy ..\..\lib\win32\sqlite3.dll $(OutDir)\ /Y
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
 			</File>
-			<File
-				RelativePath=".\util.cpp">
-			</File>
 		</Filter>
 		<Filter
 			Name="Í·ÎÄ¼þ"
@@ -207,9 +204,6 @@ copy ..\..\lib\win32\sqlite3.dll $(OutDir)\ /Y
 			</File>
 			<File
 				RelativePath=".\stdafx.h">
-			</File>
-			<File
-				RelativePath=".\util.h">
 			</File>
 		</Filter>
 		<Filter
@@ -335,6 +329,12 @@ copy ..\..\lib\win32\sqlite3.dll $(OutDir)\ /Y
 			</File>
 			<File
 				RelativePath=".\global\passwd_crypt.h">
+			</File>
+			<File
+				RelativePath=".\global\util.cpp">
+			</File>
+			<File
+				RelativePath=".\global\util.h">
 			</File>
 		</Filter>
 		<File

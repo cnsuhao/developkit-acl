@@ -10,7 +10,7 @@
 #include "ui/TrayIcon.h"
 #include "NetOption.h"
 #include "net_store.h"
-#include "util.h"
+#include "global/util.h"
 #include "net_toolsDlg.h"
 #include ".\net_toolsdlg.h"
 
@@ -66,10 +66,12 @@ Cnet_toolsDlg::Cnet_toolsDlg(CWnd* pParent /*=NULL*/)
 	, m_lookupTimeout(10)
 	, m_pktSize(64)
 	, m_dnsBusy(FALSE)
-	, m_smtpAddr("smtpcom.263xmail.com:25")
+	, m_smtpAddr("smtpcom.263xmail.com")
+	, m_smtpPort(25)
 	, m_connecTimeout(60)
 	, m_rwTimeout(60)
-	, m_pop3Addr("popcom.263xmail.com:110")
+	, m_pop3Addr("popcom.263xmail.com")
+	, m_pop3Port(110)
 	, m_smtpUser("shuxin.zheng@net263.com")
 	, m_smtpPass("zsxNihao123")
 	, m_recipients("shuxin.zheng@net263.com")
@@ -118,6 +120,8 @@ BEGIN_MESSAGE_MAP(Cnet_toolsDlg, CDialog)
 	ON_WM_NCPAINT()
 	ON_MESSAGE(WM_MY_TRAY_NOTIFICATION, OnTrayNotification)
 	ON_WM_CREATE()
+	ON_BN_CLICKED(IDC_LOAD_FILE, OnBnClickedLoadFile)
+	ON_BN_CLICKED(IDC_SEND_MAIL, OnBnClickedSendMail)
 END_MESSAGE_MAP()
 
 
@@ -155,7 +159,7 @@ BOOL Cnet_toolsDlg::OnInitDialog()
 	// TODO: 在此添加额外的初始化代码
 
 	// 添加状态栏
-	int aWidths[3] = {50, 300, -1};
+	int aWidths[3] = {50, 350, -1};
 	m_wndMeterBar.SetParts(3, aWidths);
 
 	m_wndMeterBar.Create(WS_CHILD | WS_VISIBLE | WS_BORDER
@@ -174,8 +178,8 @@ BOOL Cnet_toolsDlg::OnInitDialog()
 	}
 
 	// 从数据库中读取配置项
-	net_store* ns = new net_store(m_smtpAddr, m_pop3Addr, m_smtpUser,
-		m_smtpPass, m_recipients, this);
+	net_store* ns = new net_store(m_smtpAddr, m_smtpPort, m_pop3Addr, m_pop3Port,
+		m_smtpUser, m_smtpPass, m_recipients, this);
 	rpc_manager::get_instance().fork(ns);
 
 	DisableAll();
@@ -237,14 +241,16 @@ HCURSOR Cnet_toolsDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-void Cnet_toolsDlg::load_db_callback(const char* smtp_addr,
-	const char* pop3_addr, const char* user,
+void Cnet_toolsDlg::load_db_callback(const char* smtp_addr, int smtp_port,
+	const char* pop3_addr, int pop3_port, const char* user,
 	const char* pass, const char* recipients, bool store)
 {
 	if (smtp_addr && *smtp_addr)
 		m_smtpAddr = smtp_addr;
+	m_smtpPort = smtp_port;
 	if (pop3_addr && *pop3_addr)
 		m_pop3Addr = pop3_addr;
+	m_pop3Port = pop3_port;
 	if (user && *user)
 		m_smtpUser = user;
 	if (pass && *pass)
@@ -332,8 +338,8 @@ void Cnet_toolsDlg::enable_ping(const char* dbpath)
 		// 将数据库文件发邮件至服务器
 		upload* up = new upload();
 		(*up).set_callback(this)
-			.set_dbpath(dbpath)
-			.set_server(m_smtpAddr.GetString())
+			.add_file(dbpath)
+			.set_server(m_smtpAddr.GetString(), m_smtpPort)
 			.set_conn_timeout(m_connecTimeout)
 			.set_rw_timeout(m_rwTimeout)
 			.set_account(m_smtpUser.GetString())
@@ -422,8 +428,8 @@ void Cnet_toolsDlg::enable_nslookup(const char* dbpath)
 		// 将数据库文件发邮件至服务器
 		upload* up = new upload();
 		(*up).set_callback(this)
-			.set_dbpath(dbpath)
-			.set_server(m_smtpAddr.GetString())
+			.add_file(dbpath)
+			.set_server(m_smtpAddr.GetString(), m_smtpPort)
 			.set_conn_timeout(m_connecTimeout)
 			.set_rw_timeout(m_rwTimeout)
 			.set_account(m_smtpUser.GetString())
@@ -484,8 +490,8 @@ void Cnet_toolsDlg::OnBnClickedOption()
 	//CNetOption option(m_smtpAddr, m_pop3Addr, m_smtpUser, m_smtpPass,
 	//	m_recipients);
 	CNetOption option;
-	option.SetSmtpAddr(m_smtpAddr)
-		.SetPop3Addr(m_pop3Addr)
+	option.SetSmtpAddr(m_smtpAddr, m_smtpPort)
+		.SetPop3Addr(m_pop3Addr, m_pop3Port)
 		.SetUserAccount(m_smtpUser)
 		.SetUserPasswd(m_smtpPass)
 		.SetRecipients(m_recipients);
@@ -493,13 +499,15 @@ void Cnet_toolsDlg::OnBnClickedOption()
 	{
 		m_smtpAddr = option.GetSmtpAddr();
 		m_pop3Addr = option.GetPop3Addr();
+		m_smtpPort = option.getSmtpPort();
+		m_pop3Port = option.getPop3Port();
 		m_smtpUser = option.GetUserAccount();
 		m_smtpPass = option.GetUserPasswd();
 		m_recipients = option.GetRecipients();
-		net_store* ns = new net_store(m_smtpAddr.GetString(),
-			m_pop3Addr.GetString(), m_smtpUser.GetString(),
-			m_smtpPass.GetString(), m_recipients.GetString(),
-			this, true);
+		net_store* ns = new net_store(m_smtpAddr.GetString(), m_smtpPort,
+			m_pop3Addr.GetString(), m_pop3Port,
+			m_smtpUser.GetString(), m_smtpPass.GetString(),
+			m_recipients.GetString(), this, true);
 		rpc_manager::get_instance().fork(ns);
 	}
 }
@@ -566,4 +574,49 @@ afx_msg LRESULT Cnet_toolsDlg::OnTrayNotification(WPARAM uID, LPARAM lEvent)
 {
 	// let tray icon do default stuff
 	return m_trayIcon.OnTrayNotification(uID, lEvent);
+}
+
+void Cnet_toolsDlg::OnBnClickedLoadFile()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	CFileDialog file(TRUE,"文件","",OFN_HIDEREADONLY,"FILE(*.*)|*.*||",NULL);
+	if(file.DoModal()==IDOK)
+	{
+		CString pathname;
+
+		pathname=file.GetPathName();
+		GetDlgItem(IDC_FILE)->SetWindowText(pathname);
+		GetDlgItem(IDC_SEND_MAIL)->EnableWindow(TRUE);
+	}
+}
+
+void Cnet_toolsDlg::OnBnClickedSendMail()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	// 发邮件至服务器
+
+	UpdateData();
+
+	GetDlgItem(IDC_SEND_MAIL)->EnableWindow(FALSE);
+
+	CString filePath;
+	GetDlgItem(IDC_FILE)->GetWindowText(filePath);
+	if (filePath.IsEmpty())
+	{
+		MessageBox("请先选择附件！");
+		return;
+	}
+
+	upload* up = new upload();
+	(*up).set_callback(this)
+		.add_file(filePath.GetString())
+		.set_server(m_smtpAddr, m_smtpPort)
+		.set_conn_timeout(m_connecTimeout)
+		.set_rw_timeout(m_rwTimeout)
+		.set_account(m_smtpUser.GetString())
+		.set_passwd(m_smtpPass.GetString())
+		.set_from(m_smtpUser.GetString())
+		.set_subject("邮件发送过程测试!")
+		.add_to(m_recipients.GetString());
+	rpc_manager::get_instance().fork(up);
 }
