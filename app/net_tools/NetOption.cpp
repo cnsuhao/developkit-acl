@@ -26,16 +26,13 @@ CNetOption::~CNetOption()
 void CNetOption::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	DDX_Text(pDX, IDC_SMTP_ADDR, m_smtpDomain);
+	DDX_Text(pDX, IDC_SMTP_ADDR, m_smtpAddr);
 	DDX_Text(pDX, IDC_SMTP_PORT, m_smtpPort);
-	DDX_Text(pDX, IDC_POP3_ADDR, m_pop3Domain);
+	DDX_Text(pDX, IDC_POP3_ADDR, m_pop3Addr);
 	DDX_Text(pDX, IDC_POP3_PORT, m_pop3Port);
 	DDX_Text(pDX, IDC_USER_ACCOUNT, m_userAccount);
 	DDX_Text(pDX, IDC_USER_PASSWD, m_userPasswd);
 	DDX_Text(pDX, IDC_RECIPIENTS, m_recipients);
-
-	m_smtpAddr.Format("%s:%d", m_smtpDomain, m_smtpPort);
-	m_pop3Addr.Format("%s:%d", m_pop3Domain, m_pop3Port);
 }
 
 BOOL CNetOption::OnInitDialog()
@@ -47,15 +44,17 @@ BEGIN_MESSAGE_MAP(CNetOption, CDialog)
 	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
-CNetOption& CNetOption::SetSmtpAddr(const char* s)
+CNetOption& CNetOption::SetSmtpAddr(const char* addr, int port)
 {
-	ExactAddr(s, m_smtpDomain, m_smtpPort);
+	m_smtpAddr = addr;
+	m_smtpPort = port;
 	return *this;
 }
 
-CNetOption& CNetOption::SetPop3Addr(const char* s)
+CNetOption& CNetOption::SetPop3Addr(const char* addr, int port)
 {
-	ExactAddr(s, m_pop3Domain, m_pop3Port);
+	m_pop3Addr = addr;
+	m_pop3Port = port;
 	return *this;
 }
 
@@ -75,23 +74,6 @@ CNetOption& CNetOption::SetRecipients(const char* s)
 {
 	m_recipients = s;
 	return *this;
-}
-
-void CNetOption::ExactAddr(const char* s, CString& domain, int& port)
-{
-	char  buf[256];
-	_snprintf(buf, sizeof(buf), "%s", s);
-	char* p = strchr(buf, ':');
-	if (p == NULL || *(p + 1) == 0 || p == s)
-	{
-		CString msg;
-		msg.Format("无效的地址格式：%s", s);
-		MessageBox(msg);
-		return;
-	}
-	*p++ = 0;
-	domain = buf;
-	port = atoi(p);
 }
 
 void CNetOption::OnPaint()

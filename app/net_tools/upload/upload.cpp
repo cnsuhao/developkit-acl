@@ -1,10 +1,16 @@
 #include "StdAfx.h"
 #include "global/global.h"
+#include "global/util.h"
 #include "mime_builder.hpp"
 #include "upload.h"
 
 upload::upload()
 : callback_(NULL)
+, nslookup_cost_(0)
+, connect_cost_(0)
+, auth_cost_(0)
+, mail_enclope_cost_(0)
+, mail_data_cost_(0)
 {
 
 }
@@ -15,9 +21,9 @@ upload& upload::set_callback(upload_callback* c)
 	return *this;
 }
 
-upload& upload::set_dbpath(const char* p)
+upload& upload::add_file(const char* p)
 {
-	dbpath_ = p;
+	files_.push_back(p);
 	return *this;
 }
 
@@ -27,9 +33,10 @@ upload::~upload()
 	//	_unlink(mailpath_.c_str());
 }
 
-upload& upload::set_server(const char* addr)
+upload& upload::set_server(const char* addr, int port)
 {
 	smtp_addr_ = addr;
+	smtp_port_ = port;
 	return *this;
 }
 
@@ -106,7 +113,7 @@ void upload::rpc_wakeup(void* ctx)
 {
 	UP_CTX* up = (UP_CTX*) ctx;
 
-	callback_->upload_report(up->msg.c_str(), up->total, up->curr);
+	callback_->upload_report(up->msg.c_str(), up->total, up->curr/*, this*/);
 	delete up;
 }
 
@@ -127,9 +134,11 @@ void upload::rpc_run()
 		builer.primary_header().add_to((*cit1).c_str());
 	builer.primary_header().set_subject(subject_.c_str());
 
-	acl::string body_text("error info");
+	acl::string body_text("test");
 	builer.set_body_text(body_text.c_str(), body_text.length());
-	builer.add_file(dbpath_.c_str());
+	std::vector<acl::string>::const_iterator cit = files_.begin();
+	for (; cit != files_.end(); ++cit)
+		builer.add_file((*cit).c_str());
 
 	mailpath_.format("%s/%ld.eml", global::get_instance().get_path(),
 		time(NULL));
@@ -157,18 +166,28 @@ void upload::rpc_run()
 	up->msg.format("连接 SMTP 服务器 ...");
 	rpc_signal(up);
 
-	SMTP_CLIENT* conn = smtp_open(smtp_addr_.c_str(), connect_timeout_,
+	acl::string smtp_addr;
+	smtp_addr.format("%s:%d", smtp_addr_.c_str(), smtp_port_);
+
+	struct timeval begin, last, now;
+	gettimeofday(&begin, NULL);
+	gettimeofday(&last, NULL);
+
+	SMTP_CLIENT* conn = smtp_open(smtp_addr.c_str(), connect_timeout_,
 		rw_timeout_, 1024);
 	if (conn == NULL)
 	{
-		logger_error("connect smtp server(%s) error", smtp_addr_);
+		logger_error("connect smtp server(%s) error", smtp_addr);
 		return;
 	}
+
+	gettimeofday(&now, NULL);
+	connect_cost_ = util::stamp_sub(&now, &last);
 
 	up = new UP_CTX;
 	up->curr = 0;
 	up->total = (size_t) in.fsize();
-	up->msg.format("接收 SMTP 服务器欢迎信息 ...");
+	up->msg.format("接收 SMTP 服务器欢迎信息(连接耗时 %.2f 毫秒) ...", connect_cost_);
 	rpc_signal(up);
 
 	if (smtp_get_banner(conn) != 0)
@@ -180,7 +199,7 @@ void upload::rpc_run()
 	else if (smtp_greet(conn, "localhost", 1) != 0)
 	{
 		logger_error("send EHLO error(%d:%s) to server %s",
-			conn->smtp_code, conn->buf, smtp_addr_.c_str());
+			conn->smtp_code, conn->buf, smtp_addr.c_str());
 		smtp_close(conn);
 		return;
 	}
@@ -191,49 +210,56 @@ void upload::rpc_run()
 	up->msg.format("认证用户身份 ...");
 	rpc_signal(up);
 
+	gettimeofday(&last, NULL);
+
 	if (smtp_auth(conn, auth_account_.c_str(),
 		auth_passwd_.c_str()) != 0)
 	{
 		logger_error("smtp auth error(%d:%s) from server(%s), "
 			"account: %s, passwd: %s", conn->smtp_code, conn->buf,
-			smtp_addr_.c_str(), auth_account_.c_str(),
+			smtp_addr.c_str(), auth_account_.c_str(),
 			auth_passwd_.c_str());
 		smtp_close(conn);
 		return;
 	}
 
+	gettimeofday(&now, NULL);
+	auth_cost_ = util::stamp_sub(&now, &last);
+
 	up = new UP_CTX;
 	up->curr = 0;
 	up->total = (size_t) in.fsize();
-	up->msg.format("发送邮件信封 ...");
+	up->msg.format("发送邮件信封(认证耗时 %.2f 毫秒) ...", auth_cost_);
 	rpc_signal(up);
 
 	if (smtp_mail(conn, mail_from_.c_str()) != 0)
 	{
 		logger_error("smtp MAIL FROM error(%d:%s), from: %s, server: %s",
 			mail_from_.c_str(), conn->smtp_code,
-			conn->buf, smtp_addr_.c_str());
+			conn->buf, smtp_addr.c_str());
 		smtp_close(conn);
 		return;
 	}
 
-	std::list<acl::string>::const_iterator cit = recipients_.begin();
-	for (; cit != recipients_.end(); ++cit)
+	std::list<acl::string>::const_iterator cit2 = recipients_.begin();
+	for (; cit2 != recipients_.end(); ++cit2)
 	{
-		if (smtp_rcpt(conn, (*cit).c_str()) != 0)
+		if (smtp_rcpt(conn, (*cit2).c_str()) != 0)
 		{
 			logger_error("smtp RCPT TO error(%d:%s), to: %s, server: %s",
-				conn->smtp_code, conn->buf, (*cit).c_str(),
-				smtp_addr_.c_str());
+				conn->smtp_code, conn->buf, (*cit2).c_str(),
+				smtp_addr.c_str());
 			smtp_close(conn);
 			return;
 		}
 	}
 
+	gettimeofday(&last, NULL);
+
 	if (smtp_data(conn) != 0)
 	{
 		logger_error("smtp DATA to server %s error(%d:%s)",
-			smtp_addr_.c_str(), conn->smtp_code, conn->buf);
+			smtp_addr.c_str(), conn->smtp_code, conn->buf);
 		smtp_close(conn);
 		return;
 	}
@@ -243,6 +269,7 @@ void upload::rpc_run()
 	char buf[8192];
 	int  ret;
 	int  n = 0;
+
 	while (!in.eof())
 	{
 		ret = in.read(buf, sizeof(buf), false);
@@ -251,7 +278,7 @@ void upload::rpc_run()
 		if (acl_vstream_writen(conn->conn, buf, ret) == ACL_VSTREAM_EOF)
 		{
 			logger_error("smtp send data to server %s error(%d:%s)",
-				smtp_addr_.c_str(), conn->smtp_code, conn->buf);
+				smtp_addr.c_str(), conn->smtp_code, conn->buf);
 			smtp_close(conn);
 			return;
 		}
@@ -271,9 +298,14 @@ void upload::rpc_run()
 		smtp_close(conn);
 	}
 
+	gettimeofday(&now, NULL);
+	mail_data_cost_ = util::stamp_sub(&now, &last);
+	total_cost_ = util::stamp_sub(&now, &begin);
+
 	up = new UP_CTX;
 	up->curr = (size_t) in.fsize();
 	up->total = (size_t) in.fsize();
-	up->msg.format("发送邮件 (%d/%d 字节) 成功！", up->curr, up->total);
+	up->msg.format("发送邮件成功！(%d/%d 字节, 耗时 %.2f 毫秒)",
+		up->curr, up->total, total_cost_);
 	rpc_signal(up);
 }

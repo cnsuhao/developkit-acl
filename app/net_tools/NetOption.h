@@ -23,9 +23,9 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 public:
-	CNetOption& SetUserPasswd(const char* s);
-	CNetOption& SetSmtpAddr(const char* s);
-	CNetOption& SetPop3Addr(const char* s);
+	CNetOption& SetUserPasswd(const char* addr);
+	CNetOption& SetSmtpAddr(const char* addr, int port);
+	CNetOption& SetPop3Addr(const char* addr, int port);
 	CNetOption& SetUserAccount(const char* s);
 	CNetOption& SetRecipients(const char* s);
 
@@ -33,9 +33,17 @@ public:
 	{
 		return m_smtpAddr;
 	}
+	int getSmtpPort() const
+	{
+		return m_smtpPort;
+	}
 	const CString& GetPop3Addr() const
 	{
 		return m_pop3Addr;
+	}
+	int getPop3Port() const
+	{
+		return m_pop3Port;
 	}
 	const CString& GetUserAccount() const
 	{
@@ -51,16 +59,12 @@ public:
 	}
 //private:
 	CString m_smtpAddr;
-	CString m_smtpDomain;
 	int   m_smtpPort;
 	CString m_pop3Addr;
-	CString m_pop3Domain;
 	int   m_pop3Port;
 	CString m_userAccount;
 	CString m_userPasswd;
 	CString m_recipients;
-
-	void ExactAddr(const char* s, CString& domain, int& port);
 public:
 	afx_msg void OnPaint();
 };

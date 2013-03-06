@@ -20,8 +20,8 @@ class upload : public acl::rpc_request
 public:
 	upload();
 	upload& set_callback(upload_callback*);
-	upload& set_dbpath(const char*);
-	upload& set_server(const char*);
+	upload& add_file(const char*);
+	upload& set_server(const char*, int);
 	upload& set_conn_timeout(int);
 	upload& set_rw_timeout(int);
 	upload& set_from(const char*);
@@ -42,8 +42,9 @@ protected:
 	virtual void rpc_wakeup(void* ctx);
 private:
 	upload_callback* callback_;
-	acl::string dbpath_;
+	std::vector<acl::string> files_;
 	acl::string smtp_addr_;
+	int smtp_port_;
 	int connect_timeout_;
 	int rw_timeout_;
 	acl::string auth_account_;
@@ -52,5 +53,12 @@ private:
 	std::list<acl::string> recipients_;
 	acl::string subject_;
 	acl::string mailpath_;
+private:
+	double nslookup_cost_;
+	double connect_cost_;
+	double mail_enclope_cost_;
+	double auth_cost_;
+	double mail_data_cost_;
+	double total_cost_;
 };
 //////////////////////////////////////////////////////////////////////////

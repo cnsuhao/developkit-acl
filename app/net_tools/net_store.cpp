@@ -3,12 +3,15 @@
 #include "global/passwd_crypt.h"
 #include "net_store.h"
 
-net_store::net_store(const char* smtp_addr, const char* pop3_addr,
+net_store::net_store(const char* smtp_addr, int smtp_port,
+	const char* pop3_addr, int pop3_port,
 	const char* user, const char* pass,
 	const char* recipients, net_store_callback* callback,
 	bool store /* = false */)
 	: smtp_addr_(smtp_addr)
+	, smtp_port_(smtp_port)
 	, pop3_addr_(pop3_addr)
+	, pop3_port_(pop3_port)
 	, user_(user)
 	, pass_(pass)
 	, recipients_(recipients)
@@ -28,8 +31,8 @@ net_store::~net_store()
 
 void net_store::rpc_onover()
 {
-	callback_->load_db_callback(smtp_addr_.c_str(),
-		pop3_addr_.c_str(), user_.c_str(),
+	callback_->load_db_callback(smtp_addr_.c_str(), smtp_port_,
+		pop3_addr_.c_str(), pop3_port_, user_.c_str(),
 		pass_.c_str(), recipients_.c_str(), store_);
 
 	delete this;
@@ -42,7 +45,9 @@ static const char* CREATE_TBL =
 "create table mail_tbl\r\n"
 "(\r\n"
 "smtp_addr varchar(128) not null,\r\n"
+"smtp_port int not null,\r\n"
 "pop3_addr varchar(128) not null default '',\r\n"
+"pop3_port int not null,\r\n"
 "user varchar(128) not null default '',\r\n"
 "pass varchar(128) not null default '',\r\n"
 "recipients varchar(256) not null default '',\r\n"
@@ -102,9 +107,10 @@ void net_store::save_db(acl::db_handle& db)
 
 	// ÃÜÂëÐèÒª¼ÓÃÜ´æ´¢
 	char* pass_crypted = passwd_crypt(pass.c_str());
-	sql.format("insert into mail_tbl(smtp_addr, pop3_addr, "
-		"user, pass, recipients) values('%s', '%s', '%s', '%s', '%s')",
-		smtp_addr.c_str(), pop3_addr.c_str(),
+	sql.format("insert into mail_tbl(smtp_addr, smtp_port, pop3_addr,"
+		" pop3_port, user, pass, recipients)"
+		" values('%s', %d, '%s', %d, '%s', '%s', '%s')",
+		smtp_addr.c_str(), smtp_port_, pop3_addr.c_str(), pop3_port_,
 		user.c_str(), pass_crypted, recipients.c_str());
 	acl_myfree(pass_crypted);
 
@@ -118,7 +124,7 @@ void net_store::save_db(acl::db_handle& db)
 void net_store::load_db(acl::db_handle& db)
 {
 	acl::string sql;
-	sql.format("select smtp_addr, pop3_addr, user, pass, recipients from mail_tbl");
+	sql.format("select smtp_addr, smtp_port, pop3_addr, pop3_port, user, pass, recipients from mail_tbl");
 	if (db.sql_select(sql.c_str()) == false)
 	{
 		logger_error("sql(%s) error", sql.c_str());
@@ -131,12 +137,24 @@ void net_store::load_db(acl::db_handle& db)
 	const char* ptr = (*first_row)["smtp_addr"];
 	if (ptr)
 		smtp_addr_ = ptr;
+	ptr = (*first_row)["smtp_port"];
+
+	int n;
+	if (ptr && (n = atoi(ptr)) > 0)
+		smtp_port_ = n;
+
 	ptr = (*first_row)["pop3_addr"];
 	if (ptr)
 		pop3_addr_ = ptr;
+
+	ptr = (*first_row)["pop3_port"];
+	if (ptr && (n = atoi(ptr)) > 0)
+		pop3_port_ = n;
+
 	ptr = (*first_row)["user"];
 	if (ptr)
 		user_ = ptr;
+
 	ptr = (*first_row)["pass"];
 	if (ptr)
 	{
@@ -148,6 +166,7 @@ void net_store::load_db(acl::db_handle& db)
 			acl_myfree(pass_plain);
 		}
 	}
+
 	ptr = (*first_row)["recipients"];
 	if (ptr)
 		recipients_ = ptr;
