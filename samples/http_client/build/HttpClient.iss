@@ -21,14 +21,16 @@ Compression=lzma
 SolidCompression=yes
 
 [Languages]
-Name: "chinese"; MessagesFile: "compiler:Languages\Chinese.isl"
+Name: "chinese"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "..\Release\http_client.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\ReleaseDll\http_client.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\ReleaseDll\lib_protocol.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\ReleaseDll\lib_acl.dll"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
