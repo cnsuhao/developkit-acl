@@ -8,8 +8,8 @@ public:
 	nslookup_callback() {}
 	virtual ~nslookup_callback() {}
 
-	virtual void enable_nslookup(const char* dbpath) = 0;
 	virtual void nslookup_report(size_t total, size_t curr) = 0;
+	virtual void nslookup_finish(const char* dbpath) = 0;
 protected:
 private:
 };

@@ -2,13 +2,26 @@
 
 //////////////////////////////////////////////////////////////////////////
 
+struct SMTP_METER
+{
+	double nslookup_cost;
+	double connect_cost;
+	double envelope_cost;
+	double auth_cost;
+	double data_cost;
+	double total_cost;
+};
+
+//////////////////////////////////////////////////////////////////////////
+
 class upload_callback
 {
 public:
 	upload_callback() {}
 	virtual ~upload_callback() {}
 
-	virtual void upload_report(const char* msg, size_t total, size_t curr) = 0;
+	virtual void upload_report(const char* msg, size_t total,
+		size_t curr, const SMTP_METER& meter) = 0;
 protected:
 private:
 };
@@ -54,11 +67,6 @@ private:
 	acl::string subject_;
 	acl::string mailpath_;
 private:
-	double nslookup_cost_;
-	double connect_cost_;
-	double mail_enclope_cost_;
-	double auth_cost_;
-	double mail_data_cost_;
-	double total_cost_;
+	SMTP_METER meter_;
 };
 //////////////////////////////////////////////////////////////////////////
