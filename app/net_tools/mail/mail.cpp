@@ -1,87 +1,83 @@
 #include "StdAfx.h"
+#include "upload/mime_builder.hpp"
 #include "global/global.h"
 #include "global/util.h"
-#include "mime_builder.hpp"
-#include "upload.h"
+#include "rpc/rpc_manager.h"
+#include "mail_store.h"
+#include "mail.h"
 
-upload::upload()
-: callback_(NULL)
+mail::mail()
 {
 	memset(&meter_, 0, sizeof(meter_));
+	meter_.smtp_nslookup_elapsed = 0.00;
+	meter_.smtp_connect_elapsed = 0.00;
+	meter_.smtp_envelope_eplased = 0.00;
+	meter_.smtp_auth_elapsed = 0.00;
+	meter_.smtp_data_elapsed = 0.00;
+	meter_.smtp_total_elapsed = 0.00;
+	meter_.pop3_nslookup_elapsed = 0.00;
+	meter_.pop3_connect_elapsed = 0.00;
+	meter_.smtp_auth_elapsed = 0.00;
+	meter_.pop3_list_elapsed = 0.00;
+	meter_.pop3_total_elapsed = 0.00;
 }
 
-upload::~upload()
+mail::~mail()
 {
-	//if (!mailpath_.empty())
-	//	_unlink(mailpath_.c_str());
+
 }
 
-upload& upload::set_callback(upload_callback* c)
+mail& mail::set_callback(mail_callback* c)
 {
 	callback_ = c;
 	return *this;
 }
 
-upload& upload::add_file(const char* p)
-{
-	files_.push_back(p);
-	return *this;
-}
-
-upload& upload::set_server(const char* addr, int port)
-{
-	smtp_addr_ = addr;
-	smtp_port_ = port;
-	return *this;
-}
-
-upload& upload::set_conn_timeout(int n)
+mail& mail::set_conn_timeout(int n)
 {
 	connect_timeout_ = n;
 	return *this;
 }
 
-upload& upload::set_rw_timeout(int n)
+mail& mail::set_rw_timeout(int n)
 {
 	rw_timeout_ = n;
 	return *this;
 }
 
-upload& upload::set_account(const char* s)
+mail& mail::set_account(const char* s)
 {
 	auth_account_ = s;
 	return *this;
 }
 
-upload& upload::set_passwd(const char* s)
+mail& mail::set_passwd(const char* s)
 {
 	auth_passwd_ = s;
 	return *this;
 }
 
-upload& upload::set_from(const char* s)
+mail& mail::set_smtp(const char* addr, int port)
+{
+	smtp_addr_ = addr;
+	smtp_port_ = port;
+	smtp_ip_ = addr;
+	return *this;
+}
+
+mail& mail::set_from(const char* s)
 {
 	mail_from_ = s;
 	return *this;
 }
 
-upload& upload::add_to(const char* s)
+mail& mail::add_to(const char* s)
 {
-	ACL_ARGV* tokens = acl_argv_split(s, ";, \t\r\n");
-	ACL_ITER iter;
-
-	acl_foreach(iter, tokens)
-	{
-		const char* to = (const char*) iter.data;
-		recipients_.push_back(to);
-	}
-
-	acl_argv_free(tokens);
-
+	recipients_.push_back(s);
 	return *this;
 }
 
-upload& upload::set_subject(const char* s)
+mail& mail::set_subject(const char* s)
 {
 	acl::string buf;
 	//acl::charset_conv conv;
@@ -99,6 +95,20 @@ upload& upload::set_subject(const char* s)
 	return *this;
 }
 
+mail& mail::add_file(const char* p)
+{
+	files_.push_back(p);
+	return *this;
+}
+
+mail& mail::set_pop3(const char* addr, int port)
+{
+	pop3_addr_ = addr;
+	pop3_port_ = port;
+	pop3_ip_ = addr;
+	return *this;
+}
+
 //////////////////////////////////////////////////////////////////////////
 
 struct UP_CTX
@@ -111,16 +121,19 @@ struct UP_CTX
 //////////////////////////////////////////////////////////////////////////
 // 主线程中运行
 
-void upload::rpc_onover()
+void mail::rpc_onover()
 {
+	mail_store* s = new mail_store(auth_account_.c_str(), smtp_ip_.c_str(),
+		pop3_ip_.c_str(), meter_, *callback_);
+	rpc_manager::get_instance().fork(s);
 	delete this;
 }
 
-void upload::rpc_wakeup(void* ctx)
+void mail::rpc_wakeup(void* ctx)
 {
 	UP_CTX* up = (UP_CTX*) ctx;
 
-	callback_->upload_report(up->msg.c_str(),
+	callback_->mail_report(up->msg.c_str(),
 		up->total, up->curr, meter_);
 	delete up;
 }
@@ -128,7 +141,13 @@ void upload::rpc_wakeup(void* ctx)
 //////////////////////////////////////////////////////////////////////////
 // 子线程中运行
 
-void upload::rpc_run()
+void mail::rpc_run()
+{
+	test_smtp();
+	test_pop3();
+}
+
+void mail::test_smtp()
 {
 	// 创建邮件内容
 
@@ -168,35 +187,71 @@ void upload::rpc_run()
 	}
 	//////////////////////////////////////////////////////////////////////////
 	// 远程连接 SMTP 服务器，将本地创建的邮件发送出去
-	UP_CTX* up = new UP_CTX;
-	up->curr = 0;
-	up->total = (size_t) in.fsize();
-	up->msg.format("连接 SMTP 服务器 ...");
-	rpc_signal(up);
-
-	acl::string smtp_addr;
-	smtp_addr.format("%s:%d", smtp_addr_.c_str(), smtp_port_);
+	UP_CTX* up;
 
 	struct timeval begin, last, now;
 	gettimeofday(&begin, NULL);
 	gettimeofday(&last, NULL);
+
+	ACL_DNS_DB* dns_db = acl_gethostbyname(smtp_addr_.c_str(), NULL);
+	if (dns_db == NULL)
+	{
+		logger_error("gethostbyname(%s) failed", smtp_addr_.c_str());
+		up = new UP_CTX;
+		up->curr = 0;
+		up->total = (size_t) in.fsize();
+		up->msg.format("解析 smtp 域名：%s 失败！", smtp_addr_.c_str());
+		rpc_signal(up);
+		return;
+	}
+	const char* first_ip = acl_netdb_index_ip(dns_db, 0);
+	if (first_ip == NULL || *first_ip == 0)
+	{
+		up = new UP_CTX;
+		up->curr = 0;
+		up->total = (size_t) in.fsize();
+		up->msg.format("解析 smtp 域名2：%s 失败！", smtp_addr_.c_str());
+		rpc_signal(up);
+		logger_error("no ip for domain: %s", smtp_addr_.c_str());
+		acl_netdb_free(dns_db);
+		return;
+	}
+	smtp_ip_ = first_ip;
+
+	gettimeofday(&now, NULL);
+	meter_.smtp_nslookup_elapsed = util::stamp_sub(&now, &last);
+
+	acl::string smtp_addr;
+	smtp_addr.format("%s:%d", first_ip, smtp_port_);
+	acl_netdb_free(dns_db);
+
+	up = new UP_CTX;
+	up->curr = 0;
+	up->total = (size_t) in.fsize();
+	up->msg.format("连接 SMTP 服务器 ...");
+	rpc_signal(up);
 
 	SMTP_CLIENT* conn = smtp_open(smtp_addr.c_str(), connect_timeout_,
 		rw_timeout_, 1024);
 	if (conn == NULL)
 	{
 		logger_error("connect smtp server(%s) error", smtp_addr);
+		up = new UP_CTX;
+		up->curr = 0;
+		up->total = (size_t) in.fsize();
+		up->msg.format("连接 smtp 服务器：%s 失败！", smtp_addr.c_str());
+		rpc_signal(up);
 		return;
 	}
 
 	gettimeofday(&now, NULL);
-	meter_.connect_cost = util::stamp_sub(&now, &last);
+	meter_.smtp_connect_elapsed = util::stamp_sub(&now, &last);
 
 	up = new UP_CTX;
 	up->curr = 0;
 	up->total = (size_t) in.fsize();
 	up->msg.format("接收 SMTP 服务器欢迎信息(连接耗时 %.2f 毫秒) ...",
-		meter_.connect_cost);
+		meter_.smtp_connect_elapsed);
 	rpc_signal(up);
 
 	if (smtp_get_banner(conn) != 0)
@@ -233,12 +288,12 @@ void upload::rpc_run()
 	}
 
 	gettimeofday(&now, NULL);
-	meter_.auth_cost = util::stamp_sub(&now, &last);
+	meter_.smtp_auth_elapsed = util::stamp_sub(&now, &last);
 
 	up = new UP_CTX;
 	up->curr = 0;
 	up->total = (size_t) in.fsize();
-	up->msg.format("发送邮件信封(认证耗时 %.2f 毫秒) ...", meter_.auth_cost);
+	up->msg.format("发送邮件信封(认证耗时 %.2f 毫秒) ...", meter_.smtp_auth_elapsed);
 	rpc_signal(up);
 
 	if (smtp_mail(conn, mail_from_.c_str()) != 0)
@@ -273,7 +328,7 @@ void upload::rpc_run()
 		return;
 	}
 	gettimeofday(&now, NULL);
-	meter_.envelope_cost = util::stamp_sub(&now, &last);
+	meter_.smtp_envelope_eplased = util::stamp_sub(&now, &last);
 
 	// 发送邮件内容
 
@@ -310,13 +365,18 @@ void upload::rpc_run()
 	}
 
 	gettimeofday(&now, NULL);
-	meter_.data_cost = util::stamp_sub(&now, &last);
-	meter_.total_cost = util::stamp_sub(&now, &begin);
+	meter_.smtp_data_elapsed = util::stamp_sub(&now, &last);
+	meter_.smtp_total_elapsed = util::stamp_sub(&now, &begin);
 
 	up = new UP_CTX;
 	up->curr = (size_t) in.fsize();
 	up->total = (size_t) in.fsize();
 	up->msg.format("发送邮件成功！(%d/%d 字节, 耗时 %.2f 毫秒)",
-		up->curr, up->total, meter_.total_cost);
+		up->curr, up->total, meter_.smtp_total_elapsed);
 	rpc_signal(up);
+}
+
+void mail::test_pop3()
+{
+
 }

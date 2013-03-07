@@ -224,7 +224,7 @@ bool mime_builder::add_attach(acl::ofstream& fp, const char* filepath)
 		if (ret == -1)
 			break;
 		coder.encode_update(inbuf, ret, &outbuf);
-		if (fp.write(outbuf) == -1)
+		if (!outbuf.empty() && fp.write(outbuf) == -1)
 		{
 			logger_error("write to %s error %s", fp.file_path(),
 				acl::last_serror());

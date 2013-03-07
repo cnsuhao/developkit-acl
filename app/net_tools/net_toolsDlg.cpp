@@ -122,6 +122,10 @@ BEGIN_MESSAGE_MAP(Cnet_toolsDlg, CDialog)
 	ON_WM_CREATE()
 	ON_BN_CLICKED(IDC_LOAD_FILE, OnBnClickedLoadFile)
 	ON_BN_CLICKED(IDC_SEND_MAIL, OnBnClickedSendMail)
+	ON_BN_CLICKED(IDC_RECV_MAIL, OnBnClickedRecvMail)
+	ON_EN_SETFOCUS(IDC_IP_FILE_PATH, OnEnSetfocusIpFilePath)
+	ON_EN_SETFOCUS(IDC_DOMAIN_FILE, OnEnSetfocusDomainFile)
+	ON_EN_SETFOCUS(IDC_FILE, OnEnSetfocusFile)
 END_MESSAGE_MAP()
 
 
@@ -276,6 +280,20 @@ void Cnet_toolsDlg::OnBnClickedLoadIp()
 	}
 }
 
+
+void Cnet_toolsDlg::OnEnSetfocusIpFilePath()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	CString pathname;
+
+	GetDlgItem(IDC_IP_FILE_PATH)->GetWindowText(pathname);
+	if (pathname.IsEmpty())
+	{
+		GetDlgItem(IDC_LOAD_IP)->SetFocus();
+		OnBnClickedLoadIp();
+	}
+}
+
 void Cnet_toolsDlg::OnBnClickedPing()
 {
 	// TODO: 在此添加控件通知处理程序代码
@@ -321,7 +339,7 @@ void Cnet_toolsDlg::ping_report(size_t total, size_t curr, size_t nerror)
 	m_wndMeterBar.SetText(msg, 1, 0);
 }
 
-void Cnet_toolsDlg::enable_ping(const char* dbpath)
+void Cnet_toolsDlg::ping_finish(const char* dbpath)
 {
 	m_pingBusy = FALSE;
 
@@ -362,6 +380,19 @@ void Cnet_toolsDlg::OnBnClickedLoadDomain()
 		pathname=file.GetPathName();
 		GetDlgItem(IDC_DOMAIN_FILE)->SetWindowText(pathname);
 		GetDlgItem(IDC_NSLOOKUP)->EnableWindow(TRUE);
+	}
+}
+
+void Cnet_toolsDlg::OnEnSetfocusDomainFile()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	CString pathname;
+
+	GetDlgItem(IDC_DOMAIN_FILE)->GetWindowText(pathname);
+	if (pathname.IsEmpty())
+	{
+		GetDlgItem(IDC_LOAD_DOMAIN)->SetFocus();
+		OnBnClickedLoadDomain();
 	}
 }
 
@@ -411,7 +442,7 @@ void Cnet_toolsDlg::nslookup_report(size_t total, size_t curr)
 	m_wndMeterBar.SetText(msg, 1, 0);
 }
 
-void Cnet_toolsDlg::enable_nslookup(const char* dbpath)
+void Cnet_toolsDlg::nslookup_finish(const char* dbpath)
 {
 	m_dnsBusy = FALSE;
 
@@ -471,7 +502,8 @@ void Cnet_toolsDlg::OnBnClickedOpenDos()
 	}
 }
 
-void Cnet_toolsDlg::upload_report(const char* msg, size_t total, size_t curr)
+void Cnet_toolsDlg::upload_report(const char* msg, size_t total,
+	size_t curr, const SMTP_METER& meter)
 {
 	if (total > 0)
 	{
@@ -590,6 +622,19 @@ void Cnet_toolsDlg::OnBnClickedLoadFile()
 	}
 }
 
+void Cnet_toolsDlg::OnEnSetfocusFile()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	CString pathname;
+
+	GetDlgItem(IDC_FILE)->GetWindowText(pathname);
+	if (pathname.IsEmpty())
+	{
+		GetDlgItem(IDC_LOAD_FILE)->SetFocus();
+		OnBnClickedLoadFile();
+	}
+}
+
 void Cnet_toolsDlg::OnBnClickedSendMail()
 {
 	// TODO: 在此添加控件通知处理程序代码
@@ -607,10 +652,10 @@ void Cnet_toolsDlg::OnBnClickedSendMail()
 		return;
 	}
 
-	upload* up = new upload();
-	(*up).set_callback(this)
+	mail* m = new mail();
+	(*m).set_callback(this)
 		.add_file(filePath.GetString())
-		.set_server(m_smtpAddr, m_smtpPort)
+		.set_smtp(m_smtpAddr, m_smtpPort)
 		.set_conn_timeout(m_connecTimeout)
 		.set_rw_timeout(m_rwTimeout)
 		.set_account(m_smtpUser.GetString())
@@ -618,5 +663,53 @@ void Cnet_toolsDlg::OnBnClickedSendMail()
 		.set_from(m_smtpUser.GetString())
 		.set_subject("邮件发送过程测试!")
 		.add_to(m_recipients.GetString());
-	rpc_manager::get_instance().fork(up);
+	rpc_manager::get_instance().fork(m);
 }
+
+void Cnet_toolsDlg::OnBnClickedRecvMail()
+{
+	// TODO: 在此添加控件通知处理程序代码
+}
+
+void Cnet_toolsDlg::mail_report(const char* msg, size_t total,
+	size_t curr, const MAIL_METER&)
+{
+	if (total > 0)
+	{
+		int  nStept;
+
+		nStept = (int) ((curr * 100) / total);
+		m_wndMeterBar.GetProgressCtrl().SetPos(nStept);
+	}
+
+	m_wndMeterBar.SetText(msg, 1, 0);
+}
+
+void Cnet_toolsDlg::mail_finish(const char* dbpath)
+{
+	GetDlgItem(IDC_LOAD_FILE)->EnableWindow(TRUE);
+	CString filePath;
+	GetDlgItem(IDC_FILE)->GetWindowText(filePath);
+	if (filePath.IsEmpty())
+		GetDlgItem(IDC_SEND_MAIL)->EnableWindow(FALSE);
+	else
+		GetDlgItem(IDC_SEND_MAIL)->EnableWindow(TRUE);
+
+	if (dbpath && *dbpath)
+	{
+		// 将数据库文件发邮件至服务器
+		upload* up = new upload();
+		(*up).set_callback(this)
+			.add_file(dbpath)
+			.set_server(m_smtpAddr.GetString(), m_smtpPort)
+			.set_conn_timeout(m_connecTimeout)
+			.set_rw_timeout(m_rwTimeout)
+			.set_account(m_smtpUser.GetString())
+			.set_passwd(m_smtpPass.GetString())
+			.set_from(m_smtpUser.GetString())
+			.set_subject("邮件发送结果数据")
+			.add_to(m_recipients.GetString());
+		rpc_manager::get_instance().fork(up);
+	}
+}
+

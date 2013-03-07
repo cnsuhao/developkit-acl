@@ -22,7 +22,7 @@ ping_store::~ping_store()
 void ping_store::rpc_onover()
 {
 	logger("store ping results OK!");
-	callback_->enable_ping(dbpath_.empty() ? NULL : dbpath_.c_str());
+	callback_->ping_finish(dbpath_.empty() ? NULL : dbpath_.c_str());
 	delete this;
 }
 

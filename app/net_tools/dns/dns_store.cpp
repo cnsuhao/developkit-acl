@@ -23,7 +23,7 @@ dns_store::~dns_store()
 void dns_store::rpc_onover()
 {
 	logger("store domain lookup results %s!", ok_ ? "OK" : "Failed");
-	callback_.enable_nslookup(dbpath_.empty() ? NULL : dbpath_.c_str());
+	callback_.nslookup_finish(dbpath_.empty() ? NULL : dbpath_.c_str());
 	delete this;
 }
 
@@ -38,7 +38,7 @@ static const char* CREATE_TBL =
 "ttl integer not null default 0,\r\n"
 "spent integer not null default 0,\r\n"
 "primary key(domain, ip)\r\n"
-")";
+");";
 
 void dns_store::rpc_run()
 {

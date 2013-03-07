@@ -337,6 +337,22 @@ copy ..\..\lib\win32\sqlite3.dll $(OutDir)\ /Y
 				RelativePath=".\global\util.h">
 			</File>
 		</Filter>
+		<Filter
+			Name="mail"
+			Filter="">
+			<File
+				RelativePath=".\mail\mail.cpp">
+			</File>
+			<File
+				RelativePath=".\mail\mail.h">
+			</File>
+			<File
+				RelativePath=".\mail\mail_store.cpp">
+			</File>
+			<File
+				RelativePath=".\mail\mail_store.h">
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\net_tools.manifest">
 		</File>

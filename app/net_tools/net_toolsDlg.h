@@ -7,6 +7,7 @@
 #include "ping/ping.h"
 #include "upload/upload.h"
 #include "dns/nslookup.h"
+#include "mail/mail.h"
 #include "net_store.h"
 
 // Cnet_toolsDlg 对话框
@@ -15,6 +16,7 @@ class Cnet_toolsDlg : public CDialog
 	, public nslookup_callback
 	, public upload_callback
 	, public net_store_callback
+	, public mail_callback
 {
 // 构造
 public:
@@ -78,17 +80,19 @@ private:
 protected:
 	void DisableAll();
 	virtual void ping_report(size_t total, size_t curr, size_t nerror);
+	virtual void ping_finish(const char* dbpath);
 	virtual void nslookup_report(size_t total, size_t curr);
-	virtual void upload_report(const char* msg, size_t total, size_t curr);
+	virtual void nslookup_finish(const char* dbpath);
+	virtual void mail_report(const char* msg, size_t total,
+		size_t curr, const MAIL_METER& meter);
+	virtual void mail_finish(const char* dbpath);
+	virtual void upload_report(const char* msg, size_t total,
+		size_t curr, const SMTP_METER& meter);
+
 	virtual void load_db_callback(const char* smtp_addr, int smtp_port,
 		const char* pop3_addr, int pop3_port,
 		const char* user, const char* pass,
 		const char* recipients, bool store);
-
-public:
-	virtual void enable_ping(const char* dbpath);
-	virtual void enable_nslookup(const char* dbpath);
-
 public:
 	afx_msg void OnBnClickedOpenDos();
 	afx_msg void OnBnClickedOption();
@@ -101,4 +105,8 @@ public:
 	afx_msg LRESULT OnTrayNotification(WPARAM uID, LPARAM lEvent);
 	afx_msg void OnBnClickedLoadFile();
 	afx_msg void OnBnClickedSendMail();
+	afx_msg void OnBnClickedRecvMail();
+	afx_msg void OnEnSetfocusIpFilePath();
+	afx_msg void OnEnSetfocusDomainFile();
+	afx_msg void OnEnSetfocusFile();
 };
