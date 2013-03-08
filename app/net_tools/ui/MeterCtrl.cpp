@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#pragma warning(disable:4312)
 #include ".\Meterctrl.h"
 
 
