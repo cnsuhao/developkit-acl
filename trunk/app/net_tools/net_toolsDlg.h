@@ -8,6 +8,7 @@
 #include "upload/upload.h"
 #include "dns/nslookup.h"
 #include "mail/mail.h"
+#include "test_all.h"
 #include "net_store.h"
 
 // Cnet_toolsDlg 对话框
@@ -17,6 +18,7 @@ class Cnet_toolsDlg : public CDialog
 	, public upload_callback
 	, public net_store_callback
 	, public mail_callback
+	, public test_callback
 {
 // 构造
 public:
@@ -49,12 +51,13 @@ public:
 	afx_msg void OnBnClickedNslookup();
 
 private:
+	FILE* m_dosFp;
+
 	// ping 相关参数
 	UINT m_nPkt;
 	UINT m_delay;
 	UINT m_pingTimeout;
 	UINT m_pktSize;
-	FILE* m_dosFp;
 	BOOL m_pingBusy;
 	CString m_pingDbPath;
 
@@ -72,20 +75,28 @@ private:
 	int m_rwTimeout;
 	CString m_smtpUser;
 	CString m_smtpPass;
+	CString m_recipients;
 
 	CString m_pop3Addr;
 	int m_pop3Port;
-	CString m_recipients;
 
 protected:
 	void DisableAll();
+
 	virtual void ping_report(size_t total, size_t curr, size_t nerror);
 	virtual void ping_finish(const char* dbpath);
+
 	virtual void nslookup_report(size_t total, size_t curr);
 	virtual void nslookup_finish(const char* dbpath);
+
 	virtual void mail_report(const char* msg, size_t total,
 		size_t curr, const MAIL_METER& meter);
 	virtual void mail_finish(const char* dbpath);
+
+	virtual void test_report(const char* msg, unsigned nstep);
+	virtual void test_store(const char* dbpath);
+	virtual void test_finish();
+
 	virtual void upload_report(const char* msg, size_t total,
 		size_t curr, const SMTP_METER& meter);
 
@@ -93,6 +104,8 @@ protected:
 		const char* pop3_addr, int pop3_port,
 		const char* user, const char* pass,
 		const char* recipients, bool store);
+private:
+	std::vector<acl::string> attaches_;
 public:
 	afx_msg void OnBnClickedOpenDos();
 	afx_msg void OnBnClickedOption();

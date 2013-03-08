@@ -182,6 +182,9 @@ copy ..\..\lib\win32\sqlite3.dll $(OutDir)\ /Y
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\test_all.cpp">
+			</File>
 		</Filter>
 		<Filter
 			Name="Í·ÎÄ¼þ"
@@ -204,6 +207,9 @@ copy ..\..\lib\win32\sqlite3.dll $(OutDir)\ /Y
 			</File>
 			<File
 				RelativePath=".\stdafx.h">
+			</File>
+			<File
+				RelativePath=".\test_all.h">
 			</File>
 		</Filter>
 		<Filter

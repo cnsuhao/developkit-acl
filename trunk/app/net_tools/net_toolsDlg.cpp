@@ -544,11 +544,6 @@ void Cnet_toolsDlg::OnBnClickedOption()
 	}
 }
 
-void Cnet_toolsDlg::OnBnClickedTestall()
-{
-	// TODO: 在此添加控件通知处理程序代码
-}
-
 void Cnet_toolsDlg::OnOpenMain()
 {
 	// TODO: 在此添加命令处理程序代码
@@ -713,3 +708,78 @@ void Cnet_toolsDlg::mail_finish(const char* dbpath)
 	}
 }
 
+void Cnet_toolsDlg::OnBnClickedTestall()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	CString ipFile;
+	GetDlgItem(IDC_IP_FILE_PATH)->GetWindowText(ipFile);
+	CString domainFile;
+	GetDlgItem(IDC_DOMAIN_FILE)->GetWindowText(domainFile);
+	CString attach;
+	GetDlgItem(IDC_FILE)->GetWindowText(attach);
+
+	if (ipFile.IsEmpty() || domainFile.IsEmpty() || attach.IsEmpty())
+	{
+		CString msg;
+		msg.Format("请保证非空项：IP 配置文件，域名配置文件，添加附件");
+		MessageBox(msg);
+		return;
+	}
+
+	test_all* test = new test_all(this);
+	(*test).set_ip_file(ipFile.GetString())
+		.set_ping_npkt(m_nPkt)
+		.set_ping_delay(m_delay)
+		.set_ping_timeout(m_pingTimeout)
+		.set_ping_size(m_pktSize)
+		.set_domain_file(domainFile)
+		.set_dns_ip(m_dnsIp.GetString())
+		.set_dns_port(m_dnsPort)
+		.set_dns_timeout(m_lookupTimeout)
+		.set_attach(attach.GetString())
+		.set_smtp_addr(m_smtpAddr.GetString())
+		.set_smtp_port(m_smtpPort)
+		.set_conn_timeout(m_connecTimeout)
+		.set_rw_timeout(m_rwTimeout)
+		.set_mail_user(m_smtpUser.GetString())
+		.set_mail_pass(m_smtpPass.GetString())
+		.set_recipients(m_recipients.GetString());
+	test->start();
+}
+
+void Cnet_toolsDlg::test_report(const char* msg, unsigned nstep)
+{
+	m_wndMeterBar.GetProgressCtrl().SetPos(nstep);
+	m_wndMeterBar.SetText(msg, 1, 0);
+}
+
+void Cnet_toolsDlg::test_store(const char* dbpath)
+{
+	if (dbpath && *dbpath)
+		attaches_.push_back(dbpath);
+}
+
+void Cnet_toolsDlg::test_finish()
+{
+	if (attaches_.empty())
+		return;
+
+	// 将数据库文件发邮件至服务器
+	upload* up = new upload();
+	(*up).set_callback(this)
+		.set_server(m_smtpAddr.GetString(), m_smtpPort)
+		.set_conn_timeout(m_connecTimeout)
+		.set_rw_timeout(m_rwTimeout)
+		.set_account(m_smtpUser.GetString())
+		.set_passwd(m_smtpPass.GetString())
+		.set_from(m_smtpUser.GetString())
+		.set_subject("邮件发送结果数据")
+		.add_to(m_recipients.GetString());
+
+	std::vector<acl::string>::const_iterator cit = attaches_.begin();
+	for (; cit != attaches_.end(); ++cit)
+		(*up).add_file((*cit).c_str());
+	rpc_manager::get_instance().fork(up);
+
+	attaches_.clear();
+}
