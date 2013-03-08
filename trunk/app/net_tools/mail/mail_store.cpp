@@ -61,7 +61,7 @@ static const char* CREATE_TBL =
 void mail_store::rpc_run()
 {
 	const char* path = global::get_instance().get_path();
-	dbpath_.format("%s/mail_store_%ld.db", path, time(NULL));
+	dbpath_.format("%s/mail_store.db", path);
 
 	acl::db_sqlite db(dbpath_.c_str());
 	if (db.open() == false)
