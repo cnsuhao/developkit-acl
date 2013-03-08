@@ -210,6 +210,24 @@ public:
 	virtual const char* dbtype() const = 0;
 
 	/**
+	 * 获得上次数据库操作的出错错误号
+	 * @return {int}
+	 */
+	virtual int get_errno() const
+	{
+		return -1;
+	}
+
+	/**
+	 * 获得上次数据库操作的出错错描述
+	 * @return {const char*}
+	 */
+	virtual const char* get_error() const
+	{
+		return "unkonwn error";
+	}
+
+	/**
 	 * 纯虚接口，子类必须实现此接口用于打开数据库
 	 * @param local_charset {const char*} 本地字符集
 	 * @return {bool} 打开是否成功
