@@ -610,6 +610,16 @@ const char* db_mysql::mysql_client_info() const
 	return NULL;
 }
 
+int db_mysql::get_errno() const
+{
+	return -1;
+}
+
+const char* db_mysql::get_error() const
+{
+	return "mysql not opened yet!";
+}
+
 } // namespace acl
 
 #endif  // HAS_MYSQL
