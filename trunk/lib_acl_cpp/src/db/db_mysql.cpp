@@ -285,6 +285,22 @@ const char* db_mysql::dbtype() const
 	return type;
 }
 
+int db_mysql::get_errno() const
+{
+	if (conn_)
+		return __mysql_errno(conn_);
+	else
+		return -1;
+}
+
+const char* db_mysql::get_error() const
+{
+	if (conn_)
+		return __mysql_error(conn_);
+	else
+		return "mysql not opened yet!";
+}
+
 bool db_mysql::open(const char* local_charset /* = GBK */)
 {
 	if (conn_)

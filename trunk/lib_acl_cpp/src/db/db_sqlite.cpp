@@ -211,6 +211,21 @@ const char* db_sqlite::dbtype() const
 	return type;
 }
 
+int db_sqlite::get_errno() const
+{
+	if (db_)
+		return __sqlite3_errcode(db_);
+	else
+		return -1;
+}
+
+const char* db_sqlite::get_error() const
+{
+	if (db_)
+		return __sqlite3_errmsg(db_);
+	else
+		return "mysql not opened yet!";
+}
 bool db_sqlite::open(const char* local_charset /* = "GBK" */)
 {
 	// 如果数据库已经打开，则直接返回 true

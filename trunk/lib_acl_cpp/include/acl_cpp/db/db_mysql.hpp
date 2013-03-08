@@ -49,6 +49,18 @@ public:
 	virtual const char* dbtype() const;
 
 	/**
+	 * 获得上次数据库操作的出错错误号
+	 * @return {int}
+	 */
+	virtual int get_errno() const;
+
+	/**
+	 * 获得上次数据库操作的出错错描述
+	 * @return {const char*}
+	 */
+	virtual const char* get_error() const;
+
+	/**
 	 * 基类 db_handle 的纯虚接口
 	 * @param local_charset {const char*} 本地字符集
 	 * @return {bool} 打开是否成功
