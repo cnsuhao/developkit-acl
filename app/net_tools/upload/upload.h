@@ -2,7 +2,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-struct SMTP_METER
+struct UPLOAD_METER
 {
 	double nslookup_cost;
 	double connect_cost;
@@ -21,7 +21,7 @@ public:
 	virtual ~upload_callback() {}
 
 	virtual void upload_report(const char* msg, size_t total,
-		size_t curr, const SMTP_METER& meter) = 0;
+		size_t curr, const UPLOAD_METER& meter) = 0;
 protected:
 private:
 };
@@ -67,6 +67,6 @@ private:
 	acl::string subject_;
 	acl::string mailpath_;
 private:
-	SMTP_METER meter_;
+	UPLOAD_METER meter_;
 };
 //////////////////////////////////////////////////////////////////////////

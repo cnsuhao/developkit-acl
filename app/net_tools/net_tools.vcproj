@@ -347,16 +347,16 @@ copy ..\..\lib\win32\sqlite3.dll $(OutDir)\ /Y
 			Name="mail"
 			Filter="">
 			<File
-				RelativePath=".\mail\mail.cpp">
-			</File>
-			<File
-				RelativePath=".\mail\mail.h">
-			</File>
-			<File
 				RelativePath=".\mail\mail_store.cpp">
 			</File>
 			<File
 				RelativePath=".\mail\mail_store.h">
+			</File>
+			<File
+				RelativePath=".\mail\smtp_client.cpp">
+			</File>
+			<File
+				RelativePath=".\mail\smtp_client.h">
 			</File>
 		</Filter>
 		<File

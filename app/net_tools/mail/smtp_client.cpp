@@ -4,9 +4,9 @@
 #include "global/util.h"
 #include "rpc/rpc_manager.h"
 #include "mail_store.h"
-#include "mail.h"
+#include "smtp_client.h"
 
-mail::mail()
+smtp_client::smtp_client()
 {
 	memset(&meter_, 0, sizeof(meter_));
 	meter_.smtp_nslookup_elapsed = 0.00;
@@ -22,42 +22,42 @@ mail::mail()
 	meter_.pop3_total_elapsed = 0.00;
 }
 
-mail::~mail()
+smtp_client::~smtp_client()
 {
 
 }
 
-mail& mail::set_callback(mail_callback* c)
+smtp_client& smtp_client::set_callback(smtp_callback* c)
 {
 	callback_ = c;
 	return *this;
 }
 
-mail& mail::set_conn_timeout(int n)
+smtp_client& smtp_client::set_conn_timeout(int n)
 {
 	connect_timeout_ = n;
 	return *this;
 }
 
-mail& mail::set_rw_timeout(int n)
+smtp_client& smtp_client::set_rw_timeout(int n)
 {
 	rw_timeout_ = n;
 	return *this;
 }
 
-mail& mail::set_account(const char* s)
+smtp_client& smtp_client::set_account(const char* s)
 {
 	auth_account_ = s;
 	return *this;
 }
 
-mail& mail::set_passwd(const char* s)
+smtp_client& smtp_client::set_passwd(const char* s)
 {
 	auth_passwd_ = s;
 	return *this;
 }
 
-mail& mail::set_smtp(const char* addr, int port)
+smtp_client& smtp_client::set_smtp(const char* addr, int port)
 {
 	smtp_addr_ = addr;
 	smtp_port_ = port;
@@ -65,19 +65,19 @@ mail& mail::set_smtp(const char* addr, int port)
 	return *this;
 }
 
-mail& mail::set_from(const char* s)
+smtp_client& smtp_client::set_from(const char* s)
 {
 	mail_from_ = s;
 	return *this;
 }
 
-mail& mail::add_to(const char* s)
+smtp_client& smtp_client::add_to(const char* s)
 {
 	recipients_.push_back(s);
 	return *this;
 }
 
-mail& mail::set_subject(const char* s)
+smtp_client& smtp_client::set_subject(const char* s)
 {
 	acl::string buf;
 	//acl::charset_conv conv;
@@ -95,13 +95,13 @@ mail& mail::set_subject(const char* s)
 	return *this;
 }
 
-mail& mail::add_file(const char* p)
+smtp_client& smtp_client::add_file(const char* p)
 {
 	files_.push_back(p);
 	return *this;
 }
 
-mail& mail::set_pop3(const char* addr, int port)
+smtp_client& smtp_client::set_pop3(const char* addr, int port)
 {
 	pop3_addr_ = addr;
 	pop3_port_ = port;
@@ -121,7 +121,7 @@ struct UP_CTX
 //////////////////////////////////////////////////////////////////////////
 // 主线程中运行
 
-void mail::rpc_onover()
+void smtp_client::rpc_onover()
 {
 	mail_store* s = new mail_store(auth_account_.c_str(), smtp_ip_.c_str(),
 		pop3_ip_.c_str(), meter_, *callback_);
@@ -129,11 +129,11 @@ void mail::rpc_onover()
 	delete this;
 }
 
-void mail::rpc_wakeup(void* ctx)
+void smtp_client::rpc_wakeup(void* ctx)
 {
 	UP_CTX* up = (UP_CTX*) ctx;
 
-	callback_->mail_report(up->msg.c_str(),
+	callback_->smtp_report(up->msg.c_str(),
 		up->total, up->curr, meter_);
 	delete up;
 }
@@ -141,13 +141,13 @@ void mail::rpc_wakeup(void* ctx)
 //////////////////////////////////////////////////////////////////////////
 // 子线程中运行
 
-void mail::rpc_run()
+void smtp_client::rpc_run()
 {
 	test_smtp();
 	test_pop3();
 }
 
-void mail::test_smtp()
+void smtp_client::test_smtp()
 {
 	// 创建邮件内容
 
@@ -376,7 +376,7 @@ void mail::test_smtp()
 	rpc_signal(up);
 }
 
-void mail::test_pop3()
+void smtp_client::test_pop3()
 {
 
 }

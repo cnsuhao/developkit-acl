@@ -109,7 +109,8 @@ BEGIN
     PUSHBUTTON      "退出",IDOK,312,219,52,16
     GROUPBOX        "PING 测试",IDC_STATIC,26,7,341,68
     GROUPBOX        "DNS 测试",IDC_STATIC,26,80,341,64
-    LTEXT           "IP 配置文件：",IDC_STATIC,37,21,47,14
+    CONTROL         "IP 配置文件：",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,37,21,47,14
     LTEXT           "域名配置文件：",IDC_STATIC,46,92,53,14
     LTEXT           "数据包数量：",IDC_STATIC,39,39,42,8
     LTEXT           "时间间隔：",IDC_STATIC,126,39,34,14

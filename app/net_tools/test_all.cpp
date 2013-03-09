@@ -2,7 +2,7 @@
 #include "rpc/rpc_manager.h"
 #include "ping/ping.h"
 #include "dns/nslookup.h"
-#include "mail/mail.h"
+#include "mail/smtp_client.h"
 #include "test_all.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -31,15 +31,15 @@ void nslookup_result::nslookup_finish(const char* dbpath)
 
 //////////////////////////////////////////////////////////////////////////
 
-void mail_result::mail_report(const char* msg, size_t total,
-	size_t curr, const MAIL_METER& meter)
+void smtp_result::smtp_report(const char* msg, size_t total,
+	size_t curr, const SMTP_METER& meter)
 {
-	test_.mail_report(msg, total, curr, meter);
+	test_.smtp_report(msg, total, curr, meter);
 }
 
-void mail_result::mail_finish(const char* dbpath)
+void smtp_result::smtp_finish(const char* dbpath)
 {
-	test_.mail_finish(dbpath);
+	test_.smtp_finish(dbpath);
 }	
 
 //////////////////////////////////////////////////////////////////////////
@@ -48,7 +48,7 @@ test_all::test_all(test_callback* callback)
 : callback_(callback)
 , ping_result_(*this)
 , ns_result_(*this)
-, mail_result_(*this)
+, smtp_result_(*this)
 , ping_ok_(false)
 , dns_ok_(false)
 , mail_ok_(false)
@@ -76,8 +76,8 @@ void test_all::start()
 	rpc_manager::get_instance().fork(req);
 
 	// 启动邮件测试过程
-	mail* m = new mail();
-	(*m).set_callback(&mail_result_)
+	smtp_client* smtp = new smtp_client();
+	(*smtp).set_callback(&smtp_result_)
 		.add_file(attach_.c_str())
 		.set_smtp(smtp_addr_.c_str(), smtp_port_)
 		.set_conn_timeout(conn_timeout_)
@@ -87,7 +87,7 @@ void test_all::start()
 		.set_from(mail_user_.c_str())
 		.set_subject("邮件发送过程测试!")
 		.add_to(recipients_.c_str());
-	rpc_manager::get_instance().fork(m);
+	rpc_manager::get_instance().fork(smtp);
 }
 
 void test_all::check_finish()
@@ -139,8 +139,8 @@ void test_all::nslookup_finish(const char* dbpath)
 	check_finish();
 }
 
-void test_all::mail_report(const char* msg, size_t total,
-	size_t curr, const MAIL_METER& meter)
+void test_all::smtp_report(const char* msg, size_t total,
+	size_t curr, const SMTP_METER& meter)
 {
 	unsigned nstep;
 
@@ -151,7 +151,7 @@ void test_all::mail_report(const char* msg, size_t total,
 	callback_->test_report(msg, nstep);
 }
 
-void test_all::mail_finish(const char* dbpath)
+void test_all::smtp_finish(const char* dbpath)
 {
 	callback_->test_store(dbpath);
 	mail_ok_ = true;

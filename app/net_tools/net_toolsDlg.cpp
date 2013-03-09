@@ -503,7 +503,7 @@ void Cnet_toolsDlg::OnBnClickedOpenDos()
 }
 
 void Cnet_toolsDlg::upload_report(const char* msg, size_t total,
-	size_t curr, const SMTP_METER& meter)
+	size_t curr, const UPLOAD_METER& meter)
 {
 	if (total > 0)
 	{
@@ -647,8 +647,8 @@ void Cnet_toolsDlg::OnBnClickedSendMail()
 		return;
 	}
 
-	mail* m = new mail();
-	(*m).set_callback(this)
+	smtp_client* smtp = new smtp_client();
+	(*smtp).set_callback(this)
 		.add_file(filePath.GetString())
 		.set_smtp(m_smtpAddr, m_smtpPort)
 		.set_conn_timeout(m_connecTimeout)
@@ -658,7 +658,7 @@ void Cnet_toolsDlg::OnBnClickedSendMail()
 		.set_from(m_smtpUser.GetString())
 		.set_subject("邮件发送过程测试!")
 		.add_to(m_recipients.GetString());
-	rpc_manager::get_instance().fork(m);
+	rpc_manager::get_instance().fork(smtp);
 }
 
 void Cnet_toolsDlg::OnBnClickedRecvMail()
@@ -666,8 +666,8 @@ void Cnet_toolsDlg::OnBnClickedRecvMail()
 	// TODO: 在此添加控件通知处理程序代码
 }
 
-void Cnet_toolsDlg::mail_report(const char* msg, size_t total,
-	size_t curr, const MAIL_METER&)
+void Cnet_toolsDlg::smtp_report(const char* msg, size_t total,
+	size_t curr, const SMTP_METER&)
 {
 	if (total > 0)
 	{
@@ -680,7 +680,7 @@ void Cnet_toolsDlg::mail_report(const char* msg, size_t total,
 	m_wndMeterBar.SetText(msg, 1, 0);
 }
 
-void Cnet_toolsDlg::mail_finish(const char* dbpath)
+void Cnet_toolsDlg::smtp_finish(const char* dbpath)
 {
 	GetDlgItem(IDC_LOAD_FILE)->EnableWindow(TRUE);
 	CString filePath;
