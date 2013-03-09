@@ -15,11 +15,7 @@ smtp_client::smtp_client()
 	meter_.smtp_auth_elapsed = 0.00;
 	meter_.smtp_data_elapsed = 0.00;
 	meter_.smtp_total_elapsed = 0.00;
-	meter_.pop3_nslookup_elapsed = 0.00;
-	meter_.pop3_connect_elapsed = 0.00;
 	meter_.smtp_auth_elapsed = 0.00;
-	meter_.pop3_list_elapsed = 0.00;
-	meter_.pop3_total_elapsed = 0.00;
 }
 
 smtp_client::~smtp_client()
@@ -101,14 +97,6 @@ smtp_client& smtp_client::add_file(const char* p)
 	return *this;
 }
 
-smtp_client& smtp_client::set_pop3(const char* addr, int port)
-{
-	pop3_addr_ = addr;
-	pop3_port_ = port;
-	pop3_ip_ = addr;
-	return *this;
-}
-
 //////////////////////////////////////////////////////////////////////////
 
 struct UP_CTX
@@ -123,9 +111,9 @@ struct UP_CTX
 
 void smtp_client::rpc_onover()
 {
-	smtp_store* s = new smtp_store(auth_account_.c_str(), smtp_ip_.c_str(),
-		pop3_ip_.c_str(), meter_, *callback_);
-	rpc_manager::get_instance().fork(s);
+	smtp_store* smtp = new smtp_store(auth_account_.c_str(), smtp_ip_.c_str(),
+		meter_, *callback_);
+	rpc_manager::get_instance().fork(smtp);
 	delete this;
 }
 
@@ -142,12 +130,6 @@ void smtp_client::rpc_wakeup(void* ctx)
 // 子线程中运行
 
 void smtp_client::rpc_run()
-{
-	test_smtp();
-	test_pop3();
-}
-
-void smtp_client::test_smtp()
 {
 	// 创建邮件内容
 
@@ -374,9 +356,4 @@ void smtp_client::test_smtp()
 	up->msg.format("发送邮件成功！(%d/%d 字节, 耗时 %.2f 毫秒)",
 		up->curr, up->total, meter_.smtp_total_elapsed);
 	rpc_signal(up);
-}
-
-void smtp_client::test_pop3()
-{
-
 }

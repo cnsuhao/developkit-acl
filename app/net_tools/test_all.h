@@ -53,6 +53,20 @@ protected:
 private:
 	test_all& test_;
 };
+
+class pop3_result : public pop3_callback
+{
+public:
+	pop3_result(test_all& test) : test_(test) {}
+	~pop3_result() {}
+protected:
+	virtual void pop3_finish(const char* dbpath);
+	virtual void pop3_report(const char* msg, size_t total,
+		size_t curr, const POP3_METER& meter);
+private:
+	test_all& test_;
+};
+
 //////////////////////////////////////////////////////////////////////////
 
 class test_all
@@ -72,7 +86,15 @@ public:
 	void smtp_finish(const char* dbpath);
 	void smtp_report(const char* msg, size_t total,
 		size_t curr, const SMTP_METER& meter);
+
+	void pop3_finish(const char* dbpath);
+	void pop3_report(const char* msg, size_t total,
+		size_t curr, const POP3_METER& meter);
 private:
+	//friend class ping_result;
+	//friend class nslookup_result;
+	//friend class smtp_result;
+
 	test_callback* callback_;
 	void check_finish();
 private:
