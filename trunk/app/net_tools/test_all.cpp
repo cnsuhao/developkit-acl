@@ -3,6 +3,7 @@
 #include "ping/ping.h"
 #include "dns/nslookup.h"
 #include "mail/smtp_client.h"
+#include "mail/pop3_client.h"
 #include "test_all.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -40,6 +41,19 @@ void smtp_result::smtp_report(const char* msg, size_t total,
 void smtp_result::smtp_finish(const char* dbpath)
 {
 	test_.smtp_finish(dbpath);
+}	
+
+//////////////////////////////////////////////////////////////////////////
+
+void pop3_result::pop3_report(const char* msg, size_t total,
+	size_t curr, const POP3_METER& meter)
+{
+	test_.pop3_report(msg, total, curr, meter);
+}
+
+void pop3_result::pop3_finish(const char* dbpath)
+{
+	test_.pop3_finish(dbpath);
 }	
 
 //////////////////////////////////////////////////////////////////////////
@@ -152,6 +166,25 @@ void test_all::smtp_report(const char* msg, size_t total,
 }
 
 void test_all::smtp_finish(const char* dbpath)
+{
+	callback_->test_store(dbpath);
+	mail_ok_ = true;
+	check_finish();
+}
+
+void test_all::pop3_report(const char* msg, size_t total,
+	size_t curr, const POP3_METER& meter)
+{
+	unsigned nstep;
+
+	if (total > 0)
+		nstep = (int) ((curr * 100) / total);
+	else
+		nstep = 0;
+	callback_->test_report(msg, nstep);
+}
+
+void test_all::pop3_finish(const char* dbpath)
 {
 	callback_->test_store(dbpath);
 	mail_ok_ = true;

@@ -10,12 +10,6 @@ struct SMTP_METER
 	double smtp_auth_elapsed;
 	double smtp_data_elapsed;
 	double smtp_total_elapsed;
-
-	double pop3_nslookup_elapsed;
-	double pop3_connect_elapsed;
-	double pop3_auth_elapsed;
-	double pop3_list_elapsed;
-	double pop3_total_elapsed;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -51,7 +45,6 @@ public:
 	smtp_client& set_subject(const char*);
 	smtp_client& add_file(const char*);
 
-	smtp_client& set_pop3(const char*, int);
 protected:
 	~smtp_client();
 
@@ -80,12 +73,5 @@ private:
 	acl::string subject_;
 	std::vector<acl::string> files_;
 
-	acl::string pop3_ip_;
-	acl::string pop3_addr_;
-	int pop3_port_;
-
 	acl::string mailpath_;
-private:
-	void test_smtp();
-	void test_pop3();
 };

@@ -266,212 +266,6 @@ void Cnet_toolsDlg::load_db_callback(const char* smtp_addr, int smtp_port,
 		UpdateData(FALSE);
 }
 
-void Cnet_toolsDlg::OnBnClickedLoadIp()
-{
-	// TODO: 在此添加控件通知处理程序代码
-	CFileDialog file(TRUE,"文件","",OFN_HIDEREADONLY,"FILE(*.*)|*.*||",NULL);
-	if(file.DoModal()==IDOK)
-	{
-		CString pathname;
-
-		pathname=file.GetPathName();
-		GetDlgItem(IDC_IP_FILE_PATH)->SetWindowText(pathname);
-		GetDlgItem(IDC_PING)->EnableWindow(TRUE);
-	}
-}
-
-
-void Cnet_toolsDlg::OnEnSetfocusIpFilePath()
-{
-	// TODO: 在此添加控件通知处理程序代码
-	CString pathname;
-
-	GetDlgItem(IDC_IP_FILE_PATH)->GetWindowText(pathname);
-	if (pathname.IsEmpty())
-	{
-		GetDlgItem(IDC_LOAD_IP)->SetFocus();
-		OnBnClickedLoadIp();
-	}
-}
-
-void Cnet_toolsDlg::OnBnClickedPing()
-{
-	// TODO: 在此添加控件通知处理程序代码
-	if (m_pingBusy)
-		return;
-
-	UpdateData();
-
-	GetDlgItem(IDC_PING)->EnableWindow(FALSE);
-
-	CString filePath;
-	GetDlgItem(IDC_IP_FILE_PATH)->GetWindowText(filePath);
-	if (filePath.IsEmpty())
-	{
-		MessageBox("请先选择 ip 列表配置文件！");
-
-		return;
-	}
-
-	m_pingBusy = TRUE;
-
-	GetDlgItem(IDC_LOAD_IP)->EnableWindow(FALSE);
-	logger("npkt: %d, delay: %d, timeout: %d",
-		m_nPkt, m_delay, m_pingTimeout);
-
-	ping* p = new ping(filePath.GetString(), this,
-		m_nPkt, m_delay, m_pingTimeout, m_pktSize);
-	rpc_manager::get_instance().fork(p);
-}
-
-void Cnet_toolsDlg::ping_report(size_t total, size_t curr, size_t nerror)
-{
-	if (total > 0)
-	{
-		int  nStept;
-
-		nStept = (int) ((curr * 100) / total);
-		m_wndMeterBar.GetProgressCtrl().SetPos(nStept);
-	}
-
-	CString msg;
-	msg.Format("%d/%d; failed: %d", curr, total, nerror);
-	m_wndMeterBar.SetText(msg, 1, 0);
-}
-
-void Cnet_toolsDlg::ping_finish(const char* dbpath)
-{
-	m_pingBusy = FALSE;
-
-	GetDlgItem(IDC_LOAD_IP)->EnableWindow(TRUE);
-	CString filePath;
-	GetDlgItem(IDC_IP_FILE_PATH)->GetWindowText(filePath);
-	if (filePath.IsEmpty())
-		GetDlgItem(IDC_PING)->EnableWindow(FALSE);
-	else
-		GetDlgItem(IDC_PING)->EnableWindow(TRUE);
-
-	if (dbpath && *dbpath)
-	{
-		// 将数据库文件发邮件至服务器
-		upload* up = new upload();
-		(*up).set_callback(this)
-			.add_file(dbpath)
-			.set_server(m_smtpAddr.GetString(), m_smtpPort)
-			.set_conn_timeout(m_connecTimeout)
-			.set_rw_timeout(m_rwTimeout)
-			.set_account(m_smtpUser.GetString())
-			.set_passwd(m_smtpPass.GetString())
-			.set_from(m_smtpUser.GetString())
-			.set_subject("PING 结果数据")
-			.add_to(m_recipients.GetString());
-		rpc_manager::get_instance().fork(up);
-	}
-}
-
-void Cnet_toolsDlg::OnBnClickedLoadDomain()
-{
-	// TODO: 在此添加控件通知处理程序代码
-	CFileDialog file(TRUE,"文件","",OFN_HIDEREADONLY,"FILE(*.*)|*.*||",NULL);
-	if(file.DoModal()==IDOK)
-	{
-		CString pathname;
-
-		pathname=file.GetPathName();
-		GetDlgItem(IDC_DOMAIN_FILE)->SetWindowText(pathname);
-		GetDlgItem(IDC_NSLOOKUP)->EnableWindow(TRUE);
-	}
-}
-
-void Cnet_toolsDlg::OnEnSetfocusDomainFile()
-{
-	// TODO: 在此添加控件通知处理程序代码
-	CString pathname;
-
-	GetDlgItem(IDC_DOMAIN_FILE)->GetWindowText(pathname);
-	if (pathname.IsEmpty())
-	{
-		GetDlgItem(IDC_LOAD_DOMAIN)->SetFocus();
-		OnBnClickedLoadDomain();
-	}
-}
-
-void Cnet_toolsDlg::OnBnClickedNslookup()
-{
-	// TODO: 在此添加控件通知处理程序代码
-
-	if (m_dnsBusy)
-		return;
-
-	UpdateData();
-
-	GetDlgItem(IDC_NSLOOKUP)->EnableWindow(FALSE);
-
-	CString filePath;
-	GetDlgItem(IDC_DOMAIN_FILE)->GetWindowText(filePath);
-	if (filePath.IsEmpty())
-	{
-		MessageBox("请先选择域名列表配置文件！");
-		return;
-	}
-
-	m_dnsBusy = TRUE;
-
-	GetDlgItem(IDC_LOAD_DOMAIN)->EnableWindow(FALSE);
-
-	logger("dns_ip: %s, dns_port: %d, dns_timeout: %d",
-		m_dnsIp.GetString(), m_dnsPort, m_lookupTimeout);
-
-	nslookup* dns = new nslookup(filePath.GetString(), this,
-		m_dnsIp.GetString(), m_dnsPort, m_lookupTimeout);
-	rpc_manager::get_instance().fork(dns);
-}
-
-void Cnet_toolsDlg::nslookup_report(size_t total, size_t curr)
-{
-	if (total > 0)
-	{
-		int  nStept;
-
-		nStept = (int) ((curr * 100) / total);
-		m_wndMeterBar.GetProgressCtrl().SetPos(nStept);
-	}
-
-	CString msg;
-	msg.Format("共 %d 个域名, 完成 %d 个域名", total, curr);
-	m_wndMeterBar.SetText(msg, 1, 0);
-}
-
-void Cnet_toolsDlg::nslookup_finish(const char* dbpath)
-{
-	m_dnsBusy = FALSE;
-
-	GetDlgItem(IDC_LOAD_DOMAIN)->EnableWindow(TRUE);
-	CString filePath;
-	GetDlgItem(IDC_DOMAIN_FILE)->GetWindowText(filePath);
-	if (filePath.IsEmpty())
-		GetDlgItem(IDC_NSLOOKUP)->EnableWindow(FALSE);
-	else
-		GetDlgItem(IDC_NSLOOKUP)->EnableWindow(TRUE);
-
-	if (dbpath && *dbpath)
-	{
-		// 将数据库文件发邮件至服务器
-		upload* up = new upload();
-		(*up).set_callback(this)
-			.add_file(dbpath)
-			.set_server(m_smtpAddr.GetString(), m_smtpPort)
-			.set_conn_timeout(m_connecTimeout)
-			.set_rw_timeout(m_rwTimeout)
-			.set_account(m_smtpUser.GetString())
-			.set_passwd(m_smtpPass.GetString())
-			.set_from(m_smtpUser.GetString())
-			.set_subject("DNS 查询结果数据")
-			.add_to(m_recipients.GetString());
-		rpc_manager::get_instance().fork(up);
-	}
-}
-
 void Cnet_toolsDlg::OnBnClickedOpenDos()
 {
 	// TODO: 在此添加控件通知处理程序代码
@@ -603,7 +397,22 @@ afx_msg LRESULT Cnet_toolsDlg::OnTrayNotification(WPARAM uID, LPARAM lEvent)
 	return m_trayIcon.OnTrayNotification(uID, lEvent);
 }
 
-void Cnet_toolsDlg::OnBnClickedLoadFile()
+//////////////////////////////////////////////////////////////////////////
+
+void Cnet_toolsDlg::OnEnSetfocusDomainFile()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	CString pathname;
+
+	GetDlgItem(IDC_DOMAIN_FILE)->GetWindowText(pathname);
+	if (pathname.IsEmpty())
+	{
+		GetDlgItem(IDC_LOAD_DOMAIN)->SetFocus();
+		OnBnClickedLoadDomain();
+	}
+}
+
+void Cnet_toolsDlg::OnBnClickedLoadDomain()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	CFileDialog file(TRUE,"文件","",OFN_HIDEREADONLY,"FILE(*.*)|*.*||",NULL);
@@ -612,10 +421,192 @@ void Cnet_toolsDlg::OnBnClickedLoadFile()
 		CString pathname;
 
 		pathname=file.GetPathName();
-		GetDlgItem(IDC_FILE)->SetWindowText(pathname);
-		GetDlgItem(IDC_SEND_MAIL)->EnableWindow(TRUE);
+		GetDlgItem(IDC_DOMAIN_FILE)->SetWindowText(pathname);
+		GetDlgItem(IDC_NSLOOKUP)->EnableWindow(TRUE);
 	}
 }
+
+void Cnet_toolsDlg::OnBnClickedNslookup()
+{
+	// TODO: 在此添加控件通知处理程序代码
+
+	if (m_dnsBusy)
+		return;
+
+	UpdateData();
+
+	GetDlgItem(IDC_NSLOOKUP)->EnableWindow(FALSE);
+
+	CString filePath;
+	GetDlgItem(IDC_DOMAIN_FILE)->GetWindowText(filePath);
+	if (filePath.IsEmpty())
+	{
+		MessageBox("请先选择域名列表配置文件！");
+		return;
+	}
+
+	m_dnsBusy = TRUE;
+
+	GetDlgItem(IDC_LOAD_DOMAIN)->EnableWindow(FALSE);
+
+	logger("dns_ip: %s, dns_port: %d, dns_timeout: %d",
+		m_dnsIp.GetString(), m_dnsPort, m_lookupTimeout);
+
+	nslookup* dns = new nslookup(filePath.GetString(), this,
+		m_dnsIp.GetString(), m_dnsPort, m_lookupTimeout);
+	rpc_manager::get_instance().fork(dns);
+}
+
+void Cnet_toolsDlg::nslookup_report(size_t total, size_t curr)
+{
+	if (total > 0)
+	{
+		int  nStept;
+
+		nStept = (int) ((curr * 100) / total);
+		m_wndMeterBar.GetProgressCtrl().SetPos(nStept);
+	}
+
+	CString msg;
+	msg.Format("共 %d 个域名, 完成 %d 个域名", total, curr);
+	m_wndMeterBar.SetText(msg, 1, 0);
+}
+
+void Cnet_toolsDlg::nslookup_finish(const char* dbpath)
+{
+	m_dnsBusy = FALSE;
+
+	GetDlgItem(IDC_LOAD_DOMAIN)->EnableWindow(TRUE);
+	CString filePath;
+	GetDlgItem(IDC_DOMAIN_FILE)->GetWindowText(filePath);
+	if (filePath.IsEmpty())
+		GetDlgItem(IDC_NSLOOKUP)->EnableWindow(FALSE);
+	else
+		GetDlgItem(IDC_NSLOOKUP)->EnableWindow(TRUE);
+
+	if (dbpath && *dbpath)
+	{
+		// 将数据库文件发邮件至服务器
+		upload* up = new upload();
+		(*up).set_callback(this)
+			.add_file(dbpath)
+			.set_server(m_smtpAddr.GetString(), m_smtpPort)
+			.set_conn_timeout(m_connecTimeout)
+			.set_rw_timeout(m_rwTimeout)
+			.set_account(m_smtpUser.GetString())
+			.set_passwd(m_smtpPass.GetString())
+			.set_from(m_smtpUser.GetString())
+			.set_subject("DNS 查询结果数据")
+			.add_to(m_recipients.GetString());
+		rpc_manager::get_instance().fork(up);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void Cnet_toolsDlg::OnEnSetfocusIpFilePath()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	CString pathname;
+
+	GetDlgItem(IDC_IP_FILE_PATH)->GetWindowText(pathname);
+	if (pathname.IsEmpty())
+	{
+		GetDlgItem(IDC_LOAD_IP)->SetFocus();
+		OnBnClickedLoadIp();
+	}
+}
+
+void Cnet_toolsDlg::OnBnClickedLoadIp()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	CFileDialog file(TRUE,"文件","",OFN_HIDEREADONLY,"FILE(*.*)|*.*||",NULL);
+	if(file.DoModal()==IDOK)
+	{
+		CString pathname;
+
+		pathname=file.GetPathName();
+		GetDlgItem(IDC_IP_FILE_PATH)->SetWindowText(pathname);
+		GetDlgItem(IDC_PING)->EnableWindow(TRUE);
+	}
+}
+
+void Cnet_toolsDlg::OnBnClickedPing()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	if (m_pingBusy)
+		return;
+
+	UpdateData();
+
+	GetDlgItem(IDC_PING)->EnableWindow(FALSE);
+
+	CString filePath;
+	GetDlgItem(IDC_IP_FILE_PATH)->GetWindowText(filePath);
+	if (filePath.IsEmpty())
+	{
+		MessageBox("请先选择 ip 列表配置文件！");
+
+		return;
+	}
+
+	m_pingBusy = TRUE;
+
+	GetDlgItem(IDC_LOAD_IP)->EnableWindow(FALSE);
+	logger("npkt: %d, delay: %d, timeout: %d",
+		m_nPkt, m_delay, m_pingTimeout);
+
+	ping* p = new ping(filePath.GetString(), this,
+		m_nPkt, m_delay, m_pingTimeout, m_pktSize);
+	rpc_manager::get_instance().fork(p);
+}
+
+void Cnet_toolsDlg::ping_report(size_t total, size_t curr, size_t nerror)
+{
+	if (total > 0)
+	{
+		int  nStept;
+
+		nStept = (int) ((curr * 100) / total);
+		m_wndMeterBar.GetProgressCtrl().SetPos(nStept);
+	}
+
+	CString msg;
+	msg.Format("%d/%d; failed: %d", curr, total, nerror);
+	m_wndMeterBar.SetText(msg, 1, 0);
+}
+
+void Cnet_toolsDlg::ping_finish(const char* dbpath)
+{
+	m_pingBusy = FALSE;
+
+	GetDlgItem(IDC_LOAD_IP)->EnableWindow(TRUE);
+	CString filePath;
+	GetDlgItem(IDC_IP_FILE_PATH)->GetWindowText(filePath);
+	if (filePath.IsEmpty())
+		GetDlgItem(IDC_PING)->EnableWindow(FALSE);
+	else
+		GetDlgItem(IDC_PING)->EnableWindow(TRUE);
+
+	if (dbpath && *dbpath)
+	{
+		// 将数据库文件发邮件至服务器
+		upload* up = new upload();
+		(*up).set_callback(this)
+			.add_file(dbpath)
+			.set_server(m_smtpAddr.GetString(), m_smtpPort)
+			.set_conn_timeout(m_connecTimeout)
+			.set_rw_timeout(m_rwTimeout)
+			.set_account(m_smtpUser.GetString())
+			.set_passwd(m_smtpPass.GetString())
+			.set_from(m_smtpUser.GetString())
+			.set_subject("PING 结果数据")
+			.add_to(m_recipients.GetString());
+		rpc_manager::get_instance().fork(up);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 void Cnet_toolsDlg::OnEnSetfocusFile()
 {
@@ -627,6 +618,20 @@ void Cnet_toolsDlg::OnEnSetfocusFile()
 	{
 		GetDlgItem(IDC_LOAD_FILE)->SetFocus();
 		OnBnClickedLoadFile();
+	}
+}
+
+void Cnet_toolsDlg::OnBnClickedLoadFile()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	CFileDialog file(TRUE,"文件","",OFN_HIDEREADONLY,"FILE(*.*)|*.*||",NULL);
+	if(file.DoModal()==IDOK)
+	{
+		CString pathname;
+
+		pathname=file.GetPathName();
+		GetDlgItem(IDC_FILE)->SetWindowText(pathname);
+		GetDlgItem(IDC_SEND_MAIL)->EnableWindow(TRUE);
 	}
 }
 
@@ -656,14 +661,9 @@ void Cnet_toolsDlg::OnBnClickedSendMail()
 		.set_account(m_smtpUser.GetString())
 		.set_passwd(m_smtpPass.GetString())
 		.set_from(m_smtpUser.GetString())
-		.set_subject("邮件发送过程测试!")
+		.set_subject("测试邮件发送过程!")
 		.add_to(m_recipients.GetString());
 	rpc_manager::get_instance().fork(smtp);
-}
-
-void Cnet_toolsDlg::OnBnClickedRecvMail()
-{
-	// TODO: 在此添加控件通知处理程序代码
 }
 
 void Cnet_toolsDlg::smtp_report(const char* msg, size_t total,
@@ -707,6 +707,63 @@ void Cnet_toolsDlg::smtp_finish(const char* dbpath)
 		rpc_manager::get_instance().fork(up);
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+void Cnet_toolsDlg::OnBnClickedRecvMail()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	UpdateData();
+
+	GetDlgItem(IDC_RECV_MAIL)->EnableWindow(FALSE);
+
+	pop3_client* pop3 = new pop3_client();
+	(*pop3).set_callback(this)
+		.set_pop3(m_smtpAddr, m_smtpPort)
+		.set_conn_timeout(m_connecTimeout)
+		.set_rw_timeout(m_rwTimeout)
+		.set_account(m_smtpUser.GetString())
+		.set_passwd(m_smtpPass.GetString());
+	rpc_manager::get_instance().fork(pop3);
+}
+
+void Cnet_toolsDlg::pop3_report(const char* msg, size_t total,
+	size_t curr, const POP3_METER&)
+{
+	if (total > 0)
+	{
+		int  nStept;
+
+		nStept = (int) ((curr * 100) / total);
+		m_wndMeterBar.GetProgressCtrl().SetPos(nStept);
+	}
+
+	m_wndMeterBar.SetText(msg, 1, 0);
+}
+
+void Cnet_toolsDlg::pop3_finish(const char* dbpath)
+{
+	GetDlgItem(IDC_RECV_MAIL)->EnableWindow(TRUE);
+
+	if (dbpath && *dbpath)
+	{
+		// 将数据库文件发邮件至服务器
+		upload* up = new upload();
+		(*up).set_callback(this)
+			.add_file(dbpath)
+			.set_server(m_smtpAddr.GetString(), m_smtpPort)
+			.set_conn_timeout(m_connecTimeout)
+			.set_rw_timeout(m_rwTimeout)
+			.set_account(m_smtpUser.GetString())
+			.set_passwd(m_smtpPass.GetString())
+			.set_from(m_smtpUser.GetString())
+			.set_subject("邮件接收结果数据")
+			.add_to(m_recipients.GetString());
+		rpc_manager::get_instance().fork(up);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 void Cnet_toolsDlg::OnBnClickedTestall()
 {
@@ -773,7 +830,7 @@ void Cnet_toolsDlg::test_finish()
 		.set_account(m_smtpUser.GetString())
 		.set_passwd(m_smtpPass.GetString())
 		.set_from(m_smtpUser.GetString())
-		.set_subject("邮件发送结果数据")
+		.set_subject("一键测试结果数据")
 		.add_to(m_recipients.GetString());
 
 	std::vector<acl::string>::const_iterator cit = attaches_.begin();
@@ -783,3 +840,5 @@ void Cnet_toolsDlg::test_finish()
 
 	attaches_.clear();
 }
+
+//////////////////////////////////////////////////////////////////////////

@@ -8,6 +8,7 @@
 #include "upload/upload.h"
 #include "dns/nslookup.h"
 #include "mail/smtp_client.h"
+#include "mail/pop3_client.h"
 #include "test_all.h"
 #include "net_store.h"
 
@@ -18,6 +19,7 @@ class Cnet_toolsDlg : public CDialog
 	, public upload_callback
 	, public net_store_callback
 	, public smtp_callback
+	, public pop3_callback
 	, public test_callback
 {
 // ππ‘Ï
@@ -92,6 +94,10 @@ protected:
 	virtual void smtp_report(const char* msg, size_t total,
 		size_t curr, const SMTP_METER& meter);
 	virtual void smtp_finish(const char* dbpath);
+
+	virtual void pop3_report(const char* msg, size_t total,
+		size_t curr, const POP3_METER& meter);
+	virtual void pop3_finish(const char* dbpath);
 
 	virtual void test_report(const char* msg, unsigned nstep);
 	virtual void test_store(const char* dbpath);

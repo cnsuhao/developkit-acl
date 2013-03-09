@@ -347,6 +347,18 @@ copy ..\..\lib\win32\sqlite3.dll $(OutDir)\ /Y
 				RelativePath=".\mail\mime_builder.hpp">
 			</File>
 			<File
+				RelativePath=".\mail\pop3_client.cpp">
+			</File>
+			<File
+				RelativePath=".\mail\pop3_client.h">
+			</File>
+			<File
+				RelativePath=".\mail\pop3_store.cpp">
+			</File>
+			<File
+				RelativePath=".\mail\pop3_store.h">
+			</File>
+			<File
 				RelativePath=".\mail\smtp_client.cpp">
 			</File>
 			<File
