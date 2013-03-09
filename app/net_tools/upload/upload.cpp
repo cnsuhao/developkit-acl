@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "global/global.h"
 #include "global/util.h"
-#include "mime_builder.hpp"
+#include "mail/mime_builder.hpp"
 #include "upload.h"
 
 upload::upload()

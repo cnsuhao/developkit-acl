@@ -1,8 +1,8 @@
 #include "StdAfx.h"
-#include "upload/mime_builder.hpp"
 #include "global/global.h"
 #include "global/util.h"
 #include "rpc/rpc_manager.h"
+#include "mime_builder.hpp"
 #include "smtp_store.h"
 #include "smtp_client.h"
 
