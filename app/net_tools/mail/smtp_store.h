@@ -2,13 +2,13 @@
 
 struct SMTP_METER;
 class smtp_callback;
-class mail_store : public acl::rpc_request
+class smtp_store : public acl::rpc_request
 {
 public:
-	mail_store(const char* user, const char* smtp_ip, const char* pop3_ip,
+	smtp_store(const char* user, const char* smtp_ip, const char* pop3_ip,
 		const SMTP_METER& meter, smtp_callback& callback);
 protected:
-	~mail_store();
+	~smtp_store();
 
 	// 基类虚函数：子线程处理函数
 	virtual void rpc_run();

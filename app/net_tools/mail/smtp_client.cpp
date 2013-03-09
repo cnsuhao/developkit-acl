@@ -3,7 +3,7 @@
 #include "global/global.h"
 #include "global/util.h"
 #include "rpc/rpc_manager.h"
-#include "mail_store.h"
+#include "smtp_store.h"
 #include "smtp_client.h"
 
 smtp_client::smtp_client()
@@ -123,7 +123,7 @@ struct UP_CTX
 
 void smtp_client::rpc_onover()
 {
-	mail_store* s = new mail_store(auth_account_.c_str(), smtp_ip_.c_str(),
+	smtp_store* s = new smtp_store(auth_account_.c_str(), smtp_ip_.c_str(),
 		pop3_ip_.c_str(), meter_, *callback_);
 	rpc_manager::get_instance().fork(s);
 	delete this;
