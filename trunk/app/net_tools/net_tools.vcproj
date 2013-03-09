@@ -309,12 +309,6 @@ copy ..\..\lib\win32\sqlite3.dll $(OutDir)\ /Y
 			Name="upload"
 			Filter="">
 			<File
-				RelativePath=".\upload\mime_builder.cpp">
-			</File>
-			<File
-				RelativePath=".\upload\mime_builder.hpp">
-			</File>
-			<File
 				RelativePath=".\upload\upload.cpp">
 			</File>
 			<File
@@ -346,6 +340,12 @@ copy ..\..\lib\win32\sqlite3.dll $(OutDir)\ /Y
 		<Filter
 			Name="mail"
 			Filter="">
+			<File
+				RelativePath=".\mail\mime_builder.cpp">
+			</File>
+			<File
+				RelativePath=".\mail\mime_builder.hpp">
+			</File>
 			<File
 				RelativePath=".\mail\smtp_client.cpp">
 			</File>
