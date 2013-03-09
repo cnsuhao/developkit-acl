@@ -1,9 +1,9 @@
 #include "StdAfx.h"
 #include "global/global.h"
 #include "smtp_client.h"
-#include "mail_store.h"
+#include "smtp_store.h"
 
-mail_store::mail_store(const char* user, const char* smtp_ip,
+smtp_store::smtp_store(const char* user, const char* smtp_ip,
 	const char* pop3_ip, const SMTP_METER& meter,
 	smtp_callback& callback)
 : callback_(callback)
@@ -17,7 +17,7 @@ mail_store::mail_store(const char* user, const char* smtp_ip,
 	memcpy(meter_, &meter, sizeof(SMTP_METER));
 }
 
-mail_store::~mail_store()
+smtp_store::~smtp_store()
 {
 	acl_myfree(user_);
 	acl_myfree(smtp_ip_);
@@ -28,9 +28,9 @@ mail_store::~mail_store()
 //////////////////////////////////////////////////////////////////////////
 // 主线程过程
 
-void mail_store::rpc_onover()
+void smtp_store::rpc_onover()
 {
-	logger("store mail test results %s!", ok_ ? "OK" : "Failed");
+	logger("store smtp test results %s!", ok_ ? "OK" : "Failed");
 	callback_.smtp_finish(dbpath_.c_str());
 	delete this;
 }
@@ -58,7 +58,7 @@ static const char* CREATE_TBL =
 ");\r\n"
 "create index user_idx on mail_tbl(user);\r\n";
 
-void mail_store::rpc_run()
+void smtp_store::rpc_run()
 {
 	const char* path = global::get_instance().get_path();
 	dbpath_.format("%s/mail_store.db", path);
@@ -76,7 +76,7 @@ void mail_store::rpc_run()
 	}
 }
 
-bool mail_store::create_tbl(acl::db_handle& db)
+bool smtp_store::create_tbl(acl::db_handle& db)
 {
 	if (db.tbl_exists("mail_tbl"))
 	{
@@ -95,7 +95,7 @@ bool mail_store::create_tbl(acl::db_handle& db)
 	}
 }
 
-void mail_store::insert_tbl(acl::db_handle& db)
+void smtp_store::insert_tbl(acl::db_handle& db)
 {
 	acl::string sql;
 
