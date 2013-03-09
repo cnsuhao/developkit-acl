@@ -1,11 +1,11 @@
 #include "StdAfx.h"
 #include "global/global.h"
-#include "mail.h"
+#include "smtp_client.h"
 #include "mail_store.h"
 
 mail_store::mail_store(const char* user, const char* smtp_ip,
-	const char* pop3_ip, const MAIL_METER& meter,
-	mail_callback& callback)
+	const char* pop3_ip, const SMTP_METER& meter,
+	smtp_callback& callback)
 : callback_(callback)
 , ok_(false)
 {
@@ -13,8 +13,8 @@ mail_store::mail_store(const char* user, const char* smtp_ip,
 	smtp_ip_ = acl_mystrdup(smtp_ip);
 	pop3_ip_ = acl_mystrdup(pop3_ip);
 
-	meter_ = (MAIL_METER*) acl_mycalloc(1, sizeof(MAIL_METER));
-	memcpy(meter_, &meter, sizeof(MAIL_METER));
+	meter_ = (SMTP_METER*) acl_mycalloc(1, sizeof(SMTP_METER));
+	memcpy(meter_, &meter, sizeof(SMTP_METER));
 }
 
 mail_store::~mail_store()
@@ -31,7 +31,7 @@ mail_store::~mail_store()
 void mail_store::rpc_onover()
 {
 	logger("store mail test results %s!", ok_ ? "OK" : "Failed");
-	callback_.mail_finish(dbpath_.c_str());
+	callback_.smtp_finish(dbpath_.c_str());
 	delete this;
 }
 

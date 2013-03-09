@@ -7,7 +7,7 @@
 #include "ping/ping.h"
 #include "upload/upload.h"
 #include "dns/nslookup.h"
-#include "mail/mail.h"
+#include "mail/smtp_client.h"
 #include "test_all.h"
 #include "net_store.h"
 
@@ -17,7 +17,7 @@ class Cnet_toolsDlg : public CDialog
 	, public nslookup_callback
 	, public upload_callback
 	, public net_store_callback
-	, public mail_callback
+	, public smtp_callback
 	, public test_callback
 {
 // ππ‘Ï
@@ -89,16 +89,16 @@ protected:
 	virtual void nslookup_report(size_t total, size_t curr);
 	virtual void nslookup_finish(const char* dbpath);
 
-	virtual void mail_report(const char* msg, size_t total,
-		size_t curr, const MAIL_METER& meter);
-	virtual void mail_finish(const char* dbpath);
+	virtual void smtp_report(const char* msg, size_t total,
+		size_t curr, const SMTP_METER& meter);
+	virtual void smtp_finish(const char* dbpath);
 
 	virtual void test_report(const char* msg, unsigned nstep);
 	virtual void test_store(const char* dbpath);
 	virtual void test_finish();
 
 	virtual void upload_report(const char* msg, size_t total,
-		size_t curr, const SMTP_METER& meter);
+		size_t curr, const UPLOAD_METER& meter);
 
 	virtual void load_db_callback(const char* smtp_addr, int smtp_port,
 		const char* pop3_addr, int pop3_port,

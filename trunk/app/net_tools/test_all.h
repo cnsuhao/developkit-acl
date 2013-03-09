@@ -41,15 +41,15 @@ private:
 	test_all& test_;
 };
 
-class mail_result : public mail_callback
+class smtp_result : public smtp_callback
 {
 public:
-	mail_result(test_all& test) : test_(test) {}
-	~mail_result() {}
+	smtp_result(test_all& test) : test_(test) {}
+	~smtp_result() {}
 protected:
-	virtual void mail_finish(const char* dbpath);
-	virtual void mail_report(const char* msg, size_t total,
-		size_t curr, const MAIL_METER& meter);
+	virtual void smtp_finish(const char* dbpath);
+	virtual void smtp_report(const char* msg, size_t total,
+		size_t curr, const SMTP_METER& meter);
 private:
 	test_all& test_;
 };
@@ -69,9 +69,9 @@ public:
 	void nslookup_report(size_t total, size_t curr);
 	void nslookup_finish(const char* dbpath);
 
-	void mail_finish(const char* dbpath);
-	void mail_report(const char* msg, size_t total,
-		size_t curr, const MAIL_METER& meter);
+	void smtp_finish(const char* dbpath);
+	void smtp_report(const char* msg, size_t total,
+		size_t curr, const SMTP_METER& meter);
 private:
 	test_callback* callback_;
 	void check_finish();
@@ -100,7 +100,7 @@ private:
 	acl::string mail_pass_;
 	acl::string recipients_;
 	bool mail_ok_;
-	mail_result mail_result_;
+	smtp_result smtp_result_;
 
 public:
 	test_all& set_ip_file(const char* filename)

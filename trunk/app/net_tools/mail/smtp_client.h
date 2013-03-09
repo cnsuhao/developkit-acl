@@ -2,7 +2,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-struct MAIL_METER
+struct SMTP_METER
 {
 	double smtp_nslookup_elapsed;
 	double smtp_connect_elapsed;
@@ -20,40 +20,40 @@ struct MAIL_METER
 
 //////////////////////////////////////////////////////////////////////////
 
-class mail_callback
+class smtp_callback
 {
 public:
-	mail_callback() {}
-	virtual ~mail_callback() {}
+	smtp_callback() {}
+	virtual ~smtp_callback() {}
 
-	virtual void mail_finish(const char* dbpath) = 0;
-	virtual void mail_report(const char* msg, size_t total,
-		size_t curr, const MAIL_METER& meter) = 0;
+	virtual void smtp_finish(const char* dbpath) = 0;
+	virtual void smtp_report(const char* msg, size_t total,
+		size_t curr, const SMTP_METER& meter) = 0;
 };
 
 //////////////////////////////////////////////////////////////////////////
 
-class mail : public acl::rpc_request
+class smtp_client : public acl::rpc_request
 {
 public:
-	mail();
+	smtp_client();
 
-	mail& set_callback(mail_callback*);
+	smtp_client& set_callback(smtp_callback*);
 
-	mail& set_account(const char*);
-	mail& set_passwd(const char*);
-	mail& set_conn_timeout(int);
-	mail& set_rw_timeout(int);
+	smtp_client& set_account(const char*);
+	smtp_client& set_passwd(const char*);
+	smtp_client& set_conn_timeout(int);
+	smtp_client& set_rw_timeout(int);
 
-	mail& set_smtp(const char*, int);
-	mail& set_from(const char*);
-	mail& add_to(const char*);
-	mail& set_subject(const char*);
-	mail& add_file(const char*);
+	smtp_client& set_smtp(const char*, int);
+	smtp_client& set_from(const char*);
+	smtp_client& add_to(const char*);
+	smtp_client& set_subject(const char*);
+	smtp_client& add_file(const char*);
 
-	mail& set_pop3(const char*, int);
+	smtp_client& set_pop3(const char*, int);
 protected:
-	~mail();
+	~smtp_client();
 
 	// 基类虚函数：子线程处理函数
 	virtual void rpc_run();
@@ -64,9 +64,9 @@ protected:
 	// 基类虚函数：主线程处理过程，收到子线程的通知消息
 	virtual void rpc_wakeup(void* ctx);
 private:
-	MAIL_METER meter_;
+	SMTP_METER meter_;
 private:
-	mail_callback* callback_;
+	smtp_callback* callback_;
 	int connect_timeout_;
 	int rw_timeout_;
 	acl::string auth_account_;
