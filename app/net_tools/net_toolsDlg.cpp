@@ -193,20 +193,23 @@ BOOL Cnet_toolsDlg::OnInitDialog()
 		UpdateData(FALSE);
 	}
 
+	const char* path = acl_getcwd();
+	acl::string logpath;
+	logpath.format("%s/net_tools.txt", path);
+	logger_open(logpath.c_str(), "net_tools");
+
 	// 从数据库中读取配置项
 	net_store* ns = new net_store(m_smtpAddr, m_smtpPort, m_pop3Addr, m_pop3Port,
 		m_smtpUser, m_smtpPass, m_recipients, this);
 	rpc_manager::get_instance().fork(ns);
 
-	DisableAll();
+	//DisableAll();
+	if (m_ipFilePath.IsEmpty())
+		GetDlgItem(IDC_PING)->EnableWindow(FALSE);
+	if (m_domainFilePath.IsEmpty())
+		GetDlgItem(IDC_NSLOOKUP)->EnableWindow(FALSE);
 
 	return TRUE;  // 除非设置了控件的焦点，否则返回 TRUE
-}
-
-void Cnet_toolsDlg::DisableAll()
-{
-	GetDlgItem(IDC_PING)->EnableWindow(FALSE);
-	GetDlgItem(IDC_NSLOOKUP)->EnableWindow(FALSE);
 }
 
 void Cnet_toolsDlg::OnSysCommand(UINT nID, LPARAM lParam)

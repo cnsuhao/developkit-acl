@@ -47,7 +47,7 @@ static const char* CREATE_TBL =
 "data_elapsed float(10,2) not null default 0.00,\r\n"
 "total_elapsed float(10,2) not null default 0.00\r\n"
 ");\r\n"
-"create index user_idx on mail_tbl(user);\r\n";
+"create index user_idx on smtp_tbl(user);\r\n";
 
 void smtp_store::rpc_run()
 {
@@ -71,7 +71,7 @@ bool smtp_store::create_tbl(acl::db_handle& db)
 {
 	if (db.tbl_exists("smtp_tbl"))
 	{
-		logger("mail_tbl table exist");
+		logger("smtp_tbl table exist");
 		return (true);
 	}
 	else if (db.sql_update(CREATE_TBL) == false)
