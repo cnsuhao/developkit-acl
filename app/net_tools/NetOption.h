@@ -67,4 +67,10 @@ public:
 	CString m_recipients;
 public:
 	afx_msg void OnPaint();
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void OnEnKillfocusUserAccount();
+	afx_msg void OnEnKillfocusSmtpAddr();
+	afx_msg void OnEnKillfocusPop3Addr();
+	afx_msg void OnEnKillfocusUserPasswd();
+	afx_msg void OnEnKillfocusRecipients();
 };

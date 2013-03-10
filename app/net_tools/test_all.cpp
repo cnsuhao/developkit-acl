@@ -63,9 +63,13 @@ test_all::test_all(test_callback* callback)
 , ping_result_(*this)
 , ns_result_(*this)
 , smtp_result_(*this)
+, pop3_result_(*this)
 , ping_ok_(false)
 , dns_ok_(false)
-, mail_ok_(false)
+, smtp_ok_(false)
+, pop3_ok_(false)
+, pop3_recv_all_(false)
+, pop3_recv_limit_(1)
 {
 
 }
@@ -89,7 +93,7 @@ void test_all::start()
 		dns_ip_.c_str(), dns_port_, dns_timeout_);
 	rpc_manager::get_instance().fork(req);
 
-	// 启动邮件测试过程
+	// 启动邮件发送过程
 	smtp_client* smtp = new smtp_client();
 	(*smtp).set_callback(&smtp_result_)
 		.add_file(attach_.c_str())
@@ -102,11 +106,22 @@ void test_all::start()
 		.set_subject("邮件发送过程测试!")
 		.add_to(recipients_.c_str());
 	rpc_manager::get_instance().fork(smtp);
+
+	// 启动邮件接收过程
+	pop3_client* pop3 = new pop3_client();
+	(*pop3).set_callback(&pop3_result_)
+		.set_pop3(pop3_addr_.c_str(), pop3_port_)
+		.set_conn_timeout(conn_timeout_)
+		.set_rw_timeout(rw_timeout_)
+		.set_account(mail_user_.c_str())
+		.set_passwd(mail_pass_.c_str())
+		.set_recv_count(pop3_recv_all_ ? -1 : (int) pop3_recv_limit_);
+	rpc_manager::get_instance().fork(pop3);
 }
 
 void test_all::check_finish()
 {
-	if (ping_ok_ && dns_ok_ && mail_ok_)
+	if (ping_ok_ && dns_ok_ && smtp_ok_ && pop3_ok_)
 	{
 		callback_->test_finish();
 		delete this;
@@ -122,7 +137,7 @@ void test_all::ping_report(size_t total, size_t curr, size_t nerr)
 		nstep = 0;
 
 	acl::string msg;
-	msg.format("%d/%d; failed: %d", curr, total, nerr);
+	msg.format("ping 过程 %d/%d; failed: %d", curr, total, nerr);
 	callback_->test_report(msg.c_str(), nstep);
 }
 
@@ -168,7 +183,7 @@ void test_all::smtp_report(const char* msg, size_t total,
 void test_all::smtp_finish(const char* dbpath)
 {
 	callback_->test_store(dbpath);
-	mail_ok_ = true;
+	smtp_ok_ = true;
 	check_finish();
 }
 
@@ -187,7 +202,7 @@ void test_all::pop3_report(const char* msg, size_t total,
 void test_all::pop3_finish(const char* dbpath)
 {
 	callback_->test_store(dbpath);
-	mail_ok_ = true;
+	pop3_ok_ = true;
 	check_finish();
 }
 

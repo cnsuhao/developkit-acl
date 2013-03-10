@@ -43,6 +43,9 @@ Source: "..\Release\lib_protocol.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\Release\net_tools.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\Release\sqlite3.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\Release\zlib.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\Release\263ip.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\Release\263domain.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\Release\ReadMe.txt"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

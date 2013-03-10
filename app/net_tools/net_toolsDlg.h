@@ -61,6 +61,7 @@ private:
 	UINT m_pingTimeout;
 	UINT m_pktSize;
 	BOOL m_pingBusy;
+	CString m_ipFilePath;
 	CString m_pingDbPath;
 
 	// dns 相关参数
@@ -68,6 +69,7 @@ private:
 	UINT m_dnsPort;
 	UINT m_lookupTimeout;
 	BOOL m_dnsBusy;
+	CString m_domainFilePath;
 	CString m_dnsDbPath;
 
 	// 上传日志相关参数
@@ -78,9 +80,12 @@ private:
 	CString m_smtpUser;
 	CString m_smtpPass;
 	CString m_recipients;
+	CString m_attachFilePath;
 
 	CString m_pop3Addr;
 	int m_pop3Port;
+	UINT m_recvLimit;
+	BOOL m_recvAll;
 
 protected:
 	void DisableAll();
@@ -128,4 +133,5 @@ public:
 	afx_msg void OnEnSetfocusIpFilePath();
 	afx_msg void OnEnSetfocusDomainFile();
 	afx_msg void OnEnSetfocusFile();
+	afx_msg void OnBnClickedRecvAll();
 };

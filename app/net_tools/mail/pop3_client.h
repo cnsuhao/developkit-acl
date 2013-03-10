@@ -6,9 +6,20 @@ struct POP3_METER
 {
 	double pop3_nslookup_elapsed;
 	double pop3_connect_elapsed;
+	double pop3_banner_elapsed;
 	double pop3_auth_elapsed;
+	double pop3_uidl_elapsed;
 	double pop3_list_elapsed;
+	double pop3_recv_elapsed;
+	double pop3_quit_elapsed;
 	double pop3_total_elapsed;
+	size_t total_list;
+	size_t total_uidl;
+	size_t total_size;
+	size_t recved_limit;
+	size_t recved_count;
+	size_t recved_size;
+	size_t recved_speed;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -40,6 +51,7 @@ public:
 	pop3_client& set_conn_timeout(int);
 	pop3_client& set_rw_timeout(int);
 	pop3_client& set_pop3(const char*, int);
+	pop3_client& set_recv_count(int);
 protected:
 	// 基类虚函数：子线程处理函数
 	virtual void rpc_run();
@@ -61,4 +73,18 @@ private:
 	acl::string pop3_ip_;
 	acl::string pop3_addr_;
 	int pop3_port_;
+	int recv_limit_;
+	time_t recv_begin_;
+
+	bool get_ip();
+
+private:
+	bool pop3_get_banner(acl::socket_stream&);
+	bool pop3_auth(acl::socket_stream&, const char*, const char*);
+	bool pop3_uidl(acl::socket_stream&, std::vector<acl::string>&);
+	bool pop3_list(acl::socket_stream&, std::vector<size_t>&);
+	bool pop3_retr(acl::socket_stream& conn,
+		const std::vector<size_t>& size_list);
+	bool pop3_retr_one(acl::socket_stream& conn, size_t idx);
+	bool pop3_quit(acl::socket_stream& conn);
 };

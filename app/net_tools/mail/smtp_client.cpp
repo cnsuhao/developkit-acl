@@ -131,81 +131,38 @@ void smtp_client::rpc_wakeup(void* ctx)
 
 void smtp_client::rpc_run()
 {
-	// 创建邮件内容
-
-	mime_builder builer;
-	builer.primary_header()
-		.set_from(mail_from_.c_str())
-		.set_sender(mail_from_.c_str());
-
-	std::list<acl::string>::const_iterator cit1 = recipients_.begin();
-	for (; cit1 != recipients_.end(); ++cit1)
-		builer.primary_header().add_to((*cit1).c_str());
-	builer.primary_header().set_subject(subject_.c_str());
-
-	acl::string body_text("test");
-	builer.set_body_text(body_text.c_str(), body_text.length());
-	std::vector<acl::string>::const_iterator cit = files_.begin();
-	for (; cit != files_.end(); ++cit)
-		builer.add_file((*cit).c_str());
-
-	mailpath_.format("%s/%ld.eml", global::get_instance().get_path(),
-		time(NULL));
-	if (builer.save_as(mailpath_.c_str()) == false)
-	{
-		logger_error("build email(%s) error(%s)",
-			mailpath_.c_str(), acl::last_serror());
-		mailpath_.clear();
-		return;
-	}
-
-	acl::ifstream in;
-	if (in.open_read(mailpath_.c_str()) == false)
-	{
-		logger_error("open %s error %s", mailpath_.c_str(),
-			acl::last_serror());
-		mailpath_.clear();
-		return;
-	}
-	//////////////////////////////////////////////////////////////////////////
-	// 远程连接 SMTP 服务器，将本地创建的邮件发送出去
 	UP_CTX* up;
+
+	// 创建邮件内容
+	acl::ifstream in;
+	if (create_mail(in) == false)
+		return;
+
 
 	struct timeval begin, last, now;
 	gettimeofday(&begin, NULL);
-	gettimeofday(&last, NULL);
 
-	ACL_DNS_DB* dns_db = acl_gethostbyname(smtp_addr_.c_str(), NULL);
-	if (dns_db == NULL)
+	//////////////////////////////////////////////////////////////////////////
+	// 域名解析过程
+
+	gettimeofday(&last, NULL);
+	if (get_ip() == false)
 	{
-		logger_error("gethostbyname(%s) failed", smtp_addr_.c_str());
 		up = new UP_CTX;
 		up->curr = 0;
 		up->total = (size_t) in.fsize();
 		up->msg.format("解析 smtp 域名：%s 失败！", smtp_addr_.c_str());
 		rpc_signal(up);
-		return;
-	}
-	const char* first_ip = acl_netdb_index_ip(dns_db, 0);
-	if (first_ip == NULL || *first_ip == 0)
-	{
-		up = new UP_CTX;
-		up->curr = 0;
-		up->total = (size_t) in.fsize();
-		up->msg.format("解析 smtp 域名2：%s 失败！", smtp_addr_.c_str());
-		rpc_signal(up);
-		logger_error("no ip for domain: %s", smtp_addr_.c_str());
-		acl_netdb_free(dns_db);
-		return;
-	}
-	smtp_ip_ = first_ip;
 
+		return;
+	}
 	gettimeofday(&now, NULL);
 	meter_.smtp_nslookup_elapsed = util::stamp_sub(&now, &last);
-
 	acl::string smtp_addr;
-	smtp_addr.format("%s:%d", first_ip, smtp_port_);
-	acl_netdb_free(dns_db);
+	smtp_addr.format("%s:%d", smtp_ip_.c_str(), smtp_port_);
+
+	//////////////////////////////////////////////////////////////////////////
+	// 远程连接 SMTP 服务器
 
 	up = new UP_CTX;
 	up->curr = 0;
@@ -229,6 +186,8 @@ void smtp_client::rpc_run()
 	gettimeofday(&now, NULL);
 	meter_.smtp_connect_elapsed = util::stamp_sub(&now, &last);
 
+	//////////////////////////////////////////////////////////////////////////
+
 	up = new UP_CTX;
 	up->curr = 0;
 	up->total = (size_t) in.fsize();
@@ -249,6 +208,9 @@ void smtp_client::rpc_run()
 		smtp_close(conn);
 		return;
 	}
+
+	//////////////////////////////////////////////////////////////////////////
+	// 认证用户身份
 
 	up = new UP_CTX;
 	up->curr = 0;
@@ -275,8 +237,11 @@ void smtp_client::rpc_run()
 	up = new UP_CTX;
 	up->curr = 0;
 	up->total = (size_t) in.fsize();
-	up->msg.format("发送邮件信封(认证耗时 %.2f 毫秒) ...", meter_.smtp_auth_elapsed);
+	up->msg.format("发送邮件信封(认证耗时 %.2f 毫秒) ...",
+		meter_.smtp_auth_elapsed);
 	rpc_signal(up);
+
+	//////////////////////////////////////////////////////////////////////////
 
 	if (smtp_mail(conn, mail_from_.c_str()) != 0)
 	{
@@ -356,4 +321,62 @@ void smtp_client::rpc_run()
 	up->msg.format("发送邮件成功！(%d/%d 字节, 耗时 %.2f 毫秒)",
 		up->curr, up->total, meter_.smtp_total_elapsed);
 	rpc_signal(up);
+}
+
+bool smtp_client::create_mail(acl::ifstream& in)
+{
+	mime_builder builer;
+	builer.primary_header()
+		.set_from(mail_from_.c_str())
+		.set_sender(mail_from_.c_str());
+
+	std::list<acl::string>::const_iterator cit1 = recipients_.begin();
+	for (; cit1 != recipients_.end(); ++cit1)
+		builer.primary_header().add_to((*cit1).c_str());
+	builer.primary_header().set_subject(subject_.c_str());
+
+	acl::string body_text("test");
+	builer.set_body_text(body_text.c_str(), body_text.length());
+	std::vector<acl::string>::const_iterator cit = files_.begin();
+	for (; cit != files_.end(); ++cit)
+		builer.add_file((*cit).c_str());
+
+	mailpath_.format("%s/%ld.eml", global::get_instance().get_path(),
+		time(NULL));
+	if (builer.save_as(mailpath_.c_str()) == false)
+	{
+		logger_error("build email(%s) error(%s)",
+			mailpath_.c_str(), acl::last_serror());
+		mailpath_.clear();
+		return false;
+	}
+
+	if (in.open_read(mailpath_.c_str()) == false)
+	{
+		logger_error("open %s error %s", mailpath_.c_str(),
+			acl::last_serror());
+		mailpath_.clear();
+		return false;
+	}
+	return true;
+}
+
+bool smtp_client::get_ip()
+{
+	ACL_DNS_DB* dns_db = acl_gethostbyname(smtp_addr_.c_str(), NULL);
+	if (dns_db == NULL)
+	{
+		logger_error("gethostbyname(%s) failed", smtp_addr_.c_str());
+		return false;
+	}
+	const char* first_ip = acl_netdb_index_ip(dns_db, 0);
+	if (first_ip == NULL || *first_ip == 0)
+	{
+		logger_error("no ip for domain: %s", smtp_addr_.c_str());
+		acl_netdb_free(dns_db);
+		return false;
+	}
+	smtp_ip_ = first_ip;
+	acl_netdb_free(dns_db);
+	return true;
 }

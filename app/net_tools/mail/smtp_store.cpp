@@ -40,19 +40,19 @@ static const char* CREATE_TBL =
 "(\r\n"
 "user varchar(128) not null,\r\n"
 "smtp_ip varchar(32) not null,\r\n"
-"smtp_nslookup_elapsed float(10,2) not null default 0.00,\r\n"
-"smtp_connect_elapsed float(10,2) not null default 0.00,\r\n"
-"smtp_envelope_eplased float(10,2) not null default 0.00,\r\n"
-"smtp_auth_elapsed float(10,2) not null default 0.00,\r\n"
-"smtp_data_elapsed float(10,2) not null default 0.00,\r\n"
-"smtp_total_elapsed float(10,2) not null default 0.00\r\n"
+"nslookup_elapsed float(10,2) not null default 0.00,\r\n"
+"connect_elapsed float(10,2) not null default 0.00,\r\n"
+"envelope_eplased float(10,2) not null default 0.00,\r\n"
+"auth_elapsed float(10,2) not null default 0.00,\r\n"
+"data_elapsed float(10,2) not null default 0.00,\r\n"
+"total_elapsed float(10,2) not null default 0.00\r\n"
 ");\r\n"
 "create index user_idx on mail_tbl(user);\r\n";
 
 void smtp_store::rpc_run()
 {
 	const char* path = global::get_instance().get_path();
-	dbpath_.format("%s/mail_store.db", path);
+	dbpath_.format("%s/smtp_store.db", path);
 
 	acl::db_sqlite db(dbpath_.c_str());
 	if (db.open() == false)
@@ -90,9 +90,9 @@ void smtp_store::insert_tbl(acl::db_handle& db)
 {
 	acl::string sql;
 
-	sql.format("insert into smtp_tbl(user, smtp_ip, smtp_nslookup_elapsed, "
-		"smtp_connect_elapsed, smtp_envelope_eplased, "
-		"smtp_auth_elapsed, smtp_data_elapsed, smtp_total_elapsed) "
+	sql.format("insert into smtp_tbl(user, smtp_ip, nslookup_elapsed, "
+		"connect_elapsed, envelope_eplased, "
+		"auth_elapsed, data_elapsed, total_elapsed) "
 		"values('%s', '%s', %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f)",
 		user_, smtp_ip_, meter_->smtp_nslookup_elapsed,
 		meter_->smtp_connect_elapsed, meter_->smtp_envelope_eplased,
