@@ -35,15 +35,7 @@ public:
 		return domain_;
 	}
 
-	time_t begin_time() const
-	{
-		return begin_;
-	}
-
-	time_t end_time() const
-	{
-		return end_;
-	}
+	double get_spent() const;
 
 	void set_begin();
 	void set_end();
@@ -63,8 +55,8 @@ private:
 private:
 	nslookup& ns_;
 	char domain_[256];
-	time_t begin_;
-	time_t end_;
+	struct timeval begin_;
+	struct timeval end_;
 
 	std::vector<IP_INFO*> ip_list_;
 };

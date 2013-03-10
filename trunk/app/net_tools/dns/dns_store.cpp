@@ -36,7 +36,7 @@ static const char* CREATE_TBL =
 "domain varchar(128) not null,\r\n"
 "ip varchar(32) not null default '',\r\n"
 "ttl integer not null default 0,\r\n"
-"spent integer not null default 0,\r\n"
+"spent float(10,2) not null default 0.00,\r\n"
 "primary key(domain, ip)\r\n"
 ");";
 
@@ -92,14 +92,14 @@ void dns_store::insert_one(acl::db_handle& db, const domain_info* info)
 	for (; cit != ip_list.end(); ++cit)
 	{
 		sql.format("insert into dns_tbl(domain, ip, ttl, spent)"
-			" values('%s', '%s', '%d', '%d')",
+			" values('%s', '%s', '%d', '%.2f')",
 			info->get_domain(), (*cit)->ip, (*cit)->ttl,
-			(int) (info->end_time() - info->begin_time()));
+			info->get_spent());
 		if (db.sql_update(sql.c_str()) == false)
 			logger_error("sql(%s) error", sql.c_str());
 		else
-			logger("add ok, domain: %s, ip: %s, ttl: %d, spent: %d",
+			logger("add ok, domain: %s, ip: %s, ttl: %d, spent: %0.2f",
 				info->get_domain(), (*cit)->ip, (*cit)->ttl,
-				(int)(info->end_time() - info->begin_time()));
+				info->get_spent());
 	}
 }

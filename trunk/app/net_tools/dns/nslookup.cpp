@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "dns_store.h"
+#include "global/util.h"
 #include "rpc/rpc_manager.h"
 #include "nslookup.h"
 
@@ -7,8 +8,6 @@
 
 domain_info::domain_info(nslookup& ns, const char* domain)
 : ns_(ns)
-, begin_(0)
-, end_(0)
 {
 	ACL_SAFE_STRNCPY(domain_, domain, sizeof(domain_));
 }
@@ -30,14 +29,18 @@ void domain_info::add_ip(const char* ip, int ttl)
 
 void domain_info::set_begin()
 {
-	time(&begin_);
+	gettimeofday(&begin_, NULL);
 }
 
 void domain_info::set_end()
 {
-	time(&end_);
+	gettimeofday(&end_, NULL);
 }
 
+double domain_info::get_spent() const
+{
+	return util::stamp_sub(&end_, &begin_);
+}
 //////////////////////////////////////////////////////////////////////////
 
 nslookup::nslookup(const char* filepath, nslookup_callback* callback,
@@ -178,9 +181,9 @@ void nslookup::dns_result(ACL_DNS_DB *dns_db, void *ctx, int errnum)
 
 	info->set_end();
 	if (dns_db == NULL) {
-		logger("ERROR: %s, domain: %s, spent: %ld",
+		logger("ERROR: %s, domain: %s, spent: %0.2f",
 			acl_dns_serror(errnum), info->get_domain(),
-			info->end_time() - info->begin_time());
+			info->get_spent());
 		info->add_ip("0.0.0.0", 0);
 		info->get_nslookup().nresult_++;
 		return;
@@ -188,8 +191,8 @@ void nslookup::dns_result(ACL_DNS_DB *dns_db, void *ctx, int errnum)
 
 	ACL_ITER iter;
 	acl::string buf;
-	buf.format("OK, domain: %s, spent: %ld, ip_list: ",
-		info->get_domain(), info->end_time() - info->begin_time());
+	buf.format("OK, domain: %s, spent: %0.2f, ip_list: ",
+		info->get_domain(), info->get_spent());
 
 	// 遍历该域名的所有查询结果
 	const ACL_HOST_INFO *hi;

@@ -88,7 +88,6 @@ private:
 	BOOL m_recvAll;
 
 protected:
-	void DisableAll();
 
 	virtual void ping_report(size_t total, size_t curr, size_t nerror);
 	virtual void ping_finish(const char* dbpath);
