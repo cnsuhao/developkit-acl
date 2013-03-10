@@ -113,17 +113,24 @@ private:
 	bool dns_ok_;
 	nslookup_result ns_result_;
 private:
-	acl::string attach_;
-	acl::string smtp_addr_;
-	int smtp_port_;
-	int conn_timeout_;
-	int rw_timeout_;
 	acl::string mail_user_;
 	acl::string mail_pass_;
+	int conn_timeout_;
+	int rw_timeout_;
+private:
+	acl::string smtp_addr_;
+	int smtp_port_;
+	acl::string attach_;
 	acl::string recipients_;
-	bool mail_ok_;
+	bool smtp_ok_;
 	smtp_result smtp_result_;
-
+private:
+	acl::string pop3_addr_;
+	int pop3_port_;
+	bool pop3_recv_all_;
+	size_t pop3_recv_limit_;
+	bool pop3_ok_;
+	pop3_result pop3_result_;
 public:
 	test_all& set_ip_file(const char* filename)
 	{
@@ -187,6 +194,42 @@ public:
 		smtp_port_ = smtp_port;
 		return *this;
 	}
+	test_all& set_recipients(const char* recipients)
+	{
+		recipients_ = recipients;
+		return *this;
+	}
+public:
+	test_all& set_pop3_addr(const char* pop3_addr)
+	{
+		pop3_addr_ = pop3_addr;
+		return *this;
+	}
+	test_all& set_pop3_port(int pop3_port)
+	{
+		pop3_port_ = pop3_port;
+		return *this;
+	}
+	test_all& set_pop3_recv(int recv_limit)
+	{
+		if (recv_limit < 0)
+		{
+			pop3_recv_all_ = true;
+			pop3_recv_limit_ = -1;
+		}
+		else if (recv_limit == 0)
+		{
+			pop3_recv_all_ = false;
+			pop3_recv_limit_ = 0;
+		}
+		else
+		{
+			pop3_recv_all_ = false;
+			pop3_recv_limit_ = recv_limit;
+		}
+		return *this;
+	}
+public:
 	test_all& set_conn_timeout(int conn_timeout)
 	{
 		conn_timeout_ = conn_timeout;
@@ -205,11 +248,6 @@ public:
 	test_all& set_mail_pass(const char* mail_pass)
 	{
 		mail_pass_ = mail_pass;
-		return *this;
-	}
-	test_all& set_recipients(const char* recipients)
-	{
-		recipients_ = recipients;
 		return *this;
 	}
 };

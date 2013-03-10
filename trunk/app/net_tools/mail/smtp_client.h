@@ -74,4 +74,7 @@ private:
 	std::vector<acl::string> files_;
 
 	acl::string mailpath_;
+
+	bool create_mail(acl::ifstream& in);
+	bool get_ip();
 };

@@ -44,6 +44,14 @@
 #define IDC_RECIPIENTS                  1023
 #define IDC_LOAD_FILE                   1023
 #define IDC_FILE                        1025
+#define IDC_RECV_LIMIT                  1026
+#define IDC_RECV_ALL                    1027
+#define IDC_STATIC_SMTP_ADDR            1030
+#define IDC_STATIC_PASS                 1031
+#define IDC_STATIC_POP3_ADDR            1032
+#define IDC_STATIC_USER                 1033
+#define IDC_STATIC_PASS2                1034
+#define IDC_STATIC_RECIPIENTS           1034
 #define ID_OPEN_MAIN                    32773
 #define ID_QUIT                         32774
 
@@ -53,7 +61,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        143
 #define _APS_NEXT_COMMAND_VALUE         32775
-#define _APS_NEXT_CONTROL_VALUE         1026
+#define _APS_NEXT_CONTROL_VALUE         1031
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

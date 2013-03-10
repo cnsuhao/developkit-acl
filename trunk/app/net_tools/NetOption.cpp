@@ -37,11 +37,49 @@ void CNetOption::DoDataExchange(CDataExchange* pDX)
 
 BOOL CNetOption::OnInitDialog()
 {
-	return TRUE;
+	if (m_smtpAddr.IsEmpty())
+		GetDlgItem(IDC_STATIC_SMTP_ADDR)->SetWindowText("X");
+	else
+		GetDlgItem(IDC_STATIC_SMTP_ADDR)->SetWindowText("√");
+	if (m_pop3Addr.IsEmpty())
+		GetDlgItem(IDC_STATIC_POP3_ADDR)->SetWindowText("X");
+	else
+		GetDlgItem(IDC_STATIC_POP3_ADDR)->SetWindowText("√");
+	if (m_userAccount.IsEmpty())
+		GetDlgItem(IDC_STATIC_USER)->SetWindowText("X");
+	else
+		GetDlgItem(IDC_STATIC_USER)->SetWindowText("√");
+	if (m_userPasswd.IsEmpty())
+		GetDlgItem(IDC_STATIC_PASS)->SetWindowText("X");
+	else
+		GetDlgItem(IDC_STATIC_PASS)->SetWindowText("√");
+	if (m_recipients.IsEmpty())
+		GetDlgItem(IDC_STATIC_RECIPIENTS)->SetWindowText("X");
+	else
+		GetDlgItem(IDC_STATIC_RECIPIENTS)->SetWindowText("√");
+
+	if (m_smtpAddr.IsEmpty())
+		GetDlgItem(IDC_SMTP_ADDR)->SetFocus();
+	else if (m_pop3Addr.IsEmpty())
+		GetDlgItem(IDC_POP3_ADDR)->SetFocus();
+	else if (m_userAccount.IsEmpty())
+		GetDlgItem(IDC_USER_ACCOUNT)->SetFocus();
+	else if (m_userPasswd.IsEmpty())
+		GetDlgItem(IDC_USER_PASSWD)->SetFocus();
+	else if (m_recipients.IsEmpty())
+		GetDlgItem(IDC_RECIPIENTS)->SetFocus();
+
+	return FALSE;
 }
 
 BEGIN_MESSAGE_MAP(CNetOption, CDialog)
 	ON_WM_PAINT()
+	ON_WM_CREATE()
+	ON_EN_KILLFOCUS(IDC_USER_ACCOUNT, OnEnKillfocusUserAccount)
+	ON_EN_KILLFOCUS(IDC_SMTP_ADDR, OnEnKillfocusSmtpAddr)
+	ON_EN_KILLFOCUS(IDC_POP3_ADDR, OnEnKillfocusPop3Addr)
+	ON_EN_KILLFOCUS(IDC_USER_PASSWD, OnEnKillfocusUserPasswd)
+	ON_EN_KILLFOCUS(IDC_RECIPIENTS, OnEnKillfocusRecipients)
 END_MESSAGE_MAP()
 
 CNetOption& CNetOption::SetSmtpAddr(const char* addr, int port)
@@ -82,4 +120,79 @@ void CNetOption::OnPaint()
 	// TODO: 在此处添加消息处理程序代码
 	// 不为绘图消息调用 CDialog::OnPaint()
 	UpdateData(FALSE);
+}
+
+int CNetOption::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	if (CDialog::OnCreate(lpCreateStruct) == -1)
+		return -1;
+
+	// TODO:  在此添加您专用的创建代码
+
+	return 0;
+}
+
+void CNetOption::OnEnKillfocusSmtpAddr()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	UpdateData(TRUE);
+	if (m_smtpAddr.IsEmpty())
+	{
+		GetDlgItem(IDC_STATIC_SMTP_ADDR)->SetWindowText("X");
+		GetDlgItem(IDC_SMTP_ADDR)->SetFocus();
+	}
+	else
+		GetDlgItem(IDC_STATIC_SMTP_ADDR)->SetWindowText("√");
+}
+
+void CNetOption::OnEnKillfocusPop3Addr()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	UpdateData(TRUE);
+	if (m_pop3Addr.IsEmpty())
+	{
+		GetDlgItem(IDC_STATIC_POP3_ADDR)->SetWindowText("X");
+		GetDlgItem(IDC_POP3_ADDR)->SetFocus();
+	}
+	else
+		GetDlgItem(IDC_STATIC_POP3_ADDR)->SetWindowText("√");
+}
+
+void CNetOption::OnEnKillfocusUserAccount()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	UpdateData(TRUE);
+	if (m_userAccount.IsEmpty())
+	{
+		GetDlgItem(IDC_STATIC_USER)->SetWindowText("X");
+		GetDlgItem(IDC_USER_ACCOUNT)->SetFocus();
+	}
+	else
+		GetDlgItem(IDC_STATIC_USER)->SetWindowText("√");
+}
+
+void CNetOption::OnEnKillfocusUserPasswd()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	UpdateData(TRUE);
+	if (m_userPasswd.IsEmpty())
+	{
+		GetDlgItem(IDC_STATIC_PASS)->SetWindowText("X");
+		GetDlgItem(IDC_USER_PASSWD)->SetFocus();
+	}
+	else
+		GetDlgItem(IDC_STATIC_PASS)->SetWindowText("√");
+}
+
+void CNetOption::OnEnKillfocusRecipients()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	UpdateData(TRUE);
+	if (m_userAccount.IsEmpty())
+	{
+		GetDlgItem(IDC_STATIC_USER)->SetWindowText("X");
+		GetDlgItem(IDC_RECIPIENTS)->SetFocus();
+	}
+	else
+		GetDlgItem(IDC_STATIC_USER)->SetWindowText("√");
 }

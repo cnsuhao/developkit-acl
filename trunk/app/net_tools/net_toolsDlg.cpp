@@ -72,13 +72,19 @@ Cnet_toolsDlg::Cnet_toolsDlg(CWnd* pParent /*=NULL*/)
 	, m_rwTimeout(60)
 	, m_pop3Addr("popcom.263xmail.com")
 	, m_pop3Port(110)
-	, m_smtpUser("shuxin.zheng@net263.com")
-	, m_smtpPass("zsxNihao123")
+	, m_recvLimit(1)
+	, m_recvAll(FALSE)
+	, m_smtpUser("")
+	, m_smtpPass("")
 	, m_recipients("shuxin.zheng@net263.com")
 	, m_trayIcon(IDR_MENU_ICON)
 	, m_bShutdown(FALSE)
+	, m_ipFilePath("263ip.txt")
+	, m_domainFilePath("263domain.txt")
+	, m_attachFilePath("ReadMe.txt")
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	acl_netdb_cache_init(0, 1);
 }
 
 Cnet_toolsDlg::~Cnet_toolsDlg()
@@ -100,6 +106,11 @@ void Cnet_toolsDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_DNS_PORT, m_dnsPort);
 	DDX_Text(pDX, IDC_LOOKUP_TIMEOUT, m_lookupTimeout);
 	DDX_Text(pDX, IDC_PKT_SIZE, m_pktSize);
+	DDX_Text(pDX, IDC_RECV_LIMIT, m_recvLimit);
+	DDX_Check(pDX, IDC_RECV_ALL, m_recvAll);
+	DDX_Text(pDX, IDC_IP_FILE_PATH, m_ipFilePath);
+	DDX_Text(pDX, IDC_DOMAIN_FILE, m_domainFilePath);
+	DDX_Text(pDX, IDC_FILE, m_attachFilePath);
 }
 
 BEGIN_MESSAGE_MAP(Cnet_toolsDlg, CDialog)
@@ -126,6 +137,7 @@ BEGIN_MESSAGE_MAP(Cnet_toolsDlg, CDialog)
 	ON_EN_SETFOCUS(IDC_IP_FILE_PATH, OnEnSetfocusIpFilePath)
 	ON_EN_SETFOCUS(IDC_DOMAIN_FILE, OnEnSetfocusDomainFile)
 	ON_EN_SETFOCUS(IDC_FILE, OnEnSetfocusFile)
+	ON_BN_CLICKED(IDC_RECV_ALL, OnBnClickedRecvAll)
 END_MESSAGE_MAP()
 
 
@@ -163,7 +175,7 @@ BOOL Cnet_toolsDlg::OnInitDialog()
 	// TODO: 在此添加额外的初始化代码
 
 	// 添加状态栏
-	int aWidths[3] = {50, 350, -1};
+	int aWidths[3] = {50, 400, -1};
 	m_wndMeterBar.SetParts(3, aWidths);
 
 	m_wndMeterBar.Create(WS_CHILD | WS_VISIBLE | WS_BORDER
@@ -245,27 +257,6 @@ HCURSOR Cnet_toolsDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-void Cnet_toolsDlg::load_db_callback(const char* smtp_addr, int smtp_port,
-	const char* pop3_addr, int pop3_port, const char* user,
-	const char* pass, const char* recipients, bool store)
-{
-	if (smtp_addr && *smtp_addr)
-		m_smtpAddr = smtp_addr;
-	m_smtpPort = smtp_port;
-	if (pop3_addr && *pop3_addr)
-		m_pop3Addr = pop3_addr;
-	m_pop3Port = pop3_port;
-	if (user && *user)
-		m_smtpUser = user;
-	if (pass && *pass)
-		m_smtpPass = pass;
-	if (recipients && *recipients)
-		m_recipients = recipients;
-
-	if (store == false)
-		UpdateData(FALSE);
-}
-
 void Cnet_toolsDlg::OnBnClickedOpenDos()
 {
 	// TODO: 在此添加控件通知处理程序代码
@@ -308,6 +299,36 @@ void Cnet_toolsDlg::upload_report(const char* msg, size_t total,
 	}
 
 	m_wndMeterBar.SetText(msg, 1, 0);
+}
+
+void Cnet_toolsDlg::load_db_callback(const char* smtp_addr, int smtp_port,
+	const char* pop3_addr, int pop3_port, const char* user,
+	const char* pass, const char* recipients, bool store)
+{
+	if (smtp_addr && *smtp_addr)
+		m_smtpAddr = smtp_addr;
+	m_smtpPort = smtp_port;
+	if (pop3_addr && *pop3_addr)
+		m_pop3Addr = pop3_addr;
+	m_pop3Port = pop3_port;
+	if (user && *user)
+		m_smtpUser = user;
+	if (pass && *pass)
+		m_smtpPass = pass;
+	if (recipients && *recipients)
+		m_recipients = recipients;
+
+	// 如果有一个必填的配置项非空，则强制用户填写
+	if (m_smtpAddr.IsEmpty() || m_pop3Addr.IsEmpty()
+		|| m_smtpUser.IsEmpty() || m_smtpPass.IsEmpty()
+		|| m_recipients.IsEmpty())
+	{
+		OnBnClickedOption();
+		return;
+	}
+
+	if (store == false)
+		UpdateData(FALSE);
 }
 
 void Cnet_toolsDlg::OnBnClickedOption()
@@ -719,11 +740,12 @@ void Cnet_toolsDlg::OnBnClickedRecvMail()
 
 	pop3_client* pop3 = new pop3_client();
 	(*pop3).set_callback(this)
-		.set_pop3(m_smtpAddr, m_smtpPort)
+		.set_pop3(m_pop3Addr, m_pop3Port)
 		.set_conn_timeout(m_connecTimeout)
 		.set_rw_timeout(m_rwTimeout)
 		.set_account(m_smtpUser.GetString())
-		.set_passwd(m_smtpPass.GetString());
+		.set_passwd(m_smtpPass.GetString())
+		.set_recv_count(m_recvAll ? -1 : m_recvLimit);
 	rpc_manager::get_instance().fork(pop3);
 }
 
@@ -768,6 +790,8 @@ void Cnet_toolsDlg::pop3_finish(const char* dbpath)
 void Cnet_toolsDlg::OnBnClickedTestall()
 {
 	// TODO: 在此添加控件通知处理程序代码
+	UpdateData(TRUE);
+
 	CString ipFile;
 	GetDlgItem(IDC_IP_FILE_PATH)->GetWindowText(ipFile);
 	CString domainFile;
@@ -782,6 +806,8 @@ void Cnet_toolsDlg::OnBnClickedTestall()
 		MessageBox(msg);
 		return;
 	}
+
+	GetDlgItem(IDC_TESTALL)->EnableWindow(FALSE);
 
 	test_all* test = new test_all(this);
 	(*test).set_ip_file(ipFile.GetString())
@@ -800,7 +826,10 @@ void Cnet_toolsDlg::OnBnClickedTestall()
 		.set_rw_timeout(m_rwTimeout)
 		.set_mail_user(m_smtpUser.GetString())
 		.set_mail_pass(m_smtpPass.GetString())
-		.set_recipients(m_recipients.GetString());
+		.set_recipients(m_recipients.GetString())
+		.set_pop3_addr(m_pop3Addr)
+		.set_pop3_port(m_pop3Port)
+		.set_pop3_recv(m_recvAll ? -1 : m_recvLimit);
 	test->start();
 }
 
@@ -818,6 +847,8 @@ void Cnet_toolsDlg::test_store(const char* dbpath)
 
 void Cnet_toolsDlg::test_finish()
 {
+	GetDlgItem(IDC_TESTALL)->EnableWindow(TRUE);
+
 	if (attaches_.empty())
 		return;
 
@@ -842,3 +873,18 @@ void Cnet_toolsDlg::test_finish()
 }
 
 //////////////////////////////////////////////////////////////////////////
+
+void Cnet_toolsDlg::OnBnClickedRecvAll()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	if (IsDlgButtonChecked(IDC_RECV_ALL))
+	{
+		GetDlgItem(IDC_RECV_LIMIT)->EnableWindow(FALSE);
+		GetDlgItem(IDC_RECV_LIMIT)->SetWindowText("0");
+	}
+	else
+	{
+		GetDlgItem(IDC_RECV_LIMIT)->EnableWindow(TRUE);
+		GetDlgItem(IDC_RECV_LIMIT)->SetWindowText("1");
+	}
+}
