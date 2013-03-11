@@ -116,6 +116,9 @@ bool rpc_request::cond_wait(int timeout /* = -1 */)
 		if (status != 0)
 		{
 			logger_error("pthread_cond_wait error: %d", status);
+			status = acl_pthread_mutex_unlock(lock_);
+			if (status != 0)
+				logger_error("pthread_mutex_unlock error: %d", status);
 			return false;
 		}
 		status = acl_pthread_mutex_unlock(lock_);
@@ -141,6 +144,9 @@ bool rpc_request::cond_wait(int timeout /* = -1 */)
 			wait_timedout_ = true;
 		else
 			logger_error("pthread_cond_timedwait error: %d", status);
+		status = acl_pthread_mutex_unlock(lock_);
+		if (status != 0)
+			logger_error("pthread_mutex_unlock error: %d", status);
 		return false;
 	}
 	else
