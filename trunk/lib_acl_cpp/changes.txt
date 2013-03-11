@@ -1,5 +1,10 @@
 修改历史列表：
 ------------------------------------------------------------------------
+150) 2013.3.11
+150.1) bugfix: rpc.cpp, rpc_request::cond_wait 调用过程中，如果函数
+acl_pthread_cond_wait 或 acl_pthread_cond_timedwait 返回非 0 值，则应该
+解锁，否则会造成 rpc_request::cond_signal 因为无法获得锁而阻塞
+
 149) 2013.2.25
 149.1) bugfix: ipc 模块，当 aio_handle 为 WIN32 窗口消息事件引擎时，不应
 调用套接口的监听过程
