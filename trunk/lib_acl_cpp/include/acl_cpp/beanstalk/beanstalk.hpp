@@ -258,6 +258,10 @@ public:
 		return errbuf_;
 	}
 
+	socket_stream& get_conn() const
+	{
+		return conn_;
+	}
 private:
 	char* addr_;
 	int   timeout_;
