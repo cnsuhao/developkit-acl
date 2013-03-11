@@ -258,7 +258,7 @@ public:
 		return errbuf_;
 	}
 
-	socket_stream& get_conn() const
+	socket_stream& get_conn()
 	{
 		return conn_;
 	}
