@@ -24,6 +24,9 @@ public:
 		const char* user, const char* pass,
 		const char* recipients, net_store_callback* callback,
 		bool store = false);
+
+	static bool get_key(const char* name, acl::string& out);
+	static bool set_key(const char* name, const char* value);
 protected:
 	~net_store();
 
@@ -45,7 +48,8 @@ private:
 
 	acl::string dbpath_;
 
-	bool create_tbl(acl::db_handle& db);
-	void load_db(acl::db_handle& db);
-	void save_db(acl::db_handle& db);
+	void load_mail_db(acl::db_handle& db);
+	void save_mail_db(acl::db_handle& db);
+	bool create_mail_tbl(acl::db_handle& db, const char* tbl_name,
+		const char* sql_create);
 };

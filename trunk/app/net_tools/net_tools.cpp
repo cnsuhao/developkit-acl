@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+
 #include "net_tools.h"
 #include "net_toolsDlg.h"
 
@@ -20,6 +21,7 @@ END_MESSAGE_MAP()
 // Cnet_toolsApp 构造
 
 Cnet_toolsApp::Cnet_toolsApp()
+: m_singleCtrl("net_tools_xxxxxxx")
 {
 	// TODO: 在此处添加构造代码，
 	// 将所有重要的初始化放置在 InitInstance 中
@@ -41,6 +43,9 @@ BOOL Cnet_toolsApp::InitInstance()
 	InitCommonControls();
 
 	CWinApp::InitInstance();
+
+	if (!m_singleCtrl.Check())
+		return FALSE;
 
 	if (!AfxSocketInit())
 	{

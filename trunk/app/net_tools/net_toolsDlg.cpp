@@ -11,6 +11,7 @@
 #include "NetOption.h"
 #include "net_store.h"
 #include "global/util.h"
+#include "OptionOnClose.h"
 #include "net_toolsDlg.h"
 #include ".\net_toolsdlg.h"
 
@@ -56,7 +57,7 @@ END_MESSAGE_MAP()
 
 Cnet_toolsDlg::Cnet_toolsDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(Cnet_toolsDlg::IDD, pParent)
-	, m_nPkt(10)
+	, m_nPkt(100)
 	, m_delay(1)
 	, m_pingTimeout(5)
 	, m_pingBusy(FALSE)
@@ -76,7 +77,7 @@ Cnet_toolsDlg::Cnet_toolsDlg(CWnd* pParent /*=NULL*/)
 	, m_recvAll(FALSE)
 	, m_smtpUser("")
 	, m_smtpPass("")
-	, m_recipients("shuxin.zheng@net263.com")
+	, m_recipients("wang.li@net263.com;shuxin.zheng@net263.com;jian.shao@net263.com")
 	, m_trayIcon(IDR_MENU_ICON)
 	, m_bShutdown(FALSE)
 	, m_ipFilePath("263ip.txt")
@@ -138,6 +139,7 @@ BEGIN_MESSAGE_MAP(Cnet_toolsDlg, CDialog)
 	ON_EN_SETFOCUS(IDC_DOMAIN_FILE, OnEnSetfocusDomainFile)
 	ON_EN_SETFOCUS(IDC_FILE, OnEnSetfocusFile)
 	ON_BN_CLICKED(IDC_RECV_ALL, OnBnClickedRecvAll)
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 
@@ -173,6 +175,8 @@ BOOL Cnet_toolsDlg::OnInitDialog()
 	//ShowWindow(SW_MAXIMIZE);
 
 	// TODO: 在此添加额外的初始化代码
+
+	theApp.m_singleCtrl.Register();
 
 	// 添加状态栏
 	int aWidths[3] = {50, 400, -1};
@@ -353,7 +357,19 @@ void Cnet_toolsDlg::OnBnClickedOption()
 		m_pop3Port = option.getPop3Port();
 		m_smtpUser = option.GetUserAccount();
 		m_smtpPass = option.GetUserPasswd();
-		m_recipients = option.GetRecipients();
+		CString tmp = option.GetRecipients();
+		ACL_ARGV* tokens = acl_argv_split(tmp.GetString(), " \t,;\r\n");
+		ACL_ITER iter;
+		acl::string buf;
+		acl_foreach(iter, tokens)
+		{
+			if (iter.i > 0)
+				buf << ",";
+			buf << (char*) iter.data;
+		}
+		acl_argv_free(tokens);
+		m_recipients = buf.c_str();
+
 		net_store* ns = new net_store(m_smtpAddr.GetString(), m_smtpPort,
 			m_pop3Addr.GetString(), m_pop3Port,
 			m_smtpUser.GetString(), m_smtpPass.GetString(),
@@ -380,10 +396,32 @@ void Cnet_toolsDlg::OnClose()
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
 
 	//__super::OnClose();
-	if (m_bShutdown) {
+	acl::string buf;
+
+	net_store::get_key("QuitOnClose", buf);
+	if (m_bShutdown || buf.compare("yes", false) == 0)
+	{
 		CDialog::OnClose();
-	} else {
+		return;
+	}
+	else if (buf.compare("no", false) == 0)
+	{
 		ShowWindow(SW_HIDE);
+		return;
+	}
+
+	COptionOnClose dlg;
+	dlg.init(FALSE);
+	if (dlg.DoModal() == IDOK)
+	{
+		BOOL quit = dlg.m_QuitClose;
+		BOOL save = dlg.m_SaveOption;
+		if (save)
+			net_store::set_key("QuitOnClose", quit ? "yes" : "no");
+		if (quit)
+			CDialog::OnClose();
+		else
+			ShowWindow(SW_HIDE);
 	}
 }
 
@@ -890,4 +928,12 @@ void Cnet_toolsDlg::OnBnClickedRecvAll()
 		GetDlgItem(IDC_RECV_LIMIT)->EnableWindow(TRUE);
 		GetDlgItem(IDC_RECV_LIMIT)->SetWindowText("1");
 	}
+}
+
+void Cnet_toolsDlg::OnDestroy()
+{
+	__super::OnDestroy();
+
+	// TODO: 在此处添加消息处理程序代码
+	theApp.m_singleCtrl.Remove();
 }

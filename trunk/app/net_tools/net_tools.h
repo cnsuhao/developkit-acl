@@ -7,6 +7,7 @@
 	#error 在包含用于 PCH 的此文件之前包含“stdafx.h”
 #endif
 
+#include "SingleCtrl.h"
 #include "resource.h"		// 主符号
 
 
@@ -20,12 +21,15 @@ public:
 	Cnet_toolsApp();
 
 // 重写
-	public:
+public:
 	virtual BOOL InitInstance();
 
 // 实现
 
 	DECLARE_MESSAGE_MAP()
+
+public:
+	CSingleCtrl m_singleCtrl;
 };
 
 extern Cnet_toolsApp theApp;

@@ -139,16 +139,17 @@ BEGIN
                     WS_TABSTOP,162,179,57,10
 END
 
-IDD_OPTION DIALOGEX 0, 0, 309, 305
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
-    WS_SYSMENU
+IDD_OPTION DIALOGEX 0, 0, 309, 337
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | 
+    WS_CAPTION | WS_VSCROLL | WS_HSCROLL | WS_SYSMENU
 CAPTION "设置"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    EDITTEXT        IDC_RECIPIENTS,107,222,121,31,ES_MULTILINE | 
-                    ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL
-    PUSHBUTTON      "确定",IDOK,171,276,50,14,NOT WS_TABSTOP
-    PUSHBUTTON      "取消",IDCANCEL,226,276,50,14
+    EDITTEXT        IDC_RECIPIENTS,107,217,121,60,ES_MULTILINE | 
+                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | 
+                    WS_VSCROLL | WS_HSCROLL
+    PUSHBUTTON      "确定",IDOK,170,298,50,14,NOT WS_TABSTOP
+    PUSHBUTTON      "取消",IDCANCEL,225,297,50,14
     GROUPBOX        "SMTP 发送服务器",IDC_STATIC,37,17,239,58
     GROUPBOX        "帐号设置",IDC_STATIC,37,144,239,58
     LTEXT           "服务器地址：",IDC_STATIC,50,33,52,14
@@ -165,14 +166,29 @@ BEGIN
     LTEXT           "邮箱密码：",IDC_STATIC,57,178,42,14
     EDITTEXT        IDC_USER_PASSWD,107,176,121,14,ES_PASSWORD | 
                     ES_AUTOHSCROLL
-    GROUPBOX        "收件人设置",IDC_STATIC,37,206,239,55
+    GROUPBOX        "收件人设置",IDC_STATIC,37,206,239,80
     LTEXT           "接收者列表：",IDC_STATIC,48,224,51,14
-    LTEXT           "(多个接收者之间用逗号分隔)",IDC_STATIC,48,237,51,19
+    LTEXT           "(多个接收者之间用分号分隔)",IDC_STATIC,48,237,51,19
     LTEXT           "√",IDC_STATIC_SMTP_ADDR,237,33,32,15
     LTEXT           "√",IDC_STATIC_PASS,236,177,32,15
     LTEXT           "√",IDC_STATIC_POP3_ADDR,238,97,36,15
     LTEXT           "√",IDC_STATIC_USER,236,161,32,15
     LTEXT           "√",IDC_STATIC_RECIPIENTS,236,227,32,15
+END
+
+IDD_DIALOG_QUIT DIALOGEX 0, 0, 176, 89
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "选择"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "确定",IDOK,119,56,50,14
+    CONTROL         "记住选择",IDC_CHECK_SAVE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,26,57,56,10
+    CONTROL         "退出",IDC_QUIT_YES,"Button",BS_AUTORADIOBUTTON,25,34,28,
+                    12
+    CONTROL         "最小化",IDC_QUIT_NO,"Button",BS_AUTORADIOBUTTON,25,17,
+                    43,11
 END
 
 
@@ -242,9 +258,17 @@ BEGIN
     IDD_OPTION, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 302
+        RIGHTMARGIN, 291
         TOPMARGIN, 7
-        BOTTOMMARGIN, 298
+        BOTTOMMARGIN, 319
+    END
+
+    IDD_DIALOG_QUIT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 169
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 82
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -271,6 +295,13 @@ BEGIN
     END
 END
 
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// HTML
+//
+
+IDR_HTML_OPTIONONCLOSE  HTML                    "OptionOnClose.htm"
 
 /////////////////////////////////////////////////////////////////////////////
 //

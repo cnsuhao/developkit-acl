@@ -133,4 +133,7 @@ public:
 	afx_msg void OnEnSetfocusDomainFile();
 	afx_msg void OnEnSetfocusFile();
 	afx_msg void OnBnClickedRecvAll();
+private:
+public:
+	afx_msg void OnDestroy();
 };
