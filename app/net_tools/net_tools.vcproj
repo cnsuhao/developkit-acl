@@ -168,6 +168,12 @@ copy ..\..\lib\win32\sqlite3.dll $(OutDir)\ /Y
 				RelativePath=".\NetOption.cpp">
 			</File>
 			<File
+				RelativePath=".\OptionOnClose.cpp">
+			</File>
+			<File
+				RelativePath=".\SingleCtrl.cpp">
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -203,7 +209,13 @@ copy ..\..\lib\win32\sqlite3.dll $(OutDir)\ /Y
 				RelativePath=".\NetOption.h">
 			</File>
 			<File
+				RelativePath=".\OptionOnClose.h">
+			</File>
+			<File
 				RelativePath=".\Resource.h">
+			</File>
+			<File
+				RelativePath=".\SingleCtrl.h">
 			</File>
 			<File
 				RelativePath=".\stdafx.h">
@@ -373,6 +385,10 @@ copy ..\..\lib\win32\sqlite3.dll $(OutDir)\ /Y
 		</Filter>
 		<File
 			RelativePath=".\net_tools.manifest">
+		</File>
+		<File
+			RelativePath=".\OptionOnClose.htm"
+			DeploymentContent="TRUE">
 		</File>
 		<File
 			RelativePath=".\ReadMe.txt">

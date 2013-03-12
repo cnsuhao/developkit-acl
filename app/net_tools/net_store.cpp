@@ -27,6 +27,114 @@ net_store::~net_store()
 }
 
 //////////////////////////////////////////////////////////////////////////
+
+bool create_option_tbl(acl::db_handle& db, const char* tbl_name,
+	const char* sql_create)
+{
+	if (db.tbl_exists(tbl_name))
+	{
+		logger("table(%s) exist", tbl_name);
+		return (true);
+	}
+	else if (db.sql_update(sql_create) == false)
+	{
+		logger_error("sql(%s) error", sql_create);
+		return (false);
+	}
+	else
+	{
+		logger("create table %s ok", tbl_name);
+		return (true);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+static const char* CREATE_OPT_TBL =
+"create table option_tbl"
+"(\r\n"
+"name varchar(128) not null default '',\r\n"
+"value varchar(256) not null default '',\r\n"
+"PRIMARY KEY(name)"
+")";
+
+static acl::db_handle* open_option_tbl()
+{
+	const char* path = global::get_instance().get_path();
+	acl::string dbpath;
+	dbpath.format("%s/net_store.db", path);
+
+	acl::db_handle* db = new acl::db_sqlite(dbpath.c_str());
+	if (db->open() == false)
+	{
+		logger_error("open db: %s failed", dbpath.c_str());
+		delete db;
+		return NULL;
+	}
+	else if (create_option_tbl(*db, "option_tbl", CREATE_OPT_TBL) == false)
+	{
+		delete db;
+		return NULL;
+	}
+	else
+		return db;
+}
+
+bool net_store::get_key(const char* name, acl::string& out)
+{
+	acl::db_handle* db = open_option_tbl();
+	if (db == NULL)
+		return false;
+	acl::string sql;
+	sql.format("select value from option_tbl where name='%s'", name);
+	if (db->sql_select(sql.c_str()) == false)
+	{
+		delete db;
+		return false;
+	}
+
+	const acl::db_row* row = db->get_first_row();
+	if (row == NULL)
+	{
+		delete db;
+		return false;
+	}
+	const char* value = (*row)["value"];
+	if (value == NULL)
+	{
+		db->free_result();
+		delete db;
+		return false;
+	}
+	out = value;
+	return true;
+}
+
+bool net_store::set_key(const char* name, const char* value)
+{
+	acl::db_handle* db = open_option_tbl();
+	if (db == NULL)
+		return false;
+
+	acl::string sql;
+	sql.format("insert into option_tbl(name, value) values('%s', '%s')",
+		name, value);
+	if (db->sql_update(sql.c_str()) == false)
+	{
+		sql.format("update option_tbl set value='%s' where name='%s'",
+			value, name);
+		db->sql_update(sql.c_str());
+		delete db;
+		return false;
+	}
+	else
+	{
+		delete db;
+		return true;
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
 // 主线程中运行
 
 void net_store::rpc_onover()
@@ -41,7 +149,7 @@ void net_store::rpc_onover()
 //////////////////////////////////////////////////////////////////////////
 // 子线程中运行
 
-static const char* CREATE_TBL =
+static const char* CREATE_MAIL_TBL =
 "create table mail_tbl\r\n"
 "(\r\n"
 "smtp_addr varchar(128) not null,\r\n"
@@ -62,35 +170,36 @@ void net_store::rpc_run()
 	acl::db_sqlite db(dbpath_.c_str());
 	if (db.open() == false)
 		logger_error("open db: %s failed", dbpath_.c_str());
-	else if (create_tbl(db) == false)
+	else if (create_mail_tbl(db, "mail_tbl", CREATE_MAIL_TBL) == false)
 		logger_error("create table failed for %s", dbpath_.c_str());
 	else if (store_)
-		save_db(db);
+		save_mail_db(db);
 	else
-		load_db(db);
+		load_mail_db(db);
 }
 
-bool net_store::create_tbl(acl::db_handle& db)
+bool net_store::create_mail_tbl(acl::db_handle& db, const char* tbl_name,
+				const char* sql_create)
 {
-	if (db.tbl_exists("mail_tbl"))
+	if (db.tbl_exists(tbl_name))
 	{
-		logger("table exist");
+		logger("table(%s) exist", tbl_name);
 		return (true);
 	}
-	else if (db.sql_update(CREATE_TBL) == false)
+	else if (db.sql_update(sql_create) == false)
 	{
-		logger_error("sql(%s) error", CREATE_TBL);
+		logger_error("sql(%s) error", sql_create);
 		return (false);
 	}
 	else
 	{
-		save_db(db);
-		logger("create table mail_tbl ok");
+		save_mail_db(db);
+		logger("create table %s ok", tbl_name);
 		return (true);
 	}
 }
 
-void net_store::save_db(acl::db_handle& db)
+void net_store::save_mail_db(acl::db_handle& db)
 {
 	acl::string sql;
 
@@ -103,7 +212,18 @@ void net_store::save_db(acl::db_handle& db)
 	db.escape_string(pop3_addr_.c_str(), pop3_addr_.length(), pop3_addr);
 	db.escape_string(user_.c_str(), user_.length(), user);
 	db.escape_string(pass_.c_str(), pass_.length(), pass);
-	db.escape_string(recipients_.c_str(), recipients_.length(), recipients);
+
+	ACL_ARGV* tokens = acl_argv_split(recipients_.c_str(), "\t,;\r\n");
+	ACL_ITER iter;
+	acl::string buf;
+	acl_foreach(iter, tokens)
+	{
+		if (iter.i > 0)
+			buf << ",";
+		buf << (char*) iter.data;
+	}
+	acl_argv_free(tokens);
+	db.escape_string(buf.c_str(), recipients_.length(), recipients);
 
 	// 密码需要加密存储
 	char* pass_crypted = passwd_crypt(pass.c_str());
@@ -121,7 +241,7 @@ void net_store::save_db(acl::db_handle& db)
 		logger_error("sql(%s) error", sql.c_str());
 }
 
-void net_store::load_db(acl::db_handle& db)
+void net_store::load_mail_db(acl::db_handle& db)
 {
 	acl::string sql;
 	sql.format("select smtp_addr, smtp_port, pop3_addr, pop3_port, user, pass, recipients from mail_tbl");

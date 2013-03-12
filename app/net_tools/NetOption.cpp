@@ -110,7 +110,20 @@ CNetOption& CNetOption::SetUserPasswd(const char* s)
 
 CNetOption& CNetOption::SetRecipients(const char* s)
 {
-	m_recipients = s;
+	if (s == NULL || *s == 0)
+		return *this;
+
+	ACL_ARGV* tokens = acl_argv_split(s, ",; \t\r\n");
+	ACL_ITER iter;
+	acl::string buf;
+	acl_foreach(iter, tokens)
+	{
+		if (iter.i > 0)
+			buf << ";\r\n";
+		buf << (char*) iter.data;
+	}
+	acl_argv_free(tokens);
+	m_recipients = buf.c_str();
 	return *this;
 }
 

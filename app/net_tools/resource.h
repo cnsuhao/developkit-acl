@@ -9,11 +9,14 @@
 #define IDS_ABOUTBOX                    101
 #define IDD_NET_TOOLS_DIALOG            102
 #define IDP_SOCKETS_INIT_FAILED         103
+#define IDR_HTML_OPTIONONCLOSE          106
 #define IDR_MAINFRAME                   128
 #define IDD_OPTION                      131
 #define IDR_RT_MANIFEST1                139
 #define IDI_ICON1                       142
 #define IDI_ICON_MIN                    142
+#define IDD_DIALOG1                     143
+#define IDD_DIALOG_QUIT                 143
 #define IDC_PING                        1000
 #define IDC_NSLOOKUP                    1001
 #define IDC_IP_FILE_PATH                1002
@@ -48,9 +51,11 @@
 #define IDC_RECV_ALL                    1027
 #define IDC_STATIC_SMTP_ADDR            1030
 #define IDC_STATIC_PASS                 1031
+#define IDC_CHECK_SAVE                  1031
 #define IDC_STATIC_POP3_ADDR            1032
+#define IDC_QUIT_YES                    1032
 #define IDC_STATIC_USER                 1033
-#define IDC_STATIC_PASS2                1034
+#define IDC_QUIT_NO                     1033
 #define IDC_STATIC_RECIPIENTS           1034
 #define ID_OPEN_MAIN                    32773
 #define ID_QUIT                         32774
@@ -59,9 +64,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        143
+#define _APS_NEXT_RESOURCE_VALUE        144
 #define _APS_NEXT_COMMAND_VALUE         32775
-#define _APS_NEXT_CONTROL_VALUE         1031
-#define _APS_NEXT_SYMED_VALUE           106
+#define _APS_NEXT_CONTROL_VALUE         1034
+#define _APS_NEXT_SYMED_VALUE           107
 #endif
 #endif
