@@ -47,6 +47,10 @@ Source: "..\Release\zlib.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\Release\263ip.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\Release\263domain.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\Release\ReadMe.txt"; DestDir: "{app}"; Flags: ignoreversion
+; Source: "..\lib\IPHLPAPI.DLL"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\lib\MFC71.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\lib\msvcp71.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\lib\msvcr71.dll"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
