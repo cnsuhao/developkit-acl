@@ -134,6 +134,18 @@ public:
 	afx_msg void OnEnSetfocusFile();
 	afx_msg void OnBnClickedRecvAll();
 private:
+	void check();
 public:
 	afx_msg void OnDestroy();
+	afx_msg void OnEnKillfocusIpFilePath();
+	afx_msg void OnEnKillfocusNpkt();
+	afx_msg void OnEnKillfocusDelay();
+	afx_msg void OnEnKillfocusTimeout();
+	afx_msg void OnEnKillfocusPktSize();
+	afx_msg void OnEnKillfocusDomainFile();
+	afx_msg void OnEnKillfocusDnsPort();
+	afx_msg void OnEnKillfocusLookupTimeout();
+	afx_msg void OnEnKillfocusFile();
+	afx_msg void OnEnKillfocusRecvLimit();
+	afx_msg void OnBnKillfocusRecvAll();
 };

@@ -73,4 +73,6 @@ public:
 	afx_msg void OnEnKillfocusPop3Addr();
 	afx_msg void OnEnKillfocusUserPasswd();
 	afx_msg void OnEnKillfocusRecipients();
+	afx_msg void OnBnClickedCancel();
+	afx_msg void OnBnClickedOk();
 };

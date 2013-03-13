@@ -80,6 +80,8 @@ BEGIN_MESSAGE_MAP(CNetOption, CDialog)
 	ON_EN_KILLFOCUS(IDC_POP3_ADDR, OnEnKillfocusPop3Addr)
 	ON_EN_KILLFOCUS(IDC_USER_PASSWD, OnEnKillfocusUserPasswd)
 	ON_EN_KILLFOCUS(IDC_RECIPIENTS, OnEnKillfocusRecipients)
+	ON_BN_CLICKED(IDCANCEL, OnBnClickedCancel)
+	ON_BN_CLICKED(IDOK, OnBnClickedOk)
 END_MESSAGE_MAP()
 
 CNetOption& CNetOption::SetSmtpAddr(const char* addr, int port)
@@ -208,4 +210,16 @@ void CNetOption::OnEnKillfocusRecipients()
 	}
 	else
 		GetDlgItem(IDC_STATIC_USER)->SetWindowText("√");
+}
+
+void CNetOption::OnBnClickedCancel()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	OnCancel();
+}
+
+void CNetOption::OnBnClickedOk()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	OnOK();
 }
