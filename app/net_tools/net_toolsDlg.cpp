@@ -140,6 +140,17 @@ BEGIN_MESSAGE_MAP(Cnet_toolsDlg, CDialog)
 	ON_EN_SETFOCUS(IDC_FILE, OnEnSetfocusFile)
 	ON_BN_CLICKED(IDC_RECV_ALL, OnBnClickedRecvAll)
 	ON_WM_DESTROY()
+	ON_EN_KILLFOCUS(IDC_IP_FILE_PATH, OnEnKillfocusIpFilePath)
+	ON_EN_KILLFOCUS(IDC_NPKT, OnEnKillfocusNpkt)
+	ON_EN_KILLFOCUS(IDC_DELAY, OnEnKillfocusDelay)
+	ON_EN_KILLFOCUS(IDC_TIMEOUT, OnEnKillfocusTimeout)
+	ON_EN_KILLFOCUS(IDC_PKT_SIZE, OnEnKillfocusPktSize)
+	ON_EN_KILLFOCUS(IDC_DOMAIN_FILE, OnEnKillfocusDomainFile)
+	ON_EN_KILLFOCUS(IDC_DNS_PORT, OnEnKillfocusDnsPort)
+	ON_EN_KILLFOCUS(IDC_LOOKUP_TIMEOUT, OnEnKillfocusLookupTimeout)
+	ON_EN_KILLFOCUS(IDC_FILE, OnEnKillfocusFile)
+	ON_EN_KILLFOCUS(IDC_RECV_LIMIT, OnEnKillfocusRecvLimit)
+	ON_BN_KILLFOCUS(IDC_RECV_ALL, OnBnKillfocusRecvAll)
 END_MESSAGE_MAP()
 
 
@@ -325,6 +336,8 @@ void Cnet_toolsDlg::load_db_callback(const char* smtp_addr, int smtp_port,
 	if (recipients && *recipients)
 		m_recipients = recipients;
 
+	check();
+
 	// 如果有一个必填的配置项非空，则强制用户填写
 	if (m_smtpAddr.IsEmpty() || m_pop3Addr.IsEmpty()
 		|| m_smtpUser.IsEmpty() || m_smtpPass.IsEmpty()
@@ -375,6 +388,11 @@ void Cnet_toolsDlg::OnBnClickedOption()
 			m_smtpUser.GetString(), m_smtpPass.GetString(),
 			m_recipients.GetString(), this, true);
 		rpc_manager::get_instance().fork(ns);
+		check();
+	}
+	else
+	{
+		check();
 	}
 }
 
@@ -472,6 +490,7 @@ void Cnet_toolsDlg::OnEnSetfocusDomainFile()
 		GetDlgItem(IDC_LOAD_DOMAIN)->SetFocus();
 		OnBnClickedLoadDomain();
 	}
+	check();
 }
 
 void Cnet_toolsDlg::OnBnClickedLoadDomain()
@@ -485,6 +504,7 @@ void Cnet_toolsDlg::OnBnClickedLoadDomain()
 		pathname=file.GetPathName();
 		GetDlgItem(IDC_DOMAIN_FILE)->SetWindowText(pathname);
 		GetDlgItem(IDC_NSLOOKUP)->EnableWindow(TRUE);
+		check();
 	}
 }
 
@@ -577,6 +597,7 @@ void Cnet_toolsDlg::OnEnSetfocusIpFilePath()
 		GetDlgItem(IDC_LOAD_IP)->SetFocus();
 		OnBnClickedLoadIp();
 	}
+	check();
 }
 
 void Cnet_toolsDlg::OnBnClickedLoadIp()
@@ -590,6 +611,7 @@ void Cnet_toolsDlg::OnBnClickedLoadIp()
 		pathname=file.GetPathName();
 		GetDlgItem(IDC_IP_FILE_PATH)->SetWindowText(pathname);
 		GetDlgItem(IDC_PING)->EnableWindow(TRUE);
+		check();
 	}
 }
 
@@ -681,6 +703,7 @@ void Cnet_toolsDlg::OnEnSetfocusFile()
 		GetDlgItem(IDC_LOAD_FILE)->SetFocus();
 		OnBnClickedLoadFile();
 	}
+	check();
 }
 
 void Cnet_toolsDlg::OnBnClickedLoadFile()
@@ -694,6 +717,7 @@ void Cnet_toolsDlg::OnBnClickedLoadFile()
 		pathname=file.GetPathName();
 		GetDlgItem(IDC_FILE)->SetWindowText(pathname);
 		GetDlgItem(IDC_SEND_MAIL)->EnableWindow(TRUE);
+		check();
 	}
 }
 
@@ -918,6 +942,7 @@ void Cnet_toolsDlg::test_finish()
 void Cnet_toolsDlg::OnBnClickedRecvAll()
 {
 	// TODO: 在此添加控件通知处理程序代码
+	UpdateData(TRUE);
 	if (IsDlgButtonChecked(IDC_RECV_ALL))
 	{
 		GetDlgItem(IDC_RECV_LIMIT)->EnableWindow(FALSE);
@@ -928,6 +953,7 @@ void Cnet_toolsDlg::OnBnClickedRecvAll()
 		GetDlgItem(IDC_RECV_LIMIT)->EnableWindow(TRUE);
 		GetDlgItem(IDC_RECV_LIMIT)->SetWindowText("1");
 	}
+	check();
 }
 
 void Cnet_toolsDlg::OnDestroy()
@@ -936,4 +962,142 @@ void Cnet_toolsDlg::OnDestroy()
 
 	// TODO: 在此处添加消息处理程序代码
 	theApp.m_singleCtrl.Remove();
+}
+
+void Cnet_toolsDlg::check()
+{
+	UpdateData(TRUE);
+
+	if (m_smtpAddr.IsEmpty() || m_pop3Addr.IsEmpty()
+		|| m_smtpUser.IsEmpty() || m_smtpPass.IsEmpty()
+		|| m_recipients.IsEmpty() || m_smtpPort == 0
+		|| m_connecTimeout == 0 || m_rwTimeout == 0)
+	{
+		GetDlgItem(IDC_PING)->EnableWindow(FALSE);
+		GetDlgItem(IDC_NSLOOKUP)->EnableWindow(FALSE);
+		GetDlgItem(IDC_SEND_MAIL)->EnableWindow(FALSE);
+		GetDlgItem(IDC_RECV_MAIL)->EnableWindow(FALSE);
+		GetDlgItem(IDC_TESTALL)->EnableWindow(FALSE);
+		return;
+	}
+
+	int nok = 0;
+
+	if (m_ipFilePath.IsEmpty() || m_nPkt == 0
+		|| m_delay == 0 || m_pingTimeout == 0
+		|| m_pktSize == 0)
+	{
+		GetDlgItem(IDC_PING)->EnableWindow(FALSE);
+		GetDlgItem(IDC_TESTALL)->EnableWindow(FALSE);
+	}
+	else
+	{
+		GetDlgItem(IDC_PING)->EnableWindow(TRUE);
+		nok++;
+	}
+
+	if (m_domainFilePath.IsEmpty() || m_dnsIp.IsEmpty()
+		|| m_dnsPort == 0 || m_lookupTimeout == 0)
+	{
+		GetDlgItem(IDC_NSLOOKUP)->EnableWindow(FALSE);
+		GetDlgItem(IDC_TESTALL)->EnableWindow(FALSE);
+	}
+	else
+	{
+		GetDlgItem(IDC_NSLOOKUP)->EnableWindow(TRUE);
+		nok++;
+	}
+
+	if (m_attachFilePath.IsEmpty())
+	{
+		GetDlgItem(IDC_SEND_MAIL)->EnableWindow(FALSE);
+		GetDlgItem(IDC_TESTALL)->EnableWindow(FALSE);
+	}
+	else
+	{
+		GetDlgItem(IDC_SEND_MAIL)->EnableWindow(TRUE);
+		nok++;
+	}
+
+	if (m_pop3Port == 0 || (m_recvLimit == 0 && !m_recvAll))
+	{
+		GetDlgItem(IDC_RECV_MAIL)->EnableWindow(FALSE);
+		GetDlgItem(IDC_TESTALL)->EnableWindow(FALSE);
+	}
+	else
+	{
+		GetDlgItem(IDC_RECV_MAIL)->EnableWindow(TRUE);
+		nok++;
+	}
+
+	if (nok < 4)
+		GetDlgItem(IDC_TESTALL)->EnableWindow(FALSE);
+	else
+		GetDlgItem(IDC_TESTALL)->EnableWindow(TRUE);
+}
+
+void Cnet_toolsDlg::OnEnKillfocusIpFilePath()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	check();
+}
+
+void Cnet_toolsDlg::OnEnKillfocusNpkt()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	check();
+}
+
+void Cnet_toolsDlg::OnEnKillfocusDelay()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	check();
+}
+
+void Cnet_toolsDlg::OnEnKillfocusTimeout()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	check();
+}
+
+void Cnet_toolsDlg::OnEnKillfocusPktSize()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	check();
+}
+
+void Cnet_toolsDlg::OnEnKillfocusDomainFile()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	check();
+}
+
+void Cnet_toolsDlg::OnEnKillfocusDnsPort()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	check();
+}
+
+void Cnet_toolsDlg::OnEnKillfocusLookupTimeout()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	check();
+}
+
+void Cnet_toolsDlg::OnEnKillfocusFile()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	check();
+}
+
+void Cnet_toolsDlg::OnEnKillfocusRecvLimit()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	check();
+}
+
+void Cnet_toolsDlg::OnBnKillfocusRecvAll()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	check();
 }
