@@ -275,7 +275,7 @@ void smtp_client::rpc_run()
 		return;
 	}
 	gettimeofday(&now, NULL);
-	meter_.smtp_envelope_eplased = util::stamp_sub(&now, &last);
+	meter_.smtp_envelope_eplased = util::stamp_sub(&now, &begin);
 
 	// ·¢ËÍÓÊ¼şÄÚÈİ
 

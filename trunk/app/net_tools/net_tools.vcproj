@@ -387,10 +387,6 @@ copy ..\..\lib\win32\sqlite3.dll $(OutDir)\ /Y
 			RelativePath=".\net_tools.manifest">
 		</File>
 		<File
-			RelativePath=".\OptionOnClose.htm"
-			DeploymentContent="TRUE">
-		</File>
-		<File
 			RelativePath=".\ReadMe.txt">
 		</File>
 	</Files>
