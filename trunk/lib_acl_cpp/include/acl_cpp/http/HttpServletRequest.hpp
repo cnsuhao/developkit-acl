@@ -100,9 +100,12 @@ namespace acl
 		 * @param create {bool} 当 session 不存在时是否在缓存服务器自动创建；
 		 *  当某客户端的 session 不存在且该参数为 false 时，则该函数返
 		 *  回的 session 对象会因没有被真正创建而无法进行读写操作
+		 * @param sid {const char*} 当 session 不存在，且 create 参数非空时，
+		 *  如果 sid 非空，则使用此值设置用户的唯一会话，同时添加进客户端的
+		 *  cookie 中
 		 * @return {HttpSession&}
 		 */
-		HttpSession& getSession(bool create = true);
+		HttpSession& getSession(bool create = true, const char* sid = NULL);
 
 		/**
 		 * 获得与 HTTP 客户端连接关联的输入流对象引用

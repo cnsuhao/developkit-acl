@@ -207,7 +207,8 @@ const char* HttpServletRequest::getPathInfo(void) const
 	return client_->request_path();
 }
 
-HttpSession& HttpServletRequest::getSession(bool create /* = true */)
+HttpSession& HttpServletRequest::getSession(bool create /* = true */,
+	const char* sid /* = true */)
 {
 	if (http_session_ == NULL)
 	{
@@ -220,6 +221,14 @@ HttpSession& HttpServletRequest::getSession(bool create /* = true */)
 		{
 			// 获得唯一 ID 标识符
 			sid = store_.get_sid();
+			// 生成 cookie 对象，并分别向请求对象和响应对象添加 cookie
+			HttpCookie* cookie = NEW HttpCookie(cookie_name_, sid);
+			res_.addCookie(cookie);
+			setCookie(cookie_name_, sid);
+		}
+		else if (sid != NULL || *sid != 0)
+		{
+			store_.set_sid(sid);
 			// 生成 cookie 对象，并分别向请求对象和响应对象添加 cookie
 			HttpCookie* cookie = NEW HttpCookie(cookie_name_, sid);
 			res_.addCookie(cookie);
