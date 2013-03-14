@@ -7,17 +7,30 @@ namespace acl
 {
 
 memcache_session::memcache_session(const char* cache_addr,
-	const char* prefix /* = NULL */, time_t ttl /* = 0 */,
-	const char* sid /* = NULL */)
+	int conn_timeout /* = 180 */, int rw_timeout /* = 300 */,
+	const char* prefix /* = NULL */, time_t ttl /* = 0 */, 
+	const char* sid /* = NULL */, bool encode_key /* = true */)
 : session(ttl, sid)
+, auth_free_(true)
 {
 	acl_assert(cache_addr && *cache_addr);
-	cache_ = NEW mem_cache(prefix ? prefix : "_", cache_addr);
+	cache_ = NEW mem_cache(prefix ? prefix : "_", cache_addr, true,
+		conn_timeout, rw_timeout, true);
+}
+
+memcache_session::memcache_session(mem_cache* cache, bool auto_free /* = false */,
+	time_t ttl /* = 0 */, const char* sid /* = NULL */)
+: session(ttl, sid)
+, cache_(cache)
+, auth_free_(auto_free)
+{
+
 }
 
 memcache_session::~memcache_session()
 {
-	delete cache_;
+	if (auth_free_)
+		delete cache_;
 }
 
 bool memcache_session::get_data(const char* sid, string& buf)
