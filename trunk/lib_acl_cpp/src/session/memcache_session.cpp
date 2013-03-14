@@ -15,7 +15,7 @@ memcache_session::memcache_session(const char* cache_addr,
 {
 	acl_assert(cache_addr && *cache_addr);
 	cache_ = NEW mem_cache(prefix ? prefix : "_", cache_addr, true,
-		conn_timeout, rw_timeout, true);
+		conn_timeout, rw_timeout, encode_key);
 }
 
 memcache_session::memcache_session(mem_cache* cache, bool auto_free /* = false */,
