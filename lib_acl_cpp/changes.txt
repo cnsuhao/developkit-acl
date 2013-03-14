@@ -1,5 +1,9 @@
 修改历史列表：
 ------------------------------------------------------------------------
+151) 2013.3.14
+151.1) feature: HttpServletRequest::getSession 增加了参数 sid
+151.2) feature: memcache_session 类增加了一个构造函数
+
 150) 2013.3.11
 150.1) bugfix: rpc.cpp, rpc_request::cond_wait 调用过程中，如果函数
 acl_pthread_cond_wait 或 acl_pthread_cond_timedwait 返回非 0 值，则应该
