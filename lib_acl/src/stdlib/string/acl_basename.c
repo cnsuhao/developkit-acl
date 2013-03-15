@@ -21,9 +21,11 @@ const char *acl_safe_basename(const char *path)
 {
 	const char   *result;
 
-	if ((result = strrchr(path, '/')) == 0)
+	if ((result = strrchr(path, '/')) == NULL
+		|| (result = strchr(path, '\\')) == NULL)
+	{
 		result = (const char *) path;
-	else
+	} else
 		result += 1;
 	return (result);
 }

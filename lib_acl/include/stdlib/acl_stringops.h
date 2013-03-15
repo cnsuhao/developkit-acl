@@ -23,9 +23,12 @@ ACL_API int acl_alldig(const char *str);
 ACL_API char *acl_concatenate(const char *arg0,...);
 
 /**
- * 从一个全路径的文件名中取得文件名部分，如：从 "/tmp/test.txt" 中取得 test.txt
+ * 从一个全路径的文件名中取得文件名部分，如：
+ * 从 "/tmp/test.txt" 或 "\\tmp\\test.txt" 中取得 test.txt
  * @param path {const char*} 带有路径的文件名，如："/tmp/test.txt"
- * @return {const char*} 文件名，该返回值不需要释放
+ *  或 "\\tmp\\test.txt"
+ * @return {const char*} 文件名，该返回值不需要释放，如果返回的地址
+ *  为空串(即第一个字节为 '\0') 则说明所给路径不含文件名
  */
 ACL_API const char *acl_safe_basename(const char *path);
 
