@@ -78,7 +78,7 @@ static int session_test1(const char* addr, int n)
 static void session_delay_test(const char* addr)
 {
 	const char* sid = "XXXXXXXXXXXXXX";
-	memcache_session sess(addr, NULL, 120, sid);
+	memcache_session sess(addr, 120, 300, NULL, 0, sid);
 	sess.set_ttl(128, true);
 
 	char name[128], value[128];
