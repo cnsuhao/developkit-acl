@@ -67,7 +67,7 @@ upload& upload::set_from(const char* s)
 
 upload& upload::add_to(const char* s)
 {
-	ACL_ARGV* tokens = acl_argv_split(s, ";, \t\r\n");
+	ACL_ARGV* tokens = acl_argv_split(s, ";,£¬£» \t\r\n");
 	ACL_ITER iter;
 
 	acl_foreach(iter, tokens)
