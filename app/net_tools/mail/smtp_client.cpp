@@ -69,7 +69,17 @@ smtp_client& smtp_client::set_from(const char* s)
 
 smtp_client& smtp_client::add_to(const char* s)
 {
-	recipients_.push_back(s);
+	ACL_ARGV* tokens = acl_argv_split(s, ";,£¬£» \t\r\n");
+	ACL_ITER iter;
+
+	acl_foreach(iter, tokens)
+	{
+		const char* to = (const char*) iter.data;
+		recipients_.push_back(to);
+	}
+
+	acl_argv_free(tokens);
+
 	return *this;
 }
 
@@ -263,6 +273,9 @@ void smtp_client::rpc_run()
 			smtp_close(conn);
 			return;
 		}
+		else
+			logger("smtp RCPT TO ok, to: %s, server: %s",
+				(*cit2).c_str(), smtp_addr.c_str());
 	}
 
 	gettimeofday(&last, NULL);

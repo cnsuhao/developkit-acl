@@ -115,7 +115,7 @@ CNetOption& CNetOption::SetRecipients(const char* s)
 	if (s == NULL || *s == 0)
 		return *this;
 
-	ACL_ARGV* tokens = acl_argv_split(s, ",; \t\r\n");
+	ACL_ARGV* tokens = acl_argv_split(s, ",;£¬£» \t\r\n");
 	ACL_ITER iter;
 	acl::string buf;
 	acl_foreach(iter, tokens)
