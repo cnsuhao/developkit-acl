@@ -6,10 +6,15 @@ struct SMTP_METER
 {
 	double smtp_nslookup_elapsed;
 	double smtp_connect_elapsed;
-	double smtp_envelope_eplased;
+	double smtp_banner_elapsed;
 	double smtp_auth_elapsed;
+	double smtp_mail_elapsed;
+	double smtp_rcpt_elapsed;
+	double smtp_envelope_eplased;
 	double smtp_data_elapsed;
+	double smtp_body_elapsed;
 	double smtp_total_elapsed;
+	int smtp_speed;
 };
 
 //////////////////////////////////////////////////////////////////////////
