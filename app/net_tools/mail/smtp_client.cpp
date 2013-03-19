@@ -9,13 +9,6 @@
 smtp_client::smtp_client()
 {
 	memset(&meter_, 0, sizeof(meter_));
-	meter_.smtp_nslookup_elapsed = 0.00;
-	meter_.smtp_connect_elapsed = 0.00;
-	meter_.smtp_envelope_eplased = 0.00;
-	meter_.smtp_auth_elapsed = 0.00;
-	meter_.smtp_data_elapsed = 0.00;
-	meter_.smtp_total_elapsed = 0.00;
-	meter_.smtp_auth_elapsed = 0.00;
 }
 
 smtp_client::~smtp_client()
@@ -197,6 +190,8 @@ void smtp_client::rpc_run()
 	meter_.smtp_connect_elapsed = util::stamp_sub(&now, &last);
 
 	//////////////////////////////////////////////////////////////////////////
+	struct timeval envelop_begin;
+	gettimeofday(&envelop_begin, NULL);
 
 	up = new UP_CTX;
 	up->curr = 0;
@@ -205,6 +200,7 @@ void smtp_client::rpc_run()
 		meter_.smtp_connect_elapsed);
 	rpc_signal(up);
 
+	gettimeofday(&last, NULL);
 	if (smtp_get_banner(conn) != 0)
 	{
 		logger_error("get smtpd banner error");
@@ -218,7 +214,8 @@ void smtp_client::rpc_run()
 		smtp_close(conn);
 		return;
 	}
-
+	gettimeofday(&now, NULL);
+	meter_.smtp_banner_elapsed = util::stamp_sub(&now, &last);
 	//////////////////////////////////////////////////////////////////////////
 	// 认证用户身份
 
@@ -253,6 +250,7 @@ void smtp_client::rpc_run()
 
 	//////////////////////////////////////////////////////////////////////////
 
+	gettimeofday(&last, NULL);
 	if (smtp_mail(conn, mail_from_.c_str()) != 0)
 	{
 		logger_error("smtp MAIL FROM error(%d:%s), from: %s, server: %s",
@@ -261,7 +259,12 @@ void smtp_client::rpc_run()
 		smtp_close(conn);
 		return;
 	}
+	gettimeofday(&now, NULL);
+	meter_.smtp_mail_elapsed = util::stamp_sub(&now, &last);
 
+	//////////////////////////////////////////////////////////////////////////
+
+	gettimeofday(&last, NULL);
 	std::list<acl::string>::const_iterator cit2 = recipients_.begin();
 	for (; cit2 != recipients_.end(); ++cit2)
 	{
@@ -277,6 +280,10 @@ void smtp_client::rpc_run()
 			logger("smtp RCPT TO ok, to: %s, server: %s",
 				(*cit2).c_str(), smtp_addr.c_str());
 	}
+	gettimeofday(&now, NULL);
+	meter_.smtp_rcpt_elapsed = util::stamp_sub(&now, &last);
+
+	//////////////////////////////////////////////////////////////////////////
 
 	gettimeofday(&last, NULL);
 
@@ -288,7 +295,9 @@ void smtp_client::rpc_run()
 		return;
 	}
 	gettimeofday(&now, NULL);
-	meter_.smtp_envelope_eplased = util::stamp_sub(&now, &begin);
+	meter_.smtp_data_elapsed = util::stamp_sub(&now, &last);
+
+	meter_.smtp_envelope_eplased = util::stamp_sub(&now, &envelop_begin);
 
 	// 发送邮件内容
 
@@ -325,8 +334,9 @@ void smtp_client::rpc_run()
 	}
 
 	gettimeofday(&now, NULL);
-	meter_.smtp_data_elapsed = util::stamp_sub(&now, &last);
+	meter_.smtp_body_elapsed = util::stamp_sub(&now, &last);
 	meter_.smtp_total_elapsed = util::stamp_sub(&now, &begin);
+	meter_.smtp_speed = (int) up->total / (int) meter_.smtp_body_elapsed;
 
 	up = new UP_CTX;
 	up->curr = (size_t) in.fsize();
