@@ -208,7 +208,7 @@ const char* HttpServletRequest::getPathInfo(void) const
 }
 
 HttpSession& HttpServletRequest::getSession(bool create /* = true */,
-	const char* sid_in /* = true */)
+	const char* sid_in /* = NULL */)
 {
 	if (http_session_ == NULL)
 	{
@@ -226,7 +226,7 @@ HttpSession& HttpServletRequest::getSession(bool create /* = true */,
 			res_.addCookie(cookie);
 			setCookie(cookie_name_, sid);
 		}
-		else if (sid_in != NULL || *sid_in != 0)
+		else if (sid_in != NULL && *sid_in != 0)
 		{
 			store_.set_sid(sid_in);
 			// 生成 cookie 对象，并分别向请求对象和响应对象添加 cookie
