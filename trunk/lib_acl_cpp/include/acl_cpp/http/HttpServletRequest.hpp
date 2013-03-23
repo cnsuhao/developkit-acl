@@ -90,10 +90,17 @@ namespace acl
 
 		/**
 		 * 获得  http://test.com.cn/cgi-bin/test?name=value 中的
-		 * /path/test.cgi 路径部分
+		 * /cgi-bin/test 路径部分
 		 * @return {const char*} 返回空表示不存在？
 		 */
 		const char* getPathInfo(void) const;
+
+		/**
+		 * 获得  http://test.com.cn/cgi-bin/test?name=value 中的
+		 * /cgi-bin/test?name=value 路径部分
+		 * @return {const char*} 返回空表示不存在？
+		 */
+		const char* getRequestUri(void) const;
 
 		/**
 		 * 获得与该 HTTP 会话相关的 HttpSession 对象引用
