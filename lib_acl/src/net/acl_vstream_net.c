@@ -40,34 +40,18 @@ ACL_VSTREAM *acl_vstream_listen_ex(const char *addr,
 	char  ebuf[256];
 	ACL_SOCKET  listenfd;
 	struct sockaddr_in local;
-	char *ptr;
 	ACL_VSTREAM *listen_stream;
 	int   len;
 
 	if (addr == 0 || *addr == 0 || qlen <= 0)
+	{
+		acl_msg_error("%s: input invalid", myname);
 		return (NULL);
-
-	ptr = strchr(addr, '/');
-	if (ptr == NULL) {  /* addr such as '192.168.0.1:80' */
-		listenfd = acl_inet_listen(addr, qlen, block_mode);
-		if (listenfd == ACL_SOCKET_INVALID) {
-			acl_msg_error("%s: listen addr(%s) error(%s)",
-				myname, addr, acl_last_strerror(ebuf, sizeof(ebuf)));
-			return (NULL);
-		}
-		listen_stream = acl_vstream_fdopen(listenfd,
-			ACL_VSTREAM_FLAG_RW,
-			io_bufsize,
-			io_timeout,
-			ACL_VSTREAM_TYPE_LISTEN_INET);
-		if (listen_stream == NULL) {
-			acl_socket_close(listenfd);
-			acl_msg_error("%s: open vstream error, addr(%s)", myname, addr);
-			return (NULL);
-		}
 	}
+
 #ifdef	ACL_UNIX
-	 else { /* this maybe unix addr, such as '/home/test/listen.sock' */
+	/* this maybe unix addr, such as '/home/test/listen.sock' */
+	if (strchr(addr, '/') != NULL) {
 		listenfd = acl_unix_listen(addr, qlen, 0);
 		if (listenfd == ACL_SOCKET_INVALID)
 			return (NULL);
@@ -82,13 +66,29 @@ ACL_VSTREAM *acl_vstream_listen_ex(const char *addr,
 			acl_msg_error("%s: open vstream error, addr(%s)", myname, addr);
 			return (NULL);
 		}
-	}
-#else
-	else {
-		acl_msg_error("%s: addr(%s) invalid", myname, addr);
-		return (NULL);
+		snprintf(listen_stream->local_addr,
+			sizeof(listen_stream->local_addr), "%s", addr);
+		sprintf(listen_stream->errbuf, "+OK");
+		return (listen_stream);
 	}
 #endif
+	/* addr such as '192.168.0.1:80' */
+	listenfd = acl_inet_listen(addr, qlen, block_mode);
+	if (listenfd == ACL_SOCKET_INVALID) {
+		acl_msg_error("%s: listen addr(%s) error(%s)",
+			myname, addr, acl_last_strerror(ebuf, sizeof(ebuf)));
+		return (NULL);
+	}
+	listen_stream = acl_vstream_fdopen(listenfd,
+		ACL_VSTREAM_FLAG_RW,
+		io_bufsize,
+		io_timeout,
+		ACL_VSTREAM_TYPE_LISTEN_INET);
+	if (listen_stream == NULL) {
+		acl_socket_close(listenfd);
+		acl_msg_error("%s: open vstream error, addr(%s)", myname, addr);
+		return (NULL);
+	}
 
 	memset(&local, 0, sizeof(local));
 	len = (int) sizeof(struct sockaddr);
@@ -108,7 +108,6 @@ ACL_VSTREAM *acl_vstream_listen_ex(const char *addr,
 	}
 
 	sprintf(listen_stream->errbuf, "+OK");
-
 	return (listen_stream);
 }
 
