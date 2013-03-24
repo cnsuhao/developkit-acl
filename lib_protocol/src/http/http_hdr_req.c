@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "stdlib/acl_iterator.h"
 #include "http.h"
 #include "http/lib_http.h"
 
@@ -152,7 +153,7 @@ HTTP_HDR_REQ *http_hdr_req_create(const char *url,
 	ACL_VSTRING *req_line = acl_vstring_alloc(256);
 	HTTP_HDR_ENTRY *entry;
 	const char *ptr;
-	static char *__user_agent = "Mozilla/5.0 (Windows; U; Windows NT 5.0; zh-CN; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3";
+	static char *__user_agent = "Mozilla/5.0 (Windows; U; Windows NT 5.0; zh-CN; rv:1.9.0.3) Gecko/2008092417 ACL/3.0.6";
 
 	if (url == NULL || *url == 0) {
 		acl_msg_error("%s(%d): url invalid", myname, __LINE__);
@@ -174,8 +175,10 @@ HTTP_HDR_REQ *http_hdr_req_create(const char *url,
 	ptr = strrchr(url, '/');
 	if (ptr)
 		acl_vstring_strcat(req_line, ptr);
-	else
-		acl_vstring_strcat(req_line, "/");
+	else {
+		ACL_VSTRING_ADDCH(req_line, '/');
+		ACL_VSTRING_TERMINATE(req_line);
+	}
 #else
 	acl_vstring_strcat(req_line, url);
 #endif
@@ -409,8 +412,8 @@ int http_hdr_req_cookies_parse(HTTP_HDR_REQ *hh)
 	const char  *myname = "http_hdr_req_cookies_parse";
 	const HTTP_HDR_ENTRY *entry;
 	ACL_ARGV *argv;
-	char *ptr;
-	int   i;
+	const char *ptr;
+	ACL_ITER iter;
 
 	if (hh == NULL)
 		acl_msg_fatal("%s, %s(%d): input invalid",
@@ -430,14 +433,10 @@ int http_hdr_req_cookies_parse(HTTP_HDR_REQ *hh)
 
 	/* ·Ö¸ôÊý¾Ý¶Î */
 	argv = acl_argv_split(entry->value, ";");
-
-	for (i = 0; i < argv->argc; i++) {
-		ptr = acl_argv_index(argv, i);
-		if (ptr == NULL)
-			break;
+	acl_foreach(iter, argv) {
+		ptr = (const char*) iter.data;
 		__add_cookie_item(hh->cookies_table, ptr);
 	}
-
 	acl_argv_free(argv);
 	return (0);
 }
@@ -511,10 +510,11 @@ static void __get_host_from_url(char *buf, size_t size, const char *url)
 	const char *ptr1, *ptr2;
 	size_t n;
 
-	if (strncasecmp(url, "http://", strlen("http://")) == 0)
-		ptr1 = url + strlen("http://");
-	else if (strncasecmp(url, "https://", strlen("https://")) == 0)
-		ptr1 = url + strlen("https://");
+	buf[0] = 0;
+	if (strncasecmp(url, "http://", sizeof("http://") - 1) == 0)
+		ptr1 = url + sizeof("http://") - 1;
+	else if (strncasecmp(url, "https://", sizeof("https://") - 1) == 0)
+		ptr1 = url + sizeof("https://") - 1;
 	else
 		ptr1 = url;
 
@@ -539,27 +539,24 @@ static void __strip_url_path(ACL_VSTRING *buf, const char *url)
 {
 	ACL_ARGV *argv;
 	const char *ptr;
-	char  last_ch = *(url + strlen(url) - 1);
-	int   i;
+	const char  last_ch = *(url + strlen(url) - 1);
+	ACL_ITER iter;
 
+	ACL_VSTRING_RESET(buf);
 	argv = acl_argv_split(url, "/");
-	if (argv->argc == 1) {
-		ptr = acl_argv_index(argv, 0);
+	acl_foreach(iter, argv) {
+		ptr = (const char*) iter.data;
+		if (strcmp(ptr, ".") == 0 || strcmp(ptr, "..") == 0)
+			continue;
+		ACL_VSTRING_ADDCH(buf, '/');
 		acl_vstring_strcpy(buf, ptr);
-	} else {
-		ACL_VSTRING_RESET(buf);
-		for (i = 0; i < argv->argc; i++) {
-			ptr = acl_argv_index(argv, i);
-			if (strcmp(ptr, ".") == 0 || strcmp(ptr, "..") == 0)
-				continue;
-			acl_vstring_strcat(buf, "/");
-			acl_vstring_strcat(buf, ptr);
-		}
 	}
 
 	/* make the last char is ok */
-	if (last_ch == '/')
-		acl_vstring_strcat(buf, "/");
+	if (last_ch == '/') {
+		ACL_VSTRING_ADDCH(buf, '/');
+		ACL_VSTRING_TERMINATE(buf);
+	}
 
 	acl_argv_free(argv);
 }
@@ -578,10 +575,10 @@ static void __parse_url_and_port(HTTP_HDR_REQ *hh, const char *url)
 		hh->port = atoi(ptr);
 	}
 
-	if (strncasecmp(url, "http://", strlen("http://")) == 0)
-		url += strlen("http://");
-	else if (strncasecmp(url, "https://", strlen("https://")) == 0) {
-		url += strlen("https://");
+	if (strncasecmp(url, "http://", sizeof("http://") - 1) == 0)
+		url += sizeof("http://") - 1;
+	else if (strncasecmp(url, "https://", sizeof("https://") - 1) == 0) {
+		url += sizeof("https://") - 1;
 		hh->port = 443;  /* set the default https server port */
 	}
 
@@ -597,20 +594,22 @@ static void __parse_url_and_port(HTTP_HDR_REQ *hh, const char *url)
 	if (hh->port <= 0)
 		hh->port = 80;
 
-	url = strchr(url, '/');
-	if (url == NULL) {
-		acl_vstring_strcpy(hh->url_part, "/");
-		acl_vstring_strcpy(hh->url_path, "/");
-		return;
-	} else {
+	if (*url == '/')
 		acl_vstring_strcpy(hh->url_part, url);
+	else ((url = strchr(url, '/')) == NULL) {
+		ACL_VSTRING_ADDCH(hh->url_part, '/');
+		ACL_VSTRING_TERMINATE(hh->url_part);
+		ACL_VSTRING_ADDCH(hh->url_path, '/');
+		ACL_VSTRING_TERMINATE(hh->url_path);
+		return;
 	}
+
 	/* get url_path and url_params */
 	ptr = strchr(url, '?');
 	if (ptr == NULL) {
 		__strip_url_path(hh->url_path, url);
 	} else if (*url != '?') {
-		acl_vstring_strncpy(hh->url_path, url, (int) (ptr - url));
+		acl_vstring_strncpy(hh->url_path, url, ptr - url);
 		__strip_url_path(hh->url_path, acl_vstring_str(hh->url_path));
 		ptr++;  /* skip '?' */
 		if (*ptr)
@@ -677,7 +676,8 @@ int http_hdr_req_line_parse(HTTP_HDR_REQ *hh)
 	if (strcasecmp(entry->name, "POST") != 0
 	    && strcasecmp(entry->name, "GET") != 0
 	    && strcasecmp(entry->name, "CONNECT") != 0
-	    && strcasecmp(entry->name, "HEAD") != 0) {
+	    && strcasecmp(entry->name, "HEAD") != 0)
+	{
 		acl_msg_error("%s, %s(%d): invalid http method=%s",
 				__FILE__, myname, __LINE__,
 				entry->name);
