@@ -1,3 +1,7 @@
+
+237) 2013.3.24
+237.1) bugfix: http_hdr_req.c->__strip_url_path 解析有误导致第一个 / 丢失
+
 236) 2012.12.30
 236.1) feature: smtp_client 模块中添加了 smtp_printf 函数，更方便发送数据
 
