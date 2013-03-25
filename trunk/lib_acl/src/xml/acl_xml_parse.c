@@ -435,12 +435,14 @@ static const char *xml_parse_attr_val(ACL_XML *xml, const char *data)
 	while ((ch = *data) != 0) {
 		if (attr->backslash) {
 			ACL_VSTRING_ADDCH(attr->value, ch);
+			xml->curr_node->last_ch = ch;
 			attr->backslash = 0;
 		} else if (ch == '\\') {
 			attr->backslash = 1;
 		} else if (attr->quote) {
 			if (ch == attr->quote) {
 				xml->curr_node->status = ACL_XML_S_ATTR;
+				xml->curr_node->last_ch = ch;
 				data++;
 				break;
 			}
