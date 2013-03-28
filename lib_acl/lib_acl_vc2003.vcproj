@@ -1766,6 +1766,9 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				<File
 					RelativePath=".\include\code\acl_vstring_base64.h">
 				</File>
+				<File
+					RelativePath=".\include\code\acl_xmlcode.h">
+				</File>
 			</Filter>
 			<Filter
 				Name="master"
