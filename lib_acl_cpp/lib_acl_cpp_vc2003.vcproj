@@ -693,6 +693,9 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				<File
 					RelativePath=".\src\beanstalk\beanstalk.cpp">
 				</File>
+				<File
+					RelativePath=".\src\beanstalk\beanstalk_pool.cpp">
+				</File>
 			</Filter>
 			<Filter
 				Name="queue"
@@ -1058,6 +1061,9 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				Filter="">
 				<File
 					RelativePath=".\include\acl_cpp\beanstalk\beanstalk.hpp">
+				</File>
+				<File
+					RelativePath=".\include\acl_cpp\beanstalk\beanstalk_pool.hpp">
 				</File>
 			</Filter>
 			<Filter

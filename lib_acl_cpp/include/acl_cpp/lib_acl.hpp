@@ -81,6 +81,7 @@
 #include "acl_cpp/hsocket/hsrow.hpp"
 
 #include "acl_cpp/beanstalk/beanstalk.hpp"
+#include "acl_cpp/beanstalk/beanstalk_pool.hpp"
 
 #include "acl_cpp/mime/mime_define.hpp"
 #include "acl_cpp/mime/mime_attach.hpp"

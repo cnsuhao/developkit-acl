@@ -19,6 +19,7 @@ beanstalk::beanstalk(const char* addr, int conn_timeout,
 , retry_(retry)
 {
 	addr_ = acl_mystrdup(addr);
+	acl_lowercase(addr_);
 	errbuf_[0] = 0;
 	tube_used_ = NULL;
 	// 放置缺省队列
@@ -374,6 +375,12 @@ unsigned beanstalk::watch(const char* tube)
 
 unsigned beanstalk::ignore(const char* tube)
 {
+	if (strcasecmp(tube, "default") == 0)
+	{
+		logger_error("tube(%s) is default, can't be ignore", tube);
+		return 0;
+	}
+
 	bool found = false;
 	std::vector<char*>::iterator it = tubes_watched_.begin();
 	for (; it != tubes_watched_.end(); ++it)
@@ -392,7 +399,40 @@ unsigned beanstalk::ignore(const char* tube)
 		logger_error("tube(%s) not found", tube);
 		return 0;
 	}
+	return ignore_one(tube);
+}
 
+unsigned beanstalk::ignore_all()
+{
+	if (tubes_watched_.size() <= 1)
+	{
+		// first tube watched must be "default"
+		if (strcmp(tubes_watched_[0], "default") != 0)
+			logger_fatal("first tube(%s) is not default",
+				tubes_watched_[0]);
+		return 1;
+	}
+
+	unsigned ret = 1;  // at least one default tube is watched
+	std::vector<char*>::iterator it_next = tubes_watched_.begin(), it;
+	++it_next;  // skip first default tube
+	for (it = it_next; it != tubes_watched_.end(); it = it_next)
+	{
+		++it_next;
+		ret = ignore_one(*it);
+		if (ret == 0)
+		{
+			logger_error("ignore tube %s failed", *it);
+			return 0;
+		}
+		tubes_watched_.erase(it);
+	}
+
+	return ret;
+}
+
+unsigned beanstalk::ignore_one(const char* tube)
+{
 	string cmdline(128);
 	cmdline.format("ignore %s\r\n", tube);
 	ACL_ARGV* tokens = beanstalk_request(cmdline);

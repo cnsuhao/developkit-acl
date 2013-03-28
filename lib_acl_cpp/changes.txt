@@ -1,5 +1,8 @@
 修改历史列表：
 ------------------------------------------------------------------------
+153) 2013.3.28
+153.1) feature: beanstalk 客户端连接增加了连接池类 beanstalk_pool
+
 152) 2013.3.23
 152.1) bugfix: HttpServletRequest::getPathInfo 方法中，在 CGI 模式下应该
 先根据 SCRIPT_NAME 环境变量取得，如果取不到再根据 PATH_INFO 环境变量获取

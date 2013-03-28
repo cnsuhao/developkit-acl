@@ -102,10 +102,19 @@ public:
 	/**
 	 * 取消关注(watch)一个接收消息的管道(tube)
 	 * @param tube {const char*} 消息管道名称
-	 * @return {unsigned} 返回值为关注的消息管道数, 返回值 > 0 则表示成功
-	 *  (因至少需要关注一个缺省消息管道，所以正确情况下该返回值至少为 1)
+	 * @return {unsigned} 返回值为剩余的消息关注管道数, 返回值 > 0 则表示
+	 *  成功(因至少要关注一个缺省消息管道，所以正确情况下该返回值至少为 1)，
+	 *  如果返回值为 0 则说明输入的管道并未被关注或取消关注失败
 	 */
 	unsigned ignore(const char* tube);
+
+	/**
+	 * 取消关注所有的接收消息的管道
+	 * @return {unsigned} 返回值为剩余的消息关注管道数, 返回值 > 0 则表示
+	 *  成功(因至少要关注一个缺省消息管道，所以正确情况下该返回值至少为 1)，
+	 *  返回 0 表示取消关注失败
+	 */
+	unsigned ignore_all();
 
 	/**
 	 * 从消息输出管道中获取一条消息，但并不删除消息，可以设置
@@ -262,6 +271,15 @@ public:
 	{
 		return conn_;
 	}
+
+	/**
+	 * 返回构造函数中 beanstalkd 的服务器地址，格式：ip:port
+	 * @return {const char*} 永远返回非空的 beanstalkd 服务器地址
+	 */
+	const char* get_addr() const
+	{
+		return addr_;
+	}
 private:
 	char* addr_;
 	int   timeout_;
@@ -273,6 +291,7 @@ private:
 	unsigned long long peek_fmt(string& buf, const char* fmt, ...);
 	bool list_tubes_fmt(string& buf, const char* fmt, ...);
 
+	unsigned ignore_one(const char* tube);
 	bool beanstalk_open();
 	bool beanstalk_use();
 	unsigned beanstalk_watch(const char* tube);
