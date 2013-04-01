@@ -229,9 +229,16 @@ HttpSession& HttpServletRequest::getSession(bool create /* = true */,
 	if (http_session_ == NULL)
 	{
 		http_session_ = NEW HttpSession(store_);
-
-		const char* sid = getCookieValue(cookie_name_);
-		if (sid != NULL)
+		const char* sid = sid_in;
+		if (sid != NULL && *sid != 0)
+		{
+			store_.set_sid(sid);
+			// 生成 cookie 对象，并分别向请求对象和响应对象添加 cookie
+			HttpCookie* cookie = NEW HttpCookie(cookie_name_, sid);
+			res_.addCookie(cookie);
+			setCookie(cookie_name_, sid);
+		}
+		else if ((sid = getCookieValue(cookie_name_)) != NULL)
 			store_.set_sid(sid);
 		else if (create)
 		{
@@ -241,14 +248,6 @@ HttpSession& HttpServletRequest::getSession(bool create /* = true */,
 			HttpCookie* cookie = NEW HttpCookie(cookie_name_, sid);
 			res_.addCookie(cookie);
 			setCookie(cookie_name_, sid);
-		}
-		else if (sid_in != NULL && *sid_in != 0)
-		{
-			store_.set_sid(sid_in);
-			// 生成 cookie 对象，并分别向请求对象和响应对象添加 cookie
-			HttpCookie* cookie = NEW HttpCookie(cookie_name_, sid_in);
-			res_.addCookie(cookie);
-			setCookie(cookie_name_, sid_in);
 		}
 	}
 	return *http_session_;

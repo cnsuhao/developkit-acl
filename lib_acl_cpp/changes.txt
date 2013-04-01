@@ -1,5 +1,9 @@
 修改历史列表：
 ------------------------------------------------------------------------
+154) 2013.4.1
+154.1) HttpServletRequest.cpp: HttpServletRequest::getSession中生成 COOKIE
+及 SESSION 的优先级做了调整
+
 153) 2013.3.28
 153.1) feature: beanstalk 客户端连接增加了连接池类 beanstalk_pool
 
