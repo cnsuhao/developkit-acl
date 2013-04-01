@@ -244,7 +244,7 @@ HttpSession& HttpServletRequest::getSession(bool create /* = true */,
 		}
 		else if (sid_in != NULL && *sid_in != 0)
 		{
-			store_.set_sid(sid);
+			store_.set_sid(sid_in);
 			// 生成 cookie 对象，并分别向请求对象和响应对象添加 cookie
 			HttpCookie* cookie = NEW HttpCookie(cookie_name_, sid_in);
 			res_.addCookie(cookie);
