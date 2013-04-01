@@ -111,9 +111,7 @@ namespace acl
 		 *  如果 sid 非空，则使用此值设置用户的唯一会话，同时添加进客户端的
 		 *  cookie 中
 		 * @return {HttpSession&}
-		 *  注：当 sid 非空时，其优先级最高，它会覆盖之前在浏览器设置的 COOKIE
-		 *  值，其次是当浏览器存在 COOKIE 时的优先级次之，最后当 create 为 true
-		 *  地才会自动创建新的不存在的 COOKIE 及 SESSIOIN
+		 *  注：优先级，浏览器 COOKIE > create = true > sid != NULL
 		 */
 		HttpSession& getSession(bool create = true, const char* sid = NULL);
 
