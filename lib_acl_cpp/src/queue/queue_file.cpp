@@ -78,23 +78,45 @@ bool queue_file::create(const char* home, const char* queueName,
 
 		fp = NEW fstream;
 
-		// 排它性创建唯一文件
-		if (fp->open(buf.c_str(), O_RDWR | O_CREAT | O_EXCL, 0600) == false)
+		while (true)
 		{
-			logger_warn("open file %s error(%s)",
-				buf.c_str(), acl_last_serror());
-			delete fp;
-			sleep(1);
-			if (i++ >= 10000) {
-				logger_warn("loop 10000 times for (%s)", buf.c_str());
-				i = 0;
-			}
-			continue;
-		}
+			// 排它性创建唯一文件
+			if (fp->open(buf.c_str(), O_RDWR | O_CREAT | O_EXCL, 0600) == true)
+				goto END;
 
-		break;
+			logger_warn("open file %s error(%s)", buf.c_str(), acl_last_serror());
+
+			if (acl_last_error() != ENOENT)
+				break;
+
+			// 尝试性创建目录
+			buf.clear();
+			buf << m_home << PATH_SEP << m_queueName << PATH_SEP << m_queueSub;
+			if (acl_make_dirs(buf.c_str(), 0700) == -1)
+			{
+				logger_error("mkdir: %s error(%s)",
+					buf.c_str(), acl_last_serror());
+				delete fp;
+				return false;
+			}
+			else
+				logger("create path: %s ok", buf.c_str());
+
+			buf.clear();
+			buf << m_home << PATH_SEP << m_queueName << PATH_SEP << m_queueSub
+				<< PATH_SEP << m_partName << "." << extName;
+
+		}
+		delete fp;
+		sleep(1);
+		if (i++ >= 10) {
+			logger_error("can't create file, loop 10 times for (%s)",
+				buf.c_str());
+			return false;
+		}
 	}
 
+END:
 	m_fp = fp;
 	m_filePath = buf.c_str();
 
