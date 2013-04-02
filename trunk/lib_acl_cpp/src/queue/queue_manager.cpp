@@ -1,4 +1,5 @@
 #include "acl_stdafx.hpp"
+#include "acl_cpp/stdlib/util.hpp"
 #include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/queue/queue_manager.hpp"
 
@@ -26,7 +27,11 @@ queue_manager::queue_manager(const char* home, const char* queueName,
 	buf << PATH_SEP << queueName;
 
 	// 先创建根目录
-	acl_make_dirs(buf.c_str(), 0700);
+	if (acl_make_dirs(buf.c_str(), 0700) == -1)
+		logger_error("create dir: %s error %s", buf.c_str(),
+			last_serror());
+	else
+		logger("create dir: %s ok", buf.c_str());
 
 	char  node[32];
 	for (unsigned i = 0; i < sub_width_; i++)
@@ -36,7 +41,11 @@ queue_manager::queue_manager(const char* home, const char* queueName,
 		buf << home << PATH_SEP << queueName
 			<< PATH_SEP << node;
 		// 创建队列下子目录
-		acl_make_dirs(buf.c_str(), 0700);
+		if (acl_make_dirs(buf.c_str(), 0700) == -1)
+			logger_error("create dir: %s error %s",
+				buf.c_str(), last_serror());
+		else
+			logger("create dir: %s ok", buf.c_str());
 	}
 }
 
