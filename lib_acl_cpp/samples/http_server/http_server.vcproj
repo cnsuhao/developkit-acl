@@ -229,6 +229,9 @@
 				RelativePath=".\http_server.cpp">
 			</File>
 			<File
+				RelativePath=".\rpc_manager.cpp">
+			</File>
+			<File
 				RelativePath=".\rpc_stats.cpp">
 			</File>
 			<File
@@ -265,6 +268,9 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
 				RelativePath=".\http_rpc.h">
+			</File>
+			<File
+				RelativePath=".\rpc_manager.h">
 			</File>
 			<File
 				RelativePath=".\rpc_stats.h">

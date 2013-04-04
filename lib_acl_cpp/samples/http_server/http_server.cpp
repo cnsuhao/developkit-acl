@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include <iostream>
+#include "rpc_manager.h"
 #include "rpc_stats.h"
 #include "http_rpc.h"
 
@@ -16,9 +17,8 @@ static int var_data_size = 1024;
 class handle_io : public aio_callback
 {
 public:
-	handle_io(rpc_service& service, aio_socket_stream* client)
-		: service_(service)
-		, client_(client)
+	handle_io(aio_socket_stream* client)
+		: client_(client)
 		, http_(NULL)
 	{
 	}
@@ -68,13 +68,12 @@ public:
 		// 如果 HTTP 处理对象未创建，则创建一个
 		if (http_ == NULL)
 			http_ = new http_rpc(client_, (unsigned) var_data_size);
-		service_.rpc_fork(http_);  // 发起一个 http 会话过程
+		rpc_manager::get_instance().fork(http_);  // 发起一个 http 会话过程
 
 		return true;
 	}
 
 private:
-	rpc_service& service_;
 	aio_socket_stream* client_;
 	http_rpc* http_;
 };
@@ -87,9 +86,8 @@ private:
 class handle_accept : public aio_accept_callback
 {
 public:
-	handle_accept(rpc_service& service, bool preread)
-	: service_(service)
- 	, preread_(preread)
+	handle_accept(bool preread)
+ 	: preread_(preread)
 	{
 	}
 
@@ -113,7 +111,7 @@ public:
 		}
 
 		// 创建异步客户端流的回调对象并与该异步流进行绑定
-		handle_io* callback = new handle_io(service_, client);
+		handle_io* callback = new handle_io(client);
 
 		// 注册异步流的读回调过程
 		client->add_read_callback(callback);
@@ -136,7 +134,6 @@ public:
 	}
 
 private:
-	rpc_service& service_;
 	bool preread_;
 };
 
@@ -150,6 +147,7 @@ static void usage(const char* procname)
 		" -k[use kernel engine]\r\n"
 		" -n data size response\r\n"
 		" -N thread pool limit\r\n"
+		" -r rpc_addr\r\n"
 		" -v[enable stdout]\r\n", procname);
 }
 
@@ -160,14 +158,16 @@ int main(int argc, char* argv[])
 #endif
 
 	bool preread = false;
-	char addr[32], ch;
-	snprintf(addr, sizeof(addr), "127.0.0.1:9001");
+	char addr[32], rpc_addr[32], ch;
 	bool use_mempool = false;
 	bool use_kernel = false;
 	bool enable_stdout = false;
 	int  nthreads = 20;
 
-	while ((ch = getopt(argc, argv, "vkhpms:n:N:")) > 0)
+	snprintf(addr, sizeof(addr), "127.0.0.1:9001");
+	snprintf(rpc_addr, sizeof(rpc_addr), "127.0.0.1:0");
+
+	while ((ch = getopt(argc, argv, "vkhpms:n:N:r:")) > 0)
 	{
 		switch (ch)
 		{
@@ -199,11 +199,15 @@ int main(int argc, char* argv[])
 		case 'v':
 			enable_stdout = true;
 			break;
+		case 'r':
+			snprintf(rpc_addr, sizeof(rpc_addr), "%s", optarg);
+			break;
 		default:
 			break;
 		}
 	}
 
+	// 是否采用线程局部内存池
 	if (use_mempool)
 		acl_mem_slice_init(8, 1024, 100000,
 			ACL_SLICE_FLAG_GC2 |
@@ -233,20 +237,11 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	// 异步 RPC 通信服务句柄
-	rpc_service service(nthreads);
-	// 打开消息服务器
-	if (service.open(&handle) == false)
-	{
-		printf("open service error: %s\r\n", last_serror());
-#ifdef WIN32
-		getchar();
-#endif
-		return 1;
-	}
+	// 初始化异步 RPC 通信服务句柄
+	rpc_manager::get_instance().init(&handle, nthreads, rpc_addr);
 
 	// 创建回调类对象，当有新连接到达时自动调用此类对象的回调过程
-	handle_accept callback(service, preread);
+	handle_accept callback(preread);
 	// 将回调处理类对象与异步监听流绑定
 	sstream->add_accept_callback(&callback);
 
