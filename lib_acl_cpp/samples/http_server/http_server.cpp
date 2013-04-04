@@ -6,6 +6,8 @@
 #include "rpc_stats.h"
 #include "http_rpc.h"
 
+static int var_data_size = 1024;
+
 //////////////////////////////////////////////////////////////////////////
 
 /**
@@ -65,7 +67,7 @@ public:
 
 		// 如果 HTTP 处理对象未创建，则创建一个
 		if (http_ == NULL)
-			http_ = new http_rpc(client_);
+			http_ = new http_rpc(client_, (unsigned) var_data_size);
 		service_.rpc_fork(http_);  // 发起一个 http 会话过程
 
 		return true;
@@ -140,7 +142,15 @@ private:
 
 static void usage(const char* procname)
 {
-	printf("usage: %s -h[help] -p[preread in main thread] -s listen_addr\n", procname);
+	printf("usage: %s \r\n"
+		" -h[help]\r\n"
+		" -p[preread in main thread]\r\n"
+		" -l listen_addr[127.0.0.1:9001]\r\n"
+		" -m[use mempool]\r\n"
+		" -k[use kernel engine]\r\n"
+		" -n data size response\r\n"
+		" -N thread pool limit\r\n"
+		" -v[enable stdout]\r\n", procname);
 }
 
 int main(int argc, char* argv[])
@@ -152,8 +162,12 @@ int main(int argc, char* argv[])
 	bool preread = false;
 	char addr[32], ch;
 	snprintf(addr, sizeof(addr), "127.0.0.1:9001");
+	bool use_mempool = false;
+	bool use_kernel = false;
+	bool enable_stdout = false;
+	int  nthreads = 20;
 
-	while ((ch = getopt(argc, argv, "hps:")) > 0)
+	while ((ch = getopt(argc, argv, "vkhpms:n:N:")) > 0)
 	{
 		switch (ch)
 		{
@@ -166,16 +180,42 @@ int main(int argc, char* argv[])
 		case 'p':
 			preread = true;
 			break;
+		case 'm':
+			use_mempool = true;
+			break;
+		case 'k':
+			use_kernel = true;
+			break;
+		case 'n':
+			var_data_size = atoi(optarg);
+			if (var_data_size <= 0)
+				var_data_size = 1024;
+			break;
+		case 'N':
+			nthreads = atoi(optarg);
+			if (nthreads <= 0)
+				nthreads = 10;
+			break;
+		case 'v':
+			enable_stdout = true;
+			break;
 		default:
 			break;
 		}
 	}
 
+	if (use_mempool)
+		acl_mem_slice_init(8, 1024, 100000,
+			ACL_SLICE_FLAG_GC2 |
+			ACL_SLICE_FLAG_RTGC_OFF |
+			ACL_SLICE_FLAG_LP64_ALIGN);
+
 	// 允许日志信息输出至屏幕
-	log::stdout_open(false);
+	if (enable_stdout)
+		log::stdout_open(true);
 
 	// 异步通信框架句柄，采用 select 系统 api
-	aio_handle handle(ENGINE_SELECT);
+	aio_handle handle(use_kernel ? ENGINE_KERNEL : ENGINE_SELECT);
 
 	// 创建监听异步流
 	aio_listen_stream* sstream = new aio_listen_stream(&handle);
@@ -194,7 +234,7 @@ int main(int argc, char* argv[])
 	}
 
 	// 异步 RPC 通信服务句柄
-	rpc_service service(20);
+	rpc_service service(nthreads);
 	// 打开消息服务器
 	if (service.open(&handle) == false)
 	{

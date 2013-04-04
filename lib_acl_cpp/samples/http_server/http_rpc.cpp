@@ -2,11 +2,22 @@
 #include "rpc_stats.h"
 #include "http_rpc.h"
 
-http_rpc::http_rpc(acl::aio_socket_stream* client)
+http_rpc::http_rpc(acl::aio_socket_stream* client, unsigned buf_size)
 : proc_quit_(false)
 , handle_(client->get_handle())
 , client_(client)
+, buf_size_(buf_size)
 {
+	res_buf_ = (char*) acl_mymalloc(buf_size + 1);
+	unsigned i;
+	for (i = 0; i < buf_size; i++)
+		res_buf_[i] = 'x';
+	res_buf_[i] = 0;
+}
+
+http_rpc::~http_rpc()
+{
+	acl_myfree(res_buf_);
 }
 
 // 调用 service_.rpc_fork 后，由 RPC 框架在子线程中调用本函数
@@ -67,8 +78,7 @@ void http_rpc::handle_conn(socket_stream* stream)
 
 	// 返回数据给客户端
 
-	buf = "ok\r\n";
-	res.response(buf.c_str(), buf.length(), 200, keep_alive_);
+	res.response(res_buf_, buf_size_, 200, keep_alive_);
 
 	// 取得客户端的命令
 	const char* action = client->request_param("action");
