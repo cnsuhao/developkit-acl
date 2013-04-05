@@ -21,6 +21,13 @@ class ipc_client;
 class rpc_client;
 class rpc_service;
 
+class rpc_request;
+struct RPC_DAT
+{
+	rpc_request* req;
+	void* ctx;
+};
+
 class ACL_CPP_API rpc_request : public ipc_request
 {
 public:
@@ -94,6 +101,7 @@ protected:
 	bool cond_signal(void);
 
 private:
+	RPC_DAT dat_;
 	ipc_client* ipc_;
 	int   cond_count_;
 	acl_pthread_mutex_t* lock_;
