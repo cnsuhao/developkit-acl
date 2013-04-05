@@ -163,9 +163,11 @@ static void mem_slice_free(ACL_MEM_SLICE *mem_slice)
 		acl_msg_info("%s(%d): thread(%ld) mem slice busy slices: %d, delay free it",
 			myname, __LINE__, mem_slice->tid, n);
 
-		thread_mutex_lock(__mem_slice_list_lock);
+		if (__mem_slice_list_lock)
+			thread_mutex_lock(__mem_slice_list_lock);
 		mem_slice->delay_free = 1;
-		thread_mutex_unlock(__mem_slice_list_lock);
+		if (__mem_slice_list_lock)
+			thread_mutex_unlock(__mem_slice_list_lock);
 
 		/* 尽量回收一些已经完全释放的内存 */
 		acl_slice_pool_gc(mem_slice->slice_pool);
@@ -297,9 +299,11 @@ static void *tls_mem_alloc(const char *filename, int line, size_t len)
 		mem_slice->slice_list = __mem_slice_list;
 
 		/* 将子线程的线程局部存储内存池置入全局内存池句柄集合中 */
-		thread_mutex_lock(__mem_slice_list_lock);
+		if (__mem_slice_list_lock)
+			thread_mutex_lock(__mem_slice_list_lock);
 		private_array_push(__mem_slice_list, mem_slice);
-		thread_mutex_unlock(__mem_slice_list_lock);
+		if (__mem_slice_list_lock)
+			thread_mutex_unlock(__mem_slice_list_lock);
 	}
 
 	real_ptr = (MBLOCK *) acl_slice_pool_alloc(filename, line,

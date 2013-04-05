@@ -19,14 +19,13 @@ class handle_io : public aio_callback
 public:
 	handle_io(aio_socket_stream* client)
 		: client_(client)
-		, http_(NULL)
 	{
+		http_ = new http_rpc(client_, (unsigned) var_data_size);
 	}
 
 	~handle_io()
 	{
-		if (http_)
-			delete http_;
+		delete http_;
 		std::cout << "delete io_callback now ..." << std::endl;
 	}
 
@@ -65,10 +64,8 @@ public:
 		// 从异步监听集合中去掉对该异步流的监控
 		client_->disable_read();
 
-		// 如果 HTTP 处理对象未创建，则创建一个
-		if (http_ == NULL)
-			http_ = new http_rpc(client_, (unsigned) var_data_size);
-		rpc_manager::get_instance().fork(http_);  // 发起一个 http 会话过程
+		// 发起一个 http 会话过程
+		rpc_manager::get_instance().fork(http_);
 
 		return true;
 	}

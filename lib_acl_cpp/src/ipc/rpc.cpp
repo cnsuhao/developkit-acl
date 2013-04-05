@@ -19,16 +19,21 @@ enum
 #endif
 
 // IPC 通信时，子线程通过发送此数据通知主线程任务处理结果
+/*
 struct IPC_DAT 
 {
 	rpc_request* req;
 	void* ctx;
 };
+*/
 
 rpc_request::rpc_request()
 : ipc_(NULL)
 , wait_timedout_(false)
 {
+	dat_.req = this;
+	dat_.ctx = NULL;
+
 	cond_count_ = 0;
 	cond_ = (acl_pthread_cond_t*) acl_mycalloc(
 		1, sizeof(acl_pthread_cond_t));
@@ -53,13 +58,20 @@ void rpc_request::run(ipc_client* ipc)
 {
 	ipc_ = ipc;
 	rpc_run();
+	/*
 	IPC_DAT data;
 	data.req = this;
 	data.ctx = NULL;
 	// 向主线程发送结果
 	ipc->send_message(RPC_MSG, &data, sizeof(data));
+	*/
+	dat_.ctx = NULL;
+
+	// 向主线程发送结果
+	ipc->send_message(RPC_MSG, &dat_, sizeof(RPC_DAT));
 }
 
+// 该函数在子线程中被调用
 #ifdef WIN32
 void rpc_request::run(HWND hWnd)
 {
@@ -69,6 +81,7 @@ void rpc_request::run(HWND hWnd)
 }
 #endif
 
+// 该函数在子线程中被调用
 void rpc_request::rpc_signal(void* ctx)
 {
 #ifdef WIN32
@@ -81,11 +94,16 @@ void rpc_request::rpc_signal(void* ctx)
 	}
 #endif
 	acl_assert(ipc_ != NULL);
+	/*
 	IPC_DAT data;
 	data.req = this;
 	data.ctx = ctx;
 	// 向主线程发送结果
 	ipc_->send_message(RPC_SIG, &data, sizeof(data));
+	*/
+	dat_.ctx = ctx;
+	// 向主线程发送结果
+	ipc_->send_message(RPC_SIG, &dat_, sizeof(RPC_DAT));
 }
 
 bool rpc_request::cond_wait(int timeout /* = -1 */)
@@ -194,6 +212,8 @@ bool rpc_request::cond_signal()
 
 //////////////////////////////////////////////////////////////////////////
 
+// 该类实例在主线程中运行
+
 class rpc_client : public ipc_client
 {
 public:
@@ -209,8 +229,8 @@ protected:
 	 */
 	virtual void on_message(int nMsg, void* data, int dlen)
 	{
-		acl_assert(data && dlen == sizeof(IPC_DAT));
-		IPC_DAT* dat = (IPC_DAT*) data;
+		acl_assert(data && dlen == sizeof(RPC_DAT));
+		RPC_DAT* dat = (RPC_DAT*) data;
 		acl_assert(dat->req);
 
 		if (nMsg == RPC_MSG)
