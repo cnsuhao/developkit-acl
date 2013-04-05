@@ -20,28 +20,38 @@ void rpc_out()
 
 //////////////////////////////////////////////////////////////////////////
 
-static locker __lock;
+static locker* __lock = NULL;
 static int  __req = 0;
+
+void rpc_stats_init()
+{
+	__lock = new locker();
+}
+
+void rpc_stats_finish()
+{
+	delete __lock;
+}
 
 void rpc_req_add()
 {
-	__lock.lock();
+	__lock->lock();
 	__req++;
-	__lock.unlock();
+	__lock->unlock();
 }
 
 void rpc_req_del()
 {
-	__lock.lock();
+	__lock->lock();
 	__req--;
-	__lock.unlock();
+	__lock->unlock();
 }
 
 void rpc_req_out()
 {
-	__lock.lock();
+	__lock->lock();
 	printf(">> req_count: %d\r\n", __req);
-	__lock.unlock();
+	__lock->unlock();
 }
 
 //////////////////////////////////////////////////////////////////////////

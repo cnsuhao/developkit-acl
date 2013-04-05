@@ -1,5 +1,8 @@
 #pragma once
 
+void rpc_stats_init();
+void rpc_stats_finish();
+
 void rpc_add();
 void rpc_del();
 void rpc_out();

@@ -100,4 +100,5 @@ void master_service::proc_on_init()
 
 void master_service::proc_on_exit()
 {
+	rpc_manager::get_instance().finish();
 }

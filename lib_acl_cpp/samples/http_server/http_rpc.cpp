@@ -20,6 +20,27 @@ http_rpc::~http_rpc()
 	acl_myfree(res_buf_);
 }
 
+void http_rpc::rpc_onover()
+{
+	// 减少 rpc 计数
+	rpc_del();
+
+	if (!proc_quit_ && keep_alive_)
+	{
+		rpc_read_wait_add();
+
+		// 监控异步流是否可读
+		client_->read_wait(10);
+	}
+	else
+		// 关闭异步流对象
+		client_->close();
+
+	// 客户端发来了要求服务器程序退出的命令
+	if (proc_quit_)
+		handle_.stop();
+}
+
 // 调用 service_.rpc_fork 后，由 RPC 框架在子线程中调用本函数
 // 来处理本地其它模块发来的请求信息
 void http_rpc::rpc_run()
@@ -87,25 +108,4 @@ void http_rpc::handle_conn(socket_stream* stream)
 	{
 		proc_quit_ = true;
 	}
-}
-
-void http_rpc::rpc_onover()
-{
-	// 减少 rpc 计数
-	rpc_del();
-
-	if (!proc_quit_ && keep_alive_)
-	{
-		rpc_read_wait_add();
-
-		// 监控异步流是否可读
-		client_->read_wait(10);
-	}
-	else
-		// 关闭异步流对象
-		client_->close();
-
-	// 客户端发来了要求服务器程序退出的命令
-	if (proc_quit_)
-		handle_.stop();
 }
