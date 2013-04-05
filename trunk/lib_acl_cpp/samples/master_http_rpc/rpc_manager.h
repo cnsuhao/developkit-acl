@@ -18,6 +18,8 @@ public:
 	void init(acl::aio_handle*, int max_threads = 10,
 		const char* rpc_addr = NULL);
 
+	void finish();
+
 	/**
 	 * 发起一个阻塞过程，将该过程交由子线程处理
 	 * @param req {acl::rpc_request*} 阻塞任务对象

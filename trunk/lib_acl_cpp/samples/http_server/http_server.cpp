@@ -211,15 +211,17 @@ int main(int argc, char* argv[])
 			ACL_SLICE_FLAG_RTGC_OFF |
 			ACL_SLICE_FLAG_LP64_ALIGN);
 
+	rpc_stats_init();
+
 	// 允许日志信息输出至屏幕
 	if (enable_stdout)
 		log::stdout_open(true);
 
 	// 异步通信框架句柄，采用 select 系统 api
-	aio_handle handle(use_kernel ? ENGINE_KERNEL : ENGINE_SELECT);
+	aio_handle* handle = new aio_handle(use_kernel ? ENGINE_KERNEL : ENGINE_SELECT);
 
 	// 创建监听异步流
-	aio_listen_stream* sstream = new aio_listen_stream(&handle);
+	aio_listen_stream* sstream = new aio_listen_stream(handle);
 
 	// 监听指定的地址
 	if (sstream->open(addr) == false)
@@ -227,7 +229,7 @@ int main(int argc, char* argv[])
 		std::cout << "open " << addr << " error!" << std::endl;
 		sstream->close();
 		// XXX: 为了保证能关闭监听流，应在此处再 check 一下
-		handle.check();
+		handle->check();
 #ifdef WIN32
 		getchar();
 #endif
@@ -235,7 +237,7 @@ int main(int argc, char* argv[])
 	}
 
 	// 初始化异步 RPC 通信服务句柄
-	rpc_manager::get_instance().init(&handle, nthreads, rpc_addr);
+	rpc_manager::get_instance().init(handle, nthreads, rpc_addr);
 
 	// 创建回调类对象，当有新连接到达时自动调用此类对象的回调过程
 	handle_accept callback(preread);
@@ -248,7 +250,7 @@ int main(int argc, char* argv[])
 	while (true)
 	{
 		// 如果返回 false 则表示不再继续，需要退出
-		if (handle.check() == false)
+		if (handle->check() == false)
 		{
 			std::cout << "aio_server stop now ..." << std::endl;
 			break;
@@ -268,8 +270,20 @@ int main(int argc, char* argv[])
 	// 关闭监听流并释放流对象
 	sstream->close();
 
+	// 关闭 RPC 服务
+	rpc_manager::get_instance().finish();
+
 	// XXX: 为了保证能关闭监听流，应在此处再 check 一下
-	handle.check();
+	handle->check();
+	delete handle;
+
+	rpc_stats_finish();
+
+	if (use_mempool)
+	{
+		acl_mem_slice_gc();
+		acl_mem_slice_destroy();
+	}
 
 	return 0;
 }
