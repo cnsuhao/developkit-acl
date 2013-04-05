@@ -50,13 +50,27 @@ static void test(const char* path, const char* boundary)
 		printf(">>>name: %s, value: %s, file: %s<br>\r\n",
 				n1 ? n1 : "null", v ? v : "null", f ? f : "null");
 	}
+
+	const acl::http_mime_node* node = mime.get_node("filename");
+	if (node == NULL || node->get_mime_type() != acl::HTTP_MIME_FILE)
+	{
+		printf("filename not found\r\n");
+		return;
+	}
+	const char* ptr = node->get_filename();
+	if (ptr == NULL || *ptr == 0)
+		printf("filename's value null\r\n");
+	else
+		printf("filename: %s\r\n", ptr);
 #endif
 }
 
 int main(int argc, char* argv[])
 {
 	const char* path = "./tmp.txt";
-	const char* boundary = "-----------------------------5169208281820";
+//	const char* boundary = "-----------------------------5169208281820";
+//	const char* boundary = "------WebKitFormBoundaryztuvecMyltzibUyI";
+	const char* boundary = "--gvdrLIiwm31yiNkOc7Hr3HdHouL22D-P_49Q";
 	if (argc >= 2)
 		path = argv[1];
 	test(path, boundary);
