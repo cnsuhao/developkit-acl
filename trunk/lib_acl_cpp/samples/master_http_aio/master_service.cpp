@@ -56,7 +56,7 @@ bool master_service::on_accept(acl::aio_socket_stream* client)
 	client->keep_read(true);
 
 	// ¼à¿ØÒì²½Á÷ÊÇ·ñ¿É¶Á
-	client->read_wait(10);
+	client->read_wait(0);
 
 	return true;
 }

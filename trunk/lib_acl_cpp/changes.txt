@@ -1,5 +1,9 @@
 修改历史列表：
 ------------------------------------------------------------------------
+156) 2013.4.17
+156.1) bugfix: master_thread.cpp 在测试环境下运行时，master_threads::thread_run
+函数增加了缓冲区是否有可读数据的判断
+
 155) 2013.4.5
 155.1) bugfix: ipc_service.cpp 中 thread_pool_main 函数应该调用 last_serror
 而不应该调用 last_error
