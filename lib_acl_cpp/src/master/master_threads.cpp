@@ -120,9 +120,25 @@ namespace acl
 			return;
 		while (true)
 		{
-			// 当函数返回 1 时表示 client 已经被关闭了
-			if (acl_read_wait(ACL_VSTREAM_SOCK(client), 10) == 0)
+			if (ACL_VSTREAM_BFRD_CNT(client) > 0)
+			{
+				// 当函数返回 1 时表示 client 已经被关闭了
+				if (service_main(client, NULL) == 1)
+					break;
+				continue;
+			}
+
+			// acl_read_wait 当 timeout 为 -1 时才是完全阻塞
+			// 等待连接有数据可读，当为 0 时则会立即返回，当
+			// > 0 时则等待最多指定超时时间
+			if(acl_read_wait(ACL_VSTREAM_SOCK(client),
+				client->rw_timeout > 0 ?
+				client->rw_timeout : -1) == 0)
+			{
 				client->sys_read_ready = 1;
+			}
+
+			// 当函数返回 1 时表示 client 已经被关闭了
 			if (service_main(client, NULL) == 1)
 				break;
 		}
