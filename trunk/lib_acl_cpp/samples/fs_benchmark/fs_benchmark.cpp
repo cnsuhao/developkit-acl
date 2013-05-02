@@ -4,21 +4,24 @@
 #include "stdafx.h"
 #include <iostream>
 
-static int __nfiles = 100, __length = 102400, __parallel = 100;
+static int __nfiles = 10, __length = 102400, __parallel = 100;
 static char __path[256];
 static char __data[1024];
 static bool __kernel_event = false;
+
+static __thread int __nok = 0;
 
 //////////////////////////////////////////////////////////////////////////
 
 class async_file : public acl::aio_callback
 {
 public:
-	async_file(acl::aio_handle* handle, const char* path)
+	async_file(acl::aio_handle* handle, const char* path, int ibegin)
 		: handle_(handle)
 		, path_(path)
 		, nfiles_(__nfiles)
 		, ifile_(0)
+		, ibegin_(ibegin)
 		, nwrite_(0)
 		, delay_(1)
 		, fp_(NULL)
@@ -34,8 +37,8 @@ public:
 	bool open_write()
 	{
 		fp_ = new acl::aio_fstream(handle_);
-		filepath_.format("%s/%lu_%d", path_.c_str(),
-			(unsigned long) acl_pthread_self(), ifile_++);
+		filepath_.format("%s/%lu_%d_%d", path_.c_str(),
+			(unsigned long) acl_pthread_self(), ibegin_, ifile_++);
 		if (fp_->open_write(filepath_.c_str()) == false)
 		{
 			printf("open file %s error: %s\r\n",
@@ -45,6 +48,9 @@ public:
 
 		// 添加写成功的回调函数
 		fp_->add_write_callback(this);
+
+		// 添加关闭的回调函数
+		fp_->add_close_callback(this);
 
 		// 1 秒后启动写过程
 		fp_->write(__data, sizeof(__data), delay_ * 1000000);
@@ -59,28 +65,41 @@ protected:
 	bool write_callback()
 	{
 		nwrite_ += sizeof(__data);
-		printf(">>>write: %d\r\n", nwrite_);
 
 		if (nwrite_ >= __length)
 		{
-			printf("write one file(%s) ok\r\n", filepath_.c_str());
+			printf("write one file(%s) ok, nwrite: %d\r\n",
+				filepath_.c_str(), nwrite_);
+
 			return false;  // 返回 false 以使框架关闭该流对象
 		}
-		fp_->write(__data, sizeof(__data), 1);
+		fp_->write(__data, sizeof(__data));
 		return true;
 	}
 
 	void close_callback()
 	{
 		// 必须在此处删除该动态分配的回调类对象以防止内存泄露
-		if (ifile_ == nfiles_)
+		if (ifile_ >= nfiles_)
 		{
-			printf("thread(%lu) over!\r\n", (unsigned long)
-				acl_pthread_self());
+			printf("write %s over!, ifile: %d, nfiles: %d\r\n",
+				filepath_.c_str(), ifile_, nfiles_);
 			delete this;
+			__nok++;
 		}
 		else
+		{
+			printf("ifile_: %d, nfiles_: %d\r\n", ifile_, nfiles_);
 			nwrite_ = 0;
+			delay_ = 0;
+
+			// 重新打开一个新的异步流句柄
+			if (open_write() == false)
+			{
+				printf("open file error\r\n");
+				exit (1);
+			}
+		}
 	}
 
 	bool timeout_callback()
@@ -93,6 +112,7 @@ private:
 	acl::string filepath_;
 	int  nfiles_;
 	int  ifile_;
+	int  ibegin_;
 	int  nwrite_;
 	int  delay_;
 	acl::aio_fstream* fp_;
@@ -100,19 +120,21 @@ private:
 
 static void thread_main(void*)
 {
-	printf("%s: thread: %ld\r\n", __FUNCTION__, acl_pthread_self());
+	printf("%s: thread: %ld\r\n", __FUNCTION__,
+		(unsigned long) acl_pthread_self());
 	acl::aio_handle* handle;
 
 	// 每个线程创建单独的异步事件句柄
 	handle = new acl::aio_handle(__kernel_event ?
 		acl::ENGINE_KERNEL : acl::ENGINE_SELECT);
 
-	for (int i = 0; i < __parallel; i++)
+	int i;
+	for (i = 0; i < __parallel; i++)
 	{
-		async_file* fp = new async_file(handle, __path);
+		async_file* fp = new async_file(handle, __path, i);
 		if (fp->open_write() == false)
 		{
-			printf(("open file error: %s\r\n", acl::last_serror()));
+			printf("open file error: %s\r\n", acl::last_serror());
 			delete fp;
 			break;
 		}
@@ -131,11 +153,17 @@ static void thread_main(void*)
 	{
 		if (handle->check() == false)
 			break;
-		printf("loop check\r\n");
+		if (__nok == __parallel)
+		{
+			printf("%s: thread(%lu) over, total: %d\r\n", __FUNCTION__,
+				(unsigned long) acl_pthread_self(), __nok);
+			break;
+		}
 	}
 
 	// 因为 IO 句柄是延迟释放的，所以需要再次检查一遍
 	handle->check();
+
 	// 销毁异步事件句柄
 	delete handle;
 }
@@ -144,11 +172,11 @@ static void usage(const char* proc)
 {
 	printf("usage: %s -h[help]\r\n"
 		" -n thread_count\r\n"
-		" -c file_count\r\n"
+		" -c file_count per writer object\r\n"
 		" -l file_length\r\n"
-		" -k[use kernel event\r\n"
+		" -k [use kernel event, default: false]\r\n"
 		" -p path\r\n"
-		" -P parallel\r\n", proc);
+		" -P parallel [#writer object]\r\n", proc);
 }
 
 int main(int argc, char* argv[])
