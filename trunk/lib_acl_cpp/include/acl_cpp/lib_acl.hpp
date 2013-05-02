@@ -44,6 +44,7 @@
 #include "acl_cpp/stream/aio_ostream.hpp"
 #include "acl_cpp/stream/aio_listen_stream.hpp"
 #include "acl_cpp/stream/aio_socket_stream.hpp"
+#include "acl_cpp/stream/aio_fstream.hpp"
 
 #include "acl_cpp/ipc/ipc_client.hpp"
 #include "acl_cpp/ipc/ipc_server.hpp"

@@ -5,7 +5,7 @@ namespace acl {
 
 	bool ifstream::open_read(const char* path)
 	{
-		return (open(path, O_RDONLY, 0600));
+		return (open(path, O_RDONLY, 0200));
 	}
 
 	bool ifstream::load(acl::string* s)
