@@ -62,12 +62,12 @@ namespace acl {
 
 	bool fstream::open_trunc(const char* path)
 	{
-		return (open(path, O_RDWR | O_CREAT | O_TRUNC, 0700));
+		return (open(path, O_RDWR | O_CREAT | O_TRUNC, 0600));
 	}
 
 	bool fstream::create(const char* path)
 	{
-		return (open(path, O_RDWR | O_CREAT, 0700));
+		return (open(path, O_RDWR | O_CREAT, 0600));
 	}
 
 	bool fstream::close()

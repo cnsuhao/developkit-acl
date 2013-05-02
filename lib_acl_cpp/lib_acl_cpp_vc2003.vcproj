@@ -276,6 +276,9 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				Name="stream"
 				Filter="">
 				<File
+					RelativePath=".\src\stream\aio_fstream.cpp">
+				</File>
+				<File
 					RelativePath=".\src\stream\aio_handle.cpp">
 				</File>
 				<File
@@ -730,6 +733,9 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 			<Filter
 				Name="stream"
 				Filter="">
+				<File
+					RelativePath=".\include\acl_cpp\stream\aio_fstream.hpp">
+				</File>
 				<File
 					RelativePath=".\include\acl_cpp\stream\aio_handle.hpp">
 				</File>

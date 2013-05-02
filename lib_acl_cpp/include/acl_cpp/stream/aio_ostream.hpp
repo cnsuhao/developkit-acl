@@ -16,7 +16,7 @@ namespace acl
 	 * 步流的异步写操作解除绑定(即从 aio_handle 的监控中解除)，当指定
 	 * 时间到达后再启动异步写操作(在 timer_callback 回调中再重新将异步
 	 * 流的异步写操作绑定)，同时该定时器自动销毁(调用 destroy 方法)，
-	 * 所以如果用户继承了 aio_timer_reader 类，且子类不是在堆上分配的，
+	 * 所以如果用户继承了 aio_timer_writer 类，且子类不是在堆上分配的，
 	 * 则必须重载 destroy方法，同时在子类的 destroy 中执行与资源释放的
 	 * 相关操作，如果子类未重载 destroy，则当定时器结束后内部会自动调用
 	 * 基类 aio_timer_writer 的 destroy--该类调用了 delete this，此时就
