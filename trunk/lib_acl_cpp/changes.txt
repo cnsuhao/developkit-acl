@@ -2,6 +2,7 @@
 ------------------------------------------------------------------------
 157) 2013.5.2
 157.1) feature: 增加了针对文件进行异步 IO 操作的类：aio_fstream
+157.2) samples: 增加了针对新增类 aio_fstream 的测试例子: fs_benchmark
 
 156) 2013.4.17
 156.1) bugfix: master_thread.cpp 在测试环境下运行时，master_threads::thread_run
