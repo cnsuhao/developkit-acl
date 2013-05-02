@@ -89,7 +89,7 @@ protected:
 		}
 		else
 		{
-			printf("ifile_: %d, nfiles_: %d\r\n", ifile_, nfiles_);
+			//printf("ifile_: %d, nfiles_: %d\r\n", ifile_, nfiles_);
 			nwrite_ = 0;
 			delay_ = 0;
 
@@ -172,11 +172,11 @@ static void usage(const char* proc)
 {
 	printf("usage: %s -h[help]\r\n"
 		" -n thread_count\r\n"
+		" -P parallel [#writer object]\r\n"
 		" -c file_count per writer object\r\n"
 		" -l file_length\r\n"
 		" -k [use kernel event, default: false]\r\n"
-		" -p path\r\n"
-		" -P parallel [#writer object]\r\n", proc);
+		" -p path [default: var/]\r\n", proc);
 }
 
 int main(int argc, char* argv[])
