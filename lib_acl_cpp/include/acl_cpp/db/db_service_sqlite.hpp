@@ -3,8 +3,7 @@
 #include "acl_cpp/stdlib/string.hpp"
 #include "acl_cpp/db/db_service.hpp"
 
-namespace acl
-{
+namespace acl {
 
 class ACL_CPP_API db_service_sqlite : public db_service
 {

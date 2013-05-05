@@ -4,8 +4,7 @@
 
 typedef struct st_mysql MYSQL;
 
-namespace acl
-{
+namespace acl {
 
 class ACL_CPP_API db_mysql : public db_handle
 {

@@ -3,8 +3,7 @@
 #include "acl_cpp/stream/socket_stream.hpp"
 #include "acl_cpp/redis/redis_response.hpp"
 
-namespace acl
-{
+namespace acl {
 
 class redis_client
 {

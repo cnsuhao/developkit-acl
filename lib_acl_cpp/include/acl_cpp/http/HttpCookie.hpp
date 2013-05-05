@@ -3,8 +3,7 @@
 #include <list>
 #include "acl_cpp/http/http_type.hpp"
 
-namespace acl
-{
+namespace acl {
 
 /**
  * http 协议头中 cookie 对象类

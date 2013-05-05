@@ -6,8 +6,7 @@
 struct HTTP_HDR_RES;
 struct HTTP_HDR_ENTRY;
 
-namespace acl
-{
+namespace acl {
 
 class string;
 class HttpCookie;

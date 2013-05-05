@@ -2,8 +2,7 @@
 #include "acl_cpp/acl_cpp_define.hpp"
 #include <vector>
 
-namespace acl
-{
+namespace acl {
 
 class string;
 

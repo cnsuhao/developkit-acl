@@ -2,8 +2,7 @@
 #include <vector>
 #include "acl_cpp/stdlib/string.hpp"
 
-namespace acl
-{
+namespace acl {
 
 class redis_key
 {

@@ -8,8 +8,7 @@ typedef struct ACL_SCAN_DIR ACL_SCAN_DIR;
 typedef struct ACL_SCAN_DIR ACL_SCAN_DIR;
 typedef struct ACL_SCAN_DIR ACL_SCAN_DIR;
 
-namespace acl
-{
+namespace acl {
 
 class queue_file;
 
