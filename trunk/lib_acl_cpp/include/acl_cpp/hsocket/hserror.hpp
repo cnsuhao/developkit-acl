@@ -9,16 +9,15 @@
 #define	HS_ERR_CONN		-1		// 连接失败
 #define	HS_ERR_OK		0		// 正确
 
-namespace acl
+namespace acl {
+
+class hserror
 {
+public:
+	hserror();
+	~hserror();
 
-	class hserror
-	{
-	public:
-		hserror();
-		~hserror();
+	static const char* get_serror(int errnum);
+};
 
-		static const char* get_serror(int errnum);
-	};
-
-}
+}  // namespace acl

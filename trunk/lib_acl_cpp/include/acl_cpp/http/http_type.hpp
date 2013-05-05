@@ -1,7 +1,6 @@
 #pragma once
 
-namespace acl
-{
+namespace acl {
 
 struct HTTP_PARAM 
 {

@@ -1,8 +1,8 @@
 #pragma once
 #include "acl_cpp/acl_cpp_define.hpp"
 
-namespace acl
-{
+namespace acl {
+
 class ACL_CPP_API noncopyable
 {
 protected:
@@ -12,4 +12,5 @@ private:
 	noncopyable( const noncopyable& );
 	const noncopyable& operator=( const noncopyable& );
 };
+
 }  // namespace acl

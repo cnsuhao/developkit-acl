@@ -5,8 +5,7 @@
 
 typedef struct sqlite3 sqlite3;
 
-namespace acl
-{
+namespace acl {
 
 class charset_conv;
 

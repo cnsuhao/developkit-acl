@@ -29,8 +29,7 @@
 // In debug mode, we assert that no non-const functions are called
 // after main is invoked.
 
-namespace acl
-{
+namespace acl {
 
 #ifdef WIN32
 #  pragma warning(push)

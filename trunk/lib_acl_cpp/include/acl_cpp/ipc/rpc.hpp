@@ -14,8 +14,7 @@
 # endif
 #endif
 
-namespace acl
-{
+namespace acl {
 
 class ipc_client;
 class rpc_client;

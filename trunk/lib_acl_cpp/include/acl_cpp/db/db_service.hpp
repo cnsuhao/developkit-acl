@@ -4,8 +4,7 @@
 #include "acl_cpp/ipc/ipc_service.hpp"
 #include "acl_cpp/stdlib/string.hpp"
 
-namespace acl
-{
+namespace acl {
 
 typedef enum
 {

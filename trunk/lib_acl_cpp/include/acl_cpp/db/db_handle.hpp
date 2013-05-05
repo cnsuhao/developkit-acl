@@ -3,8 +3,7 @@
 #include <vector>
 #include "acl_cpp/stdlib/string.hpp"
 
-namespace acl
-{
+namespace acl {
 
 /**
  * 数据库查询结果集的行记录类型定义

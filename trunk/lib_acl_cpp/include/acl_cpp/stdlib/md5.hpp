@@ -1,8 +1,7 @@
 #pragma once
 #include "acl_cpp/acl_cpp_define.hpp"
 
-namespace acl
-{
+namespace acl {
 
 class istream;
 
@@ -85,11 +84,11 @@ public:
 	 *  3) out 缓冲区大小 size 小于 33 字节长度
 	 */
 #ifdef WIN32
-	static __int64 md5_file(const char* path, const void *key, size_t klen,
-		char* out, size_t size);
+	static __int64 md5_file(const char* path, const void *key,
+		size_t klen, char* out, size_t size);
 #else
-	static long long int md5_file(const char* path, const void *key, size_t klen,
-		char* out, size_t size);
+	static long long int md5_file(const char* path, const void *key,
+		size_t klen, char* out, size_t size);
 #endif
 
 	/**
@@ -104,11 +103,11 @@ public:
 	 *  2) out 缓冲区大小 size 小于 33 字节长度
 	 */
 #ifdef WIN32
-	static __int64 md5_file(istream& in, const void *key, size_t klen,
-		char* out, size_t size);
+	static __int64 md5_file(istream& in, const void *key,
+		size_t klen, char* out, size_t size);
 #else
-	static long long int md5_file(istream& in, const void *key, size_t klen,
-		char* out, size_t size);
+	static long long int md5_file(istream& in, const void *key,
+		size_t klen, char* out, size_t size);
 #endif
 
 	/**

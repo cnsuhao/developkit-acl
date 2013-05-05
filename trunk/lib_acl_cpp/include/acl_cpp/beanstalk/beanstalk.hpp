@@ -6,8 +6,7 @@
 
 struct ACL_ARGV;
 
-namespace acl
-{
+namespace acl {
 
 /**
  * 消息 ID 号从 1 开始递增(参加 beanstalkd 的 job.c 源程序中的如下内容：

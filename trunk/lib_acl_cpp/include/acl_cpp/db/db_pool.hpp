@@ -2,8 +2,7 @@
 #include "acl_cpp/acl_cpp_define.hpp"
 #include <list>
 
-namespace acl
-{
+namespace acl {
 
 class db_handle;
 class locker;

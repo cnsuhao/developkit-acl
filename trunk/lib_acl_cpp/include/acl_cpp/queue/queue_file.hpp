@@ -8,8 +8,7 @@
 #define MAXPATH255 255
 #endif
 
-namespace acl
-{
+namespace acl {
 
 class fstream;
 
