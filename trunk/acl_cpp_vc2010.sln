@@ -122,6 +122,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_acl_cpp", "lib_acl_cpp\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "singleton", "lib_acl_cpp\samples\singleton\singleton.vcxproj", "{128791D9-6787-471C-9A0C-0DCAE53F4911}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_rpc", "lib_rpc\lib_rpc.vcxproj", "{2B0C9A86-6C14-4CEF-BD7A-4A6752386A44}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -361,6 +363,16 @@ Global
 		{128791D9-6787-471C-9A0C-0DCAE53F4911}.Releasedll|Win32.Build.0 = ReleaseDll|Win32
 		{128791D9-6787-471C-9A0C-0DCAE53F4911}.Template|Win32.ActiveCfg = Release|Win32
 		{128791D9-6787-471C-9A0C-0DCAE53F4911}.Template|Win32.Build.0 = Release|Win32
+		{2B0C9A86-6C14-4CEF-BD7A-4A6752386A44}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2B0C9A86-6C14-4CEF-BD7A-4A6752386A44}.Debug|Win32.Build.0 = Debug|Win32
+		{2B0C9A86-6C14-4CEF-BD7A-4A6752386A44}.DebugDll|Win32.ActiveCfg = Debug|Win32
+		{2B0C9A86-6C14-4CEF-BD7A-4A6752386A44}.DebugDll|Win32.Build.0 = Debug|Win32
+		{2B0C9A86-6C14-4CEF-BD7A-4A6752386A44}.Release|Win32.ActiveCfg = Release|Win32
+		{2B0C9A86-6C14-4CEF-BD7A-4A6752386A44}.Release|Win32.Build.0 = Release|Win32
+		{2B0C9A86-6C14-4CEF-BD7A-4A6752386A44}.Releasedll|Win32.ActiveCfg = Release|Win32
+		{2B0C9A86-6C14-4CEF-BD7A-4A6752386A44}.Releasedll|Win32.Build.0 = Release|Win32
+		{2B0C9A86-6C14-4CEF-BD7A-4A6752386A44}.Template|Win32.ActiveCfg = Release|Win32
+		{2B0C9A86-6C14-4CEF-BD7A-4A6752386A44}.Template|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

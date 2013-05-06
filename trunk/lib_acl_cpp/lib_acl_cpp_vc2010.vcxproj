@@ -203,6 +203,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\beanstalk\beanstalk.cpp" />
+    <ClCompile Include="src\beanstalk\beanstalk_pool.cpp" />
     <ClCompile Include="src\db\db_handle.cpp" />
     <ClCompile Include="src\db\db_mysql.cpp" />
     <ClCompile Include="src\db\db_pool.cpp" />
@@ -309,6 +310,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include="include\acl_cpp\acl_cpp_init.hpp" />
     <ClInclude Include="include\acl_cpp\acl_cpp_test.hpp" />
     <ClInclude Include="include\acl_cpp\beanstalk\beanstalk.hpp" />
+    <ClInclude Include="include\acl_cpp\beanstalk\beanstalk_pool.hpp" />
     <ClInclude Include="include\acl_cpp\db\db_handle.hpp" />
     <ClInclude Include="include\acl_cpp\db\db_mysql.hpp" />
     <ClInclude Include="include\acl_cpp\db\db_pool.hpp" />
