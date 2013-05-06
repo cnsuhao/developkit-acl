@@ -313,6 +313,9 @@
     <ClCompile Include="src\stdlib\url_coder.cpp">
       <Filter>src\stdlib</Filter>
     </ClCompile>
+    <ClCompile Include="src\beanstalk\beanstalk_pool.cpp">
+      <Filter>src\beanstalk</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\acl_stdafx.hpp">
@@ -647,6 +650,9 @@
     </ClInclude>
     <ClInclude Include="include\acl_cpp\http\HttpCookie.hpp">
       <Filter>include\http</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\beanstalk\beanstalk_pool.hpp">
+      <Filter>include\beanstalk</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
