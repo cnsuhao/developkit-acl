@@ -38,7 +38,7 @@
   */
  struct ACL_WATCHDOG {
 	 unsigned timeout;		/* our time resolution */
-	 ACL_WATCHDOG_FN action;		/* application routine */
+	 ACL_WATCHDOG_FN action;	/* application routine */
 	 char   *context;		/* application context */
 	 int     trip_run;		/* number of successive timeouts */
 	 ACL_WATCHDOG *saved_watchdog;	/* saved state */
@@ -54,25 +54,23 @@ static ACL_WATCHDOG *acl_watchdog_curr;
 
 /* acl_watchdog_event - handle timeout event */
 
-static void acl_watchdog_event(int unused_sig)
+static void acl_watchdog_event(int unused_sig acl_unused)
 {
-	char  myname[] = "acl_watchdog_event";
+	const char* myname = "acl_watchdog_event";
 	ACL_WATCHDOG *wp;
 
-	unused_sig = unused_sig;
-
 	/*
-	 * This routine runs as a signal handler. We should not do anything that
-	 * could involve memory allocation/deallocation, but exiting without
-	 * proper explanation would be unacceptable.
+	 * This routine runs as a signal handler. We should not do anything
+	 * that could involve memory allocation/deallocation, but exiting
+	 * without proper explanation would be unacceptable.
 	 */
 	if ((wp = acl_watchdog_curr) == 0)
 		acl_msg_panic("%s: no instance", myname);
 	if (acl_msg_verbose > 1)
 		acl_msg_info("%s: %p %d", myname, (void *) wp, wp->trip_run);
-	if (++(wp->trip_run) < ACL_WATCHDOG_STEPS) {
+	if (++(wp->trip_run) < ACL_WATCHDOG_STEPS)
 		alarm(wp->timeout);
-	} else {
+	else {
 		if (wp->action)
 			wp->action(wp, wp->context);
 		else
@@ -82,15 +80,16 @@ static void acl_watchdog_event(int unused_sig)
 
 /* acl_watchdog_create - create watchdog instance */
 
-ACL_WATCHDOG *acl_watchdog_create(unsigned timeout, ACL_WATCHDOG_FN action, char *context)
+ACL_WATCHDOG *acl_watchdog_create(unsigned timeout,
+	ACL_WATCHDOG_FN action, char *context)
 {
-	char   myname[] = "acl_watchdog_create";
+	const char* myname = "acl_watchdog_create";
 	struct sigaction sig_action;
 	ACL_WATCHDOG *wp;
 
 	wp = (ACL_WATCHDOG *) acl_mymalloc(sizeof(*wp));
 	if ((wp->timeout = timeout / ACL_WATCHDOG_STEPS) == 0)
-		acl_msg_panic("%s: timeout %d is too small", myname, timeout);
+		acl_msg_panic("%s: timeout %d too small", myname, timeout);
 	wp->action = action;
 	wp->context = context;
 	wp->saved_watchdog = acl_watchdog_curr;
@@ -102,11 +101,9 @@ ACL_WATCHDOG *acl_watchdog_create(unsigned timeout, ACL_WATCHDOG_FN action, char
 	sig_action.sa_flags = 0;
 #endif
 	sig_action.sa_handler = acl_watchdog_event;
-	if (sigaction(SIGALRM, &sig_action, &wp->saved_action) < 0) {
-		char tbuf[256];
-		acl_msg_fatal("%s: sigaction(SIGALRM): %s", myname,
-			acl_last_strerror(tbuf, sizeof(tbuf)));
-	}
+	if (sigaction(SIGALRM, &sig_action, &wp->saved_action) < 0)
+		acl_msg_fatal("%s: sigaction(SIGALRM): %s",
+			myname, acl_last_serror());
 	if (acl_msg_verbose > 1)
 		acl_msg_info("%s: %p %d", myname, (void *) wp, timeout);
 	return (acl_watchdog_curr = wp);
@@ -116,15 +113,13 @@ ACL_WATCHDOG *acl_watchdog_create(unsigned timeout, ACL_WATCHDOG_FN action, char
 
 void    acl_watchdog_destroy(ACL_WATCHDOG *wp)
 {
-	char  myname[] = "acl_watchdog_destroy";
+	const char* myname = "acl_watchdog_destroy";
 
 	acl_watchdog_stop(wp);
 	acl_watchdog_curr = wp->saved_watchdog;
-	if (sigaction(SIGALRM, &wp->saved_action, (struct sigaction *) 0) < 0) {
-		char tbuf[256];
-		acl_msg_fatal("%s: sigaction(SIGALRM): %s", myname,
-			acl_last_strerror(tbuf, sizeof(tbuf)));
-	}
+	if (sigaction(SIGALRM, &wp->saved_action, (struct sigaction *) 0) < 0)
+		acl_msg_fatal("%s: sigaction(SIGALRM): %s",
+			myname, acl_last_serror());
 	if (wp->saved_time)
 		alarm(wp->saved_time);
 	acl_myfree(wp);
@@ -136,7 +131,7 @@ void    acl_watchdog_destroy(ACL_WATCHDOG *wp)
 
 void    acl_watchdog_start(ACL_WATCHDOG *wp)
 {
-	char  myname[] = "acl_watchdog_start";
+	const char* myname = "acl_watchdog_start";
 
 	if (wp != acl_watchdog_curr)
 		acl_msg_panic("%s: wrong watchdog instance", myname);
@@ -150,7 +145,7 @@ void    acl_watchdog_start(ACL_WATCHDOG *wp)
 
 void    acl_watchdog_stop(ACL_WATCHDOG *wp)
 {
-	char  myname[] = "acl_watchdog_stop";
+	const char* myname = "acl_watchdog_stop";
 
 	if (wp != acl_watchdog_curr)
 		acl_msg_panic("%s: wrong watchdog instance", myname);
@@ -163,7 +158,7 @@ void    acl_watchdog_stop(ACL_WATCHDOG *wp)
 
 void    acl_watchdog_pat(void)
 {
-	char  myname[] = "acl_watchdog_pat";
+	const char* myname = "acl_watchdog_pat";
 
 	if (acl_watchdog_curr)
 		acl_watchdog_curr->trip_run = 0;
