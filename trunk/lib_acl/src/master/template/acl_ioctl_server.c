@@ -249,6 +249,7 @@ static void close_listen_timer(int event acl_unused, void *context acl_unused)
 		acl_ioctl_disable_readwrite(__h_ioctl, __listen_streams[i]);
 		acl_vstream_close(__listen_streams[i]);
 		__listen_streams[i] = NULL;
+		acl_msg_info("All listener closed now!");
 	}
 	acl_myfree(__listen_streams);
 	__listen_streams = NULL;
@@ -292,10 +293,11 @@ static void ioctl_server_exit(void)
 static void ioctl_server_abort(int event acl_unused, ACL_IOCTL *h_ioctl,
 	ACL_VSTREAM *stream acl_unused, void *context acl_unused)
 {
+	const char *myname = "ioctl_server_abort";
 	int   n;
 
 	if (acl_var_ioctl_quick_abort) {
-		acl_msg_info("master disconnect -- quick exiting");
+		acl_msg_info("%s: master disconnect -- quick exiting", myname);
 		ioctl_server_exit();
 	}
 
@@ -306,6 +308,8 @@ static void ioctl_server_abort(int event acl_unused, ACL_IOCTL *h_ioctl,
 	
 	n = get_client_count();
 	if (n > 0) {
+		acl_msg_info("%s: wait for all connection(count=%d) closing",
+			myname, n);
 		/* set idle timeout to 1 second, one second check once */
 		acl_var_ioctl_idle_limit = 1;
 		acl_ioctl_request_timer(h_ioctl, ioctl_server_timeout,
@@ -313,8 +317,7 @@ static void ioctl_server_abort(int event acl_unused, ACL_IOCTL *h_ioctl,
 		return;
 	}
 
-	if (acl_msg_verbose)
-		acl_msg_info("master disconnect -- exiting");
+	acl_msg_info("%s: master disconnect -- exiting", myname);
 	ioctl_server_exit();
 }
 
@@ -322,6 +325,7 @@ static void ioctl_server_abort(int event acl_unused, ACL_IOCTL *h_ioctl,
 
 static void ioctl_server_timeout(int event acl_unused, void *context)
 {
+	const char* myname = "ioctl_server_timeout";
 	ACL_IOCTL *h_ioctl = (ACL_IOCTL *) context;
 	time_t last, inter;
 	int   n;
@@ -345,7 +349,7 @@ static void ioctl_server_timeout(int event acl_unused, void *context)
 	}
 
 	if (acl_msg_verbose)
-		acl_msg_info("idle timeout -- exiting");
+		acl_msg_info("%s: idle timeout -- exiting", myname);
 
 	ioctl_server_exit();
 }
