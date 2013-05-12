@@ -20,11 +20,9 @@
 #endif
 
 #include <google/protobuf/generated_message_util.h>
-#include <google/protobuf/message.h>
+#include <google/protobuf/message_lite.h>
 #include <google/protobuf/repeated_field.h>
 #include <google/protobuf/extension_set.h>
-#include <google/protobuf/generated_enum_reflection.h>
-#include <google/protobuf/unknown_field_set.h>
 // @@protoc_insertion_point(includes)
 
 namespace tutorial {
@@ -48,19 +46,9 @@ const Person_PhoneType Person_PhoneType_PhoneType_MIN = Person_PhoneType_MOBILE;
 const Person_PhoneType Person_PhoneType_PhoneType_MAX = Person_PhoneType_WORK;
 const int Person_PhoneType_PhoneType_ARRAYSIZE = Person_PhoneType_PhoneType_MAX + 1;
 
-const ::google::protobuf::EnumDescriptor* Person_PhoneType_descriptor();
-inline const ::std::string& Person_PhoneType_Name(Person_PhoneType value) {
-  return ::google::protobuf::internal::NameOfEnum(
-    Person_PhoneType_descriptor(), value);
-}
-inline bool Person_PhoneType_Parse(
-    const ::std::string& name, Person_PhoneType* value) {
-  return ::google::protobuf::internal::ParseNamedEnum<Person_PhoneType>(
-    Person_PhoneType_descriptor(), name, value);
-}
 // ===================================================================
 
-class Person_PhoneNumber : public ::google::protobuf::Message {
+class Person_PhoneNumber : public ::google::protobuf::MessageLite {
  public:
   Person_PhoneNumber();
   virtual ~Person_PhoneNumber();
@@ -72,24 +60,24 @@ class Person_PhoneNumber : public ::google::protobuf::Message {
     return *this;
   }
 
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
   static const Person_PhoneNumber& default_instance();
+
+  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+  // Returns the internal default instance pointer. This function can
+  // return NULL thus should not be used by the user. This is intended
+  // for Protobuf internal code. Please use default_instance() declared
+  // above instead.
+  static inline const Person_PhoneNumber* internal_default_instance() {
+    return default_instance_;
+  }
+  #endif
 
   void Swap(Person_PhoneNumber* other);
 
   // implements Message ----------------------------------------------
 
   Person_PhoneNumber* New() const;
-  void CopyFrom(const ::google::protobuf::Message& from);
-  void MergeFrom(const ::google::protobuf::Message& from);
+  void CheckTypeAndMergeFrom(const ::google::protobuf::MessageLite& from);
   void CopyFrom(const Person_PhoneNumber& from);
   void MergeFrom(const Person_PhoneNumber& from);
   void Clear();
@@ -100,7 +88,6 @@ class Person_PhoneNumber : public ::google::protobuf::Message {
       ::google::protobuf::io::CodedInputStream* input);
   void SerializeWithCachedSizes(
       ::google::protobuf::io::CodedOutputStream* output) const;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
   int GetCachedSize() const { return _cached_size_; }
   private:
   void SharedCtor();
@@ -108,7 +95,7 @@ class Person_PhoneNumber : public ::google::protobuf::Message {
   void SetCachedSize(int size) const;
   public:
 
-  ::google::protobuf::Metadata GetMetadata() const;
+  ::std::string GetTypeName() const;
 
   // nested types ----------------------------------------------------
 
@@ -140,15 +127,17 @@ class Person_PhoneNumber : public ::google::protobuf::Message {
   inline void set_has_type();
   inline void clear_has_type();
 
-  ::google::protobuf::UnknownFieldSet _unknown_fields_;
-
   ::std::string* number_;
   int type_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
 
+  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+  friend void  protobuf_AddDesc_test_2eproto_impl();
+  #else
   friend void  protobuf_AddDesc_test_2eproto();
+  #endif
   friend void protobuf_AssignDesc_test_2eproto();
   friend void protobuf_ShutdownFile_test_2eproto();
 
@@ -157,7 +146,7 @@ class Person_PhoneNumber : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class Person : public ::google::protobuf::Message {
+class Person : public ::google::protobuf::MessageLite {
  public:
   Person();
   virtual ~Person();
@@ -169,24 +158,24 @@ class Person : public ::google::protobuf::Message {
     return *this;
   }
 
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
   static const Person& default_instance();
+
+  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+  // Returns the internal default instance pointer. This function can
+  // return NULL thus should not be used by the user. This is intended
+  // for Protobuf internal code. Please use default_instance() declared
+  // above instead.
+  static inline const Person* internal_default_instance() {
+    return default_instance_;
+  }
+  #endif
 
   void Swap(Person* other);
 
   // implements Message ----------------------------------------------
 
   Person* New() const;
-  void CopyFrom(const ::google::protobuf::Message& from);
-  void MergeFrom(const ::google::protobuf::Message& from);
+  void CheckTypeAndMergeFrom(const ::google::protobuf::MessageLite& from);
   void CopyFrom(const Person& from);
   void MergeFrom(const Person& from);
   void Clear();
@@ -197,7 +186,6 @@ class Person : public ::google::protobuf::Message {
       ::google::protobuf::io::CodedInputStream* input);
   void SerializeWithCachedSizes(
       ::google::protobuf::io::CodedOutputStream* output) const;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
   int GetCachedSize() const { return _cached_size_; }
   private:
   void SharedCtor();
@@ -205,7 +193,7 @@ class Person : public ::google::protobuf::Message {
   void SetCachedSize(int size) const;
   public:
 
-  ::google::protobuf::Metadata GetMetadata() const;
+  ::std::string GetTypeName() const;
 
   // nested types ----------------------------------------------------
 
@@ -224,17 +212,6 @@ class Person : public ::google::protobuf::Message {
     Person_PhoneType_PhoneType_MAX;
   static const int PhoneType_ARRAYSIZE =
     Person_PhoneType_PhoneType_ARRAYSIZE;
-  static inline const ::google::protobuf::EnumDescriptor*
-  PhoneType_descriptor() {
-    return Person_PhoneType_descriptor();
-  }
-  static inline const ::std::string& PhoneType_Name(PhoneType value) {
-    return Person_PhoneType_Name(value);
-  }
-  static inline bool PhoneType_Parse(const ::std::string& name,
-      PhoneType* value) {
-    return Person_PhoneType_Parse(name, value);
-  }
 
   // accessors -------------------------------------------------------
 
@@ -290,8 +267,6 @@ class Person : public ::google::protobuf::Message {
   inline void set_has_email();
   inline void clear_has_email();
 
-  ::google::protobuf::UnknownFieldSet _unknown_fields_;
-
   ::std::string* name_;
   ::std::string* email_;
   ::google::protobuf::RepeatedPtrField< ::tutorial::Person_PhoneNumber > phone_;
@@ -300,7 +275,11 @@ class Person : public ::google::protobuf::Message {
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
 
+  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+  friend void  protobuf_AddDesc_test_2eproto_impl();
+  #else
   friend void  protobuf_AddDesc_test_2eproto();
+  #endif
   friend void protobuf_AssignDesc_test_2eproto();
   friend void protobuf_ShutdownFile_test_2eproto();
 
@@ -309,7 +288,7 @@ class Person : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class AddressBook : public ::google::protobuf::Message {
+class AddressBook : public ::google::protobuf::MessageLite {
  public:
   AddressBook();
   virtual ~AddressBook();
@@ -321,24 +300,24 @@ class AddressBook : public ::google::protobuf::Message {
     return *this;
   }
 
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
   static const AddressBook& default_instance();
+
+  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+  // Returns the internal default instance pointer. This function can
+  // return NULL thus should not be used by the user. This is intended
+  // for Protobuf internal code. Please use default_instance() declared
+  // above instead.
+  static inline const AddressBook* internal_default_instance() {
+    return default_instance_;
+  }
+  #endif
 
   void Swap(AddressBook* other);
 
   // implements Message ----------------------------------------------
 
   AddressBook* New() const;
-  void CopyFrom(const ::google::protobuf::Message& from);
-  void MergeFrom(const ::google::protobuf::Message& from);
+  void CheckTypeAndMergeFrom(const ::google::protobuf::MessageLite& from);
   void CopyFrom(const AddressBook& from);
   void MergeFrom(const AddressBook& from);
   void Clear();
@@ -349,7 +328,6 @@ class AddressBook : public ::google::protobuf::Message {
       ::google::protobuf::io::CodedInputStream* input);
   void SerializeWithCachedSizes(
       ::google::protobuf::io::CodedOutputStream* output) const;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
   int GetCachedSize() const { return _cached_size_; }
   private:
   void SharedCtor();
@@ -357,7 +335,7 @@ class AddressBook : public ::google::protobuf::Message {
   void SetCachedSize(int size) const;
   public:
 
-  ::google::protobuf::Metadata GetMetadata() const;
+  ::std::string GetTypeName() const;
 
   // nested types ----------------------------------------------------
 
@@ -378,14 +356,16 @@ class AddressBook : public ::google::protobuf::Message {
   // @@protoc_insertion_point(class_scope:tutorial.AddressBook)
  private:
 
-  ::google::protobuf::UnknownFieldSet _unknown_fields_;
-
   ::google::protobuf::RepeatedPtrField< ::tutorial::Person > person_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
 
+  #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
+  friend void  protobuf_AddDesc_test_2eproto_impl();
+  #else
   friend void  protobuf_AddDesc_test_2eproto();
+  #endif
   friend void protobuf_AssignDesc_test_2eproto();
   friend void protobuf_ShutdownFile_test_2eproto();
 
@@ -716,19 +696,6 @@ AddressBook::mutable_person() {
 // @@protoc_insertion_point(namespace_scope)
 
 }  // namespace tutorial
-
-#ifndef SWIG
-namespace google {
-namespace protobuf {
-
-template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::tutorial::Person_PhoneType>() {
-  return ::tutorial::Person_PhoneType_descriptor();
-}
-
-}  // namespace google
-}  // namespace protobuf
-#endif  // SWIG
 
 // @@protoc_insertion_point(global_scope)
 
