@@ -10,7 +10,7 @@
 
 using namespace google::protobuf::io;
 
-int main(int argc, char* argv[])
+int main(void)
 {
 	const char* path = "test.txt";
 

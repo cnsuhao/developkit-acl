@@ -169,7 +169,7 @@ class LIBPROTOBUF_EXPORT Descriptor {
   int field_count() const;
   // Gets a field by index, where 0 <= index < field_count().
   // These are returned in the order they were defined in the .proto file.
-  const FieldDescriptor* field(int index) const;
+  const FieldDescriptor* field(int idx) const;
 
   // Looks up a field by declared tag number.  Returns NULL if no such field
   // exists.
@@ -196,7 +196,7 @@ class LIBPROTOBUF_EXPORT Descriptor {
   int nested_type_count() const;
   // Gets a nested type by index, where 0 <= index < nested_type_count().
   // These are returned in the order they were defined in the .proto file.
-  const Descriptor* nested_type(int index) const;
+  const Descriptor* nested_type(int idx) const;
 
   // Looks up a nested type by name.  Returns NULL if no such nested type
   // exists.
@@ -208,7 +208,7 @@ class LIBPROTOBUF_EXPORT Descriptor {
   int enum_type_count() const;
   // Gets an enum type by index, where 0 <= index < enum_type_count().
   // These are returned in the order they were defined in the .proto file.
-  const EnumDescriptor* enum_type(int index) const;
+  const EnumDescriptor* enum_type(int idx) const;
 
   // Looks up an enum type by name.  Returns NULL if no such enum type exists.
   const EnumDescriptor* FindEnumTypeByName(const string& name) const;
@@ -231,7 +231,7 @@ class LIBPROTOBUF_EXPORT Descriptor {
   // Gets an extension range by index, where 0 <= index <
   // extension_range_count(). These are returned in the order they were defined
   // in the .proto file.
-  const ExtensionRange* extension_range(int index) const;
+  const ExtensionRange* extension_range(int idx) const;
 
   // Returns true if the number is in one of the extension ranges.
   bool IsExtensionNumber(int number) const;
@@ -241,7 +241,7 @@ class LIBPROTOBUF_EXPORT Descriptor {
   int extension_count() const;
   // Get an extension by index, where 0 <= index < extension_count().
   // These are returned in the order they were defined in the .proto file.
-  const FieldDescriptor* extension(int index) const;
+  const FieldDescriptor* extension(int idx) const;
 
   // Looks up a named extension (which extends some *other* message type)
   // defined within this message type's scope.
@@ -606,7 +606,7 @@ class LIBPROTOBUF_EXPORT EnumDescriptor {
   int value_count() const;
   // Gets a value by index, where 0 <= index < value_count().
   // These are returned in the order they were defined in the .proto file.
-  const EnumValueDescriptor* value(int index) const;
+  const EnumValueDescriptor* value(int idx) const;
 
   // Looks up a value by name.  Returns NULL if no such value exists.
   const EnumValueDescriptor* FindValueByName(const string& name) const;
@@ -768,7 +768,7 @@ class LIBPROTOBUF_EXPORT ServiceDescriptor {
   int method_count() const;
   // Gets a MethodDescriptor by index, where 0 <= index < method_count().
   // These are returned in the order they were defined in the .proto file.
-  const MethodDescriptor* method(int index) const;
+  const MethodDescriptor* method(int idx) const;
 
   // Look up a MethodDescriptor by name.
   const MethodDescriptor* FindMethodByName(const string& name) const;
@@ -902,7 +902,7 @@ class LIBPROTOBUF_EXPORT FileDescriptor {
   int dependency_count() const;
   // Gets an imported file by index, where 0 <= index < dependency_count().
   // These are returned in the order they were defined in the .proto file.
-  const FileDescriptor* dependency(int index) const;
+  const FileDescriptor* dependency(int idx) const;
 
   // The number of files public imported by this one.
   // The public dependency list is a subset of the dependency list.
@@ -910,7 +910,7 @@ class LIBPROTOBUF_EXPORT FileDescriptor {
   // Gets a public imported file by index, where 0 <= index <
   // public_dependency_count().
   // These are returned in the order they were defined in the .proto file.
-  const FileDescriptor* public_dependency(int index) const;
+  const FileDescriptor* public_dependency(int idx) const;
 
   // The number of files that are imported for weak fields.
   // The weak dependency list is a subset of the dependency list.
@@ -918,34 +918,34 @@ class LIBPROTOBUF_EXPORT FileDescriptor {
   // Gets a weak imported file by index, where 0 <= index <
   // weak_dependency_count().
   // These are returned in the order they were defined in the .proto file.
-  const FileDescriptor* weak_dependency(int index) const;
+  const FileDescriptor* weak_dependency(int idx) const;
 
   // Number of top-level message types defined in this file.  (This does not
   // include nested types.)
   int message_type_count() const;
   // Gets a top-level message type, where 0 <= index < message_type_count().
   // These are returned in the order they were defined in the .proto file.
-  const Descriptor* message_type(int index) const;
+  const Descriptor* message_type(int idx) const;
 
   // Number of top-level enum types defined in this file.  (This does not
   // include nested types.)
   int enum_type_count() const;
   // Gets a top-level enum type, where 0 <= index < enum_type_count().
   // These are returned in the order they were defined in the .proto file.
-  const EnumDescriptor* enum_type(int index) const;
+  const EnumDescriptor* enum_type(int idx) const;
 
   // Number of services defined in this file.
   int service_count() const;
   // Gets a service, where 0 <= index < service_count().
   // These are returned in the order they were defined in the .proto file.
-  const ServiceDescriptor* service(int index) const;
+  const ServiceDescriptor* service(int idx) const;
 
   // Number of extensions defined at file scope.  (This does not include
   // extensions nested within message types.)
   int extension_count() const;
   // Gets an extension's descriptor, where 0 <= index < extension_count().
   // These are returned in the order they were defined in the .proto file.
-  const FieldDescriptor* extension(int index) const;
+  const FieldDescriptor* extension(int idx) const;
 
   // Get options for this file.  These are specified in the .proto file by
   // placing lines like "option foo = 1234;" at the top level, outside of any
@@ -1314,7 +1314,7 @@ class LIBPROTOBUF_EXPORT DescriptorPool {
 
 // Arrays take an index parameter, obviously.
 #define PROTOBUF_DEFINE_ARRAY_ACCESSOR(CLASS, FIELD, TYPE) \
-  inline TYPE CLASS::FIELD(int index) const { return FIELD##s_ + index; }
+  inline TYPE CLASS::FIELD(int idx) const { return FIELD##s_ + idx; }
 
 #define PROTOBUF_DEFINE_OPTIONS_ACCESSOR(CLASS, TYPE) \
   inline const TYPE& CLASS::options() const { return *options_; }

@@ -1196,8 +1196,8 @@ LIBPROTOBUF_EXPORT void OnShutdown(void (*func)());
 #if PROTOBUF_USE_EXCEPTIONS
 class FatalException : public std::exception {
  public:
-  FatalException(const char* filename, int line, const std::string& message)
-      : filename_(filename), line_(line), message_(message) {}
+  FatalException(const char* f, int l, const std::string& m)
+      : filename_(f), line_(l), message_(m) {}
   virtual ~FatalException() throw();
 
   virtual const char* what() const throw();
