@@ -69,10 +69,10 @@ install:
 	cp -Rf lib_acl/include/* $(ACL_INC)/
 	cp -f lib_protocol/lib/lib_protocol.a $(PROTO_LIB)/$(RPATH)/
 	cp -Rf lib_protocol/include/* $(PROTO_INC)/
-	cp -f lib_dict/lib/lib_dict.a $(DICT_LIB)/$(RPATH)/
-	cp -Rf lib_dict/include/* $(DICT_INC)/
-	cp -f lib_tls/lib/lib_tls.a $(TLS_LIB)/$(RPATH)/
-	cp -Rf lib_tls/include/* $(TLS_INC)/
+#	cp -f lib_dict/lib/lib_dict.a $(DICT_LIB)/$(RPATH)/
+#	cp -Rf lib_dict/include/* $(DICT_INC)/
+#	cp -f lib_tls/lib/lib_tls.a $(TLS_LIB)/$(RPATH)/
+#	cp -Rf lib_tls/include/* $(TLS_INC)/
 uninstall:
 	@(echo "")
 	@(echo "begin remove file...")

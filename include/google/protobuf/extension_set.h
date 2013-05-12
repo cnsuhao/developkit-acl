@@ -844,8 +844,8 @@ class ExtensionIdentifier {
   typedef TypeTraitsType TypeTraits;
   typedef ExtendeeType Extendee;
 
-  ExtensionIdentifier(int number, typename TypeTraits::ConstType default_value)
-      : number_(number), default_value_(default_value) {}
+  ExtensionIdentifier(int _number, typename TypeTraits::ConstType _default_value)
+      : number_(_number), default_value_(_default_value) {}
   inline int number() const { return number_; }
   typename TypeTraits::ConstType default_value() const {
     return default_value_;

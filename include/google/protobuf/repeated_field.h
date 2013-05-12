@@ -564,12 +564,12 @@ inline RepeatedField<Element>::RepeatedField(const RepeatedField& other)
 
 template <typename Element>
 template <typename Iter>
-inline RepeatedField<Element>::RepeatedField(Iter begin, const Iter& end)
+inline RepeatedField<Element>::RepeatedField(Iter _begin, const Iter& _end)
   : elements_(NULL),
     current_size_(0),
     total_size_(kInitialSize) {
-  for (; begin != end; ++begin) {
-    Add(*begin);
+  for (; _begin != _end; ++_begin) {
+    Add(*_begin);
   }
 }
 
@@ -1008,9 +1008,9 @@ inline RepeatedPtrField<Element>::RepeatedPtrField(
 template <typename Element>
 template <typename Iter>
 inline RepeatedPtrField<Element>::RepeatedPtrField(
-    Iter begin, const Iter& end) {
-  for (; begin != end; ++begin) {
-    *Add() = *begin;
+    Iter _begin, const Iter& _end) {
+  for (; _begin != _end; ++_begin) {
+    *Add() = *_begin;
   }
 }
 

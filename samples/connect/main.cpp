@@ -1,7 +1,34 @@
 #include "lib_acl.h"
 
+static void test(const char* addr)
+{
+	for (int i = 0; i < 1000; i++)
+	{
+		ACL_VSTREAM* client = acl_vstream_connect(addr, ACL_BLOCKING, 10, 10, 4096);
+		if (client)
+		{
+			char buf[256];
+			acl_vstream_gets(client, buf, sizeof(buf));
+			acl_vstream_close(client);
+			printf("connect addr: %s ok, banner: %s\r\n", addr, buf);
+			if (strncasecmp(buf, "220", 3) != 0)
+			{
+				printf("error\r\n");
+				break;
+			}
+		}
+		else
+		{
+			printf("connect addr: %s error\r\n", addr);
+			break;
+		}
+	}
+}
+
 int main(int argc, char *argv[])
 {
+	test(argv[1]); return 0;
+
 	ACL_VSTREAM *client;
 	const char *addr;
 	char  buf[1024];
