@@ -33,10 +33,10 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="protobuf_client.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="test.pb.cc">
+    <ClCompile Include="test.pb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
