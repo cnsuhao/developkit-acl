@@ -5,63 +5,98 @@ namespace google {
 namespace protobuf {
 namespace io {
 
-acl_protobuf_istream::acl_protobuf_istream(acl::istream* in)
-: in_(in)
+AclInputStream::AclInputStream(acl::istream* input, int block_size)
+: copying_input_(input)
+, impl_(&copying_input_, block_size)
 {
-
 }
 
-acl_protobuf_istream::~acl_protobuf_istream()
+AclInputStream::~AclInputStream()
 {
-
 }
 
-bool acl_protobuf_istream::Next(const void** data, int* size)
+bool AclInputStream::Next(const void** data, int* size)
 {
-	return true;
+	return impl_.Next(data, size);
 }
 
-void acl_protobuf_istream::BackUp(int count)
+void AclInputStream::BackUp(int count)
 {
-
+	impl_.BackUp(count);
 }
 
-bool acl_protobuf_istream::Skip(int count)
+bool AclInputStream::Skip(int count)
 {
-	return true;
+	return impl_.Skip(count);
 }
 
-int64 acl_protobuf_istream::ByteCount() const
+int64 AclInputStream::ByteCount() const
 {
-	return 0;
+	return impl_.ByteCount();
 }
 
+AclInputStream::CopyingAclInputStream::CopyingAclInputStream(acl::istream* input)
+	: input_(input)
+{
+}
+
+AclInputStream::CopyingAclInputStream::~CopyingAclInputStream()
+{
+}
+
+int AclInputStream::CopyingAclInputStream::Read(void* buffer, int size)
+{
+	return input_->read(buffer, (size_t) size, false);
+}
 //////////////////////////////////////////////////////////////////////////
 
-acl_protobuf_ostream::acl_protobuf_ostream(acl::ostream* out)
-: out_(out)
+AclOutputStream::AclOutputStream(acl::ostream* output,
+	int block_size /* = -1 */)
+: copying_output_(output)
+, impl_(&copying_output_, block_size)
 {
 
 }
 
-acl_protobuf_ostream::~acl_protobuf_ostream()
+AclOutputStream::~AclOutputStream()
 {
-
+	impl_.Flush();
 }
 
-bool acl_protobuf_ostream::Next(void** data, int* size)
+void AclOutputStream::Flush()
 {
-	return true;
+	impl_.Flush();
 }
 
-void acl_protobuf_ostream::BackUp(int count)
+bool AclOutputStream::Next(void** data, int* size)
 {
-
+	return impl_.Next(data, size);
 }
 
-int64 acl_protobuf_ostream::ByteCount() const
+void AclOutputStream::BackUp(int count)
 {
-	return 0;
+	impl_.BackUp(count);
+}
+
+int64 AclOutputStream::ByteCount() const
+{
+	return impl_.ByteCount();
+}
+
+AclOutputStream::CopyingAclOutputStream::CopyingAclOutputStream(
+	acl::ostream* output)
+	: output_(output)
+{
+}
+
+AclOutputStream::CopyingAclOutputStream::~CopyingAclOutputStream()
+{
+}
+
+bool AclOutputStream::CopyingAclOutputStream::Write(
+	const void* buffer, int size)
+{
+	return output_->write(buffer, (size_t) size) == size ? true : false;
 }
 
 }  // namespace io
