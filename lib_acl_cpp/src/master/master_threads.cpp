@@ -193,6 +193,29 @@ namespace acl
 		}
 	}
 
+	void master_threads::proc_set_timer(void (*callback)(int, void*),
+		void* ctx, int delay)
+	{
+#ifdef WIN32
+		logger_error("can't support on win32");
+#else
+		if (proc_inited_)
+			acl_ioctl_server_request_timer(callback, ctx, delay);
+		else
+			logger_error("please call me in proc_on_init");
+#endif
+	}
+
+	void master_threads::proc_del_timer(void (*callback)(int, void*), void* ctx)
+	{
+#ifdef WIN32
+		logger_error("can't support on win32");
+#else
+		if (proc_inited_)
+			acl_ioctl_server_cancel_timer(callback, ctx);
+#endif
+	}
+
 	//////////////////////////////////////////////////////////////////////////
 
 	void master_threads::service_pre_jail(void*)
@@ -204,6 +227,7 @@ namespace acl
 	void master_threads::service_init(void*)
 	{
 		acl_assert(__mt != NULL);
+		__mt->proc_inited_ = true;
 		__mt->proc_on_init();
 	}
 

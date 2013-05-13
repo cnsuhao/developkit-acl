@@ -1027,6 +1027,9 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service,..
 			ACL_IOCTL_CTL_EXIT_CTX, thread_exit_ctx,
 			ACL_IOCTL_CTL_END);
 
+	if (acl_var_ioctl_enable_dog)
+		acl_ioctl_add_dog(__h_ioctl);
+
 	/*
 	 * Run pre-jail initialization.
 	 */
@@ -1059,20 +1062,17 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service,..
 	}
 
 	/*
-	 * Run post-jail initialization.
-	 */
-	if (post_init)
-		post_init(ioctl_server_name, ioctl_server_argv);
-
-	if (acl_var_ioctl_enable_dog)
-		acl_ioctl_add_dog(__h_ioctl);
-
-	/*
 	 * The event loop, at last.
 	 */
 	if (acl_ioctl_start(__h_ioctl) < 0)
 		acl_msg_fatal("%s(%d): acl_ioctl_start error(%s)",
 			myname, __LINE__, strerror(errno));
+
+	/*
+	 * Run post-jail initialization.
+	 */
+	if (post_init)
+		post_init(ioctl_server_name, ioctl_server_argv);
 
 	/*
 	 * Are we running as a one-shot server with the client connection on

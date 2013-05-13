@@ -128,7 +128,6 @@ void acl_timer_walk(ACL_TIMER *timer, void (*action)(ACL_TIMER_INFO *, void *), 
 	}
 }
 
-#include <stdio.h>
 static const void *timer_iter_head(ACL_ITER *iter, struct ACL_TIMER *timer)
 {
 	ACL_TIMER_INFO *info;
