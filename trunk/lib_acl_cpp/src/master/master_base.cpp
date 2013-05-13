@@ -6,6 +6,7 @@ namespace acl
 	master_base::master_base()
 	{
 		daemon_mode_ = false;
+		proc_inited_ = false;
 	}
 
 	master_base::~master_base()

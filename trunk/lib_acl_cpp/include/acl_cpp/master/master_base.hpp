@@ -39,6 +39,7 @@ public:
 	bool daemon_mode(void) const;
 protected:
 	bool daemon_mode_;
+	bool proc_inited_;
 
 	master_base();
 	virtual ~master_base();
