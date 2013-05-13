@@ -50,7 +50,11 @@ int main(void)
 
 	// 将地址簿数据序列化至磁盘文件流中
 	address.SerializeToZeroCopyStream(&output);
-	output.Flush();
+	if (output.Flush() == false)
+	{
+		printf("flush failed!\r\n");
+		return 1;
+	}
 	out_fp.close();
 
 	/////////////////////////////////////////////////////////////////////////

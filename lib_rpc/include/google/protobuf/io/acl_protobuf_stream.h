@@ -50,7 +50,7 @@ public:
 	explicit AclOutputStream(acl::ostream* output, int block_size = -1);
 	~AclOutputStream();
 
-	void Flush();
+	bool Flush();
 
 	//基类 ZeroCopyInputStream 虚函数实现
 	bool Next(void** data, int* size);
