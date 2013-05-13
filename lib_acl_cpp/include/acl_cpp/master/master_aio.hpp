@@ -54,23 +54,6 @@ protected:
 	 *  远程客户端连接，否则继续接收客户端连接
 	 */
 	virtual bool on_accept(aio_socket_stream* stream) = 0;
-
-	/**
-	 * 设置进程级别的循环定时器，该定时器只有当 proc_on_init 回调过程中
-	 * 被设置才会生效
-	 * @param callback {void (*)(int, void*)} 定时器回调函数
-	 * @param ctx {void*} callback 被调用时的第二个参数
-	 * @param delay {int} 定时器被循环触发的时间间隔(秒)
-	 */
-	void proc_set_timer(void (*callback)(int, void*), void* ctx, int delay);
-
-	/**
-	 * 删除进程级别的循环定时器
-	 * @param callback {void (*)(int, void*)} 定时器回调函数
-	 * @param ctx {void*} callback 被调用时的第二个参数
-	 */
-	void proc_del_timer(void (*callback)(int, void*), void* ctx);
-
 private:
 	/**
 	 * 基类 aio_accept_callback 的虚函数实现

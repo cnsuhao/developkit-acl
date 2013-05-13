@@ -94,6 +94,7 @@ namespace acl
 	void master_trigger::service_init(char*, char**)
 	{
 		acl_assert(__mt != NULL);
+		proc_inited_ = true;
 		__mt->proc_on_init();
 	}
 

@@ -115,6 +115,7 @@ namespace acl
 	void master_proc::service_init(char*, char**)
 	{
 		acl_assert(__mp != NULL);
+		proc_inited_ = true;
 		__mp->proc_on_init();
 	}
 
