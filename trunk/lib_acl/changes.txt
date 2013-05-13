@@ -1,3 +1,8 @@
+
+365) 2013.5.13
+365.1) acl_ioctl_server.c: 在主函数 acl_ioctl_server_main 中，需要将 acl_ioctl_start
+放在 proc_init 之前，以便于应用在 proc_init 回调过程中设置一次性定时器
+
 364) 2013.3.26
 364.1) bugfix: acl_xml_parse.c->xml_parse_attr_val() 函数中当
 if (ch == attr->quote) 时应该添加 xml->curr_node->last_ch = ch;

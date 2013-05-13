@@ -17,21 +17,25 @@ AclInputStream::~AclInputStream()
 
 bool AclInputStream::Next(const void** data, int* size)
 {
+	printf("%s:%d\r\n", __FUNCTION__, __LINE__);
 	return impl_.Next(data, size);
 }
 
 void AclInputStream::BackUp(int count)
 {
+	printf("%s:%d\r\n", __FUNCTION__, __LINE__);
 	impl_.BackUp(count);
 }
 
 bool AclInputStream::Skip(int count)
 {
+	printf("%s:%d\r\n", __FUNCTION__, __LINE__);
 	return impl_.Skip(count);
 }
 
 int64 AclInputStream::ByteCount() const
 {
+	printf("%s:%d\r\n", __FUNCTION__, __LINE__);
 	return impl_.ByteCount();
 }
 
@@ -46,8 +50,12 @@ AclInputStream::CopyingAclInputStream::~CopyingAclInputStream()
 
 int AclInputStream::CopyingAclInputStream::Read(void* buffer, int size)
 {
-	return input_->read(buffer, (size_t) size, false);
+	printf("%s:%d, size; %d\r\n", __FUNCTION__, __LINE__, size);
+	int ret = input_->read(buffer, (size_t) size, false);
+	printf(">>>read: %d\r\n", ret);
+	return ret;
 }
+
 //////////////////////////////////////////////////////////////////////////
 
 AclOutputStream::AclOutputStream(acl::ostream* output,
@@ -63,9 +71,9 @@ AclOutputStream::~AclOutputStream()
 	impl_.Flush();
 }
 
-void AclOutputStream::Flush()
+bool AclOutputStream::Flush()
 {
-	impl_.Flush();
+	return impl_.Flush();
 }
 
 bool AclOutputStream::Next(void** data, int* size)
@@ -96,6 +104,7 @@ AclOutputStream::CopyingAclOutputStream::~CopyingAclOutputStream()
 bool AclOutputStream::CopyingAclOutputStream::Write(
 	const void* buffer, int size)
 {
+	printf("write called, size: %d\r\n", size);
 	return output_->write(buffer, (size_t) size) == size ? true : false;
 }
 

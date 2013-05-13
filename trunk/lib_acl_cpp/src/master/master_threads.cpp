@@ -199,7 +199,7 @@ namespace acl
 #ifdef WIN32
 		logger_error("can't support on win32");
 #else
-		if (proc_inited_)
+		if (__mt->proc_inited_)
 			acl_ioctl_server_request_timer(callback, ctx, delay);
 		else
 			logger_error("please call me in proc_on_init");
@@ -211,7 +211,7 @@ namespace acl
 #ifdef WIN32
 		logger_error("can't support on win32");
 #else
-		if (proc_inited_)
+		if (__mt->proc_inited_)
 			acl_ioctl_server_cancel_timer(callback, ctx);
 #endif
 	}
