@@ -476,6 +476,11 @@ static void ioctl_server_accept_local(int event_type, ACL_IOCTL *h_ioctl,
 	int     fd;
 	int     i = 0;
 
+	if (__listen_streams == NULL) {
+		acl_msg_info("Server stoping ...");
+		return;
+	}
+
 	if (event_type != ACL_EVENT_READ)
 		acl_msg_fatal("%s, %s(%d): unknown event_type(%d)",
 			__FILE__, myname, __LINE__, event_type);
@@ -507,8 +512,14 @@ static void ioctl_server_accept_local(int event_type, ACL_IOCTL *h_ioctl,
 		if (errno == EMFILE) {
 			delay_listen = 1;
 			acl_msg_warn("accept connection: %s", strerror(errno));
-		} else if (errno != EAGAIN && errno != EINTR)
-			acl_msg_fatal("accept connection: %s", strerror(errno));
+		} else if (errno != EAGAIN && errno != EINTR) {
+			acl_msg_warn("accept connection: %s, stoping ...",
+					strerror(errno));
+			acl_ioctl_disable_readwrite(h_ioctl, stream);
+			ioctl_server_abort(0, h_ioctl, stream, h_ioctl);
+			return;
+		}
+
 		break;
 	}
 
@@ -544,6 +555,11 @@ static void ioctl_server_accept_pass(int event_type, ACL_IOCTL *h_ioctl,
 	int     delay_listen = 0;
 	int     i = 0;
 
+	if (__listen_streams == NULL) {
+		acl_msg_info("Server stoping ...");
+		return;
+	}
+
 	if (event_type != ACL_EVENT_READ)
 		acl_msg_fatal("%s, %s(%d): unknown event_type(%d)",
 			__FILE__, myname, __LINE__, event_type);
@@ -574,8 +590,14 @@ static void ioctl_server_accept_pass(int event_type, ACL_IOCTL *h_ioctl,
 		if (errno == EMFILE) {
 			delay_listen = 1;
 			acl_msg_warn("accept connection: %s", strerror(errno));
-		} else if (errno != EAGAIN && errno != EINTR)
-			acl_msg_fatal("accept connection: %s", strerror(errno));
+		} else if (errno != EAGAIN && errno != EINTR) {
+			acl_msg_warn("accept connection: %s, stoping ...",
+				strerror(errno));
+			acl_ioctl_disable_readwrite(h_ioctl, stream);
+			ioctl_server_abort(0, h_ioctl, stream, h_ioctl);
+			return;
+		}
+
 		break;
 	}
 
@@ -614,6 +636,11 @@ static void ioctl_server_accept_inet(int event_type, ACL_IOCTL *h_ioctl,
 	int     delay_listen = 0;
 	char    remote_addr[64], local_addr[64];
 
+	if (__listen_streams == NULL) {
+		acl_msg_info("Server stoping ...");
+		return;
+	}
+
 	if (event_type != ACL_EVENT_READ)
 		acl_msg_fatal("%s, %s(%d): unknown event_type(%d)",
 			__FILE__, myname, __LINE__, event_type);
@@ -640,8 +667,13 @@ static void ioctl_server_accept_inet(int event_type, ACL_IOCTL *h_ioctl,
 			if (errno == EMFILE) {
 				delay_listen = 1;
 				acl_msg_warn("accept connection: %s", strerror(errno));
-			} else if (errno != EAGAIN && errno != EINTR)
-				acl_msg_fatal("accept connection: %s", strerror(errno));
+			} else if (errno != EAGAIN && errno != EINTR) {
+				acl_msg_warn("accept connection: %s, stoping ...",
+					strerror(errno));
+				acl_ioctl_disable_readwrite(h_ioctl, stream);
+				ioctl_server_abort(0, h_ioctl, stream, h_ioctl);
+				return;
+			}
 			break;
 		}
 
