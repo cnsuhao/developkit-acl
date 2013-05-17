@@ -293,8 +293,12 @@ static void ioctl_server_exit(void)
 static void ioctl_server_abort(int event acl_unused, ACL_IOCTL *h_ioctl,
 	ACL_VSTREAM *stream acl_unused, void *context acl_unused)
 {
+	static int  __aborting = 0;
 	const char *myname = "ioctl_server_abort";
 	int   n;
+
+	if (__aborting)
+		return;
 
 	if (acl_var_ioctl_quick_abort) {
 		acl_msg_info("%s: master disconnect -- quick exiting", myname);
@@ -306,6 +310,8 @@ static void ioctl_server_abort(int event acl_unused, ACL_IOCTL *h_ioctl,
 		disable_listen();
 	}
 	
+	__aborting = 1;
+
 	n = get_client_count();
 	if (n > 0) {
 		acl_msg_info("%s: wait for all connection(count=%d) closing",
