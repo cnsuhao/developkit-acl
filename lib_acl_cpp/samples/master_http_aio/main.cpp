@@ -18,6 +18,8 @@ int main(int argc, char* argv[])
 	if (argc >= 2 && strcmp(argv[1], "alone") == 0)
 	{
 		const char* addr = "127.0.0.1:8888";
+		if (argc >= 3)
+			addr = argv[2];
 		printf("listen on: %s\r\n", addr);
 		ms.run_alone(addr, NULL, acl::ENGINE_SELECT);  // 单独运行方式
 	}
