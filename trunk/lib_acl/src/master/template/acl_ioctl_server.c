@@ -394,7 +394,7 @@ static void ioctl_server_execute(ACL_IOCTL *h_ioctl, ACL_VSTREAM *stream)
 	    && acl_master_notify(acl_var_ioctl_pid, ioctl_server_generation,
 		ACL_MASTER_STAT_TAKEN) < 0)
 	{
-		ioctl_server_abort(ACL_EVENT_NULL_TYPE, NULL, NULL,
+		ioctl_server_abort(ACL_EVENT_NULL_TYPE, h_ioctl, stream,
 			ACL_EVENT_NULL_CONTEXT);
 	}
 
@@ -404,7 +404,7 @@ static void ioctl_server_execute(ACL_IOCTL *h_ioctl, ACL_VSTREAM *stream)
 	    && acl_master_notify(acl_var_ioctl_pid, ioctl_server_generation,
 		ACL_MASTER_STAT_AVAIL) < 0)
 	{
-		ioctl_server_abort(ACL_EVENT_NULL_TYPE, NULL, NULL,
+		ioctl_server_abort(ACL_EVENT_NULL_TYPE, h_ioctl, stream,
 			ACL_EVENT_NULL_CONTEXT);
 	}
 }
