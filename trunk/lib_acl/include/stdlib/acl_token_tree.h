@@ -120,8 +120,6 @@ ACL_API ACL_TOKEN *acl_token_tree_add(ACL_TOKEN *token_tree,
 	const char *word, unsigned int flag, const void *ctx);
 ACL_API ACL_TOKEN *acl_token_tree_add_word_map(ACL_TOKEN *token_tree,
 	const char *word, const char *word_map, unsigned int flag);
-ACL_API ACL_TOKEN *acl_token_tree_add_utf8(ACL_TOKEN *token_tree,
-	char *word, unsigned int flag, const void *ctx);
 ACL_API const ACL_TOKEN *acl_token_tree_word_match(const ACL_TOKEN *token_tree,
 	const char *word);
 ACL_API const ACL_TOKEN *acl_token_tree_match(const ACL_TOKEN *token_tree,
