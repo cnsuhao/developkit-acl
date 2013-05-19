@@ -41,7 +41,7 @@ private:
 	CopyingAclInputStream copying_input_;
 	CopyingInputStreamAdaptor impl_;
 
-	GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(AclInputStream);
+	GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(acl_ifstream);
 };
 
 class LIBPROTOBUF_EXPORT acl_ofstream : public ZeroCopyOutputStream
@@ -75,7 +75,7 @@ private:
 	CopyingAclOutputStream copying_output_;
 	CopyingOutputStreamAdaptor impl_;
 
-	GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(AclOutputStream);
+	GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(acl_ofstream);
 };
 
 }  // namespace io

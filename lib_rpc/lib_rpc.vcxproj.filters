@@ -15,18 +15,24 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\acl_protobuf_stream.cpp">
+    <ClCompile Include="src\stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="stdafx.cpp">
+    <ClCompile Include="http_protobuf.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\acl_fstream.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\google\protobuf\io\acl_protobuf_stream.h">
+    <ClInclude Include="src\stdafx.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="stdafx.h">
+    <ClInclude Include="http_protobuf.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\google\protobuf\io\acl_fstream.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
