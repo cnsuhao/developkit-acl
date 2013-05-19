@@ -5,60 +5,54 @@ namespace google {
 namespace protobuf {
 namespace io {
 
-AclInputStream::AclInputStream(acl::istream* input, int block_size)
+acl_ifstream::acl_ifstream(acl::istream* input, int block_size)
 : copying_input_(input)
 , impl_(&copying_input_, block_size)
 {
 }
 
-AclInputStream::~AclInputStream()
+acl_ifstream::~acl_ifstream()
 {
 }
 
-bool AclInputStream::Next(const void** data, int* size)
+bool acl_ifstream::Next(const void** data, int* size)
 {
-	printf("%s:%d\r\n", __FUNCTION__, __LINE__);
 	return impl_.Next(data, size);
 }
 
-void AclInputStream::BackUp(int count)
+void acl_ifstream::BackUp(int count)
 {
-	printf("%s:%d\r\n", __FUNCTION__, __LINE__);
 	impl_.BackUp(count);
 }
 
-bool AclInputStream::Skip(int count)
+bool acl_ifstream::Skip(int count)
 {
-	printf("%s:%d\r\n", __FUNCTION__, __LINE__);
 	return impl_.Skip(count);
 }
 
-int64 AclInputStream::ByteCount() const
+int64 acl_ifstream::ByteCount() const
 {
-	printf("%s:%d\r\n", __FUNCTION__, __LINE__);
 	return impl_.ByteCount();
 }
 
-AclInputStream::CopyingAclInputStream::CopyingAclInputStream(acl::istream* input)
+acl_ifstream::CopyingAclInputStream::CopyingAclInputStream(acl::istream* input)
 	: input_(input)
 {
 }
 
-AclInputStream::CopyingAclInputStream::~CopyingAclInputStream()
+acl_ifstream::CopyingAclInputStream::~CopyingAclInputStream()
 {
 }
 
-int AclInputStream::CopyingAclInputStream::Read(void* buffer, int size)
+int acl_ifstream::CopyingAclInputStream::Read(void* buffer, int size)
 {
-	printf("%s:%d, size; %d\r\n", __FUNCTION__, __LINE__, size);
 	int ret = input_->read(buffer, (size_t) size, false);
-	printf(">>>read: %d\r\n", ret);
 	return ret;
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-AclOutputStream::AclOutputStream(acl::ostream* output,
+acl_ofstream::acl_ofstream(acl::ostream* output,
 	int block_size /* = -1 */)
 : copying_output_(output)
 , impl_(&copying_output_, block_size)
@@ -66,42 +60,42 @@ AclOutputStream::AclOutputStream(acl::ostream* output,
 
 }
 
-AclOutputStream::~AclOutputStream()
+acl_ofstream::~acl_ofstream()
 {
 	impl_.Flush();
 }
 
-bool AclOutputStream::Flush()
+bool acl_ofstream::Flush()
 {
 	return impl_.Flush();
 }
 
-bool AclOutputStream::Next(void** data, int* size)
+bool acl_ofstream::Next(void** data, int* size)
 {
 	return impl_.Next(data, size);
 }
 
-void AclOutputStream::BackUp(int count)
+void acl_ofstream::BackUp(int count)
 {
 	impl_.BackUp(count);
 }
 
-int64 AclOutputStream::ByteCount() const
+int64 acl_ofstream::ByteCount() const
 {
 	return impl_.ByteCount();
 }
 
-AclOutputStream::CopyingAclOutputStream::CopyingAclOutputStream(
+acl_ofstream::CopyingAclOutputStream::CopyingAclOutputStream(
 	acl::ostream* output)
 	: output_(output)
 {
 }
 
-AclOutputStream::CopyingAclOutputStream::~CopyingAclOutputStream()
+acl_ofstream::CopyingAclOutputStream::~CopyingAclOutputStream()
 {
 }
 
-bool AclOutputStream::CopyingAclOutputStream::Write(
+bool acl_ofstream::CopyingAclOutputStream::Write(
 	const void* buffer, int size)
 {
 	printf("write called, size: %d\r\n", size);

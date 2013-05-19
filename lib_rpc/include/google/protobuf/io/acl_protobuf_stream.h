@@ -10,11 +10,11 @@ namespace google {
 namespace protobuf {
 namespace io {
 
-class LIBPROTOBUF_EXPORT AclInputStream : public ZeroCopyInputStream
+class LIBPROTOBUF_EXPORT acl_ifstream : public ZeroCopyInputStream
 {
 public:
-	explicit AclInputStream(acl::istream* in, int block_size = -1);
-	~AclInputStream();
+	explicit acl_ifstream(acl::istream* in, int block_size = -1);
+	~acl_ifstream();
 
 	//基类 ZeroCopyInputStream 虚函数实现
 	bool Next(const void** data, int* size);
@@ -44,11 +44,11 @@ private:
 	GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(AclInputStream);
 };
 
-class LIBPROTOBUF_EXPORT AclOutputStream : public ZeroCopyOutputStream
+class LIBPROTOBUF_EXPORT acl_ofstream : public ZeroCopyOutputStream
 {
 public:
-	explicit AclOutputStream(acl::ostream* output, int block_size = -1);
-	~AclOutputStream();
+	explicit acl_ofstream(acl::ostream* output, int block_size = -1);
+	~acl_ofstream();
 
 	bool Flush();
 
