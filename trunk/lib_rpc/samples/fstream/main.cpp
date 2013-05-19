@@ -5,7 +5,7 @@
 #include "acl_cpp/stream/ifstream.hpp"
 #include "acl_cpp/stream/ofstream.hpp"
 #include "acl_cpp/stdlib/string.hpp"
-#include "google/protobuf/io/acl_protobuf_stream.h"
+#include "google/protobuf/io/acl_fstream.h"
 #include "test.pb.h"
 
 using namespace google::protobuf::io;
@@ -22,7 +22,7 @@ int main(void)
 		printf("open file %s error\r\n", path);
 		return 1;
 	}
-	AclOutputStream output(&out_fp);
+	acl_ofstream output(&out_fp);
 
 	tutorial::AddressBook address;
 	size_t  person_count = 5;
@@ -67,7 +67,7 @@ int main(void)
 		printf("open file %s error\r\n", path);
 		return 1;
 	}
-	AclInputStream input(&in_fp);
+	acl_ifstream input(&in_fp);
 	address.Clear();
 
 	// 从文件流中解析地址簿信息

@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "google/protobuf/io/acl_protobuf_stream.h"
+#include "google/protobuf/io/acl_fstream.h"
 
 namespace google {
 namespace protobuf {
