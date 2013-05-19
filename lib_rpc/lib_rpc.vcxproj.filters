@@ -18,10 +18,10 @@
     <ClCompile Include="src\stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="http_protobuf.cpp">
+    <ClCompile Include="src\acl_fstream.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\acl_fstream.cpp">
+    <ClCompile Include="src\http_protobuf.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -29,10 +29,10 @@
     <ClInclude Include="src\stdafx.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="http_protobuf.h">
+    <ClInclude Include="include\google\protobuf\io\acl_fstream.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="include\google\protobuf\io\acl_fstream.h">
+    <ClInclude Include="include\google\protobuf\io\http_protobuf.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
