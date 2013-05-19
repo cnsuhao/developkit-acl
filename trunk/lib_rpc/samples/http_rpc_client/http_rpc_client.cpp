@@ -1,31 +1,18 @@
-// protobuf_client.cpp : Defines the entry point for the console application.
+// http_rpc_client.cpp : Defines the entry point for the console application.
 //
 
 #include "stdafx.h"
-#include "acl_cpp/stream/ifstream.hpp"
-#include "acl_cpp/stream/ofstream.hpp"
 #include "acl_cpp/stdlib/string.hpp"
-#include "google/protobuf/io/acl_fstream.h"
+#include "acl_cpp/http/http_request.hpp"
+#include "google/protobuf/io/http_protobuf.h"
 #include "test.pb.h"
 
 using namespace google::protobuf::io;
 
-int main(void)
+int main(int argc, char* argv[])
 {
-	const char* path = "test.txt";
-
-	// 将用户的信息序列化输出至文件中
-
-	//打开本地文件进行数据写入
-	acl::ofstream out_fp;
-	if (out_fp.open_write(path) == false)
-	{
-		printf("open file %s error\r\n", path);
-		return 1;
-	}
-
-	// 将文件输出流与系列化输出流进行关联
-	acl_ofstream output(&out_fp);
+	//////////////////////////////////////////////////////////////////
+	// 请求过程
 
 	tutorial::AddressBook address;
 	size_t  person_count = 5;
@@ -51,43 +38,24 @@ int main(void)
 		}
 	}
 
-	// 将地址簿数据序列化至磁盘文件流中
-	address.SerializeToZeroCopyStream(&output);
-	if (output.Flush() == false)
+	//////////////////////////////////////////////////////////////////
+	// 发送请求数据至服务端，并读取服务端的响应
+
+	tutorial::AddressBook address_result;
+	http_request rpc("127.0.0.1:8088");
+	if (rpc.rpc_request(address, &address_result) == false)
 	{
-		printf("flush failed!\r\n");
-		return 1;
-	}
-	out_fp.close();
-
-	/////////////////////////////////////////////////////////////////////////
-
-	// 从序列化文件中读取用户信息
-
-	// 打开本地文件输入流
-	acl::ifstream in_fp;
-	if (in_fp.open_read(path) == false)
-	{
-		printf("open file %s error\r\n", path);
-		return 1;
+		printf("error\r\n");
+		return 0;
 	}
 
-	// 将文件输入流与系列化输入流进行关联
-	acl_ifstream input(&in_fp);
-
-	address.Clear();
-
-	// 从文件流中解析地址簿信息
-	if (!address.ParseFromZeroCopyStream(&input))
-	{
-		printf("parse file %s failed\r\n", path);
-		return 1;
-	}
+	//////////////////////////////////////////////////////////////////
+	// 分析响应数据
 
 	// 列出地址簿中所有用户信息
-	for (int i = 0; i < address.person_size(); i++)
+	for (int i = 0; i < address_result.person_size(); i++)
 	{
-		const tutorial::Person& person = address.person(i);
+		const tutorial::Person& person = address_result.person(i);
 		printf("person->name: %s\r\n", person.name().c_str());
 		printf("person->id: %d\r\n", person.id());
 		printf("person->email: %s\r\n", person.has_email() ?
@@ -109,6 +77,5 @@ int main(void)
 	printf("Enter any key to exit\r\n");
 	getchar();
 #endif
-
 	return 0;
 }
