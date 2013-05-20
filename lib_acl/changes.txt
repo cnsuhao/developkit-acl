@@ -1,4 +1,7 @@
 
+366) 2013.5.20
+366.1) bugfix: acl_basename.c -> acl_safe_basename 在 3 月份修改的有误
+
 365) 2013.5.13
 365.1) acl_ioctl_server.c: 在主函数 acl_ioctl_server_main 中，需要将 acl_ioctl_start
 放在 proc_init 之前，以便于应用在 proc_init 回调过程中设置一次性定时器
