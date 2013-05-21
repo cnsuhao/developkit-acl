@@ -80,7 +80,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\acl_fstream.cpp" />
-    <ClCompile Include="src\http_protobuf.cpp" />
+    <ClCompile Include="src\http_stream.cpp" />
     <ClCompile Include="src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -88,7 +88,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\google\protobuf\io\acl_fstream.h" />
-    <ClInclude Include="include\google\protobuf\io\http_protobuf.h" />
+    <ClInclude Include="include\google\protobuf\io\http_stream.h" />
     <ClInclude Include="src\stdafx.h" />
   </ItemGroup>
   <ItemGroup>
