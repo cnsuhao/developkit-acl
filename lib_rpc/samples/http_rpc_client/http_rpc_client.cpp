@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include "acl_cpp/acl_cpp_init.hpp"
 #include "acl_cpp/stdlib/string.hpp"
 #include "acl_cpp/http/http_request.hpp"
 #include "google/protobuf/io/http_protobuf.h"
@@ -11,6 +12,10 @@ using namespace google::protobuf::io;
 
 int main(int argc, char* argv[])
 {
+#ifdef WIN32
+	acl::acl_cpp_init();
+#endif
+
 	//////////////////////////////////////////////////////////////////
 	// ÇëÇó¹ý³Ì
 
@@ -45,7 +50,7 @@ int main(int argc, char* argv[])
 	http_request rpc("127.0.0.1:8088");
 	if (rpc.rpc_request(address, &address_result) == false)
 	{
-		printf("error\r\n");
+		printf("rpc_request error\r\n");
 		return 0;
 	}
 

@@ -74,7 +74,6 @@ int main(int argc, char* argv[])
 		if (conn == NULL)
 			break;
 		handle_client(conn);
-		acl_vstream_close(conn);
 	}
 	return 0;
 }

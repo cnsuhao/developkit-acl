@@ -39,7 +39,6 @@ public:
 	bool send_response(const MessageLite& in);
 private:
 	acl::http_response* response_;
-	acl::http_response* response_inner_;
 };
 
 }  // namespace io

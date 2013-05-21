@@ -65,7 +65,7 @@ bool http_request::rpc_request(const MessageLite& in, MessageLite* out)
 			return false;
 		else if (ret == 0)
 			break;
-		buf.append(tmp.c_str());
+		buf.append(tmp.c_str(), (size_t) ret);
 	}
 
 	if (out->ParseFromString(buf) == false)
@@ -77,15 +77,12 @@ bool http_request::rpc_request(const MessageLite& in, MessageLite* out)
 
 http_response::http_response(acl::http_response* response)
 : response_(response)
-, response_inner_(NULL)
 {
 	assert(response);
 }
 
 http_response::~http_response()
 {
-	if (response_inner_)
-		delete response_inner_;
 }
 
 bool http_response::read_request(MessageLite* out)
@@ -97,7 +94,7 @@ bool http_response::read_request(MessageLite* out)
 	acl::string buf;
 	if (response_->get_body(buf) == false)
 		return false;
-	std::string data(buf.c_str());
+	std::string data(buf.c_str(), (int) buf.length());
 	return out->ParseFromString(data);
 }
 
@@ -106,10 +103,7 @@ bool http_response::send_response(const MessageLite& in)
 	std::string buf;
 
 	in.SerializeToString(&buf);
-	if (response_->response(buf.c_str(), buf.length()) == false)
-		return false;
-	else
-		return true;
+	return response_->response(buf.c_str(), buf.length());
 }
 
 }  // namespace io
