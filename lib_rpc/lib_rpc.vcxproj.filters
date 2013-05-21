@@ -21,7 +21,7 @@
     <ClCompile Include="src\acl_fstream.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\http_protobuf.cpp">
+    <ClCompile Include="src\http_stream.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,7 +32,7 @@
     <ClInclude Include="include\google\protobuf\io\acl_fstream.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="include\google\protobuf\io\http_protobuf.h">
+    <ClInclude Include="include\google\protobuf\io\http_stream.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

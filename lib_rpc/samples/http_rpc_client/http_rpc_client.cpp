@@ -5,7 +5,7 @@
 #include "acl_cpp/acl_cpp_init.hpp"
 #include "acl_cpp/stdlib/string.hpp"
 #include "acl_cpp/http/http_request.hpp"
-#include "google/protobuf/io/http_protobuf.h"
+#include "google/protobuf/io/http_stream.h"
 #include "test.pb.h"
 
 using namespace google::protobuf::io;

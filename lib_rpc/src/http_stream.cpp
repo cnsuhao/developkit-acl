@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "google/protobuf/message_lite.h"
-#include "google/protobuf/io/http_protobuf.h"
+#include "google/protobuf/io/http_stream.h"
 #include "lib_acl.h"
 #include "acl_cpp/stdlib/string.hpp"
 
