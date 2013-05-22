@@ -22,7 +22,7 @@ static int header_http(const char* filepath, int max)
 	struct timeval begin, end;
 	double n;
 	ACL_VSTREAM* fp;
-	int   i;
+	int   i, ret;
 
 	fp = acl_vstream_fopen(filepath, O_RDONLY, 0600, 8192);
 	if (fp == NULL)
@@ -41,10 +41,10 @@ static int header_http(const char* filepath, int max)
 			printf("fseek error\r\n");
 			break;
 		}
-		if (http_hdr_req_get_sync(hdr_req, fp, 0) < 0)
+		if ((ret = http_hdr_req_get_sync(hdr_req, fp, 0)) < 0)
 		{
 			http_hdr_req_free(hdr_req);
-			printf("get header error\r\n");
+			printf("get header error: %d\r\n", ret);
 			break;
 		}
 		if (http_hdr_req_parse(hdr_req) < 0)
@@ -154,19 +154,37 @@ static int header_parse(const char* filepath, int max)
 
 	gettimeofday(&begin, NULL);
 
+#define	HDR_RES
+
 	ACL_METER_TIME("begin run");
 	for (i = 0; i < max; i++)
 	{
-		HTTP_HDR_RES* hdr_res;
+#ifdef	HDR_RES
+		HTTP_HDR_RES* hdr;
+#else
+		HTTP_HDR_REQ* hdr;
+#endif
+		int j = 0;
 
-		hdr_res = http_hdr_res_new();
+#ifdef	HDR_RES
+		hdr = http_hdr_res_new();
+#else
+		hdr = http_hdr_req_new();
+#endif
 		acl_foreach(iter, tokens)
 		{
 			HTTP_HDR_ENTRY* entry =
 				http_hdr_entry_new((const char*) iter.data);
-			http_hdr_append_entry(&hdr_res->hdr, entry);
+			http_hdr_append_entry(&hdr->hdr, entry);
+			if (++j == 200)
+				break;
 		}
-		http_hdr_res_free(hdr_res);
+
+#ifdef	HDR_RES
+		http_hdr_res_free(hdr);
+#else
+		http_hdr_req_free(hdr);
+#endif
 
 		if (i % 1000 == 0)
 		{
@@ -195,6 +213,12 @@ int main(int argc, char* argv[])
 {
 	int   ch, max = 10;
 	char  filepath[256], action[64];
+
+	if (0)
+		acl_mem_slice_init(8, 1024, 100000,
+			ACL_SLICE_FLAG_GC2 |
+			ACL_SLICE_FLAG_RTGC_OFF |
+			ACL_SLICE_FLAG_LP64_ALIGN);
 
 	filepath[0] = 0;
 	action[0] = 0;

@@ -42,6 +42,7 @@ namespace acl {
 		m_pStream = vstream;
 		m_bEof = false;
 		m_bOpened = true;
+		acl_tcp_set_nodelay(ACL_VSTREAM_SOCK(vstream));
 		return true;
 	}
 

@@ -100,11 +100,11 @@ static void handle_rpc(const char* addr, int max)
 
 	char  buf[64];
 	ACL_METER_TIME("begin run");
-	for (int i = 0; i < max; i++)
+	for (int i = 0; i < max;)
 	{
 		if (handle_one(rpc, i >= 1 ? false : true) == false)
 			break;
-		if (i % 1000 == 0)
+		if (++i % 1000 == 0)
 		{
 			snprintf(buf, sizeof(buf), "total count: %d, curr: %d", max, i);
 			ACL_METER_TIME(buf);

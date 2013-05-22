@@ -5,20 +5,13 @@
 
 #include "http/lib_http.h"
 
-static int __http_hdr_def_entry = 50;
+static int __http_hdr_def_entry = 25;
 static int __http_hdr_max_lines = 1024;
 
 /*-------------------------- for general http header -------------------------*/
 /* 生成一个新的 HTTP_HDR 数据结构 */
 static void __hdr_init(HTTP_HDR *hh)
 {
-	const char *myname = "__hdr_init";
-
-	hh->entry_lnk = acl_array_create(__http_hdr_def_entry);
-	if (hh->entry_lnk == NULL)
-		acl_msg_fatal("%s, %s(%d): array create error=%s",
-			__FILE__, myname, __LINE__,  acl_last_serror());
-
 	hh->max_lines      = __http_hdr_max_lines;
 	hh->cur_lines      = 0;
 	hh->valid_lines    = 0;
@@ -39,13 +32,9 @@ HTTP_HDR *http_hdr_new(size_t size)
 			__FILE__, myname, __LINE__, (int) size);
 
 	hh = (HTTP_HDR*) acl_mycalloc(1, (int) size);
-	if (hh == NULL)
-		acl_msg_fatal("%s, %s(%d): can't calloc, error(%s)",
-			__FILE__, myname, __LINE__,  acl_last_serror());
-
+	hh->entry_lnk = acl_array_create(__http_hdr_def_entry);
 	__hdr_init(hh);
-
-	return (hh);
+	return hh;
 }
 
 /* 克隆一个HTTP协议头的基础结构 */
@@ -64,42 +53,20 @@ void http_hdr_clone(const HTTP_HDR *src, HTTP_HDR *dst)
 	n = acl_array_size(src->entry_lnk);
 	for (i = 0; i < n; i++) {
 		entry_from = (HTTP_HDR_ENTRY*) acl_array_index(src->entry_lnk, i);
-		entry = (HTTP_HDR_ENTRY*) acl_mymalloc(sizeof(HTTP_HDR_ENTRY));
-		entry->off = 0;
-		entry->name = acl_mystrdup(entry_from->name);
-		entry->value = acl_mystrdup(entry_from->value);
+		entry = http_hdr_entry_build(entry_from->name, entry_from->value);
 		http_hdr_append_entry(dst, entry);
 	}
 }
 
-/* 释放一条HTTP_HDR_ENTRY */
-static void __hdr_entry_free_fn(void *arg)
-{
-	HTTP_HDR_ENTRY *entry = (HTTP_HDR_ENTRY *) arg;
-
-	if (entry == NULL)
-		return;
-	if (entry->name != NULL)
-		acl_myfree(entry->name);
-	if (entry->value != NULL)
-		acl_myfree(entry->value);
-	acl_myfree(entry);
-}
-
 /* 释放 HTTP_HDR */
-static void __hdr_free_member(HTTP_HDR *hh)
-{
-	if (hh->entry_lnk)
-		acl_array_destroy(hh->entry_lnk, __hdr_entry_free_fn);
-	hh->entry_lnk = NULL;
-}
 
 void http_hdr_free(HTTP_HDR *hh)
 {
 	if (hh == NULL)
 		return;
+	if (hh->entry_lnk != NULL)
+		acl_array_free(hh->entry_lnk, acl_myfree_fn);
 
-	__hdr_free_member(hh);
 	if (hh->chat_free_ctx_fn && hh->chat_ctx)
 		hh->chat_free_ctx_fn(hh->chat_ctx);
 	acl_myfree(hh);
@@ -107,11 +74,11 @@ void http_hdr_free(HTTP_HDR *hh)
 
 void http_hdr_reset(HTTP_HDR *hh)
 {
-	if (hh == NULL)
-		return;
-
-	__hdr_free_member(hh);
-	__hdr_init(hh);
+	if (hh != NULL) {
+		if (hh->entry_lnk != NULL)
+			acl_array_clean(hh->entry_lnk, acl_myfree_fn);
+		__hdr_init(hh);
+	}
 }
 
 /*----------------------------------------------------------------------------*/
@@ -119,59 +86,73 @@ void http_hdr_reset(HTTP_HDR *hh)
 HTTP_HDR_ENTRY *http_hdr_entry_build(const char *name, const char *value)
 {
 	HTTP_HDR_ENTRY *entry;
+	size_t n0 = sizeof(HTTP_HDR_ENTRY), n1 = strlen(name), n2 = strlen(value);
 
-	entry = (HTTP_HDR_ENTRY*) acl_mymalloc(sizeof(HTTP_HDR_ENTRY));
+	entry = (HTTP_HDR_ENTRY*) acl_mymalloc(n0 + n1 + n2 + 2);
 	entry->off = 0;
-	entry->name = acl_mystrdup(name);
-	entry->value = acl_mystrdup(value);
-	return (entry);
+
+	entry->name = (char*) entry + n0;
+	memcpy(entry->name, name, n1);
+	entry->name[n1] = 0;
+
+	entry->value = entry->name + n1 + 1;
+	memcpy(entry->value, value, n2);
+	entry->value[n2] = 0;
+
+	return entry;
 }
 
 /* 根据传入的一行数据进行分析, 生成一个 HTTP_HDR_ENTRY */
 
 HTTP_HDR_ENTRY *http_hdr_entry_new(const char *data)
 {
-/* data format: Content-Length: 245 */
-	const char *myname = "http_hdr_entry_new";
-	char *pbuf = NULL, *ptr;
-	char *pname, *pvalue;
+	/* data format: Content-Length: 245 */
+	char buf_fixed[512], *name, *value, *buf = NULL;
 	HTTP_HDR_ENTRY *entry;
+	size_t n;
 
-#undef	RETURN
-#define	RETURN(_x_) do { \
-	if (pbuf != NULL) \
-		acl_myfree(pbuf); \
-	return (_x_); \
-} while (0)
+	while (*data == ' ' || *data == '\t' || *data == ':')
+		data++;
+	if (*data == 0)
+		return NULL;
 
-	pbuf = acl_mystrdup(data);
-	ptr = pbuf;
-	pname = acl_mystrtok(&ptr, ":\t ");
-	if (pname == NULL || *pname == 0 || ptr == NULL) {
-		acl_msg_error("%s, %s(%d): invalid data=%s",
-			__FILE__, myname, __LINE__, data);
-		RETURN (NULL);
+	n = strlen(data);
+	if (n >= sizeof(buf_fixed) - 1) {
+		buf = acl_mystrdup(data);
+		name = buf;
+	} else {
+		name = buf_fixed;
+		memcpy(name, data, n);
+		name[n] = 0;
 	}
 
-	pvalue = ptr;
-
-	while (*pvalue == ' ' || *pvalue == '\t' || *pvalue == ':')
-		pvalue++;
-
-	if (*pvalue == 0) {
-		RETURN (NULL);
+	value = name + 1;
+	while (*value != 0) {
+		if (*value == ':' || *value == ' ' || *value == '\t') {
+			*value++ = 0;
+			break;
+		}
+		else
+			value++;
 	}
 
-	entry = http_hdr_entry_build(pname, pvalue);
-	RETURN (entry);
-#ifdef	ACL_BCB_COMPILER
-	return (NULL);
-#endif
+	while (*value == ':' || *value == ' ' || *value == '\t')
+		value++;
+	if (*value == 0) {
+		if (buf)
+			acl_myfree(buf);
+		return NULL;
+	}
+
+	entry = http_hdr_entry_build(name, value);
+	if (buf)
+		acl_myfree(buf);
+	return entry;
 }
 
 HTTP_HDR_ENTRY *http_hdr_entry_head(char *data)
 {
-/* data format: GET / HTTP/1.1 or 200 OK */
+	/* data format: GET / HTTP/1.1 or 200 OK */
 	const char *myname = "http_hdr_entry_head";
 	char *ptr, *pname, *psep = NULL;
 	HTTP_HDR_ENTRY *entry;
@@ -200,15 +181,8 @@ HTTP_HDR_ENTRY *http_hdr_entry_head(char *data)
 		return (NULL);
 	}
 
-#if 1
-	entry = (HTTP_HDR_ENTRY*) acl_mymalloc(sizeof(HTTP_HDR_ENTRY));
-	entry->off = 0;
-	entry->name = acl_mystrdup(pname);
-	entry->value = acl_mystrdup(ptr);
-#else
 	entry = http_hdr_entry_build(pname, ptr);
-#endif
-	return (entry);
+	return entry;
 }
 
 HTTP_HDR_ENTRY *http_hdr_entry_new2(char *data)
@@ -242,15 +216,8 @@ HTTP_HDR_ENTRY *http_hdr_entry_new2(char *data)
 		return (NULL);
 	}
 
-#if 1
-	entry = (HTTP_HDR_ENTRY*) acl_mymalloc(sizeof(HTTP_HDR_ENTRY));
-	entry->off = 0;
-	entry->name = acl_mystrdup(pname);
-	entry->value = acl_mystrdup(ptr);
-#else
 	entry = http_hdr_entry_build(pname, ptr);
-#endif
-	return (entry);
+	return entry;
 }
 
 /* 将 HTTP_HDR_ENTRY 放入 HTTP_HDR 中 */
@@ -258,18 +225,6 @@ HTTP_HDR_ENTRY *http_hdr_entry_new2(char *data)
 void http_hdr_append_entry(HTTP_HDR *hh, HTTP_HDR_ENTRY *entry)
 {
 	const char *myname = "http_hdr_append_entry";
-
-	if (entry == NULL)
-		acl_msg_fatal("%s, %s(%d): entry null", __FILE__,
-				myname, __LINE__);
-
-	if (hh == NULL)
-		acl_msg_fatal("%s, %s(%d): hh null",
-				__FILE__, myname, __LINE__);
-
-	if (hh->entry_lnk == NULL)
-		acl_msg_fatal("%s, %s(%d): entry_lnk null",
-				__FILE__, myname, __LINE__);
 
 	if (acl_array_append(hh->entry_lnk, entry) < 0)
 		acl_msg_fatal("%s, %s(%d): acl_array_append error(%s)",
@@ -285,16 +240,15 @@ int http_hdr_parse_version(HTTP_HDR *hh, const char *data)
 				__FILE__, myname, __LINE__);
 
 	if (data == NULL || *data == 0)
-		return (-1);
+		return -1;
 
 	if (strncasecmp(data, "HTTP/", 5) != 0)
-		return (-1);
+		return -1;
 	if (sscanf(data + 5, "%u.%u", &hh->version.major, &hh->version.minor) != 2)
-		return (-1);
+		return -1;
 
 	ACL_SAFE_STRNCPY(hh->proto, "HTTP", sizeof(hh->proto));
-
-	return (0);
+	return 0;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -305,39 +259,24 @@ static HTTP_HDR_ENTRY *__get_hdr_entry(const HTTP_HDR *hh, const char *name)
 {
 	const char *myname = "__get_hdr_entry";
 	HTTP_HDR_ENTRY *entry;
-	int  i, n;
-
-	if (hh == NULL || name == NULL || *name == 0) {
-		acl_msg_error("%s, %s(%d): input invalid",
-				__FILE__, myname, __LINE__);
-		return (NULL);
-	}
+	ACL_ITER iter;
 
 	if (hh->entry_lnk == NULL)
 		acl_msg_fatal("%s, %s(%d): entry_lnk null",
 			__FILE__, myname, __LINE__);
 
-	n = acl_array_size(hh->entry_lnk);
-	if (n <= 0) {
-		acl_msg_error("%s, %s(%d): entry_lnk size %d, name=%s",
-			__FILE__, myname, __LINE__, n, name);
-		return (NULL);
-	}
-
-	for (i = 0; i < n; i++) {
-		entry = (HTTP_HDR_ENTRY *) acl_array_index(hh->entry_lnk, i);
-		if (entry == NULL || entry->off)
-			break;
+	acl_foreach(iter, hh->entry_lnk) {
+		entry = (HTTP_HDR_ENTRY *) iter.data;
 		if (strcasecmp(name, entry->name) == 0)
 			return (entry);
 	}
 
-	return (NULL);
+	return NULL;
 }
 
 HTTP_HDR_ENTRY *http_hdr_entry(const HTTP_HDR *hh, const char *name)
 {
-	return (__get_hdr_entry(hh, name));
+	return __get_hdr_entry(hh, name);
 }
 
 char *http_hdr_entry_value(const HTTP_HDR *hh, const char *name)
@@ -347,7 +286,7 @@ char *http_hdr_entry_value(const HTTP_HDR *hh, const char *name)
 	hdr_entry = http_hdr_entry(hh, name);
 	if (hdr_entry == NULL)
 		return (NULL);
-	return (hdr_entry->value);
+	return hdr_entry->value;
 }
 
 int http_hdr_entry_replace(HTTP_HDR *hh, const char *name,
@@ -363,25 +302,24 @@ int http_hdr_entry_replace(HTTP_HDR *hh, const char *name,
 	entry = __get_hdr_entry(hh, name);
 	if (entry == NULL) {
 		if (force == 0)
-			return (-1);
-		entry = (HTTP_HDR_ENTRY*) acl_mymalloc(sizeof(HTTP_HDR_ENTRY));
-		entry->off = 0;
-		entry->name = acl_mystrdup(name);
-		http_hdr_append_entry(hh, entry);
+			return -1;
+		entry = http_hdr_entry_build(name, value);
 	} else {
-		acl_myfree(entry->value);
+		acl_array_delete_obj(hh->entry_lnk, entry, NULL);
+		acl_myfree(entry);
+		entry = http_hdr_entry_build(name, value);
 	}
 
-	entry->value = acl_mystrdup(value);
-	return (0);
+	http_hdr_append_entry(hh, entry);
+	return 0;
 }
 
 int http_hdr_entry_replace2(HTTP_HDR *hh, const char *name,
 	const char *from, const char *to, int ignore_case)
 {
 	HTTP_HDR_ENTRY *entry;
-	ACL_ITER iter;
-	int   once, n = 0, len = (int) strlen(from);
+	ACL_VSTRING *value = acl_vstring_alloc(256);
+	int   once, n = 0, len = (int) strlen(from), i;
 	char *(*find_fn)(char *, const char*);
 
 	if (strcasecmp(name, "Set-Cookie") == 0)
@@ -393,37 +331,41 @@ int http_hdr_entry_replace2(HTTP_HDR *hh, const char *name,
 	else
 		find_fn = (char *(*)(char*, const char*)) strstr;
 
-	acl_foreach(iter, hh->entry_lnk) {
-		entry = (HTTP_HDR_ENTRY*) iter.data;
-		if (strcasecmp(entry->name, name) == 0) {
-			ACL_VSTRING *value = acl_vstring_alloc(256);
-			char *ptr_prev = entry->value, *ptr;
+	for (i = 0; i < hh->entry_lnk->count; i++) {
+		char *ptr_prev, *ptr;
 
-			while (*ptr_prev) {
-				ptr = find_fn(ptr_prev, from);
-				if (ptr == NULL) {
-					acl_vstring_strcat(value, ptr_prev);
-					break;
-				}
-				if (ptr > ptr_prev)
-					acl_vstring_strncat(value, ptr_prev,
-						ptr - ptr_prev);
-				acl_vstring_strcat(value, to);
-				ptr_prev = ptr + len;
-				n++;
-			}
-			if (n > 0) {
-				acl_myfree(entry->value);
-				entry->value = acl_vstring_export(value);
-			} else {
-				acl_vstring_free(value);
-			}
-			if (once)
+		entry = (HTTP_HDR_ENTRY*) hh->entry_lnk->items[i];
+		if (strcasecmp(entry->name, name) != 0)
+			continue;
+
+		ACL_VSTRING_RESET(value);
+		ptr_prev = entry->value;
+
+		while (*ptr_prev) {
+			ptr = find_fn(ptr_prev, from);
+			if (ptr == NULL) {
+				acl_vstring_strcat(value, ptr_prev);
 				break;
+			}
+			if (ptr > ptr_prev)
+				acl_vstring_strncat(value, ptr_prev,
+					ptr - ptr_prev);
+			acl_vstring_strcat(value, to);
+			ptr_prev = ptr + len;
+			n++;
 		}
+
+		if (n > 0) {
+			acl_myfree(entry);
+			hh->entry_lnk->items[i] = http_hdr_entry_build(name,
+					acl_vstring_str(value));
+		}
+		if (once)
+			break;
 	}
 
-	return (n);
+	acl_vstring_free(value);
+	return n;
 }
 
 void http_hdr_entry_off(HTTP_HDR *hh, const char *name)
@@ -584,7 +526,7 @@ int http_hdr_parse(HTTP_HDR *hh)
 		hh->keep_alive = 0;
 	}
 
-	return (0);
+	return 0;
 }
 
 void http_hdr_print(const HTTP_HDR *hh, const char *msg)

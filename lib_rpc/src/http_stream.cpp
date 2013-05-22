@@ -1,8 +1,10 @@
 #include "stdafx.h"
 #include "google/protobuf/message_lite.h"
 #include "google/protobuf/io/http_stream.h"
-#include "lib_acl.h"
+#include "acl_cpp/stream/socket_stream.hpp"
+#include "acl_cpp/http/http_client.hpp"
 #include "acl_cpp/stdlib/string.hpp"
+#include "lib_acl.h"
 
 namespace google {
 namespace protobuf {

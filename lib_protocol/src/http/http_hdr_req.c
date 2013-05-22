@@ -68,6 +68,11 @@ static void __hdr_free_member(HTTP_HDR_REQ *hh)
 
 static void __hdr_reset(HTTP_HDR_REQ *hh, int clear_cookies)
 {
+	hh->port = 80;
+	hh->method[0] = 0;
+	hh->host[0] = 0;
+	hh->flag = 0;
+
 	if (hh->url_part)
 		ACL_VSTRING_RESET(hh->url_part);
 

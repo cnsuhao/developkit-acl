@@ -1,4 +1,9 @@
 
+238) 2013.5.22
+238.1) performance: http 协议库提高了 HTTP 头的解析速度，由原来的每秒 5 万
+多次提升至每秒 17 万多次
+238.2) bugfix: http 协议库中 http_hdr_reset 函数判断 hh 参数是否合法时有误
+
 237) 2013.3.24
 237.1) bugfix: http_hdr_req.c->__strip_url_path 解析有误导致第一个 / 丢失
 
