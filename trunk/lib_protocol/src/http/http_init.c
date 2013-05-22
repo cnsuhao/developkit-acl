@@ -7,7 +7,7 @@
 #include "http.h"
 
 http_off_t var_http_buf_size = HTTP_BSIZE;
-int   var_http_tls_cache = 0;
+int   var_http_tls_cache = 50;
 
 void http_buf_size_set(http_off_t size)
 {

@@ -76,7 +76,7 @@ static void handle_client(ACL_VSTREAM* conn)
 	ACL_METER_TIME("begin run");
 	while (true)
 	{
-		if (handle_one(response, ++i > 1 ? false : true) == false)
+		if (handle_one(response, i > 1 ? false : true) == false)
 			break;
 
 		__header_spent += response.header_spent();
@@ -85,7 +85,7 @@ static void handle_client(ACL_VSTREAM* conn)
 		__build_spent += response.build_spent();
 		__response_spent += response.response_spent();
 
-		if (i % 1000 == 0)
+		if (++i % 1000 == 0)
 		{
 			snprintf(buf, sizeof(buf), "total: %d", i);
 			ACL_METER_TIME(buf);

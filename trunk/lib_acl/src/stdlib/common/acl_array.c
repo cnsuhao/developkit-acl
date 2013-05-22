@@ -171,8 +171,6 @@ void acl_array_clean(ACL_ARRAY *a, void (*free_fn)(void *))
 {
 	int	idx;
 
-	if(a == NULL)
-		return;
 	for(idx = 0; idx < a->count; idx++) {
 		if(free_fn != NULL && a->items[idx] != NULL)
 			free_fn(a->items[idx]);
@@ -183,8 +181,6 @@ void acl_array_clean(ACL_ARRAY *a, void (*free_fn)(void *))
 
 void acl_array_free(ACL_ARRAY *a, void (*free_fn)(void *))
 {
-	if(a == NULL)
-		return;
 	acl_array_clean(a, free_fn);
 	if (a->items)
 		acl_myfree(a->items);
@@ -193,9 +189,6 @@ void acl_array_free(ACL_ARRAY *a, void (*free_fn)(void *))
 
 int acl_array_append(ACL_ARRAY *a, void *obj)
 {
-	if(a == NULL || obj == NULL)
-		return(-1);
-
 	if (a->count >= a->capacity)
 		acl_array_grow(a, a->count + 16);
 	a->items[a->count++] = obj;
@@ -210,7 +203,7 @@ int acl_array_pred_insert(ACL_ARRAY *a, int position, void *obj)
 	 * a->items[count - 1] should be the last valid item node
 	 * position should: positioin >= 0 && position <= a->count - 1
 	 */
-	if(a == NULL || obj == NULL || position < 0 || position >= a->count)
+	if(obj == NULL || position < 0 || position >= a->count)
 		return(-1);
 	if(a->count >= a->capacity)
 		acl_array_grow(a, a->count + 1);
