@@ -15,11 +15,9 @@ static void __hdr_init(HTTP_HDR *hh)
 	const char *myname = "__hdr_init";
 
 	hh->entry_lnk = acl_array_create(__http_hdr_def_entry);
-	if (hh->entry_lnk == NULL) {
-		char ebuf[256];
+	if (hh->entry_lnk == NULL)
 		acl_msg_fatal("%s, %s(%d): array create error=%s",
-				__FILE__, myname, __LINE__,  acl_last_strerror(ebuf, sizeof(ebuf)));
-	}
+			__FILE__, myname, __LINE__,  acl_last_serror());
 
 	hh->max_lines      = __http_hdr_max_lines;
 	hh->cur_lines      = 0;
@@ -41,10 +39,9 @@ HTTP_HDR *http_hdr_new(size_t size)
 			__FILE__, myname, __LINE__, (int) size);
 
 	hh = (HTTP_HDR*) acl_mycalloc(1, (int) size);
-	if (hh == NULL) {
+	if (hh == NULL)
 		acl_msg_fatal("%s, %s(%d): can't calloc, error(%s)",
 			__FILE__, myname, __LINE__,  acl_last_serror());
-	}
 
 	__hdr_init(hh);
 
@@ -270,15 +267,13 @@ void http_hdr_append_entry(HTTP_HDR *hh, HTTP_HDR_ENTRY *entry)
 		acl_msg_fatal("%s, %s(%d): hh null",
 				__FILE__, myname, __LINE__);
 
-	if (hh->entry_lnk == NULL) {
+	if (hh->entry_lnk == NULL)
 		acl_msg_fatal("%s, %s(%d): entry_lnk null",
 				__FILE__, myname, __LINE__);
-	}
 
-	if (acl_array_append(hh->entry_lnk, entry) < 0) {
+	if (acl_array_append(hh->entry_lnk, entry) < 0)
 		acl_msg_fatal("%s, %s(%d): acl_array_append error(%s)",
 			__FILE__, myname, __LINE__, acl_last_serror());
-	}
 }
 
 int http_hdr_parse_version(HTTP_HDR *hh, const char *data)
@@ -361,10 +356,9 @@ int http_hdr_entry_replace(HTTP_HDR *hh, const char *name,
 	const char *myname = "http_hdr_entry_replace";
 	HTTP_HDR_ENTRY *entry;
 
-	if (hh == NULL || name == NULL || value == NULL) {
+	if (hh == NULL || name == NULL || value == NULL)
 		acl_msg_fatal("%s, %s(%d): input invalid",
 			__FILE__, myname, __LINE__);
-	}
 
 	entry = __get_hdr_entry(hh, name);
 	if (entry == NULL) {

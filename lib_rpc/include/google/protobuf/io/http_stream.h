@@ -44,12 +44,37 @@ public:
 	 * @return {bool} 是否成功
 	 */
 	bool rpc_request(const MessageLite& in, MessageLite* out);
+
+	double request_spent() const
+	{
+		return request_spent_;
+	}
+
+	double response_spent() const
+	{
+		return response_spent_;
+	}
+
+	double build_spent() const
+	{
+		return build_spent_;
+	}
+
+	double parse_spent() const
+	{
+		return parse_spent_;
+	}
 private:
 	acl::http_request* request_;
 	acl::http_request* request_inner_;
 	char* addr_;
 	int   conn_timeout_;
 	int   rw_timeout_;
+
+	double request_spent_;
+	double response_spent_;
+	double build_spent_;
+	double parse_spent_;
 };
 
 /**
@@ -79,8 +104,38 @@ public:
 	 * @return {bool} 写过程是否成功
 	 */
 	bool send_response(const MessageLite& in);
+
+	double header_spent() const
+	{
+		return header_spent_;
+	}
+
+	double body_spent() const
+	{
+		return body_spent_;
+	}
+
+	double parse_spent() const
+	{
+		return parse_spent_;
+	}
+
+	double build_spent() const
+	{
+		return build_spent_;
+	}
+
+	double response_spent() const
+	{
+		return response_spent_;
+	}
 private:
 	acl::http_response* response_;
+	double header_spent_;
+	double body_spent_;
+	double parse_spent_;
+	double build_spent_;
+	double response_spent_;
 };
 
 }  // namespace io

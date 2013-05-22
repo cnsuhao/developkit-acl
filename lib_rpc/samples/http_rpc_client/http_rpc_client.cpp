@@ -6,21 +6,23 @@
 #include "acl_cpp/stdlib/string.hpp"
 #include "acl_cpp/http/http_request.hpp"
 #include "google/protobuf/io/http_stream.h"
+
+#include "util.h"
 #include "test.pb.h"
 
 using namespace google::protobuf::io;
 
-int main(int argc, char* argv[])
-{
-#ifdef WIN32
-	acl::acl_cpp_init();
-#endif
+static double __request_spent, __response_spent, __build_spent, __parse_spent;
 
+static bool handle_one(http_request& rpc, bool output)
+{
 	//////////////////////////////////////////////////////////////////
 	// 请求过程
 
-	tutorial::AddressBook address;
+	static tutorial::AddressBook address;
 	size_t  person_count = 5;
+
+	address.Clear();
 
 	acl::string buf;
 
@@ -46,13 +48,19 @@ int main(int argc, char* argv[])
 	//////////////////////////////////////////////////////////////////
 	// 发送请求数据至服务端，并读取服务端的响应
 
-	tutorial::AddressBook address_result;
-	http_request rpc("127.0.0.1:8088");
+	static tutorial::AddressBook address_result;
+	address_result.Clear();
+
 	if (rpc.rpc_request(address, &address_result) == false)
 	{
 		printf("rpc_request error\r\n");
-		return 0;
+		return false;
 	}
+
+	__request_spent += rpc.request_spent();
+	__response_spent += rpc.response_spent();
+	__build_spent += rpc.build_spent();
+	__parse_spent += rpc.parse_spent();
 
 	//////////////////////////////////////////////////////////////////
 	// 分析响应数据
@@ -61,19 +69,102 @@ int main(int argc, char* argv[])
 	for (int i = 0; i < address_result.person_size(); i++)
 	{
 		const tutorial::Person& person = address_result.person(i);
-		printf("person->name: %s\r\n", person.name().c_str());
-		printf("person->id: %d\r\n", person.id());
-		printf("person->email: %s\r\n", person.has_email() ?
-			person.email().c_str() : "null");
+		if (output)
+		{
+			printf("person->name: %s\r\n", person.name().c_str());
+			printf("person->id: %d\r\n", person.id());
+			printf("person->email: %s\r\n", person.has_email() ?
+				person.email().c_str() : "null");
+		}
 
 		// 列出该用户的所有电话
 		for (int j = 0; j < person.phone_size(); j++)
 		{
 			const tutorial::Person::PhoneNumber& phone = person.phone(j);
-			printf("\tphone number: %s\r\n", phone.number().c_str());
+			if (output)
+				printf("\tphone number: %s\r\n", phone.number().c_str());
 		}
-		printf("------------------------------------------\r\n");
+		if (output)
+			printf("------------------------------------------\r\n");
 	}
+
+	return true;
+}
+
+static void handle_rpc(const char* addr, int max)
+{
+	http_request rpc(addr);
+
+	struct timeval begin;
+	gettimeofday(&begin, NULL);
+
+	char  buf[64];
+	ACL_METER_TIME("begin run");
+	for (int i = 0; i < max; i++)
+	{
+		if (handle_one(rpc, i >= 1 ? false : true) == false)
+			break;
+		if (i % 1000 == 0)
+		{
+			snprintf(buf, sizeof(buf), "total count: %d, curr: %d", max, i);
+			ACL_METER_TIME(buf);
+		}
+	}
+
+	struct timeval end;
+	gettimeofday(&end, NULL);
+	double n = util::stamp_sub(&end, &begin);
+	printf("total check: %d, spent: %0.2f ms, speed: %0.2f\r\n"
+		"total_build: %0.2f, total_parse: %0.2f, "
+		"total_request: %0.2f, total_reponse: %0.2f\r\n",
+		max, n, (max * 1000) /(n > 0 ? n : 1),
+		__build_spent, __parse_spent,
+		__request_spent, __response_spent);
+}
+
+static void usage(const char* procname)
+{
+	printf("usage: %s -h [help] -s server_addr [127.0.0.1:8088] -n max_request\r\n", procname);
+}
+
+int main(int argc, char* argv[])
+{
+	if (1)
+		acl_mem_slice_init(8, 1024, 100000,
+			ACL_SLICE_FLAG_GC2 |
+			ACL_SLICE_FLAG_RTGC_OFF |
+			ACL_SLICE_FLAG_LP64_ALIGN);
+
+#ifdef WIN32
+	acl::acl_cpp_init();
+#endif
+
+	char  addr[64];
+	int   ch, max = 1;
+
+	snprintf(addr, sizeof(addr), "127.0.0.1:8088");
+
+	while ((ch = getopt(argc, argv, "hs:n:")) > 0)
+	{
+		switch (ch)
+		{
+		case 'h':
+			usage(argv[0]);
+			return 0;
+		case 's':
+			snprintf(addr, sizeof(addr), "%s", optarg);
+			break;
+		case 'n':
+			max = atoi(optarg);
+			if (max <= 0)
+				max = 1;
+			break;
+		default:
+			break;
+		}
+	}
+
+	handle_rpc(addr, max);
 
 	// Optional:  Delete all global objects allocated by libprotobuf.
 	google::protobuf::ShutdownProtobufLibrary();
