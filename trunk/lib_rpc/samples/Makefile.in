@@ -9,7 +9,7 @@ CFLAGS = -c -g -W -Wall -Wcast-qual -Wcast-align \
 ###########################################################
 #Check system:
 #       Linux, SunOS, Solaris, BSD variants, AIX, HP-UX
-SYSLIB = -lpthread -lcrypt
+SYSLIB = -lpthread -lcrypt -lz
 CHECKSYSRES = @echo "Unknow system type!";exit 1
 UNIXNAME = $(shell uname -sm)
 OSTYPE = $(shell uname -p)
@@ -72,7 +72,7 @@ ifneq ($(SYSPATH),)
 endif
 ###########################################################
 
-CFLAGS += -I../../include -I../../../include \
+CFLAGS += -I../../include -I../../../include -I. -I.. \
 	-I../../../lib_acl_cpp/include -I../../../lib_acl/include
 EXTLIBS =
 LDFLAGS = -L../.. -l_rpc  \
@@ -86,10 +86,12 @@ LINK = $(CC) $(OBJ) $(LDFLAGS)
 OBJ_PATH = .
 
 #Project's objs
-SRC = $(wildcard *.cpp)
+SRC = $(wildcard *.cpp) $(wildcard ../*.cpp)
 OBJ = $(patsubst %.cpp, $(OBJ_PATH)/%.o, $(notdir $(SRC)))
 
 $(OBJ_PATH)/%.o: %.cpp
+	$(COMPILE) $< -o $@
+$(OBJ_PATH)/%.o: ../%.cpp
 	$(COMPILE) $< -o $@
 
 .PHONY = all clean

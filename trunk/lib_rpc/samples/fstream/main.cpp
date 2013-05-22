@@ -6,12 +6,39 @@
 #include "acl_cpp/stream/ofstream.hpp"
 #include "acl_cpp/stdlib/string.hpp"
 #include "google/protobuf/io/acl_fstream.h"
+
+#include "util.h"
 #include "test.pb.h"
 
 using namespace google::protobuf::io;
 
-int main(void)
+static void usage(const char* procname)
 {
+	printf("usage: %s -h [help] -n max\r\n", procname);
+}
+
+int main(int argc, char* argv[])
+{
+	int   total = 10000;
+	int   ch;
+
+	while ((ch = getopt(argc, argv, "hn:")) > 0)
+	{
+		switch (ch)
+		{
+		case 'h':
+			usage(argv[0]);
+			return 0;
+		case 'n':
+			total = atoi(optarg);
+			if (total <= 0)
+				total = 10000;
+			break;
+		default:
+			break;
+		}
+	}
+
 	const char* path = "test.txt";
 
 	// 将用户的信息序列化输出至文件中
@@ -101,6 +128,36 @@ int main(void)
 		}
 		printf("------------------------------------------\r\n");
 	}
+
+	acl::string buf1;
+	acl::ifstream::load(path, &buf1);
+
+	struct timeval begin;
+	gettimeofday(&begin, NULL);
+
+	ACL_METER_TIME("begin run");
+	for (int i = 0; i < total; i++)
+	{
+		address.Clear();
+		std::string data(buf1.c_str(), buf1.length());
+		if (address.ParseFromString(data) == false)
+		{
+			printf("parse failed\r\n");
+			break;
+		}
+		if (i % 1000 == 0)
+		{
+			char tmp[64];
+			snprintf(tmp, sizeof(tmp), "total: %d, curr: %d", total, i);
+			ACL_METER_TIME(tmp);
+		}
+	}
+
+	struct timeval end;
+	gettimeofday(&end, NULL);
+	double n = util::stamp_sub(&end, &begin);
+	printf("total check: %d, spent: %0.2f ms, speed: %0.2f\r\n",
+			total, n, (total * 1000) /(n > 0 ? n : 1));
 
 	// Optional:  Delete all global objects allocated by libprotobuf.
 	google::protobuf::ShutdownProtobufLibrary();

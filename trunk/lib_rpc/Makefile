@@ -11,7 +11,8 @@ CFLAGS = -c -g -W -Wall -Wcast-align \
 -D_REENTRANT -D_POSIX_PTHREAD_SEMANTICS \
 -Wno-long-long \
 -fPIC \
--Wformat
+-Wformat \
+-DDEBUG
 #-DHAS_POLARSSL
 #-DUSE_DYNAMIC
 
@@ -75,7 +76,7 @@ OBJ_PATH_DST = ./Debug
 LIB_PATH_DST = .
 DEF_PATH_DST = ./Debug
 
-CFLAGS += -I./include -I../lib_acl_cpp/include -I../include
+CFLAGS += -I./include -I../lib_acl_cpp/include -I../lib_acl/include -I../include
 
 #Project's objs
 OBJS_DST = $(patsubst %.cpp, $(OBJ_PATH_DST)/%.o, $(notdir $(wildcard src/*.cpp)))

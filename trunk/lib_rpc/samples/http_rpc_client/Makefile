@@ -1,2 +1,2 @@
 include ../Makefile.in
-PROG = fstream
+PROG = http_rpc_client
