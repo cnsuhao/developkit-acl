@@ -958,7 +958,9 @@ namespace acl {
 	string& string::clear(void)
 	{
 		ACL_VSTRING_RESET(m_pVbf);
-		TERM(m_pVbf);
+
+		// 现在的 ACL_VSTRING_RESET 中已经将字符串置 0
+		// TERM(m_pVbf);
 		m_ptr = NULL;
 		return (*this);
 	}

@@ -1,4 +1,10 @@
 
+367) 2013.5.23
+367.1) ACL_VSTRING_RESET 宏没有初始化第一个字节为 0，所以很容易造成使用者的误用，
+如在 acl_json.c ->acl_json_node_reset 及 acl_xml.c -> acl_xml_node_reset 中虽然
+调用了 ACL_VSTRING_RESET，但并没有调用 ACL_VSTRING_TERMINATE，所以为避免出错，在
+ACL_VSTRING_RESET 中强制调用 ACL_VSTRING_TERMINATE。
+
 366) 2013.5.20
 366.1) bugfix: acl_basename.c -> acl_safe_basename 在 3 月份修改的有误
 
