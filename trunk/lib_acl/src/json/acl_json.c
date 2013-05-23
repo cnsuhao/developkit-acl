@@ -109,6 +109,7 @@ ACL_JSON_NODE *acl_json_node_alloc(ACL_JSON *json)
 			json->node_cache->pop_back(json->node_cache);
 		if (node) {
 			acl_json_node_reset(node);
+			node->json = json;
 			json->node_cnt++;
 			return (node);
 		}

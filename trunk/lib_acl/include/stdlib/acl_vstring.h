@@ -357,15 +357,16 @@ ACL_API const ACL_VSTRING *acl_buffer_gets(ACL_VSTRING *vp, const char **src, si
  * @param vp {ACL_VSTRING*}
  */
 #define ACL_VSTRING_TERMINATE(vp)	{ if ((vp)->vbuf.cnt <= 0) \
-					ACL_VSTRING_SPACE((vp),1); \
+						ACL_VSTRING_SPACE((vp),1); \
 				 	 *(vp)->vbuf.ptr = 0; }
 
 /**
- * 重置 ACL_VSTRING 内部缓冲区
+ * 重置 ACL_VSTRING 内部缓冲区同时将偏移指针位置置 0
  * @param vp {ACL_VSTRING*}
  */
 #define ACL_VSTRING_RESET(vp)		{ (vp)->vbuf.ptr = (vp)->vbuf.data; \
-					  (vp)->vbuf.cnt = (vp)->vbuf.len; }
+					  (vp)->vbuf.cnt = (vp)->vbuf.len; \
+					  ACL_VSTRING_TERMINATE((vp)) }
 
 /**
  * 添加一个字符至 ACL_VSTRING 缓冲区

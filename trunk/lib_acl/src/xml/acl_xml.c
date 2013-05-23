@@ -149,6 +149,7 @@ ACL_XML_NODE *acl_xml_node_alloc(ACL_XML *xml)
 			xml->node_cache->pop_back(xml->node_cache);
 		if (node) {
 			acl_xml_node_reset(node);
+			node->xml = xml;
 			xml->node_cnt++;
 			return (node);
 		}
