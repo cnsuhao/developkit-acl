@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 
-static const char* __addr = "122.49.0.200:11300";
+static char  __addr[64];
 static const char* __tube = "zsxxsz";
 static int __max = 100;
 
@@ -31,8 +31,9 @@ static void* producer(void* ctx)
 			printf("put %s failed\r\n", data.c_str());
 			return NULL;
 		}
-		else
-			printf("put %s ok, id: %llu\r\n", data.c_str(), id);
+		else if (i < 10)
+			printf("put %s ok, id: %llu, len: %d\r\n",
+				data.c_str(), id, (int) data.length());
 	}
 
 	return NULL;
@@ -58,14 +59,14 @@ static void* consumer(void* ctx)
 			printf("reserve failed\r\n");
 			return NULL;
 		}
-		else
+		else if (i < 10)
 			printf("reserved: %s\r\n", buf.c_str());
 		if (conn.delete_id(id) == false)
 		{
 			printf("delete id %llu failed\r\n", id);
 			return NULL;
 		}
-		else
+		else if (i < 10)
 			printf("delete id %llu ok\r\n", id);
 	}
 
@@ -87,11 +88,38 @@ static void test1()
 	acl_pthread_join(tid2, NULL);
 }
 
-int main()
+static void usage(const char* procname)
+{
+	printf("usage: %s -h [help] -s beanstalk_addr [127.0.0.1:11300]\r\n", procname);
+}
+
+int main(int argc, char* argv[])
 {
 #if WIN32
 	acl::acl_cpp_init();
 #endif
+	snprintf(__addr, sizeof(__addr), "127.0.0.1:11300");
+	int   ch;
+	while ((ch = getopt(argc, argv, "hs:n:")) > 0)
+	{
+		switch (ch)
+		{
+		case 'h':
+			usage(argv[0]);
+			return 0;
+		case 's':
+			snprintf(__addr, sizeof(__addr), "%s", optarg);
+			break;
+		case 'n':
+			__max = atoi(optarg);
+			if (__max <= 0)
+				__max = 1;
+			break;
+		default:
+			break;
+		}
+	}
+
 	test1();
 
 #ifdef WIN32

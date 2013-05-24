@@ -86,6 +86,9 @@ static void acl_json_node_reset(ACL_JSON_NODE *node)
 {
 	ACL_VSTRING_RESET(node->ltag);
 	ACL_VSTRING_RESET(node->text);
+	ACL_VSTRING_TERMINATE(node->ltag);
+	ACL_VSTRING_TERMINATE(node->text);
+
 	node->tag_node = NULL;
 	node->type = ACL_JSON_T_LEAF;
 
