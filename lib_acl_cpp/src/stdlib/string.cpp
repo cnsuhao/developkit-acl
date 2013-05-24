@@ -12,6 +12,7 @@
 #define MCAT(x, from, n) acl_vstring_memcat((x), (from), (n))
 #define SCP(x, from) acl_vstring_strcpy((x), (from))
 #define SCAT(x, from) acl_vstring_strcat((x), (from))
+#define	RSET(x)	ACL_VSTRING_RESET((x))
 #define TERM(x) ACL_VSTRING_TERMINATE((x))
 #define AT(x, n) acl_vstring_charat((x), (n))
 
@@ -659,7 +660,7 @@ namespace acl {
 
 	string& string::set_offset(size_t n)
 	{
-		ACL_VSTRING_RESET(m_pVbf);
+		RSET(m_pVbf);
 		ACL_VSTRING_SPACE(m_pVbf, (int) n);
 		ACL_VSTRING_AT_OFFSET(m_pVbf, (int) n);
 		TERM(m_pVbf);
@@ -957,10 +958,8 @@ namespace acl {
 
 	string& string::clear(void)
 	{
-		ACL_VSTRING_RESET(m_pVbf);
-
-		// 现在的 ACL_VSTRING_RESET 中已经将字符串置 0
-		// TERM(m_pVbf);
+		RSET(m_pVbf);
+		TERM(m_pVbf);
 		m_ptr = NULL;
 		return (*this);
 	}
@@ -1005,7 +1004,7 @@ namespace acl {
 		size_t n = (dlen * 3) / 4;
 		ACL_VSTRING *s = ALLOC(n) ;
 		if (acl_vstring_base64_decode(s, c_str(), (int) dlen) == NULL)
-			ACL_VSTRING_RESET(s);
+			RSET(s);
 		FREE(m_pVbf);
 		m_pVbf = s;
 		return (*this);
@@ -1016,7 +1015,7 @@ namespace acl {
 		if (acl_vstring_base64_decode(m_pVbf,
 			s, (int) strlen(s)) == NULL)
 		{
-			ACL_VSTRING_RESET(m_pVbf);
+			RSET(m_pVbf);
 		}
 		return (*this);
 	}
@@ -1026,7 +1025,7 @@ namespace acl {
 		if (acl_vstring_base64_decode(m_pVbf,
 			(const char*) ptr, (int) len) == NULL)
 		{
-			ACL_VSTRING_RESET(m_pVbf);
+			RSET(m_pVbf);
 		}
 		return (*this);
 	}

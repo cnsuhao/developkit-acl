@@ -121,6 +121,10 @@ static void acl_xml_node_reset(ACL_XML_NODE *node)
 	ACL_VSTRING_RESET(node->ltag);
 	ACL_VSTRING_RESET(node->rtag);
 	ACL_VSTRING_RESET(node->text);
+	ACL_VSTRING_TERMINATE(node->ltag);
+	ACL_VSTRING_TERMINATE(node->rtag);
+	ACL_VSTRING_TERMINATE(node->text);
+
 	node->id = NULL;
 
 	if (node->attr_list)
