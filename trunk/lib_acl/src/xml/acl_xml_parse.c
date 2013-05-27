@@ -437,7 +437,7 @@ static const char *xml_parse_attr_val(ACL_XML *xml, const char *data)
 			ACL_VSTRING_ADDCH(attr->value, ch);
 			xml->curr_node->last_ch = ch;
 			attr->backslash = 0;
-		} else if (ch == '\\') {
+		} else if (ch == '\\' && xml->curr_node->last_ch >= 0) {
 			attr->backslash = 1;
 		} else if (attr->quote) {
 			if (ch == attr->quote) {
