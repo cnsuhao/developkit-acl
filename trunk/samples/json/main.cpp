@@ -177,14 +177,18 @@ static void test_json_data(const char* data)
 	const char* ptr = data;
 	char  buf[2];
 
-	while (*ptr)
-	{
-		buf[0] = *ptr++;
-		buf[1] = 0;
-		acl_json_update(json, buf);
-		if (json->finish)
-			break;
+	if (0) {
+		while (*ptr)
+		{
+			buf[0] = *ptr++;
+			buf[1] = 0;
+			acl_json_update(json, buf);
+			if (json->finish)
+				break;
+		}
 	}
+	else
+		acl_json_update(json, data);
 
 	test_json_foreach1(json);
 	test_json_foreach2(json);
@@ -256,7 +260,9 @@ static void test_json_file(const char* path)
 		return;
 	}
 
+	printf("buf: |%s|\r\n", buf);
 	test_json_data(buf);
+	acl_myfree(buf);
 }
 
 static void test_json_benchmark(bool use_cache, bool once, int max)
@@ -304,6 +310,18 @@ static void usage(const char* program)
 
 int main(int argc, char** argv)
 {
+#if 0
+//	const char* pp = "Õ\\";
+	const char* pp = "å\\";
+	while (*pp)
+	{
+		printf("ch: %d\r\n", *pp);
+		pp++;
+	}
+	printf("'\\': %d\r\n", '\\');
+	exit(0);
+#endif
+
 	int   ch;
 	int   benchmark_max = 100;
 	bool  use_default = true, benchmark = false;

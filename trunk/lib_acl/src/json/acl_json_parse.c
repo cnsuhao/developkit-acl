@@ -169,7 +169,12 @@ static const char *json_tag(ACL_JSON *json, const char *data)
 			if (json->curr_node->backslash) {
 				ACL_VSTRING_ADDCH(json->curr_node->ltag, ch);
 				json->curr_node->backslash = 0;
-			} else if (ch == '\\') {
+			}
+
+			/* 当为双字节汉字时，第一个字节为的高位为 1，
+			 * 第二个字节为 92，正好与转义字符相同
+			 */
+			else if (ch == '\\' && json->curr_node->last_ch >= 0) {
 				json->curr_node->backslash = 1;
 			} else if (ch == json->curr_node->quote) {
 				ACL_JSON_NODE *parent =
@@ -184,6 +189,7 @@ static const char *json_tag(ACL_JSON *json, const char *data)
 				break;
 			} else {
 				ACL_VSTRING_ADDCH(json->curr_node->ltag, ch);
+				json->curr_node->last_ch = ch;
 			}
 		}
 
@@ -192,7 +198,12 @@ static const char *json_tag(ACL_JSON *json, const char *data)
 		else if (json->curr_node->backslash) {
 			ACL_VSTRING_ADDCH(json->curr_node->ltag, ch);
 			json->curr_node->backslash = 0;
-		} else if (ch == '\\') {
+		}
+
+		/* 当为双字节汉字时，第一个字节为的高位为 1，
+		 * 第二个字节为 92，正好与转义字符相同
+		 */
+		else if (ch == '\\' && json->curr_node->last_ch >= 0) {
 			json->curr_node->backslash = 1;
 		} else if (IS_SPACE(ch) || ch == ':') {
 			/* 标签名分析结束，下一步需要找到冒号 */
@@ -200,6 +211,7 @@ static const char *json_tag(ACL_JSON *json, const char *data)
 			break;
 		} else {
 			ACL_VSTRING_ADDCH(json->curr_node->ltag, ch);
+			json->curr_node->last_ch = ch;
 		}
 		data++;
 	}
@@ -274,7 +286,12 @@ static const char *json_val(ACL_JSON *json, const char *data)
 			if (json->curr_node->backslash) {
 				ACL_VSTRING_ADDCH(json->curr_node->text, ch);
 				json->curr_node->backslash = 0;
-			} else if (ch == '\\') {
+			}
+
+			/* 当为双字节汉字时，第一个字节为的高位为 1，
+			 * 第二个字节为 92，正好与转义字符相同
+			 */
+			else if (ch == '\\' && json->curr_node->last_ch >= 0) {
 				json->curr_node->backslash = 1;
 			} else if (ch == json->curr_node->quote) {
 				json->curr_node->quote = 0;
@@ -285,11 +302,17 @@ static const char *json_val(ACL_JSON *json, const char *data)
 				break;
 			} else {
 				ACL_VSTRING_ADDCH(json->curr_node->text, ch);
+				json->curr_node->last_ch = ch;
 			}
 		} else if (json->curr_node->backslash) {
 			ACL_VSTRING_ADDCH(json->curr_node->text, ch);
 			json->curr_node->backslash = 0;
-		} else if (ch == '\\') {
+		}
+
+		/* 当为双字节汉字时，第一个字节为的高位为 1，
+		 * 第二个字节为 92，正好与转义字符相同
+		 */
+		else if (ch == '\\' && json->curr_node->last_ch >= 0) {
 			json->curr_node->backslash = 1;
 		} else if (IS_SPACE(ch) || ch == ',' || ch == ';'
 			|| ch == '}' || ch == ']')
@@ -299,6 +322,7 @@ static const char *json_val(ACL_JSON *json, const char *data)
 			break;
 		} else {
 			ACL_VSTRING_ADDCH(json->curr_node->text, ch);
+			json->curr_node->last_ch = ch;
 		}
 		data++;
 	}
