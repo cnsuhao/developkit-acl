@@ -101,6 +101,7 @@ static void acl_json_node_reset(ACL_JSON_NODE *node)
 	node->status = -1;
 	node->backslash = 0;
 	node->left_ch = node->right_ch = 0;
+	node->last_ch = 0;
 }
 
 ACL_JSON_NODE *acl_json_node_alloc(ACL_JSON *json)
@@ -130,6 +131,7 @@ ACL_JSON_NODE *acl_json_node_alloc(ACL_JSON *json)
 	node->status = ACL_JSON_S_NXT;
 	node->ltag = acl_vstring_alloc2(json->slice, 16);
 	node->text = acl_vstring_alloc2(json->slice, 16);
+	node->last_ch = 0;
 	json->node_cnt++;
 
 	node->iter_head = node_iter_head;
