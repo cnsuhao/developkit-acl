@@ -2,7 +2,7 @@
 368) 2013.5.27
 368.1) bugfix: acl_json_parse.c: 有些汉字，如“誠”的后半个字节的值正好与转义字符
 相同，即为 92，所以需要兼容此情况，当判断 last_ch < 0 且当前 char 为 92 时，则认为
-汉字情况
+汉字情况; acl_xml_parse.c 也存在类似问题，已修复
 
 367) 2013.5.23
 367.1) acl_json.c/acl_xml.c: 当启用结点对象缓存策略时，acl_json_node_reset 和
