@@ -493,7 +493,7 @@ static void usage(const char *procname)
 {
 	printf("usage: %s -h[help]"
 		" -f {xml_file}\n"
-		" -s[parse once\n"
+		" -s[parse once]\n"
 		" -M[use mempool]\n"
 		" -b[benchmark] -c[cache xml node] -m benchmark_max\n"
 		" -p[print] data1|data2|data3|data4|data5|data6|data7\n"
@@ -512,7 +512,9 @@ int main(int argc, char *argv[])
 	int   benchmark = 0, use_mempool = 0, use_cache = 0;
 	const char *data = __data1;
 
-	test1(); getchar(); exit(0);
+	if (0) {
+		test1(); getchar(); exit(0);
+	}
 
 	snprintf(filepath, sizeof(filepath), "xmlcatalog_man.xml");
 
