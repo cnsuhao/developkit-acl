@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#include <stdio.h>
 #ifndef ACL_PREPARE_COMPILE
 #include "json/acl_json.h"
 #endif
@@ -129,7 +130,7 @@ static const char *json_tag(ACL_JSON *json, const char *data)
 	int   ch;
 
 	/* 开始分析标签时，需要检查该标签名前是否有引号，并清除多余空格 */
-	if (LEN(json->curr_node->ltag) == 0) {
+	if (LEN(json->curr_node->ltag) == 0 && json->curr_node->quote == 0) {
 		ACL_JSON_NODE *node = acl_json_node_parent(json->curr_node);
 
 		acl_assert(node);
@@ -174,8 +175,13 @@ static const char *json_tag(ACL_JSON *json, const char *data)
 			/* 当为双字节汉字时，第一个字节为的高位为 1，
 			 * 第二个字节为 92，正好与转义字符相同
 			 */
-			else if (ch == '\\' && json->curr_node->last_ch >= 0) {
-				json->curr_node->backslash = 1;
+			else if (ch == '\\') {
+				/* 处理半个汉字的情形 */
+				if (json->curr_node->part_word) {
+					ACL_VSTRING_ADDCH(json->curr_node->ltag, ch);
+					json->curr_node->part_word = 0;
+				} else
+					json->curr_node->backslash = 1;
 			} else if (ch == json->curr_node->quote) {
 				ACL_JSON_NODE *parent =
 					acl_json_node_parent(json->curr_node);
@@ -185,11 +191,17 @@ static const char *json_tag(ACL_JSON *json, const char *data)
 				else
 					json->curr_node->status = ACL_JSON_S_COL;
 				json->curr_node->quote = 0;
+				json->curr_node->part_word = 0;
 				data++;
 				break;
 			} else {
 				ACL_VSTRING_ADDCH(json->curr_node->ltag, ch);
-				json->curr_node->last_ch = ch;
+
+				/* 处理半个汉字的情形 */
+				if (json->curr_node->part_word)
+					json->curr_node->part_word = 0;
+				else if (ch < 0)
+					json->curr_node->part_word = 1;
 			}
 		}
 
@@ -203,15 +215,26 @@ static const char *json_tag(ACL_JSON *json, const char *data)
 		/* 当为双字节汉字时，第一个字节为的高位为 1，
 		 * 第二个字节为 92，正好与转义字符相同
 		 */
-		else if (ch == '\\' && json->curr_node->last_ch >= 0) {
-			json->curr_node->backslash = 1;
+		else if (ch == '\\') {
+			/* 处理半个汉字的情形 */
+			if (json->curr_node->part_word) {
+				ACL_VSTRING_ADDCH(json->curr_node->ltag, ch);
+				json->curr_node->part_word = 0;
+			} else
+				json->curr_node->backslash = 1;
 		} else if (IS_SPACE(ch) || ch == ':') {
 			/* 标签名分析结束，下一步需要找到冒号 */
 			json->curr_node->status = ACL_JSON_S_COL;
+			json->curr_node->part_word = 0;
 			break;
 		} else {
 			ACL_VSTRING_ADDCH(json->curr_node->ltag, ch);
-			json->curr_node->last_ch = ch;
+
+			/* 处理半个汉字的情形 */
+			if (json->curr_node->part_word)
+				json->curr_node->part_word = 0;
+			else if (ch < 0)
+				json->curr_node->part_word = 1;
 		}
 		data++;
 	}
@@ -250,7 +273,7 @@ static const char *json_val(ACL_JSON *json, const char *data)
 
 	/* 当文本长度为 0 时，可以认为还未遇到有效的字符 */
 
-	if (LEN(json->curr_node->text) == 0) {
+	if (LEN(json->curr_node->text) == 0 && json->curr_node->quote == 0) {
 		/* 先过滤开头没用的空格 */
 		SKIP_SPACE(data);
 		SKIP_WHILE(*data == ':', data);
@@ -289,31 +312,49 @@ static const char *json_val(ACL_JSON *json, const char *data)
 			}
 
 			/* 当为双字节汉字时，第一个字节为的高位为 1，
-			 * 第二个字节为 92，正好与转义字符相同
+			 * 第二个字节有可能为 92，正好与转义字符相同
 			 */
-			else if (ch == '\\' && json->curr_node->last_ch >= 0) {
-				json->curr_node->backslash = 1;
+			else if (ch == '\\') {
+				/* 处理半个汉字的情况，如果前一个字节是前半个汉字，
+				 * 则当前的转义符当作后半个汉字
+				 */
+				if (json->curr_node->part_word) {
+					ACL_VSTRING_ADDCH(json->curr_node->text, ch);
+					json->curr_node->part_word = 0;
+				} else
+					json->curr_node->backslash = 1;
 			} else if (ch == json->curr_node->quote) {
 				json->curr_node->quote = 0;
 
 				/* 切换至查询该结点的兄弟结点的过程 */
 				json->curr_node->status = ACL_JSON_S_NXT;
+				json->curr_node->part_word = 0;
 				data++;
 				break;
 			} else {
 				ACL_VSTRING_ADDCH(json->curr_node->text, ch);
-				json->curr_node->last_ch = ch;
+
+				/* 若前一个字节为前半个汉字，则当前字节
+				 * 为后半个汉字，正好为一个完整的汉字
+				 */
+				if (json->curr_node->part_word)
+					json->curr_node->part_word = 0;
+
+				/* 前一个字节非前半个汉字且当前字节高位为 1，
+				 * 则表明当前字节为前半个汉字
+				 */
+				else if (ch < 0)
+					json->curr_node->part_word = 1;
 			}
 		} else if (json->curr_node->backslash) {
 			ACL_VSTRING_ADDCH(json->curr_node->text, ch);
 			json->curr_node->backslash = 0;
-		}
-
-		/* 当为双字节汉字时，第一个字节为的高位为 1，
-		 * 第二个字节为 92，正好与转义字符相同
-		 */
-		else if (ch == '\\' && json->curr_node->last_ch >= 0) {
-			json->curr_node->backslash = 1;
+		} else if (ch == '\\') {
+			if (json->curr_node->part_word) {
+				ACL_VSTRING_ADDCH(json->curr_node->text, ch);
+				json->curr_node->part_word = 0;
+			} else
+				json->curr_node->backslash = 1;
 		} else if (IS_SPACE(ch) || ch == ',' || ch == ';'
 			|| ch == '}' || ch == ']')
 		{
@@ -322,7 +363,12 @@ static const char *json_val(ACL_JSON *json, const char *data)
 			break;
 		} else {
 			ACL_VSTRING_ADDCH(json->curr_node->text, ch);
-			json->curr_node->last_ch = ch;
+
+			/* 处理半个汉字的情形 */
+			if (json->curr_node->part_word)
+				json->curr_node->part_word = 0;
+			else if (ch < 0)
+				json->curr_node->part_word = 1;
 		}
 		data++;
 	}

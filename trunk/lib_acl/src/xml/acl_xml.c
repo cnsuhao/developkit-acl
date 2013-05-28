@@ -28,6 +28,7 @@ ACL_XML_ATTR *acl_xml_attr_alloc(ACL_XML_NODE *node)
 	attr->value = acl_vstring_alloc2(node->xml->slice, 16);
 	attr->quote = 0;
 	attr->backslash = 0;
+	attr->part_word = 0;
 
 	acl_array_append(node->attr_list, attr);
 	return (attr);

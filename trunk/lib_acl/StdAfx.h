@@ -35,6 +35,8 @@ int acl_secure_vsnprintf(char *buf, size_t size, const char *fmt, va_list ap);
 #   define _GNU_SOURCE
 #  endif
 
+#  include <stdio.h>
+#  include <stdlib.h>
 #  include <unistd.h>
 #  include <signal.h>
 #  include <sys/types.h>
