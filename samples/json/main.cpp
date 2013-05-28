@@ -177,14 +177,16 @@ static void test_json_data(const char* data)
 	const char* ptr = data;
 	char  buf[2];
 
-	if (0) {
+	if (1) {
 		while (*ptr)
 		{
 			buf[0] = *ptr++;
 			buf[1] = 0;
 			acl_json_update(json, buf);
+			/*
 			if (json->finish)
 				break;
+				*/
 		}
 	}
 	else
