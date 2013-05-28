@@ -34,7 +34,7 @@ struct ACL_JSON_NODE {
 	int   left_ch;              /**< 本结点的第一个字符: { or [ */
 	int   right_ch;             /**< 本结点的最后一个字符: } or ] */
 	int   backslash;            /**< 转义字符 \ */
-	int   last_ch;              /**< 上一个字符 */
+	int   part_word;            /**< 半个汉字的情况处理标志位 */
 
 	int   status;               /**< 状态机当前解析状态 */
 #define ACL_JSON_S_ROOT     0       /**< 表示是根结点 */

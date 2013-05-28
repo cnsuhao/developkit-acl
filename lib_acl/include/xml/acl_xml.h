@@ -25,6 +25,7 @@ struct ACL_XML_ATTR {
 	/* private */
 	int   quote;                /**< 非 0 表示 ' 或 " */
 	int   backslash;            /**< 转义字符 \ */
+	int   part_word;            /**< 半个汉字的情况处理标志位 */
 	int   slash;                /**< 是否有 '/' 标志位设定 */
 };
 

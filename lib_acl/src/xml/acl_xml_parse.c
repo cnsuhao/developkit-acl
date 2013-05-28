@@ -166,7 +166,11 @@ static const char *xml_meta_attr_value(ACL_XML_ATTR *attr, const char *data)
 			ACL_VSTRING_ADDCH(attr->value, ch);
 			attr->backslash = 0;
 		} else if (ch == '\\') {
-			attr->backslash = 1;
+			if (attr->part_word) {
+				ACL_VSTRING_ADDCH(attr->value, ch);
+				attr->part_word = 0;
+			} else
+				attr->backslash = 1;
 		} else if (attr->quote) {
 			if (ch == attr->quote) {
 				data++;
@@ -178,6 +182,10 @@ static const char *xml_meta_attr_value(ACL_XML_ATTR *attr, const char *data)
 			break;
 		} else {
 			ACL_VSTRING_ADDCH(attr->value, ch);
+			if (attr->part_word)
+				attr->part_word = 0;
+			else if (ch < 0)
+				attr->part_word = 1;
 		}
 		data++;
 	}
@@ -437,8 +445,13 @@ static const char *xml_parse_attr_val(ACL_XML *xml, const char *data)
 			ACL_VSTRING_ADDCH(attr->value, ch);
 			xml->curr_node->last_ch = ch;
 			attr->backslash = 0;
-		} else if (ch == '\\' && xml->curr_node->last_ch >= 0) {
-			attr->backslash = 1;
+		} else if (ch == '\\') {
+			if (attr->part_word) {
+				ACL_VSTRING_ADDCH(attr->value, ch);
+				attr->part_word = 0;
+			}
+			else
+				attr->backslash = 1;
 		} else if (attr->quote) {
 			if (ch == attr->quote) {
 				xml->curr_node->status = ACL_XML_S_ATTR;
@@ -461,6 +474,11 @@ static const char *xml_parse_attr_val(ACL_XML *xml, const char *data)
 		} else {
 			ACL_VSTRING_ADDCH(attr->value, ch);
 			xml->curr_node->last_ch = ch;
+			/* 处理半个汉字的情形 */
+			if (attr->part_word)
+				attr->part_word = 0;
+			else if (ch < 0)
+				attr->part_word = 1;
 		}
 		data++;
 	}
