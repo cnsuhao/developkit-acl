@@ -193,7 +193,6 @@ void acl_dbuf_pool_test(size_t max)
 {
 	ACL_DBUF_POOL *pool;
 	size_t   i, n = 1000000, len, j, k;
-	void *ptr;
 
 	for (j = 0; j < max; j++) {
 		printf("begin alloc, max: %d\n", (int) n);
@@ -235,7 +234,7 @@ void acl_dbuf_pool_test(size_t max)
 				len = 88;
 				break;
 			}
-			ptr = acl_dbuf_pool_alloc(pool, len);
+			(void) acl_dbuf_pool_alloc(pool, len);
 		}
 		printf("alloc over now, sleep(10)\n");
 		sleep(10);
