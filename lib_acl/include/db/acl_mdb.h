@@ -34,13 +34,13 @@ typedef struct ACL_MDB ACL_MDB;
  * 创建一个数据库句柄
  * @param dbname {const char*} 数据库名
  * @param dbtype {const char*} 数据库类型: hash/avl
- * @return {ACL_MDT*} 数据库句柄
+ * @return {ACL_MDB*} 数据库句柄
  */
 ACL_API ACL_MDB *acl_mdb_create(const char *dbname, const char *dbtype);
 
 /**
  * 关闭并释放一个内存数据库
- * @param {ACL_MDT*} 数据库句柄
+ * @param {ACL_MDB*} 数据库句柄
  */
 ACL_API void acl_mdb_free(ACL_MDB *mdb);
 
