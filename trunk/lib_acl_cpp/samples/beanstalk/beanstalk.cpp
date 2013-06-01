@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include "util.h"
 
 static char  __addr[64];
 static const char* __tube = "zsxxsz";
@@ -52,6 +53,9 @@ static void* consumer(void* ctx)
 
 	acl::string buf;
 	unsigned long long id;
+	struct timeval begin, end;
+	gettimeofday(&begin, NULL);
+	ACL_METER_TIME("begin");
 	for (int i = 0; i < __max; i++)
 	{
 		if ((id = conn.reserve(buf)) == 0)
@@ -68,8 +72,18 @@ static void* consumer(void* ctx)
 		}
 		else if (i < 10)
 			printf("delete id %llu ok\r\n", id);
+		if (i % 1000 == 0)
+		{
+			buf.format_append("; total: %d, curr: %d, id: %ld",
+				__max, i, id);
+			ACL_METER_TIME(buf.c_str());
+		}
 	}
 
+	gettimeofday(&end, NULL);
+	double n = util::stamp_sub(&end, &begin);
+        printf("total get: %d, spent: %0.2f ms, speed: %0.2f\r\n",
+		__max, n, (__max * 1000) /(n > 0 ? n : 1));
 	return NULL;
 }
 
@@ -90,7 +104,7 @@ static void test1()
 
 static void usage(const char* procname)
 {
-	printf("usage: %s -h [help] -s beanstalk_addr [127.0.0.1:11300]\r\n", procname);
+	printf("usage: %s -h [help] -s beanstalk_addr [127.0.0.1:11300] -n max_count\r\n", procname);
 }
 
 int main(int argc, char* argv[])

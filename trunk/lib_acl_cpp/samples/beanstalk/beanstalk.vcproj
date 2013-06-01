@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\lib_acl_cpp\include;..\..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\;..\..\..\lib_acl_cpp\include;..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;VC2003"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -67,7 +67,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\lib_acl_cpp\include;..\..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\;..\..\..\lib_acl_cpp\include;..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;VC2003"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="3"
@@ -115,7 +115,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\lib_acl_cpp\include;..\..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\;..\..\..\lib_acl_cpp\include;..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;VC2003;ACL_DLL;ACL_CPP_DLL"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -163,7 +163,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\lib_acl_cpp\include;..\..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\;..\..\..\lib_acl_cpp\include;..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;VC2003;ACL_DLL;ACL_CPP_DLL"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="3"
@@ -211,7 +211,8 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\beanstalk.cpp">
+				RelativePath=".\beanstalk.cpp"
+				RelativePath="..\util.cpp">
 			</File>
 			<File
 				RelativePath=".\stdafx.cpp">
@@ -246,7 +247,8 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath=".\stdafx.h">
+				RelativePath=".\stdafx.h"
+				RelativePath="..\util.h">
 			</File>
 		</Filter>
 		<Filter
