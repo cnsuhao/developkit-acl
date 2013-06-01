@@ -8,12 +8,15 @@ static char  __addr[64];
 static const char* __tube = "zsxxsz";
 static int __max = 100;
 
+// 消息生产者线程
 static void* producer(void* ctx)
 {
 	(void) ctx;
 
+	// beanstalk 客户端连接对象
 	acl::beanstalk conn(__addr, 10);
 
+	// 指定消息目标队列
 	if (conn.use(__tube) == false)
 	{
 		printf("use %s error\r\n", __tube);
@@ -27,6 +30,7 @@ static void* producer(void* ctx)
 	for (int i = 0; i < __max; i++)
 	{
 		data.format("hello-%d", i);
+		// 向 beanstalkd 消息服务器发送消息
 		if ((id = conn.put(data.c_str(), data.length())) == 0)
 		{
 			printf("put %s failed\r\n", data.c_str());
@@ -40,11 +44,13 @@ static void* producer(void* ctx)
 	return NULL;
 }
 
+// 接收队列消息的消费者线程
 static void* consumer(void* ctx)
 {
 	(void) ctx;
 
 	acl::beanstalk conn(__addr, 10);
+	// 从指定消息队列中接收消息
 	if (conn.watch(__tube) == false)
 	{
 		printf("watch %s faile\r\n", __tube);
@@ -58,6 +64,7 @@ static void* consumer(void* ctx)
 	ACL_METER_TIME("begin");
 	for (int i = 0; i < __max; i++)
 	{
+		// 接收一条消息
 		if ((id = conn.reserve(buf)) == 0)
 		{
 			printf("reserve failed\r\n");
@@ -65,6 +72,8 @@ static void* consumer(void* ctx)
 		}
 		else if (i < 10)
 			printf("reserved: %s\r\n", buf.c_str());
+
+		// 删除接收到的消息
 		if (conn.delete_id(id) == false)
 		{
 			printf("delete id %llu failed\r\n", id);
