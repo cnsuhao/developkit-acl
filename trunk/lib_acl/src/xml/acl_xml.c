@@ -456,7 +456,8 @@ void acl_xml_foreach_init(ACL_XML *xml, ACL_XML_NODE *node)
 
 void acl_xml_slash(ACL_XML *xml, int ignore)
 {
-	xml->ignore_slash = ignore;
+	if (ignore)
+		xml->flag |= ACL_XML_FLAG_IGNORE_SLASH;
 }
 
 void acl_xml_cache(ACL_XML *xml, int max_cache)

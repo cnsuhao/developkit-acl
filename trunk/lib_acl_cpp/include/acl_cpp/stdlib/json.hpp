@@ -180,6 +180,8 @@ public:
 	json(const char* data = NULL);
 	~json(void);
 
+	json& part_word(bool on);
+
 	/**
 	 * 以流式方式循环调用本函数添加 json 数据，也可以一次性添加
 	 * 完整的 json 数据，如果是重复使用该 json 解析器解析多个 json

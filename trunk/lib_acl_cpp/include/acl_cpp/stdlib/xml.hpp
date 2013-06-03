@@ -269,6 +269,9 @@ public:
 	xml(const char* data = NULL);
 	~xml(void);
 
+	xml& part_word(bool on);
+	xml& ignore_slash(bool on);
+
 	/**
 	 * 以流式方式循环调用本函数添加 XML 数据，也可以一次性添加
 	 * 完整的 XML 数据，如果是重复使用该 XML 解析器解析多个 XML

@@ -101,7 +101,9 @@ struct ACL_XML {
 
 	ACL_ARRAY *node_cache;      /**< XML结点缓存池 */
 	int   max_cache;            /**< XML结点缓存池的最大容量 */
-	int   ignore_slash;         /**< 是否兼容单结点中没有 / 情况 */
+	unsigned flag;              /**< 标志位: ACL_XML_FLAG_xxx */ 
+#define	ACL_XML_FLAG_PART_WORD		(1 << 0) /**< 是否兼容后半个汉字为转义符 '\' 的情况 */
+#define	ACL_XML_FLAG_IGNORE_SLASH	(1 << 1) /**< 是否兼容单结点中没有 '/' 情况 */
 
 	/* public: for acl_iterator, 通过 acl_foreach 可以列出所有子结点 */
 

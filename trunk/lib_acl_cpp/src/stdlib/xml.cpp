@@ -300,6 +300,24 @@ namespace acl {
 			acl_myfree(iter_);
 	}
 
+	xml& xml::part_word(bool on)
+	{
+		if (on)
+			xml_->flag |= ACL_XML_FLAG_PART_WORD;
+		else
+			xml_->flag &= ~ACL_XML_FLAG_PART_WORD;
+		return *this;
+	}
+
+	xml& xml::ignore_slash(bool on)
+	{
+		if (on)
+			xml_->flag |= ACL_XML_FLAG_IGNORE_SLASH;
+		else
+			xml_->flag &= ~ACL_XML_FLAG_IGNORE_SLASH;
+		return *this;
+	}
+
 	void xml::update(const char* data)
 	{
 		acl_xml_update(xml_, data);
