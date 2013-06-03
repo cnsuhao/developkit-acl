@@ -179,6 +179,15 @@ namespace acl
 			acl_myfree(iter_);
 	}
 
+	json& json::part_word(bool on)
+	{
+		if (on)
+			json_->flag |= ACL_JSON_FLAG_PART_WORD;
+		else
+			json_->flag &= ~ACL_JSON_FLAG_PART_WORD;
+		return *this;
+	}
+
 	void json::update(const char* data)
 	{
 		acl_json_update(json_, data);

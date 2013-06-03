@@ -177,6 +177,8 @@ static void test_json_data(const char* data)
 	const char* ptr = data;
 	char  buf[2];
 
+	json->flag |= ACL_JSON_FLAG_PART_WORD;
+
 	if (1) {
 		while (*ptr)
 		{

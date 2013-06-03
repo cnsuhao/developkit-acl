@@ -61,6 +61,8 @@ struct ACL_JSON {
 	int   node_cnt;             /**< 结点总数, 包括 root 结点 */
 	ACL_JSON_NODE *root;        /**< json 根结点 */
 	int   finish;               /**< 是否分析结束 */
+	unsigned flag;              /**< 标志位 */
+#define	ACL_JSON_FLAG_PART_WORD	(1 << 0)  /**< 是否兼容半个汉字 */
 
 	/* public: for acl_iterator, 通过 acl_foreach 可以列出所有子结点 */
 

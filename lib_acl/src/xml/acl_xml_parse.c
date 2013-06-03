@@ -182,10 +182,12 @@ static const char *xml_meta_attr_value(ACL_XML_ATTR *attr, const char *data)
 			break;
 		} else {
 			ACL_VSTRING_ADDCH(attr->value, ch);
-			if (attr->part_word)
-				attr->part_word = 0;
-			else if (ch < 0)
-				attr->part_word = 1;
+			if ((attr->node->xml->flag & ACL_XML_FLAG_PART_WORD)) {
+				if (attr->part_word)
+					attr->part_word = 0;
+				else if (ch < 0)
+					attr->part_word = 1;
+			}
 		}
 		data++;
 	}
@@ -474,11 +476,14 @@ static const char *xml_parse_attr_val(ACL_XML *xml, const char *data)
 		} else {
 			ACL_VSTRING_ADDCH(attr->value, ch);
 			xml->curr_node->last_ch = ch;
-			/* 处理半个汉字的情形 */
-			if (attr->part_word)
-				attr->part_word = 0;
-			else if (ch < 0)
-				attr->part_word = 1;
+
+			if ((xml->flag & ACL_XML_FLAG_PART_WORD)) {
+				/* 处理半个汉字的情形 */
+				if (attr->part_word)
+					attr->part_word = 0;
+				else if (ch < 0)
+					attr->part_word = 1;
+			}
 		}
 		data++;
 	}
@@ -686,7 +691,7 @@ static const char *xml_parse_right_tag(ACL_XML *xml, const char *data)
 	if (acl_strcasecmp(STR(curr_node->ltag), STR(curr_node->rtag)) != 0) {
 		int   ret = 0;
 
-		if (xml->ignore_slash)
+		if ((xml->flag & ACL_XML_FLAG_IGNORE_SLASH))
 			ret = search_match_node(xml);
 		if (ret == 0) {
 			/* 如果结点标签名与开始标签名不匹配，
