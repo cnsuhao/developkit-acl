@@ -184,7 +184,7 @@ static int reopen_log(ACL_LOG *log)
 #undef	RETURN
 #define	RETURN(x) do {  \
 	if (log->lock)  \
-		thread_mutex_lock(log->lock);  \
+		thread_mutex_unlock(log->lock);  \
 	return (x);  \
 } while (0)
 
