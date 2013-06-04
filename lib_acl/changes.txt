@@ -1,4 +1,8 @@
 
+369) 2013.6.4
+369.1) bugfix: acl_mylog.c->reopen_log 函数中的 RETURN 宏定义中应该是
+thread_mutex_unlock，原来的 thread_mutex_lock 会造成死锁
+
 368) 2013.5.27
 368.1) bugfix: acl_json_parse.c: 有些汉字，如“誠”的后半个字节的值正好与转义字符
 相同，即为 92，所以需要兼容此情况，当判断 last_ch < 0 且当前 char 为 92 时，则认为
