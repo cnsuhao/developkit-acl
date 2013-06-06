@@ -607,4 +607,18 @@ http_request_error_t HttpServletRequest::getLastError(void) const
 	return req_error_;
 }
 
+void HttpServletRequest::fprint_header(ostream& out, const char* prompt)
+{
+	if (client_)
+	{
+		client_->fprint_header(out, prompt);
+	}
+	else
+	{
+		const char* ptr = acl_getenv_list();
+		if (ptr)
+			out.format("%s", ptr);
+	}
+}
+
 } // namespace acl
