@@ -8,6 +8,7 @@
 namespace acl {
 
 class istream;
+class ostream;
 class socket_stream;
 class http_client;
 class http_mime;
@@ -229,6 +230,12 @@ public:
 	 */
 	http_request_error_t getLastError(void) const;
 
+	/**
+	 * 将 HTTP 请求头输出至流中（文件流或网络流）
+	 * @param out {ostream&}
+	 * @param prompt {const char*} 提示内容
+	 */	 
+	void fprint_header(ostream& out, const char* prompt);
 private:
 	http_request_error_t req_error_;
 	char cookie_name_[64];

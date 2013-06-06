@@ -2,6 +2,7 @@
 #include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/stdlib/zlib_stream.hpp"
 #include "acl_cpp/stream/ssl_stream.hpp"
+#include "acl_cpp/stream/ostream.hpp"
 #include "acl_cpp/http/http_header.hpp"
 #include "acl_cpp/http/http_client.hpp"
 
@@ -629,6 +630,20 @@ SKIP_GZIP_HEAD_AGAIN:  // 对于有 GZIP 头数据，可能需要重复读
 			http_hdr_print(&hdr_res_->hdr, prompt ? prompt : "dummy");
 		else if (hdr_req_)
 			http_hdr_print(&hdr_req_->hdr, prompt ? prompt : "dummy");
+	}
+
+	void http_client::fprint_header(ostream& out, const char* prompt)
+	{
+		ACL_VSTREAM* fp = out.get_vstream();
+		if (fp == NULL)
+		{
+			logger_error("fp stream null");
+			return;
+		}
+		if (hdr_res_)
+			http_hdr_fprint(fp, &hdr_res_->hdr, prompt ? prompt : "dummy");
+		else if (hdr_req_)
+			http_hdr_fprint(fp, &hdr_req_->hdr, prompt ? prompt : "dummy");
 	}
 
 }
