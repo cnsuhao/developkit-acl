@@ -170,8 +170,8 @@ static void __service(ACL_IOCTL *h_ioctl, ACL_VSTREAM *stream,
 	}
 
 	if (acl_getpeername(ACL_VSTREAM_SOCK(stream), addr, sizeof(addr)) < 0) {
-		acl_msg_warn("%s, %s(%d): can't get socket's addr",
-			__FILE__, myname, __LINE__);
+		acl_msg_warn("%s, %s(%d): can't get socket's addr(%s)",
+			__FILE__, myname, __LINE__, acl_last_serror());
 		acl_vstream_close(stream);
 		return;
 	}
