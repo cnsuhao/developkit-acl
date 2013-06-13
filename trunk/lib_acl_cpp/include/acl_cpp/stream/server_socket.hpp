@@ -28,13 +28,28 @@ public:
 	bool open(const char* addr);
 
 	/**
+	 * 关闭已经打开的监听套接口
+	 * @return {bool} 是否正常关闭
+	 */
+	bool close();
+
+	/**
 	 * 接收客户端连接并创建客户端连接流
 	 * @param timeout {int} 在阻塞模式下，当该值 > 0 时，采用超时
 	 *  方式接收客户端连接，若在指定时间内未获得客户端连接，则返回 NULL
 	 * @return {socket_stream*} 返回空表示接收失败
 	 */
 	socket_stream* accept(int timeout = 0);
-protected:
+
+	/**
+	 * 获得监听的地址
+	 * @return {const char*} 返回值非空指针
+	 */
+	const char* get_addr() const
+	{
+		return addr_;
+	}
+
 private:
 	int   backlog_;
 	bool  block_;

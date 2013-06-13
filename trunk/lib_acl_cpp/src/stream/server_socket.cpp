@@ -46,6 +46,16 @@ bool server_socket::open(const char* addr)
 	return true;
 }
 
+bool server_socket::close()
+{
+	if (fd_ == ACL_SOCKET_INVALID)
+		return true;
+	bool ret = acl_socket_close(fd_) == 0 ? true : false;
+	fd_ = ACL_SOCKET_INVALID;
+	addr_[0] = 0;
+	return ret;
+}
+
 socket_stream* server_socket::accept(int timeout /* = 0 */)
 {
 	if (fd_ == ACL_SOCKET_INVALID)
