@@ -1,5 +1,9 @@
 修改历史列表：
 ------------------------------------------------------------------------
+160) 2013.6.13
+160.1) feature: 添加了 server_socket 类
+160.2) socket_stream: 对 get_ip 类的函数做了一定调整
+
 159) 2013.6.6
 159.1) feature: HttpServletRequest/http_client 添加调试输出 HTTP 请求头的函数
 

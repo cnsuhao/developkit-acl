@@ -316,6 +316,9 @@
     <ClCompile Include="src\beanstalk\beanstalk_pool.cpp">
       <Filter>src\beanstalk</Filter>
     </ClCompile>
+    <ClCompile Include="src\stream\server_socket.cpp">
+      <Filter>src\stream</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\acl_stdafx.hpp">
@@ -653,6 +656,9 @@
     </ClInclude>
     <ClInclude Include="include\acl_cpp\beanstalk\beanstalk_pool.hpp">
       <Filter>include\beanstalk</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stream\server_socket.hpp">
+      <Filter>include\stream</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
