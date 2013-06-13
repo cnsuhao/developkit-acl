@@ -27,12 +27,14 @@ bool server_socket::open(const char* addr)
 #ifndef WIN32
 	if (strchr(addr, '/') != NULL)
 	{
-		fd_ = acl_unix_listen(addr, backlog_, block_);
+		fd_ = acl_unix_listen(addr, backlog_, block_
+			? ACL_BLOCKING : ACL_NON_BLOCKING);
 		unix_sock_ = true;
 	}
 	else
 #endif
-		fd_ = acl_inet_listen(addr, backlog_, block_);
+		fd_ = acl_inet_listen(addr, backlog_, block_
+			? ACL_BLOCKING : ACL_NON_BLOCKING);
 
 	if (fd_ == ACL_SOCKET_INVALID)
 	{
