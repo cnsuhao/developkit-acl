@@ -98,6 +98,9 @@ socket_stream* server_socket::accept(int timeout /* = 0 */)
 		return NULL;
 	}
 
+	if (!unix_sock_)
+		acl_tcp_set_nodelay(fd);
+
 	return client;
 }
 
