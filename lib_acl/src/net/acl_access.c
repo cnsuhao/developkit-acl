@@ -16,7 +16,7 @@
 #endif
 
 /* local variables */
-static ACL_IPLink *__host_allow_link = NULL;
+static ACL_IPLINK *__host_allow_link = NULL;
 static void (*__log_fn) (const char *fmt, ...) = acl_msg_info;
 static int __host_allow_all = 0;
 
@@ -115,6 +115,7 @@ int acl_access_add(const char *data, const char *sep1, const char *sep2)
 		if (*to == 0)
 			continue;
 
+		__log_fn("add access: from(%s), to(%s)", from, to);
 		if (acl_iplink_insert(__host_allow_link, from, to) == NULL)
 			__log_fn("%s, %s(%d): acl_iplink_insert error(%s)",
 				__FILE__, myname, __LINE__, psrc);

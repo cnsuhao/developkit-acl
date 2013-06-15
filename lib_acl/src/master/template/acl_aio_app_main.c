@@ -101,7 +101,7 @@ static void __post_jail_init(char *name acl_unused, char **argv acl_unused)
 {
 
 	if (acl_var_aio_access_allow != NULL)
-		acl_access_add(acl_var_aio_access_allow, ",", ":");
+		acl_access_add(acl_var_aio_access_allow, ", \t", ":");
 
 	if (__app_init_fn != NULL)
 		__app_init_fn(__app_init_ctx);

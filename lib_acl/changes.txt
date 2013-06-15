@@ -1,4 +1,12 @@
 
+370) 2013.6.15
+370.1) bugfix: acl_array.c->acl_array_prepend，其中调用的 acl_array_succ_insert，
+应该调用 acl_array_pred_insert，该 BUG 会影响到所有调用 acl_dlink, acl_iplink,
+acl_access 函数的地方，包括 acl_aio_app_main.c/acl_ioctl_app_main.c 中有关访问
+权限的地方
+370.2) 将 acl_iplink.c 中的函数调用映射为直接调用 acl_dlink.c 中的方法
+370.3) samples/iplink: 该例子用于测试 acl_iplink.c 中的相关函数
+
 369) 2013.6.4
 369.1) bugfix: acl_mylog.c->reopen_log 函数中的 RETURN 宏定义中应该是
 thread_mutex_unlock，原来的 thread_mutex_lock 会造成死锁

@@ -22,7 +22,7 @@
 
 static void dlink_free_callback(void *arg)
 {
-	ACL_DITEM	*pitem;
+	ACL_DITEM *pitem;
 
 	if(arg == NULL)
 		return;
@@ -49,10 +49,10 @@ static void dlink_free_callback(void *arg)
  * 		if idx > 0 && idx <= a->count - 1 -----> 说明在数组的中间的某一位置
  *		if idx > a->count - 1 -----> 说明在数组的最后一位置添加
  */
-static int scope_pos(const ACL_ARRAY *a, acl_off_t n)
+static int scope_pos(const ACL_ARRAY *a, acl_uint64 n)
 {
 	ACL_DITEM *pitem_left, *pitem_right;
-	int	lidx, hidx, midx, ridx, idx;
+	int lidx, hidx, midx, ridx, idx;
 
 	lidx  = 0;
 	hidx = acl_array_size(a) - 1;
@@ -105,148 +105,142 @@ static int scope_pos(const ACL_ARRAY *a, acl_off_t n)
 		}
 	}
 
-	return(idx);
+	return idx;
 }
 
-static int begin_pos(const ACL_ARRAY *a, acl_off_t n)
+static int begin_pos(const ACL_ARRAY *a, acl_uint64 n)
 {
-	int	ridx;
-
-	ridx = scope_pos(a, n);
-	return(ridx);
+	return scope_pos(a, n);
 }
 
-static int end_pos(const ACL_ARRAY *a, acl_off_t n)
+static int end_pos(const ACL_ARRAY *a, acl_uint64 n)
 {
-	int	ridx;
-
-	ridx = scope_pos(a, n);
-	return(ridx);
+	return scope_pos(a, n);
 }
 
 #ifdef	_USE_PRED_INSERT_
 static ACL_DITEM *dlink_pred_insert(ACL_ARRAY *a, int idx_position,
-					acl_off_t begin, acl_off_t end)
+	acl_uint64 begin, acl_uint64 end)
 {
 	ACL_DITEM *pitem;
-	int	ret;
+	int ret;
 
 	pitem = acl_mymalloc(sizeof(ACL_DITEM));
 	if(pitem == NULL)
-		return(NULL);
+		return NULL;
 	pitem->begin = begin;
 	pitem->end   = end;
 	ret = acl_array_pred_insert(a, idx_position, pitem);
 	if(ret < 0) {
 		acl_myfree(pitem);
-		return(NULL);
+		return NULL;
 	}
 	pitem->pnode = NULL;
 
-	return(pitem);
+	return pitem;
 }
 #endif
 
 static ACL_DITEM *dlink_succ_insert(ACL_ARRAY *a, int idx_position,
-					acl_off_t begin, acl_off_t end)
+	acl_uint64 begin, acl_uint64 end)
 {
-	ACL_DITEM	*pitem = NULL;
-	int	ret;
+	ACL_DITEM *pitem;
+	int ret;
 
 	pitem = (ACL_DITEM *) acl_mymalloc(sizeof(ACL_DITEM));
 	if(pitem == NULL)
-		return(NULL);
+		return NULL;
 	pitem->begin = begin;
 	pitem->end = end;
 	ret = acl_array_succ_insert(a, idx_position, pitem);
 	if(ret < 0) {
 		acl_myfree(pitem);
-		return(NULL);
+		return NULL;
 	}
 	pitem->pnode = NULL;
 
-	return(pitem);
+	return pitem;
 }
 
-static ACL_DITEM *dlink_append(ACL_ARRAY *a, acl_off_t begin, acl_off_t end)
+static ACL_DITEM *dlink_append(ACL_ARRAY *a, acl_uint64 begin, acl_uint64 end)
 {
-	ACL_DITEM	*pitem = NULL;
-	int	ret;
+	ACL_DITEM *pitem;
+	int ret;
 
 	pitem = (ACL_DITEM *) acl_mymalloc(sizeof(ACL_DITEM));
 	if(pitem == NULL)
-		return(NULL);
+		return NULL;
 	pitem->begin = begin;
 	pitem->end   = end;
 	ret = acl_array_append(a, pitem);
 	if(ret < 0) {
 		acl_myfree(pitem);
-		return(NULL);
+		return NULL;
 	}
 	pitem->pnode = NULL;
 
-	return(pitem);
+	return pitem;
 }
 
-static ACL_DITEM *dlink_prepend(ACL_ARRAY *a, acl_off_t begin, acl_off_t end)
+static ACL_DITEM *dlink_prepend(ACL_ARRAY *a, acl_uint64 begin, acl_uint64 end)
 {
-	ACL_DITEM	*pitem = NULL;
-	int	ret;
+	ACL_DITEM *pitem;
+	int ret;
 
 	pitem = (ACL_DITEM *) acl_mymalloc(sizeof(ACL_DITEM));
 	if(pitem == NULL)
-		return(NULL);
+		return NULL;
 	pitem->begin = begin;
 	pitem->end   = end;
 	ret = acl_array_prepend(a, pitem);
 	if(ret < 0) {
 		acl_myfree(pitem);
-		return(NULL);
+		return NULL;
 	}
 	pitem->pnode = NULL;
 
-	return(pitem);
+	return pitem;
 }
 
 static int dlink_node_merge(ACL_ARRAY *a, int idx_obj_begin, int idx_src_begin)
 {
-	int	ret;
+	int ret;
 
 	if(idx_obj_begin >= idx_src_begin)
-		return(0);
+		return 0;
 
 	ret = acl_array_mv_idx(a, idx_obj_begin, idx_src_begin, dlink_free_callback);
 	if(ret < 0)
-		return(-1);
+		return -1;
 
-	return(0);
+	return 0;
 }
 
-static ACL_DITEM *dlink_add(ACL_ARRAY *a, acl_off_t begin, acl_off_t end)
+static ACL_DITEM *dlink_add(ACL_ARRAY *a, acl_uint64 begin, acl_uint64 end)
 {
-	ACL_DITEM	*pitem_right, *pitem_left, *pitem;
-	int	idx_begin, idx_end;
+	ACL_DITEM *pitem_right, *pitem_left, *pitem;
+	int idx_begin, idx_end;
 	int	ret;
 
 	/* sanity check, maybe useless */
 	/* because it's used internal */
 	if(begin > end)
-		return(NULL);
+		return NULL;
 
 	idx_begin = begin_pos(a, begin);
 	if(idx_begin < 0 || idx_begin >= acl_array_size(a))	/* an error happened */
-		return(NULL);
+		return NULL;
 
 	idx_end   = end_pos(a, end);
 	if(idx_end < 0 || idx_end >= acl_array_size(a))	/* an error happened */
-		return(NULL);
+		return NULL;
 
 	if(idx_begin > idx_end)	/* an error happened */
-		return(NULL);
+		return NULL;
 
 	if(acl_array_size(a) == 0) {	/* the d-link is empty so just add one :) */
 		pitem = dlink_append(a, begin, end);
-		return(pitem);
+		return pitem;
 	}
 
 	pitem_left  = (ACL_DITEM *) acl_array_index(a, idx_begin);
@@ -269,7 +263,7 @@ static ACL_DITEM *dlink_add(ACL_ARRAY *a, acl_off_t begin, acl_off_t end)
 			 * add one new node before the one
 			 */
 			pitem = dlink_prepend(a, begin, end);
-			return(pitem);
+			return pitem;
 		}
 
 		if (begin > pitem_left->end) {
@@ -285,7 +279,7 @@ static ACL_DITEM *dlink_add(ACL_ARRAY *a, acl_off_t begin, acl_off_t end)
 			 * the the last node
 			 */
 			pitem = dlink_succ_insert(a, idx_begin, begin, end);
-			return(pitem);
+			return pitem;
 		}
 
 		/*
@@ -311,7 +305,7 @@ static ACL_DITEM *dlink_add(ACL_ARRAY *a, acl_off_t begin, acl_off_t end)
 			 */
 			pitem_left->end = end;
 
-		return(pitem_left);
+		return pitem_left;
 	}
 
 	/*
@@ -389,9 +383,9 @@ static ACL_DITEM *dlink_add(ACL_ARRAY *a, acl_off_t begin, acl_off_t end)
 
 		ret = dlink_node_merge(a, idx_begin, idx_end);
 		if(ret < 0)
-			return(NULL);
+			return NULL;
 
-		return(pitem_right);
+		return pitem_right;
 	}
 
 	/*
@@ -433,34 +427,34 @@ static ACL_DITEM *dlink_add(ACL_ARRAY *a, acl_off_t begin, acl_off_t end)
 
 	ret = dlink_node_merge(a, idx_begin + 1, idx_end);
 	if(ret < 0)
-		return(NULL);
+		return NULL;
 
-	return(pitem_right);
+	return pitem_right;
 }
 
 static void *dlink_iter_head(ACL_ITER *iter, struct ACL_DLINK *dlink)
 {
-	return (dlink->parray->iter_head(iter, dlink->parray));
+	return dlink->parray->iter_head(iter, dlink->parray);
 }
 
 static void *dlink_iter_next(ACL_ITER *iter, struct ACL_DLINK *dlink)
 {
-	return (dlink->parray->iter_next(iter, dlink->parray));
+	return dlink->parray->iter_next(iter, dlink->parray);
 }
 
 static void *dlink_iter_tail(ACL_ITER *iter, struct ACL_DLINK *dlink)
 {
-	return (dlink->parray->iter_tail(iter, dlink->parray));
+	return dlink->parray->iter_tail(iter, dlink->parray);
 }
 
 static void *dlink_iter_prev(ACL_ITER *iter, struct ACL_DLINK *dlink)
 {
-	return (dlink->parray->iter_prev(iter, dlink->parray));
+	return dlink->parray->iter_prev(iter, dlink->parray);
 }
 
 ACL_DLINK *acl_dlink_create(int nsize)
 {
-	ACL_DLINK	*plink = NULL;
+	ACL_DLINK *plink;
 
 	plink = (ACL_DLINK *) acl_mymalloc(sizeof(ACL_DLINK));
 	plink->parray = NULL;
@@ -469,7 +463,7 @@ ACL_DLINK *acl_dlink_create(int nsize)
 	plink->parray = acl_array_create(nsize);
 	if(plink->parray == NULL) {
 		acl_myfree(plink);
-		return(NULL);
+		return NULL;
 	}
 
 	plink->iter_head = dlink_iter_head;
@@ -477,69 +471,58 @@ ACL_DLINK *acl_dlink_create(int nsize)
 	plink->iter_tail = dlink_iter_tail;
 	plink->iter_prev = dlink_iter_prev;
 
-	return(plink);
+	return plink;
 }
 
 void acl_dlink_free(ACL_DLINK *plink)
 {
 	if(plink == NULL)
 		return;
-	if(plink->parray) {
+	if(plink->parray)
 		acl_array_destroy(plink->parray, dlink_free_callback);
-		plink->parray = NULL;
-	}
 	acl_myfree(plink);
 }
 
 ACL_DITEM *acl_dlink_lookup_by_item(const ACL_DLINK *plink, ACL_DITEM *pitem)
 {
-	return (acl_dlink_lookup2_by_item(plink, pitem, NULL));
+	return acl_dlink_lookup2_by_item(plink, pitem, NULL);
 }
 
 ACL_DITEM *acl_dlink_lookup2_by_item(const ACL_DLINK *plink, ACL_DITEM *pitem, int *pidx)
 {
-	int	i;
-	ACL_ARRAY	*parray;
-
-	if(plink == NULL || pitem == NULL)
-		return(NULL);
-	parray = plink->parray;
-	if(parray == NULL)
-		return(NULL);
+	int i;
+	ACL_ARRAY *parray = plink->parray;
 
 	for(i = 0; i < acl_array_size(parray) - 1; i++) {
 		if((ACL_DITEM *) acl_array_index(parray, i) == pitem) {
 			if (pidx)
 				*pidx = i;
-			return(pitem);
+			return pitem;
 		}
 	}
-	return(NULL);
+	return NULL;
 }
 
-ACL_DITEM *acl_dlink_lookup(const ACL_DLINK *plink, acl_off_t n)
+ACL_DITEM *acl_dlink_lookup(const ACL_DLINK *plink, acl_uint64 n)
 {
-	return (acl_dlink_lookup2(plink, n, NULL));
+	return acl_dlink_lookup2(plink, n, NULL);
 }
 
-ACL_DITEM *acl_dlink_lookup2(const ACL_DLINK *plink, acl_off_t n, int *pidx)
+ACL_DITEM *acl_dlink_lookup2(const ACL_DLINK *plink, acl_uint64 n, int *pidx)
 {
-	ACL_ARRAY	*parray;
-	ACL_DITEM	*pitem;
-	int	lidx, midx, hidx;
-
-	if(plink == NULL || (parray = plink->parray) == NULL)
-		return(NULL);
+	int lidx, midx, hidx;
 
 	lidx = 0;
-	hidx = acl_array_size(parray) - 1;
+	hidx = acl_array_size(plink->parray) - 1;
 	while(lidx <= hidx) {
-		midx  = (lidx + hidx)/2;
-		pitem = (ACL_DITEM *) acl_array_index(parray, midx);
+		ACL_DITEM* pitem;
+
+		midx  = (lidx + hidx) / 2;
+		pitem = (ACL_DITEM *) acl_array_index(plink->parray, midx);
 		if(n >= pitem->begin && n <= pitem->end) {
 			if (pidx)
 				*pidx = midx;
-			return(pitem);
+			return pitem;
 		}
 		if(n < pitem->begin)
 			hidx = midx - 1;
@@ -549,134 +532,110 @@ ACL_DITEM *acl_dlink_lookup2(const ACL_DLINK *plink, acl_off_t n, int *pidx)
 			break;
 	}
 
-	return(NULL);	/*not in the d_link scope */
+	return NULL;	/*not in the d_link scope */
 }
 
-ACL_DITEM *acl_dlink_lookup_range(const ACL_DLINK *plink, acl_off_t begin,
-	acl_off_t end, int *pidx)
+ACL_DITEM *acl_dlink_lookup_range(const ACL_DLINK *plink, acl_uint64 begin,
+	acl_uint64 end, int *pidx)
 {
 	ACL_DITEM *ditem;
 
 	if (end < begin)
-		return (NULL);
+		return NULL;
 	ditem = acl_dlink_lookup2(plink, begin, pidx);
 	if (ditem == NULL)
-		return (NULL);
+		return NULL;
 	if (ditem->end >= end)
-		return (ditem);
-	return (NULL);
+		return ditem;
+	return NULL;
 }
 
-ACL_DITEM *acl_dlink_lookup_larger(const ACL_DLINK *plink, acl_off_t off, int *pidx)
+ACL_DITEM *acl_dlink_lookup_larger(const ACL_DLINK *plink,
+	acl_uint64 off, int *pidx)
 {
-	ACL_ARRAY *parray;
-	ACL_DITEM *pitem;
 	int   i, size;
 
-	if(plink == NULL || (parray = plink->parray) == NULL)
-		return (NULL);
-
-	size = acl_array_size(parray);
+	size = acl_array_size(plink->parray);
 
 	for (i = 0; i < size; i++) {
-		pitem = (ACL_DITEM*) acl_array_index(parray, i);
+		ACL_DITEM* pitem = (ACL_DITEM*)
+			acl_array_index(plink->parray, i);
 		if (pitem->end >= off) {
 			if (pidx)
 				*pidx = i;
-			return (pitem);
+			return pitem;
 		}
 	}
 
-	return(NULL);	/*not in the d_link scope */
+	return NULL;	/*not in the d_link scope */
 }
 
-ACL_DITEM *acl_dlink_lookup_lower(const ACL_DLINK *plink, acl_off_t off, int *pidx)
+ACL_DITEM *acl_dlink_lookup_lower(const ACL_DLINK *plink,
+	acl_uint64 off, int *pidx)
 {
-	ACL_ARRAY *parray;
-	ACL_DITEM *pitem;
 	int   i, size;
 
-	if(plink == NULL || (parray = plink->parray) == NULL)
-		return (NULL);
-
-	size = acl_array_size(parray);
+	size = acl_array_size(plink->parray);
 
 	for (i = size - 1; i >= 0; i--) {
-		pitem = (ACL_DITEM*) acl_array_index(parray, i);
+		ACL_DITEM* pitem = (ACL_DITEM*)
+			acl_array_index(plink->parray, i);
 		if (pitem->begin <= off) {
 			if (pidx)
 				*pidx = i;
-			return (pitem);
+			return pitem;
 		}
 	}
 
-	return(NULL);	/*not in the d_link scope */
+	return NULL;	/*not in the d_link scope */
 }
 
-ACL_DITEM *acl_dlink_insert(ACL_DLINK *plink, acl_off_t begin, acl_off_t end)
+ACL_DITEM *acl_dlink_insert(ACL_DLINK *plink, acl_uint64 begin, acl_uint64 end)
 {
-	ACL_ARRAY	*parray;
-	ACL_DITEM	*pitem;
-	acl_off_t tmp;
-
-	if(plink == NULL)
-		return (NULL);
-
-	if (plink == NULL || (parray = plink->parray) == NULL)
-		return(NULL);
-
 	if (begin > end) {
+		acl_uint64 tmp;
 		/* swap the begin and end if end < begin */
 		tmp   = begin;
 		begin = end;
 		end   = tmp;
 	}
 
-	if(acl_array_size(parray) == 0)	{
+	if(acl_array_size(plink->parray) == 0) {
 		/* this is the first item of the array */
-		pitem = dlink_append(parray, begin, end);
-		return(pitem);
+		return dlink_append(plink->parray, begin, end);
 	}
-	pitem = dlink_add(parray, begin, end);
-	/* 此函数内有可能进行了结点项的合并 */
 
-	return(pitem);
+	/* 此函数内有可能进行了结点项的合并 */
+	return dlink_add(plink->parray, begin, end);
 }
 
-int acl_dlink_delete(ACL_DLINK *plink, acl_off_t n)
+int acl_dlink_delete(ACL_DLINK *plink, acl_uint64 n)
 {
 	const ACL_DITEM *ditem;
 	int  idx;
 
-	if(plink == NULL || plink->parray == NULL)
-		return(-1);
 	ditem = acl_dlink_lookup2(plink, n, &idx);
-	if (ditem != NULL)
-		acl_array_delete_idx(plink->parray, idx, dlink_free_callback);
-	return (0);
+	if (ditem == NULL)
+		return -1;
+	acl_array_delete_idx(plink->parray, idx, dlink_free_callback);
+	return 0;
 }
 
 int acl_dlink_delete_by_item(ACL_DLINK *plink, ACL_DITEM *pitem)
 {
-	ACL_ARRAY	*parray;
-	int	ret;
+	int ret;
 
-	if(plink == NULL || (parray = plink->parray) == NULL || pitem == NULL)
-		return(-1);
-	ret = acl_array_delete_obj(parray, pitem, dlink_free_callback);
+	ret = acl_array_delete_obj(plink->parray, pitem, dlink_free_callback);
 	if (ret < 0)	/* this is impossile, but a sanity check */
-		return(-1);
-	return(0);
+		return -1;
+	return 0;
 }
 
-int acl_dlink_delete_range(ACL_DLINK *plink, acl_off_t begin, acl_off_t end)
+int acl_dlink_delete_range(ACL_DLINK *plink, acl_uint64 begin, acl_uint64 end)
 {
-	ACL_ARRAY *parray;
+	ACL_ARRAY *parray = plink->parray;
 	ACL_DITEM *pitem, *pitem_low;
 	int   i, low, high, size;
-
-	if (plink == NULL || (parray = plink->parray) == NULL)
-		return (-1);
 
 	low = 0;
 	pitem_low = NULL;
@@ -694,11 +653,11 @@ int acl_dlink_delete_range(ACL_DLINK *plink, acl_off_t begin, acl_off_t end)
 			if (end < pitem->end) {
 				/* begin <= pitem->begin <= end < pitem->end */
 				pitem->begin = end + 1;
-				return (0);
+				return 0;
 			} else if (end == pitem->end) {
 				/* begin <= pitem->begin <= pitem->end == end */
 				acl_array_delete_idx(parray, i, dlink_free_callback);
-				return (0);
+				return 0;
 			}
 			/* begin <= pitem->begin <= pitem->end < end */
 			low = i;
@@ -709,35 +668,35 @@ int acl_dlink_delete_range(ACL_DLINK *plink, acl_off_t begin, acl_off_t end)
 		else if (end == pitem->end) {
 			/* pitem->begin < begin <= end == pitem->end */
 			pitem->end = begin - 1;
-			return (0);
+			return 0;
 		} else if (end < pitem->end) {
 			/* pitem->begin < begin <= end < pitem->end */
-			acl_off_t tmp_begin, tmp_end;
+			acl_uint64 tmp_begin, tmp_end;
 
 			tmp_begin = end + 1;
 			tmp_end = pitem->end;
 			pitem->end = begin - 1;
 			/* add one ditem hole */
 			dlink_add(parray, tmp_begin, tmp_end);
-			return (0);
+			return 0;
 		} else {
 			/* pitem->begin < begin <= pitem->end < end */
 			pitem->end = begin - 1;
 			low = i + 1;
 			if (low >= size)  /* i is the last item's idx */
-				return (0);
+				return 0;
 			pitem_low = (ACL_DITEM*) acl_array_index(parray, low);
 			if (pitem_low->begin > end)
-				return (0);
+				return 0;
 			/* begin < pitem_low->begin <= end */
 			if (end < pitem_low->end) {
 				/* begin < pitem_low->begin <= end < pitem_low->end */
 				pitem_low->begin = end + 1;
-				return (0);
+				return 0;
 			} else if (end == pitem_low->end) {
 				/* begin < pitem_low->begin <= pitem_low->end == end */
 				acl_array_delete_idx(parray, low, dlink_free_callback);
-				return (0);
+				return 0;
 			}
 
 			/* begin < pitem_low->begin <= pitem_low->end < end */
@@ -782,51 +741,32 @@ int acl_dlink_delete_range(ACL_DLINK *plink, acl_off_t begin, acl_off_t end)
 	}
 
 	if (low > high)
-		return (0);
+		return 0;
 
-	return (acl_array_delete_range(parray, low, high, dlink_free_callback));
+	return acl_array_delete_range(parray, low, high, dlink_free_callback);
 }
 
-ACL_DITEM *acl_dlink_modify(ACL_DLINK *plink, acl_off_t begin, acl_off_t end)
+ACL_DITEM *acl_dlink_modify(ACL_DLINK *plink, acl_uint64 begin, acl_uint64 end)
 {
-	ACL_DITEM	*pitem = NULL;
-	ACL_ARRAY	*parray;
-	acl_off_t tmp;
-
-	if (plink == NULL || (parray = plink->parray) == NULL)
-		return(NULL);
-
 	if (begin > end) {
+		acl_uint64 tmp;
 		/* swap the begin andend if end < begin */
 		tmp   = begin;
 		begin = end;
 		end   = tmp;
 	}
 
-	pitem = dlink_add(parray, begin, end);
-
-	return(pitem);
+	return dlink_add(plink->parray, begin, end);
 }
 
 ACL_DITEM *acl_dlink_index(const ACL_DLINK *plink, int idx)
 {
-	ACL_ARRAY	*parray;
-	ACL_DITEM *pitem;
-
-	if(plink == NULL || (parray = plink->parray) == NULL)
-		return(NULL);
-	pitem = (ACL_DITEM *) acl_array_index(parray, idx);
-
-	return(pitem);
+	return (ACL_DITEM *) acl_array_index(plink->parray, idx);
 }
 
 int acl_dlink_size(const ACL_DLINK *plink)
 {
-	ACL_ARRAY	*parray;
-
-	if(plink == NULL || (parray = plink->parray) == NULL)
-		return(-1);
-	return (acl_array_size(parray));
+	return acl_array_size(plink->parray);
 }
 
 /* ++++++++++++++++++++++++++below functions are used only for test ++++++++++++ */
@@ -839,7 +779,7 @@ int acl_dlink_list(const ACL_DLINK *plink)
 
 	if(plink == NULL || plink->parray == NULL) {
 		printf("%s: input error\r\n", myname);
-		return(-1);
+		return-1;
 	}
 
 	n = acl_array_size(plink->parray);
@@ -850,5 +790,5 @@ int acl_dlink_list(const ACL_DLINK *plink)
 		printf("begin=" ACL_FMT_I64D ", end=" ACL_FMT_I64D "\r\n",
 			item->begin, item->end);
 	}
-	return (0);
+	return 0;
 }

@@ -4,10 +4,30 @@
 #include <getopt.h>
 #include "lib_gid.h"
 
+static double stamp_sub(const struct timeval *from, const struct timeval *sub_by)
+{
+        struct timeval res;
+
+        memcpy(&res, from, sizeof(struct timeval));
+
+        res.tv_usec -= sub_by->tv_usec;
+        if (res.tv_usec < 0) {
+                --res.tv_sec;
+                res.tv_usec += 1000000;
+        }
+        res.tv_sec -= sub_by->tv_sec;
+
+        return (res.tv_sec * 1000.0 + res.tv_usec/1000.0);
+}
+
 static void test_get_gid(const char *tag, int n)
 {
 	int   i, errnum;
-	acl_int64 gid;
+	acl_int64 gid = 0;
+	struct timeval begin, end;
+	double spent;
+
+	gettimeofday(&begin, NULL);
 
 	for (i = 0; i < n; i++) {
 		/* »ñµÃÎ¨Ò» gid ºÅ */
@@ -24,6 +44,12 @@ static void test_get_gid(const char *tag, int n)
 			ACL_METER_TIME("---------");
 		}
 	}
+
+	gettimeofday(&end, NULL);
+
+	spent = stamp_sub(&end, &begin);
+	printf("total count: %d, curr gid: %lld, spent: %.2f, speed: %.2f\r\n",
+		n, gid, spent, (n * 1000) / (spent  < 1 ? 1 : spent));
 }
 
 static const char *__tag = NULL;
