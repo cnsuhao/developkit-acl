@@ -257,7 +257,7 @@ int acl_array_prepend(ACL_ARRAY *a, void *obj)
 
 	if(a == NULL || obj == NULL)
 		return(-1);
-	ret = acl_array_insert(a, position, obj);
+	ret = acl_array_pred_insert(a, position, obj);
 	return(ret);
 }
 

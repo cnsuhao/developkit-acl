@@ -217,7 +217,7 @@ static void __post_jail_init(char *name acl_unused, char **argv acl_unused)
 	char  myname[] = "__post_jail_init";
 
 	if (acl_var_ioctl_access_allow != NULL)
-		acl_access_add(acl_var_ioctl_access_allow, ",", ":");
+		acl_access_add(acl_var_ioctl_access_allow, ", \t", ":");
 
 	__app_handle = app_create();
 	if (__app_handle == NULL)
