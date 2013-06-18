@@ -44,7 +44,7 @@ static ACL_EVENT *__eventp = NULL;
 static ACL_VSTREAM *__front_stream = NULL;
 static ACL_VSTREAM *__backend_stream = NULL;
 
-static ACL_IPLink *__host_allow_link = NULL;
+static ACL_IPLINK *__host_allow_link = NULL;
 
 /* forward define */
 static int __if_host_allow(const char *client_ip);
@@ -205,7 +205,7 @@ static void __pre_accept(char *unused_name, char **unused_argv)
 				__FILE__, __LINE__, myname);
 }
 
-static void __add_one_host_item(ACL_IPLink *allow_link, const char *pitem)
+static void __add_one_host_item(ACL_IPLINK *allow_link, const char *pitem)
 {
 	char  myname[] = "__add_one_host_item";
 	char *pdata = NULL;
