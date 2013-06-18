@@ -3,6 +3,7 @@
 all:
 	@(cd master; make)
 	@(cd dlink; make)
+	@(cd iplink; make)
 	@(cd event; make)
 	@(cd fifo; make)
 	@(cd mempool; make)
@@ -67,9 +68,12 @@ all:
 #	@(cd http_probe; make)
 	@(cd thread_pool_client; make)
 	@(cd smtp_client; make)
+	@(cd vstream_popen3; make)
+	@(cd mkdir; make)
 clean:
 	@(cd master; make clean)
 	@(cd dlink; make clean)
+	@(cd iplink; make clean)
 	@(cd event; make clean)
 	@(cd fifo; make clean)
 	@(cd mempool; make clean)
@@ -136,3 +140,5 @@ clean:
 	@(cd thread_pool_client; make clean)
 	@(cd gc; make clean)
 	@(cd smtp_client; make clean)
+	@(cd vstream_popen3; make clean)
+	@(cd mkdir; make clean)

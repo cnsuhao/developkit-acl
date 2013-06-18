@@ -125,3 +125,4 @@ clean:
 	rm -f $(LIB_PATH_DST)/lib_rpc.a
 	rm -f $(OBJS_DST)
 	rm -f $(OBJS_DEF)
+	@(cd samples; make clean)
