@@ -137,6 +137,7 @@ static: depends $(OBJS_DST)
 	@$(AR) $(ARFL) $(LIB_PATH_DST)/lib_acl_cpp.a $(OBJS_DST)
 	@$(RANLIB) $(LIB_PATH_DST)/lib_acl_cpp.a
 	@echo 'create $(LIB_PATH_DST)/lib_acl_cpp.a ok!'
+	@(cd samples; make)
 
 shared_ldflags = -l_protocol -l_acl \
 	-lmysqlclient -lsqlite3 -lrt -lpthread -lz -ldl

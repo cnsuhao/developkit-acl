@@ -1,2 +1,2 @@
-include ../Makefile.in
 PROG = xml
+include ../Makefile.in
