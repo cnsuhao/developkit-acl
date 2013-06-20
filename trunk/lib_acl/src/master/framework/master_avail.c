@@ -29,7 +29,18 @@ static int master_prefork(ACL_MASTER_SERV *serv)
 {
 	const char *myname = "master_prefork";
 
-	if (serv->prefork_proc > 0 && serv->total_proc < serv->prefork_proc) {
+	if (serv->prefork_proc <= 0)
+		return 0;
+	else if ((serv->flags & ACL_MASTER_FLAG_RELOADING) != 0) {
+		int  n;
+		for (n = 0; n < serv->prefork_proc; n++)
+			acl_master_spawn(serv);
+
+		if (acl_msg_verbose)
+			acl_msg_info("%s: service %s prefork %d processes ok ...",
+				myname, serv->name, n);
+		return n;
+	} else if (serv->total_proc < serv->prefork_proc) {
 		int  nproc = serv->prefork_proc - serv->total_proc;
 		int  n = serv->max_proc - serv->total_proc;
 

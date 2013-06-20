@@ -70,6 +70,7 @@ typedef struct ACL_MASTER_SERV {
 #define ACL_MASTER_FLAG_MARK		(1<<1)	/* garbage collection support */
 #define ACL_MASTER_FLAG_CONDWAKE	(1<<2)	/* wake up if actually used */
 #define ACL_MASTER_FLAG_INETHOST	(1<<3)	/* endpoint name specifies host */
+#define	ACL_MASTER_FLAG_RELOADING	(1<<4)	/* the service is reloading */
 
 #define ACL_MASTER_THROTTLED(f)		((f)->flags & ACL_MASTER_FLAG_THROTTLE)
 
