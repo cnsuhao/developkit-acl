@@ -825,10 +825,6 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service,..
 	void  *thread_init_ctx = NULL;
 	void  *thread_exit_ctx = NULL;
 
-	if (acl_msg_verbose)
-		acl_msg_info("%s(%d): daemon started, log = %s",
-			acl_var_ioctl_procname, __LINE__, acl_var_ioctl_log_file);
-
 	/*
 	 * Pick up policy settings from master process. Shut up error messages to
 	 * stderr, because no-one is going to see them.
@@ -1169,6 +1165,10 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service,..
 		(ACL_WATCHDOG_FN) 0, (char *) 0);
 
 	acl_msg_info("%s: starting...", argv[0]);
+
+	if (acl_msg_verbose)
+		acl_msg_info("%s(%d): daemon started, log = %s",
+			acl_var_ioctl_procname, __LINE__, acl_var_ioctl_log_file);
 
 	while (1) {
 		if (ioctl_server_lock != 0) {

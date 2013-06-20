@@ -29,29 +29,6 @@
 ACL_MASTER_SERV *acl_var_master_head = NULL;
 ACL_EVENT *acl_var_master_global_event = NULL;
 
-static void master_prefork(ACL_MASTER_SERV *serv)
-{
-	const char *myname = "master_prefork";
-
-	if (ACL_MASTER_THROTTLED(serv))
-		return;
-
-	if (serv->prefork_proc > 0 && serv->total_proc < serv->prefork_proc) {
-		int  n, nproc = serv->prefork_proc - serv->total_proc;
-
-		if (serv->max_proc > 0) {
-			n = serv->max_proc - serv->total_proc;
-			if (n < nproc)
-				nproc = n;
-		}
-		for (n = 0 ; n < nproc; n++)
-			acl_master_spawn(serv);
-
-		acl_msg_info("%s: service %s prefork %d processes ok ...",
-			myname, serv->name, n);
-	}
-}
-
 /* acl_master_start_service - activate service */
 
 void    acl_master_start_service(ACL_MASTER_SERV *serv)
@@ -79,7 +56,6 @@ void    acl_master_start_service(ACL_MASTER_SERV *serv)
 	acl_msg_info("%s: service %s listen init ok ...", myname, serv->name);
 	acl_master_status_init(serv);
 	acl_msg_info("%s: service %s status init ok ...", myname, serv->name);
-	master_prefork(serv);  /* prefork services */
 	acl_master_avail_listen(serv);
 	acl_msg_info("%s: service %s avail listen ok ...", myname, serv->name);
 	acl_master_wakeup_init(serv);
@@ -124,6 +100,7 @@ void    acl_master_restart_service(ACL_MASTER_SERV *serv)
 	 * Now undo the undone.
 	 */
 	acl_master_status_init(serv);
+	acl_master_avail_listen(serv);
 	acl_master_wakeup_init(serv);
 }
 #endif /* ACL_UNIX */

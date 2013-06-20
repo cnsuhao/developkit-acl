@@ -1088,6 +1088,10 @@ static void run_loop(const char *procname)
 	acl_msg_info("%s: starting...(accept_alone: %s)",
 		procname, acl_var_aio_accept_alone);
 
+	if (acl_msg_verbose)
+		acl_msg_info("%s(%d): daemon started, log = %s",
+			acl_var_aio_procname, __LINE__, acl_var_aio_log_file);
+
 	/*
 	 * Traditionally, BSD select() can't handle aiople processes selecting
 	 * on the same socket, and wakes up every process in select(). See TCP/IP
@@ -1136,10 +1140,6 @@ void acl_aio_server_main(int argc, char **argv, ACL_AIO_SERVER_FN service,...)
 	ACL_MASTER_SERVER_LOOP_FN loop = 0;
 	int     alone = 0, zerolimit = 0;
 	char   *transport = 0, *generation, *conf_file_ptr = 0;
-
-	if (acl_msg_verbose)
-		acl_msg_info("%s(%d): daemon started, log = %s",
-			acl_var_aio_procname, __LINE__, acl_var_aio_log_file);
 
 	aio_init();  /* ≥ı ºªØACLø‚ */
 

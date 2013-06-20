@@ -25,8 +25,9 @@ void acl_master_log_open(const char *procname)
 	} else {
 		acl_msg_open(master_log, procname);
 		var_master_log_opened = 1;
-		acl_msg_info("%s(%d): service: %s, log opened now.",
-			myname, __LINE__, procname);
+		if (acl_msg_verbose)
+			acl_msg_info("%s(%d): service: %s, log opened now.",
+				myname, __LINE__, procname);
 	}
 }
 

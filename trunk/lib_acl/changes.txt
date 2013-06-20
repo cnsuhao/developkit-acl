@@ -1,4 +1,9 @@
 
+371) 2013.6.21
+371.1) feature: acl_master 框架支持在 reload 时的 prefork，修改的相关文件有：
+master_avail.c, master_service.c
+371.2) acl_master_log.c: 将日志输出信息当调试状态对待
+
 370) 2013.6.15
 370.1) bugfix: acl_array.c->acl_array_prepend，其中调用的 acl_array_succ_insert，
 应该调用 acl_array_pred_insert，该 BUG 会影响到所有调用 acl_dlink, acl_iplink,
