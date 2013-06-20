@@ -100,7 +100,15 @@ void    acl_master_restart_service(ACL_MASTER_SERV *serv)
 	 * Now undo the undone.
 	 */
 	acl_master_status_init(serv);
+
+	/* set ACL_MASTER_FLAG_RELOADING flag */
+	serv->flags |= ACL_MASTER_FLAG_RELOADING;
+
 	acl_master_avail_listen(serv);
+
+	/* delete ACL_MASTER_FLAG_RELOADING flag */
+	serv->flags &= ~ACL_MASTER_FLAG_RELOADING;
+
 	acl_master_wakeup_init(serv);
 }
 #endif /* ACL_UNIX */

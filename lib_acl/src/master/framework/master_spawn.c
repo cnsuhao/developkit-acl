@@ -107,7 +107,7 @@ static void master_throttle(ACL_MASTER_SERV *serv)
 
 void    acl_master_spawn(ACL_MASTER_SERV *serv)
 {
-	char   *myname = "acl_master_spawn";
+	const char *myname = "acl_master_spawn";
 	ACL_MASTER_PROC *proc;
 	ACL_MASTER_NV *nv;
 	ACL_MASTER_PID pid;
@@ -125,14 +125,18 @@ void    acl_master_spawn(ACL_MASTER_SERV *serv)
 	 * to know what it is doing.
 	 */
 
-	if (!ACL_MASTER_LIMIT_OK(serv->max_proc, serv->total_proc))
-		acl_msg_panic("%s(%d)->%s: at process limit %d",
-			__FILE__, __LINE__, myname, serv->total_proc);
-	if (serv->avail_proc > 0) {
-		if (serv->prefork_proc <= 0 || serv->avail_proc > serv->prefork_proc)
+	if (!(serv->flags & ACL_MASTER_FLAG_RELOADING)) {
+		if (!ACL_MASTER_LIMIT_OK(serv->max_proc, serv->total_proc)) {
+			acl_msg_panic("%s(%d)->%s: at process limit %d",
+				__FILE__, __LINE__, myname, serv->total_proc);
+		}
+		if (serv->avail_proc > 0 && (serv->prefork_proc <= 0
+			|| serv->avail_proc > serv->prefork_proc))
+		{
 			acl_msg_panic("%s(%d)->%s: processes available: %d"
 				", processes prefork: %d", __FILE__, __LINE__,
 				myname, serv->avail_proc, serv->prefork_proc);
+		}
 	}
 
 	if (serv->flags & ACL_MASTER_FLAG_THROTTLE)
