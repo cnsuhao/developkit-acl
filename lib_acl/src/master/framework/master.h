@@ -124,7 +124,7 @@ extern void acl_master_config(void);
 extern void acl_master_refresh(void);
 
  /*
-  * acl_master_tab.c
+  * acl_master_service.c
   */
 extern ACL_MASTER_SERV *acl_var_master_head;
 extern ACL_EVENT *acl_var_master_global_event;

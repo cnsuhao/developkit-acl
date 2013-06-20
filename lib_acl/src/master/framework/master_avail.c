@@ -23,6 +23,31 @@
 #include "../master_proto.h"
 #include "master.h"
 
+/* master_prefork -- prefork service proccess and return the number */
+
+static int master_prefork(ACL_MASTER_SERV *serv)
+{
+	const char *myname = "master_prefork";
+
+	if (serv->prefork_proc > 0 && serv->total_proc < serv->prefork_proc) {
+		int  nproc = serv->prefork_proc - serv->total_proc;
+		int  n = serv->max_proc - serv->total_proc;
+
+		/* xxx: sanity check */
+		if (n > 0 && n < nproc)
+			nproc = n;
+
+		for (n = 0 ; n < nproc; n++)
+			acl_master_spawn(serv);
+
+		if (acl_msg_verbose)
+			acl_msg_info("%s: service %s prefork %d processes ok ...",
+				myname, serv->name, n);
+		return nproc;
+	} else
+		return 0;
+}
+
 /* master_avail_event - create child process to handle connection request */
 
 static void master_avail_event(int event, void *context)
@@ -31,25 +56,16 @@ static void master_avail_event(int event, void *context)
 	int     n;
 
 	if (event == 0)  /* XXX Can this happen? */
-		return;
-	if (ACL_MASTER_THROTTLED(serv)) {  /* XXX interface botch */
+		acl_msg_panic("master_avail_event: null event");
+	else if (ACL_MASTER_THROTTLED(serv)) {  /* XXX interface botch */
 		for (n = 0; n < serv->listen_fd_count; n++) {
 			acl_event_disable_readwrite(acl_var_master_global_event,
-						serv->listen_streams[n]);
+				serv->listen_streams[n]);
 		}
-	} else if (serv->prefork_proc > 0 && serv->total_proc < serv->prefork_proc) {
-		int  nproc = serv->prefork_proc - serv->total_proc;
-
-		if (serv->max_proc > 0) {
-			n = serv->max_proc - serv->total_proc;
-			if (n < nproc)
-				nproc = n;
-		}
-		for (n = 0 ; n < nproc; n++)
-			acl_master_spawn(serv);
-	} else {
+	} else if (serv->prefork_proc > 0)
+		(void) master_prefork(serv);
+	else
 		acl_master_spawn(serv);
-	}
 }
 
 /* acl_master_avail_listen - make sure that someone monitors the listen socket */
@@ -57,7 +73,7 @@ static void master_avail_event(int event, void *context)
 void acl_master_avail_listen(ACL_MASTER_SERV *serv)
 {
 	const char *myname = "acl_master_avail_listen";
-	int   n;
+	int   listen_flag;
 
 	/*
 	 * When no-one else is monitoring the service's listen socket,
@@ -68,17 +84,28 @@ void acl_master_avail_listen(ACL_MASTER_SERV *serv)
 	if (acl_msg_verbose)
 		acl_msg_info("%s: avail %d total %d max %d", myname,
 			serv->avail_proc, serv->total_proc, serv->max_proc);
-	if ((serv->avail_proc < 1 || (serv->prefork_proc > 0
-		&& serv->avail_proc < serv->prefork_proc))
-	    && ACL_MASTER_LIMIT_OK(serv->max_proc, serv->total_proc)
-	    && !ACL_MASTER_THROTTLED(serv)) {
+
+	if (ACL_MASTER_THROTTLED(serv))
+		listen_flag = 0;
+	else if (serv->prefork_proc > 0)
+		listen_flag = master_prefork(serv) > 0 ? 0 : 1;  /* prefork services */
+	else if (serv->avail_proc > 0)
+		listen_flag = 0;
+	else if (ACL_MASTER_LIMIT_OK(serv->max_proc, serv->total_proc))
+		listen_flag = 1;
+	else
+		listen_flag = 0;
+
+	if (listen_flag) {
+		int   i;
+
 		if (acl_msg_verbose)
 			acl_msg_info("%s(%d), %s: enable events %s",
 				__FILE__, __LINE__, myname, serv->name);
-		for (n = 0; n < serv->listen_fd_count; n++) {
+		for (i = 0; i < serv->listen_fd_count; i++) {
 			acl_event_enable_read(acl_var_master_global_event,
-					serv->listen_streams[n], 0,
-					master_avail_event, (void *) serv);
+				serv->listen_streams[i], 0,
+				master_avail_event, (void *) serv);
 		}
 	}
 }
