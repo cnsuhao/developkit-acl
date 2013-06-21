@@ -34,7 +34,7 @@
 
 static void master_status_event(int event, void *context)
 {
-	char   *myname = "master_status_event";
+	const char *myname = "master_status_event";
 	ACL_MASTER_SERV *serv = (ACL_MASTER_SERV *) context;
 	ACL_MASTER_STATUS stat_buf;
 	ACL_MASTER_PROC *proc;
@@ -55,36 +55,38 @@ static void master_status_event(int event, void *context)
 	 */
 
 #if 1
-	n = read(ACL_VSTREAM_FILE(serv->status_read_stream), (char *) &stat_buf, sizeof(stat_buf));
+	n = read(ACL_VSTREAM_FILE(serv->status_read_stream),
+		(char *) &stat_buf, sizeof(stat_buf));
 #else
-	n = acl_vstream_readn(serv->status_read_stream, (char *) &stat_buf, sizeof(stat_buf));
+	n = acl_vstream_readn(serv->status_read_stream,
+		(char *) &stat_buf, sizeof(stat_buf));
 #endif
 
 	switch (n) {
 	case -1:
 		acl_msg_warn("%s(%d)->%s: fd = %d, read: %s",
-				__FILE__, __LINE__, myname,
-				serv->status_fd[0], strerror(errno));
+			__FILE__, __LINE__, myname,
+			serv->status_fd[0], strerror(errno));
 		return;
 
 	case 0:
 		acl_msg_panic("%s(%d)->%s: fd = %d, read EOF status",
-				__FILE__, __LINE__, myname, serv->status_fd[0]);
+			__FILE__, __LINE__, myname, serv->status_fd[0]);
 		/* NOTREACHED */
 
 	default:
-		acl_msg_warn("%s(%d)->%s: service %s: child (pid %d) sent partial,"
-			"fd = %d, status update (%d bytes)", 
-			__FILE__, __LINE__, myname,
-			serv->name, stat_buf.pid, serv->status_fd[0], n);
+		acl_msg_warn("%s(%d)->%s: service %s: child (pid %d) "
+			"sent partial, fd = %d, status update (%d bytes)", 
+			__FILE__, __LINE__, myname, serv->name, stat_buf.pid,
+			serv->status_fd[0], n);
 		return;
 
 	case sizeof(stat_buf):
 		pid = stat_buf.pid;
 		if (acl_msg_verbose)
-			acl_msg_info("%s: pid = %d, gen = %u, avail = %d, fd = %d",
-				myname, stat_buf.pid, stat_buf.gen, stat_buf.avail,
-				serv->status_fd[0]);
+			acl_msg_info("%s: pid = %d, gen = %u, avail = %d, "
+				"fd = %d", myname, stat_buf.pid, stat_buf.gen,
+				stat_buf.avail, serv->status_fd[0]);
 	} /* end switch */
 
 	/*
@@ -96,27 +98,27 @@ static void master_status_event(int event, void *context)
 	 */
 
 	if (acl_var_master_child_table == 0)
-		acl_msg_fatal("%s(%d): acl_var_master_child_table null", myname, __LINE__);
+		acl_msg_fatal("%s(%d): acl_var_master_child_table null",
+			myname, __LINE__);
 
-	if ((proc = (ACL_MASTER_PROC *) acl_binhash_find(acl_var_master_child_table,
-					(char *) &pid, sizeof(pid))) == 0) {
+	if ((proc = (ACL_MASTER_PROC *) acl_binhash_find(
+		acl_var_master_child_table, (char *) &pid, sizeof(pid))) == 0)
+	{
 		acl_msg_warn("%s(%d)->%s: process id not found: pid = %d,"
-			 " status = %d, gen = %u",
-				__FILE__, __LINE__, myname,
-				stat_buf.pid, stat_buf.avail, stat_buf.gen);
+			 " status = %d, gen = %u", __FILE__, __LINE__,
+			 myname, stat_buf.pid, stat_buf.avail, stat_buf.gen);
 		return;
 	}
 	if (proc->gen != stat_buf.gen) {
-		acl_msg_warn("%s(%d)->%s: ignoring status update from child pid"
-				" %d generation %u", 
-				__FILE__, __LINE__, myname,
-				pid, stat_buf.gen);
+		acl_msg_warn("%s(%d)->%s: ignoring status update from child "
+			"pid %d generation %u", __FILE__, __LINE__,
+			myname, pid, stat_buf.gen);
 		return;
 	}
 	if (proc->serv != serv)
 		acl_msg_panic("%s(%d)->%s: pointer corruption: %p != %p",
-				__FILE__, __LINE__, myname,
-				(void *) proc->serv, (void *) serv);
+			__FILE__, __LINE__, myname, (void *) proc->serv,
+			(void *) serv);
 
 	/*
 	 * Update our idea of the child process status. Allow redundant status
@@ -136,10 +138,10 @@ static void master_status_event(int event, void *context)
 		acl_master_avail_less(serv, proc);
 		break;
 	default:
-		acl_msg_warn("%s(%d)->%s: ignoring unknown status: %d allegedly"
-			" from pid: %d", __FILE__, __LINE__, myname,
-			stat_buf.pid, stat_buf.avail);
-			break;
+		acl_msg_warn("%s(%d)->%s: ignoring unknown status: %d "
+			"allegedly from pid: %d", __FILE__, __LINE__,
+			myname, stat_buf.pid, stat_buf.avail);
+		break;
 	}
 }
 
@@ -147,7 +149,7 @@ static void master_status_event(int event, void *context)
 
 void    acl_master_status_init(ACL_MASTER_SERV *serv)
 {
-	char   *myname = "acl_master_status_init";
+	const char *myname = "acl_master_status_init";
 
 	/*
 	 * Sanity checks.
@@ -168,27 +170,24 @@ void    acl_master_status_init(ACL_MASTER_SERV *serv)
 	acl_close_on_exec(serv->status_fd[0], ACL_CLOSE_ON_EXEC);
 	acl_close_on_exec(serv->status_fd[1], ACL_CLOSE_ON_EXEC);
 	serv->status_read_stream = acl_vstream_fdopen(serv->status_fd[0],
-						O_RDWR,
-						acl_var_master_buf_size,
-						acl_var_master_rw_timeout,
-						ACL_VSTREAM_TYPE_SOCK);
+		O_RDWR, acl_var_master_buf_size,
+		acl_var_master_rw_timeout, ACL_VSTREAM_TYPE_SOCK);
 
 	if (acl_msg_verbose)
-		acl_msg_info("%s(%d)->%s: call acl_event_enable_read, status_fd = %d",
-			__FILE__, __LINE__, myname, serv->status_fd[0]);
+		acl_msg_info("%s(%d)->%s: call acl_event_enable_read, "
+			"status_fd = %d", __FILE__, __LINE__,
+			myname, serv->status_fd[0]);
 
 	acl_event_enable_read(acl_var_master_global_event,
-				serv->status_read_stream,
-				0,
-				master_status_event,
-				(void *) serv);
+		serv->status_read_stream, 0, master_status_event,
+		(void *) serv);
 }
 
 /* acl_master_status_cleanup - stop status event processing for this service */
 
 void    acl_master_status_cleanup(ACL_MASTER_SERV *serv)
 {
-	char   *myname = "acl_master_status_cleanup";
+	const char *myname = "acl_master_status_cleanup";
 
 	/*
 	 * Sanity checks.
@@ -202,14 +201,15 @@ void    acl_master_status_cleanup(ACL_MASTER_SERV *serv)
 	 * Dispose of this service's status pipe after disabling read events.
 	 */
 
-	acl_event_disable_readwrite(acl_var_master_global_event, serv->status_read_stream);
+	acl_event_disable_readwrite(acl_var_master_global_event,
+		serv->status_read_stream);
 
 	if (close(serv->status_fd[0]) != 0)
 		acl_msg_warn("%s: close status descriptor (read side): %s",
-				myname, strerror(errno));
+			myname, strerror(errno));
 	if (close(serv->status_fd[1]) != 0)
 		acl_msg_warn("%s: close status descriptor (write side): %s",
-				myname, strerror(errno));
+			myname, strerror(errno));
 	serv->status_fd[0] = serv->status_fd[1] = -1;
 	if (serv->status_read_stream)
 		acl_vstream_free(serv->status_read_stream);

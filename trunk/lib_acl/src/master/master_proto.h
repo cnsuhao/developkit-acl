@@ -29,6 +29,7 @@ extern "C" {
 #define ACL_MASTER_XPORT_NAME_UNIX	"unix"	/* local IPC */
 #define ACL_MASTER_XPORT_NAME_FIFO	"fifo"	/* local IPC */
 #define ACL_MASTER_XPORT_NAME_INET	"inet"	/* non-local IPC */
+#define	ACL_MASTER_XPORT_NAME_SOCK	"sock"	/* inet/unix IPC */
 /*#define ACL_MASTER_XPORT_NAME_PASS	"pass"	  local IPC */
 
  /*

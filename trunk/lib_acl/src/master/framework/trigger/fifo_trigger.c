@@ -33,7 +33,7 @@
 int acl_fifo_trigger(ACL_EVENT *eventp_unused, const char *service,
 	const char *buf, int len, int timeout)
 {
-	char   *myname = "acl_fifo_trigger";
+	const char *myname = "acl_fifo_trigger";
 	static ACL_VSTRING *why;
 	ACL_VSTREAM *fp;
 	int     fd;
@@ -53,11 +53,12 @@ int acl_fifo_trigger(ACL_EVENT *eventp_unused, const char *service,
 	 * the caller with safe_open() specific quirks such as the why argument.
 	 */
 	if ((fp = acl_safe_open(service, O_WRONLY | O_NONBLOCK, 0,
-				(struct stat *) 0, (uid_t) -1,
-				(uid_t) -1, why)) == 0) {
+			(struct stat *) 0, (uid_t) -1,
+			(uid_t) -1, why)) == 0)
+	{
 		if (acl_msg_verbose)
 			acl_msg_info("%s: open %s: %s",
-					myname, service, acl_vstring_str(why));
+				myname, service, acl_vstring_str(why));
 		return (-1);
 	}
 	fd = ACL_VSTREAM_FILE(fp);
@@ -69,7 +70,7 @@ int acl_fifo_trigger(ACL_EVENT *eventp_unused, const char *service,
 	if (acl_write_buf(fd, buf, len, timeout) < 0)
 		if (acl_msg_verbose)
 			acl_msg_warn("%s: write %s: %s",
-					myname, service, strerror(errno));
+				myname, service, strerror(errno));
 
 	/*
 	 * Disconnect.
@@ -77,7 +78,7 @@ int acl_fifo_trigger(ACL_EVENT *eventp_unused, const char *service,
 	if (acl_vstream_fclose(fp))
 		if (acl_msg_verbose)
 			acl_msg_warn("%s: close %s: %s",
-					myname, service, strerror(errno));
+				myname, service, strerror(errno));
 	return (0);
 }
 #endif /* ACL_UNIX */

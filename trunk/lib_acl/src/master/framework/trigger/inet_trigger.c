@@ -45,20 +45,22 @@ struct ACL_INET_TRIGGER {
 
 static void acl_inet_trigger_event(int event, void *context)
 {
+	const char *myname = "acl_inet_trigger_event";
 	struct ACL_INET_TRIGGER *ip = (struct ACL_INET_TRIGGER *) context;
-	static char *myname = "acl_inet_trigger_event";
 
 	/*
 	 * Disconnect.
 	 */
 	if (event == ACL_EVENT_TIME)
-		acl_msg_warn("%s: read timeout for service %s", myname, ip->service);
+		acl_msg_warn("%s: read timeout for service %s",
+			myname, ip->service);
 	acl_event_disable_readwrite(ip->eventp, ip->stream);
 	/*
 	 * acl_event_cancel_timer(ip->eventp, acl_inet_trigger_event, context);
 	 */
 	if (acl_vstream_close(ip->stream) < 0)
-		acl_msg_warn("%s: close %s: %s", myname, ip->service, strerror(errno));
+		acl_msg_warn("%s: close %s: %s",
+			myname, ip->service, strerror(errno));
 	acl_myfree(ip->service);
 	acl_myfree(ip);
 }
@@ -69,7 +71,7 @@ static void acl_inet_trigger_event(int event, void *context)
 int acl_inet_trigger(ACL_EVENT *eventp, const char *service,
 	const char *buf, int len, int timeout)
 {
-	char   *myname = "acl_inet_trigger";
+	const char *myname = "acl_inet_trigger";
 	struct ACL_INET_TRIGGER *ip;
 	int     fd;
 
@@ -81,7 +83,8 @@ int acl_inet_trigger(ACL_EVENT *eventp, const char *service,
 	 */
 	if ((fd = acl_inet_connect(service, ACL_BLOCKING, timeout)) < 0) {
 		if (acl_msg_verbose)
-			acl_msg_warn("%s: connect to %s: %s", myname, service, strerror(errno));
+			acl_msg_warn("%s: connect to %s: %s",
+				myname, service, strerror(errno));
 		return (-1);
 	}
 	acl_close_on_exec(fd, ACL_CLOSE_ON_EXEC);
@@ -92,15 +95,20 @@ int acl_inet_trigger(ACL_EVENT *eventp, const char *service,
 	ip = (struct ACL_INET_TRIGGER *) acl_mymalloc(sizeof(*ip));
 	ip->fd = fd;
 	ip->service = acl_mystrdup(service);
-	ip->stream = acl_vstream_fdopen(fd, O_RDWR, 4096, timeout, ACL_VSTREAM_TYPE_LISTEN_INET);
+	ip->stream = acl_vstream_fdopen(fd, O_RDWR, 4096,
+		timeout, ACL_VSTREAM_TYPE_LISTEN_INET);
 	ip->eventp = eventp;
 
 	/*
 	 * Write the request...
 	 */
-	if (acl_write_buf(fd, buf, len, timeout) < 0 || acl_write_buf(fd, "", 1, timeout) < 0)
+	if (acl_write_buf(fd, buf, len, timeout) < 0
+		|| acl_write_buf(fd, "", 1, timeout) < 0)
+	{
 		if (acl_msg_verbose)
-			acl_msg_warn("%s: write to %s: %s", myname, service, strerror(errno));
+			acl_msg_warn("%s: write to %s: %s",
+				myname, service, strerror(errno));
+	}
 
 	/*
 	 * Wakeup when the peer disconnects, or when we lose patience.

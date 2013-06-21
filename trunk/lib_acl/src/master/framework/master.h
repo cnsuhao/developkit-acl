@@ -19,6 +19,11 @@ typedef struct ACL_MASTER_NV {
 	char *value;
 } ACL_MASTER_NV;
 
+typedef struct ACL_MASTER_ADDR {
+	int   type;
+	char *addr;
+} ACL_MASTER_ADDR;
+
  /*
   * Server processes that provide the same service share a common "listen"
   * socket to accept connection requests, and share a common pipe to the
@@ -38,14 +43,7 @@ typedef struct ACL_MASTER_SERV {
 	ACL_VSTREAM **listen_streams;	/* multi-listening stream */
 	int     listen_fd_count;	/* nr of descriptors */
 	int     defer_accept;		/* accept timeout if no data from client */
-	union {
-		struct {
-			char   *port;	/* inet listen port */
-			ACL_DNS_DB *addr;/* inet listen address */
-		} inet_ep;
-#define ACL_MASTER_INET_ADDRLIST(s)	((s)->endpoint.inet_ep.addr)
-#define ACL_MASTER_INET_PORT(s)		((s)->endpoint.inet_ep.port)
-	} endpoint;
+	ACL_ARRAY *addrs;		/* in which ACL_MASTER_ADDR save */
 	int     max_proc;		/* upper bound on # processes */
 	int     prefork_proc;		/* prefork processes */
 	char   *path;			/* command pathname */
@@ -69,8 +67,7 @@ typedef struct ACL_MASTER_SERV {
 #define ACL_MASTER_FLAG_THROTTLE	(1<<0)	/* we're having trouble */
 #define ACL_MASTER_FLAG_MARK		(1<<1)	/* garbage collection support */
 #define ACL_MASTER_FLAG_CONDWAKE	(1<<2)	/* wake up if actually used */
-#define ACL_MASTER_FLAG_INETHOST	(1<<3)	/* endpoint name specifies host */
-#define	ACL_MASTER_FLAG_RELOADING	(1<<4)	/* the service is reloading */
+#define	ACL_MASTER_FLAG_RELOADING	(1<<3)	/* the service is reloading */
 
 #define ACL_MASTER_THROTTLED(f)		((f)->flags & ACL_MASTER_FLAG_THROTTLE)
 
@@ -79,9 +76,11 @@ typedef struct ACL_MASTER_SERV {
  /*
   * Service types.
   */
+#define	ACL_MASTER_SERV_TYPE_NULL	0	/* invalid type */
 #define ACL_MASTER_SERV_TYPE_UNIX	1	/* AF_UNIX domain socket */
 #define ACL_MASTER_SERV_TYPE_INET	2	/* AF_INET domain socket */
 #define ACL_MASTER_SERV_TYPE_FIFO	3	/* fifo (named pipe) */
+#define	ACL_MASTER_SERV_TYPE_SOCK	4	/* AF_UNIX/AF_INET socket */
 
  /*
   * Default process management policy values. This is only the bare minimum.
