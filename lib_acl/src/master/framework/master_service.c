@@ -40,11 +40,10 @@ void    acl_master_start_service(ACL_MASTER_SERV *serv)
 
 	if (acl_var_master_global_event == NULL)
 		acl_var_master_global_event = acl_event_new_select(
-				acl_var_master_delay_sec,
-				acl_var_master_delay_usec);
+			acl_var_master_delay_sec, acl_var_master_delay_usec);
 	if (acl_var_master_global_event == NULL)
 		acl_msg_fatal("%s(%d)->%s: acl_event_new null, serr=%s",
-				__FILE__, __LINE__, myname, strerror(errno));
+			__FILE__, __LINE__, myname, strerror(errno));
 
 	/*
 	 * Enable connection requests, wakeup timers, and status updates from

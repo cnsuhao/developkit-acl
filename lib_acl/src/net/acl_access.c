@@ -115,7 +115,8 @@ int acl_access_add(const char *data, const char *sep1, const char *sep2)
 		if (*to == 0)
 			continue;
 
-		__log_fn("add access: from(%s), to(%s)", from, to);
+		if (acl_msg_verbose)
+			__log_fn("add access: from(%s), to(%s)", from, to);
 		if (acl_iplink_insert(__host_allow_link, from, to) == NULL)
 			__log_fn("%s, %s(%d): acl_iplink_insert error(%s)",
 				__FILE__, myname, __LINE__, psrc);

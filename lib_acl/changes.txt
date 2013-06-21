@@ -1,4 +1,8 @@
 
+372) 2013.6.21
+372.1) feature: acl_master 框架支持在一个配置文件中监听多个地址(可以为 TCP
+套接口与域套接口混用)
+
 371) 2013.6.21
 371.1) feature: acl_master 框架支持在 reload 时的 prefork，修改的相关文件有：
 master_avail.c, master_service.c, master_spawn.c, master.h

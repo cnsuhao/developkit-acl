@@ -41,20 +41,22 @@ struct ACL_UNIX_TRIGGER {
 
 static void acl_unix_trigger_event(int event, void *context)
 {
+	const char *myname = "acl_unix_trigger_event";
 	struct ACL_UNIX_TRIGGER *up = (struct ACL_UNIX_TRIGGER *) context;
-	static char *myname = "acl_unix_trigger_event";
 
 	/*
 	 * Disconnect.
 	 */
 	if (event == ACL_EVENT_TIME)
-		acl_msg_warn("%s: read timeout for service %s", myname, up->service);
+		acl_msg_warn("%s: read timeout for service %s",
+			myname, up->service);
 	acl_event_disable_readwrite(up->eventp, up->stream);
 #ifdef	__USE_TIMER
 	acl_event_cancel_timer(up->eventp, acl_unix_trigger_event, up);
 #endif
 	if (acl_vstream_close(up->stream) < 0)
-		acl_msg_warn("%s: close %s: %s", myname, up->service, strerror(errno));
+		acl_msg_warn("%s: close %s: %s",
+			myname, up->service, strerror(errno));
 	acl_myfree(up->service);
 	acl_myfree(up);
 }
@@ -64,7 +66,7 @@ static void acl_unix_trigger_event(int event, void *context)
 int acl_unix_trigger(ACL_EVENT *eventp, const char *service,
 	const char *buf, int len, int timeout)
 {
-	char   *myname = "acl_unix_trigger";
+	const char *myname = "acl_unix_trigger";
 	struct ACL_UNIX_TRIGGER *up;
 	ACL_SOCKET fd;
 
@@ -76,7 +78,8 @@ int acl_unix_trigger(ACL_EVENT *eventp, const char *service,
 	 */
 	if ((fd = acl_unix_connect(service, ACL_BLOCKING, timeout)) < 0) {
 		if (acl_msg_verbose)
-			acl_msg_warn("%s: connect to %s: %s", myname, service, strerror(errno));
+			acl_msg_warn("%s: connect to %s: %s",
+				myname, service, strerror(errno));
 		return (-1);
 	}
 	acl_close_on_exec(fd, ACL_CLOSE_ON_EXEC);
@@ -86,15 +89,20 @@ int acl_unix_trigger(ACL_EVENT *eventp, const char *service,
 	 */
 	up = (struct ACL_UNIX_TRIGGER *) acl_mymalloc(sizeof(*up));
 	up->service = acl_mystrdup(service);
-	up->stream = acl_vstream_fdopen(fd, O_RDWR, 4096, timeout, ACL_VSTREAM_TYPE_LISTEN_UNIX);
+	up->stream = acl_vstream_fdopen(fd, O_RDWR, 4096,
+			timeout, ACL_VSTREAM_TYPE_LISTEN_UNIX);
 	up->eventp = eventp; 
 
 	/*
 	 * Write the request...
 	 */
-	if (acl_vstream_writen(up->stream, buf, len) < 0 || acl_vstream_writen(up->stream, "", 1) < 0)
+	if (acl_vstream_writen(up->stream, buf, len) < 0
+		|| acl_vstream_writen(up->stream, "", 1) < 0)
+	{
 		if (acl_msg_verbose)
-			acl_msg_warn("%s: write to %s: %s", myname, service, strerror(errno));
+			acl_msg_warn("%s: write to %s: %s",
+				myname, service, strerror(errno));
+	}
 
 	/*
 	 * Wakeup when the peer disconnects, or when we lose patience.

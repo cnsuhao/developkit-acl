@@ -221,7 +221,8 @@ void    acl_master_sigsetup(void)
 	action.sa_handler = master_sigdeath;
 	for (i = 0; i < sizeof(sigs) / sizeof(sigs[0]); i++)
 		if (sigaction(sigs[i], &action, (struct sigaction *) 0) < 0)
-			acl_msg_fatal("%s: sigaction(%d): %s", myname, sigs[i], strerror(errno));
+			acl_msg_fatal("%s: sigaction(%d): %s",
+				myname, sigs[i], strerror(errno));
 
 
 #ifdef USE_SIG_PIPE
@@ -233,23 +234,18 @@ void    acl_master_sigsetup(void)
 	acl_close_on_exec(ACL_SIG_PIPE_READ_FD, ACL_CLOSE_ON_EXEC);
 
 	ACL_SIG_PIPE_READ_STREAM = acl_vstream_fdopen(ACL_SIG_PIPE_READ_FD,
-						O_RDONLY,
-						acl_var_master_buf_size,
-						acl_var_master_rw_timeout,
-						ACL_VSTREAM_TYPE_SOCK);
+			O_RDONLY, acl_var_master_buf_size,
+			acl_var_master_rw_timeout, ACL_VSTREAM_TYPE_SOCK);
 	if (ACL_SIG_PIPE_READ_STREAM == NULL)
 		acl_msg_fatal("%s(%d)->%s: acl_vstream_fdopen error=%s",
-				__FILE__, __LINE__, myname, strerror(errno));
+			__FILE__, __LINE__, myname, strerror(errno));
 
 	if (acl_msg_verbose)
 		acl_msg_info("%s(%d)->%s: call acl_event_enable_read, "
-			"SIG_PIPE_READ_FD = %d",
-			__FILE__, __LINE__, myname, ACL_SIG_PIPE_READ_FD);
+			"SIG_PIPE_READ_FD = %d", __FILE__, __LINE__, myname,
+			ACL_SIG_PIPE_READ_FD);
 	acl_event_enable_read(acl_var_master_global_event,
-				ACL_SIG_PIPE_READ_STREAM, 
-				0,
-				master_sig_event,
-				(void *) 0);
+		ACL_SIG_PIPE_READ_STREAM, 0, master_sig_event, (void *) 0);
 #endif
 
 	/*
@@ -260,11 +256,13 @@ void    acl_master_sigsetup(void)
 #endif
 	action.sa_handler = master_sighup;
 	if (sigaction(SIGHUP, &action, (struct sigaction *) 0) < 0)
-		acl_msg_fatal("%s: sigaction(%d): %s", myname, SIGHUP, strerror(errno));
+		acl_msg_fatal("%s: sigaction(%d): %s",
+			myname, SIGHUP, strerror(errno));
 
 	action.sa_flags |= SA_NOCLDSTOP;
 	action.sa_handler = master_sigchld;
 	if (sigaction(SIGCHLD, &action, (struct sigaction *) 0) < 0)
-		acl_msg_fatal("%s: sigaction(%d): %s", myname, SIGCHLD, strerror(errno));
+		acl_msg_fatal("%s: sigaction(%d): %s",
+			myname, SIGCHLD, strerror(errno));
 }
 #endif /* ACL_UNIX */

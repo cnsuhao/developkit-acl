@@ -16,8 +16,9 @@ typedef struct WARN_INFO {
 	char *desc;
 } WARN_INFO;
 
-static WARN_INFO *warn_info_new(const char *notify_addr, const char *notify_recipients,
-	const char *path, int pid, const char *desc)
+static WARN_INFO *warn_info_new(const char *notify_addr,
+	const char *notify_recipients, const char *path,
+	int pid, const char *desc)
 {
 	WARN_INFO *info = (WARN_INFO*) acl_mycalloc(1, sizeof(WARN_INFO));
 
@@ -50,10 +51,11 @@ static void notify_thread(void *arg)
 	acl_vstring_sprintf(buf, "PROC=%s|PID=%d|RCPT=%s|info=%s\r\n",
 		info->path, info->pid, info->notify_recipients, info->desc);
 
-	client = acl_vstream_connect(info->notify_addr, ACL_BLOCKING, 60, 60, 1024);
+	client = acl_vstream_connect(info->notify_addr,
+		ACL_BLOCKING, 60, 60, 1024);
 	if (client == NULL) {
-		acl_msg_error("%s(%d): connect %s error, info(%s)",
-			myname, __LINE__, info->notify_addr, acl_vstring_str(buf));
+		acl_msg_error("%s(%d): connect %s error, info(%s)", myname,
+			__LINE__, info->notify_addr, acl_vstring_str(buf));
 		acl_vstring_free(buf);
 		warn_info_free(info);
 		return;
@@ -62,7 +64,8 @@ static void notify_thread(void *arg)
 	/* 禁止将该句柄传递给子进程 */
 	acl_close_on_exec(ACL_VSTREAM_SOCK(client), ACL_CLOSE_ON_EXEC);
 
-	ret = acl_vstream_writen(client, acl_vstring_str(buf), ACL_VSTRING_LEN(buf));
+	ret = acl_vstream_writen(client, acl_vstring_str(buf),
+		ACL_VSTRING_LEN(buf));
 	if (ret == ACL_VSTREAM_EOF)
 		acl_msg_error("%s(%d): write to notify server error, info(%s)",
 			myname, __LINE__, acl_vstring_str(buf));
@@ -94,8 +97,11 @@ void master_warning(const char *notify_addr, const char *notify_recipients,
 	}
 
 	info = warn_info_new(notify_addr, notify_recipients, path, pid, desc);
-	if (acl_pthread_pool_add(acl_var_master_thread_pool, notify_thread, info) != 0)
+	if (acl_pthread_pool_add(acl_var_master_thread_pool,
+		notify_thread, info) != 0)
+	{
 		warn_info_free(info);
+	}
 }
 
 #endif /* ACL_UNIX */
