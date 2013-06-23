@@ -7,8 +7,8 @@
 #include "acl_cpp/stdlib/string.hpp"
 #include "google/protobuf/io/acl_fstream.h"
 
-#include "util.h"
-#include "test.pb.h"
+#include "../util.h"
+#include "../test.pb.h"
 
 using namespace google::protobuf::io;
 

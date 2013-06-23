@@ -1842,6 +1842,9 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 			<File
 				RelativePath=".\changes.txt">
 			</File>
+			<File
+				RelativePath=".\todo.txt">
+			</File>
 		</Filter>
 		<File
 			RelativePath="Readme.txt">
