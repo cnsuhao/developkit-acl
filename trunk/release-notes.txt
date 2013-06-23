@@ -1,33 +1,34 @@
 acl 3.0.8 (2013.6.25)
 
-ä¸€ã€lib_acl
-1) feature: acl_master æ¡†æ¶æ”¯æŒåœ¨ä¸€ä¸ªé…ç½®æ–‡ä»¶ä¸­ç›‘å¬å¤šä¸ªåœ°å€(å¯ä»¥ä¸º TCP
-å¥—æ¥å£ä¸åŸŸå¥—æ¥å£æ··ç”¨)
-2) feature: acl_master æ¡†æ¶æ”¯æŒåœ¨ reload æ—¶çš„ preforkï¼Œä¿®æ”¹çš„ç›¸å…³æ–‡ä»¶æœ‰ï¼š
+Ò»¡¢lib_acl
+1) feature: acl_master ¿ò¼ÜÖ§³ÖÔÚÒ»¸öÅäÖÃÎÄ¼şÖĞ¼àÌı¶à¸öµØÖ·(¿ÉÒÔÎª TCP
+Ì×½Ó¿ÚÓëÓòÌ×½Ó¿Ú»ìÓÃ)
+2) feature: acl_master ¿ò¼ÜÖ§³ÖÔÚ reload Ê±µÄ prefork£¬ĞŞ¸ÄµÄÏà¹ØÎÄ¼şÓĞ£º
 master_avail.c, master_service.c, master_spawn.c, master.h
-3) acl_master_log.c: å°†æ—¥å¿—è¾“å‡ºä¿¡æ¯å½“è°ƒè¯•çŠ¶æ€å¯¹å¾…
-4) bugfix: acl_array.c->acl_array_prependï¼Œå…¶ä¸­è°ƒç”¨çš„ acl_array_succ_insertï¼Œ
-åº”è¯¥è°ƒç”¨ acl_array_pred_insertï¼Œè¯¥ BUG ä¼šå½±å“åˆ°æ‰€æœ‰è°ƒç”¨ acl_dlink, acl_iplink,
-acl_access å‡½æ•°çš„åœ°æ–¹ï¼ŒåŒ…æ‹¬ acl_aio_app_main.c/acl_ioctl_app_main.c ä¸­æœ‰å…³è®¿é—®
-æƒé™çš„åœ°æ–¹
-5) å°† acl_iplink.c ä¸­çš„å‡½æ•°è°ƒç”¨æ˜ å°„ä¸ºç›´æ¥è°ƒç”¨ acl_dlink.c ä¸­çš„æ–¹æ³•
-6) samples/iplink: è¯¥ä¾‹å­ç”¨äºæµ‹è¯• acl_iplink.c ä¸­çš„ç›¸å…³å‡½æ•°
-7) bugfix: acl_mylog.c->reopen_log å‡½æ•°ä¸­çš„ RETURN å®å®šä¹‰ä¸­åº”è¯¥æ˜¯
-thread_mutex_unlockï¼ŒåŸæ¥çš„ thread_mutex_lock ä¼šé€ æˆæ­»é”
-8) bugfix: acl_json_parse.c: æœ‰äº›æ±‰å­—ï¼Œå¦‚â€œèª â€çš„ååŠä¸ªå­—èŠ‚çš„å€¼æ­£å¥½ä¸è½¬ä¹‰å­—ç¬¦
-ç›¸åŒï¼Œå³ä¸º 92ï¼Œæ‰€ä»¥éœ€è¦å…¼å®¹æ­¤æƒ…å†µï¼Œå½“åˆ¤æ–­ last_ch < 0 ä¸”å½“å‰ char ä¸º 92 æ—¶ï¼Œåˆ™è®¤ä¸º
-æ±‰å­—æƒ…å†µ; acl_xml_parse.c ä¹Ÿå­˜åœ¨ç±»ä¼¼é—®é¢˜ï¼Œå·²ä¿®å¤
-9) acl_json.c/acl_xml.c: å½“å¯ç”¨ç»“ç‚¹å¯¹è±¡ç¼“å­˜ç­–ç•¥æ—¶ï¼Œacl_json_node_reset å’Œ
-acl_xml_node_reset ä¸­è°ƒç”¨ ACL_VSTRING_RESET åè¿˜åº”è¯¥è°ƒç”¨ ACL_VSTRING_TERMINATE
-10) bugfix: acl_basename.c -> acl_safe_basename åœ¨ 3 æœˆä»½ä¿®æ”¹çš„æœ‰è¯¯
+3) acl_master_log.c: ½«ÈÕÖ¾Êä³öĞÅÏ¢µ±µ÷ÊÔ×´Ì¬¶Ô´ı
+4) bugfix: acl_array.c->acl_array_prepend£¬ÆäÖĞµ÷ÓÃµÄ acl_array_succ_insert£¬
+Ó¦¸Ãµ÷ÓÃ acl_array_pred_insert£¬¸Ã BUG »áÓ°Ïìµ½ËùÓĞµ÷ÓÃ acl_dlink, acl_iplink,
+acl_access º¯ÊıµÄµØ·½£¬°üÀ¨ acl_aio_app_main.c/acl_ioctl_app_main.c ÖĞÓĞ¹Ø·ÃÎÊ
+È¨ÏŞµÄµØ·½
+5) ½« acl_iplink.c ÖĞµÄº¯Êıµ÷ÓÃÓ³ÉäÎªÖ±½Óµ÷ÓÃ acl_dlink.c ÖĞµÄ·½·¨
+6) samples/iplink: ¸ÃÀı×ÓÓÃÓÚ²âÊÔ acl_iplink.c ÖĞµÄÏà¹Øº¯Êı
+7) bugfix: acl_mylog.c->reopen_log º¯ÊıÖĞµÄ RETURN ºê¶¨ÒåÖĞÓ¦¸ÃÊÇ
+thread_mutex_unlock£¬Ô­À´µÄ thread_mutex_lock »áÔì³ÉËÀËø
+8) bugfix: acl_json_parse.c: ÓĞĞ©ºº×Ö£¬Èç¡°Õ\¡±µÄºó°ë¸ö×Ö½ÚµÄÖµÕıºÃÓë×ªÒå×Ö·û
+ÏàÍ¬£¬¼´Îª 92£¬ËùÒÔĞèÒª¼æÈİ´ËÇé¿ö£¬µ±ÅĞ¶Ï last_ch < 0 ÇÒµ±Ç° char Îª 92
+Ê±£¬ÔòÈÏÎª
+ºº×ÖÇé¿ö; acl_xml_parse.c Ò²´æÔÚÀàËÆÎÊÌâ£¬ÒÑĞŞ¸´
+9) acl_json.c/acl_xml.c: µ±ÆôÓÃ½áµã¶ÔÏó»º´æ²ßÂÔÊ±£¬acl_json_node_reset ºÍ
+acl_xml_node_reset ÖĞµ÷ÓÃ ACL_VSTRING_RESET ºó»¹Ó¦¸Ãµ÷ÓÃ ACL_VSTRING_TERMINATE
+10) bugfix: acl_basename.c -> acl_safe_basename ÔÚ 3 ÔÂ·İĞŞ¸ÄµÄÓĞÎó
 
-äºŒã€lib_protocol
-1) performance: http åè®®åº“æé«˜äº† HTTP å¤´çš„è§£æé€Ÿåº¦ï¼Œç”±åŸæ¥çš„æ¯ç§’ 5 ä¸‡
-å¤šæ¬¡æå‡è‡³æ¯ç§’ 17 ä¸‡å¤šæ¬¡
-2) bugfix: http åè®®åº“ä¸­ http_hdr_reset å‡½æ•°åˆ¤æ–­ hh å‚æ•°æ˜¯å¦åˆæ³•æ—¶æœ‰è¯¯
+¶ş¡¢lib_protocol
+1) performance: http Ğ­Òé¿âÌá¸ßÁË HTTP Í·µÄ½âÎöËÙ¶È£¬ÓÉÔ­À´µÄÃ¿Ãë 5 Íò
+¶à´ÎÌáÉıÖÁÃ¿Ãë 17 Íò¶à´Î
+2) bugfix: http Ğ­Òé¿âÖĞ http_hdr_reset º¯ÊıÅĞ¶Ï hh ²ÎÊıÊÇ·ñºÏ·¨Ê±ÓĞÎó
 
-ä¸‰ã€lib_acl_cpp
-1) feature: æ·»åŠ äº† server_socket ç±»
-2) socket_stream: å¯¹ get_ip ç±»çš„å‡½æ•°åšäº†ä¸€å®šè°ƒæ•´
-3) samples/benchmark: å¢åŠ äº† client/server ä¸¤ä¸ªç”¨äºæµ‹è¯• IO å‹åŠ›çš„ç¨‹åº
-4) feature: HttpServletRequest/http_client æ·»åŠ è°ƒè¯•è¾“å‡º HTTP è¯·æ±‚å¤´çš„å‡½æ•°
+Èı¡¢lib_acl_cpp
+1) feature: Ìí¼ÓÁË server_socket Àà
+2) socket_stream: ¶Ô get_ip ÀàµÄº¯Êı×öÁËÒ»¶¨µ÷Õû
+3) samples/benchmark: Ôö¼ÓÁË client/server Á½¸öÓÃÓÚ²âÊÔ IO Ñ¹Á¦µÄ³ÌĞò
+4) feature: HttpServletRequest/http_client Ìí¼Óµ÷ÊÔÊä³ö HTTP ÇëÇóÍ·µÄº¯Êı
