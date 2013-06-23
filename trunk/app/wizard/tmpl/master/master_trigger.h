@@ -1,6 +1,4 @@
 #pragma once
-#include "acl_cpp/master/master_trigger.hpp"
-#include "acl_cpp/master/master_conf.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 // ÅäÖÃÄÚÈİÏî

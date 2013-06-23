@@ -179,15 +179,15 @@ int acl_iplink_list(const ACL_IPLINK *plink)
 	int   i, n;
 	ACL_IPITEM *item;
 	char  buf[64];
-	unsigned long long ip_begin, ip_end;
+	unsigned ip_begin, ip_end;
 
 	n = acl_array_size(plink->parray);
 	for (i = 0; i < n; i++) {
 		item = (ACL_IPITEM *) acl_array_index(plink->parray, i);
 		if (item == NULL)
 			break;
-		ip_begin = (unsigned long long) item->begin;
-		ip_end = item->end;
+		ip_begin = (unsigned) item->begin;
+		ip_end = (unsigned) item->end;
 		__sane_inet_ntoa(ip_begin, buf, sizeof(buf));
 		printf("ipbegin=%s", buf);
 		__sane_inet_ntoa(ip_end, buf, sizeof(buf));

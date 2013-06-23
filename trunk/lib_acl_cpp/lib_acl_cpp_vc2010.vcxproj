@@ -289,6 +289,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClCompile Include="src\stdlib\util.cpp" />
     <ClCompile Include="src\stdlib\xml.cpp" />
     <ClCompile Include="src\stdlib\zlib_stream.cpp" />
+    <ClCompile Include="src\stream\aio_fstream.cpp" />
     <ClCompile Include="src\stream\aio_handle.cpp" />
     <ClCompile Include="src\stream\aio_istream.cpp" />
     <ClCompile Include="src\stream\aio_listen_stream.cpp" />
@@ -390,6 +391,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include="include\acl_cpp\stdlib\vld.h" />
     <ClInclude Include="include\acl_cpp\stdlib\xml.hpp" />
     <ClInclude Include="include\acl_cpp\stdlib\zlib_stream.hpp" />
+    <ClInclude Include="include\acl_cpp\stream\aio_fstream.hpp" />
     <ClInclude Include="include\acl_cpp\stream\aio_handle.hpp" />
     <ClInclude Include="include\acl_cpp\stream\aio_istream.hpp" />
     <ClInclude Include="include\acl_cpp\stream\aio_listen_stream.hpp" />
