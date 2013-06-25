@@ -9,7 +9,6 @@
 static void fifo_test(bool use_slice)
 {
 	ACL_FIFO *fifo;
-	ACL_FIFO_INFO *info;
 	int   i;
 	char *ptr;
 	ACL_SLICE_POOL *slice;
@@ -29,7 +28,7 @@ static void fifo_test(bool use_slice)
 		else
 			ptr = (char*) acl_mymalloc(100);
 		snprintf(ptr, 100, "test:%d", i);
-		info = acl_fifo_push(fifo, ptr);
+		(void) acl_fifo_push(fifo, ptr);
 		printf(">>>ptr: %s\n", ptr);
 	}
 

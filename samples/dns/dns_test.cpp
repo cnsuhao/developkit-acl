@@ -7,7 +7,6 @@ int dns_lookup(const char *domain, const char *dns_ip,
 	ACL_RES *res = NULL;
 	ACL_DNS_DB *dns_db = NULL;
 	ACL_ITER iter;
-	int   n;
 
 #define RETURN(_x_) do { \
 	if (res) \
@@ -29,7 +28,7 @@ int dns_lookup(const char *domain, const char *dns_ip,
 		RETURN (-1);
 	}
 
-	n = acl_netdb_size(dns_db);
+	(void) acl_netdb_size(dns_db);
 	acl_vstring_sprintf_append(sbuf, "type\tttl\tip\t\tnet\t\tqid\t\n");
 	acl_foreach(iter, dns_db) {
 		ACL_HOST_INFO *info;
