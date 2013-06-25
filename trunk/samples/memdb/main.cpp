@@ -36,6 +36,7 @@ static void create_db(void)
 			ACL_MDT_FLAG_SLICE1,
 			/* ACL_MDT_FLAG_SLICE_RTGC_OFF, */
 			100, key_names, key_flags);
+	acl_assert(mdt);
 	__slice = acl_slice_create("for USER_INFO", 0, sizeof(USER_INFO), ACL_SLICE_FLAG_GC1);
 }
 

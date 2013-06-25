@@ -22,7 +22,7 @@ static int smtp_sender(void)
 	if (strchr(line, ':') == NULL)
 		snprintf(addr, sizeof(addr), "%s:25", line);
 	else
-		snprintf(addr, sizeof(addr), line);
+		snprintf(addr, sizeof(addr), "%s", line);
 
 	/* 连接 SMTP 服务器 */
 	conn = smtp_open(addr, 60, 60, 1024);

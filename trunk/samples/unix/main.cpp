@@ -13,8 +13,7 @@ int main(void)
 
 	acl_chroot_uid(NULL, "zsx");
 
-	getcwd(buf, sizeof(buf));
-	printf("curr: %s\n", buf);
+	printf("curr: %s\r\n", getcwd(buf, sizeof(buf)));
 
 	if (getrlimit(RLIMIT_CORE, &rlim)==0) {
 		rlim_new.rlim_cur = rlim_new.rlim_max = RLIM_INFINITY;
