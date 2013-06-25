@@ -572,7 +572,6 @@ static int __wait_worker_exit(acl_pthread_pool_t *thr_pool)
 	char *myname = "__wait_worker_exit";
 	int   status, nwait = 0;
 	char  buf[256];
-	struct	timespec  timeout;
 
 	status = acl_pthread_mutex_lock(&thr_pool->worker_mutex);
 	if (status != 0) {
@@ -616,9 +615,6 @@ static int __wait_worker_exit(acl_pthread_pool_t *thr_pool)
 	}
 
 	while (thr_pool->counter > 0) {
-		timeout.tv_sec  = 0;
-		timeout.tv_nsec = 1000;
-
 		nwait++;
 
 		acl_debug(ACL_DEBUG_THR_POOL, 2)

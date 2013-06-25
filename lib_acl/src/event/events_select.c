@@ -440,7 +440,6 @@ static void event_loop(ACL_EVENT *eventp)
 	 */
 
 	for (i = 0; i < eventp->fdcnt; i++) {
-		int   x = 0, r = 0, w = 0;
 		fdp = eventp->fdtabs[i];
 
 		/* 如果该描述字对象已经在被设置为异常或超时状态则继续 */
@@ -456,7 +455,6 @@ static void event_loop(ACL_EVENT *eventp)
 			fdp->event_type |= ACL_EVENT_XCPT;
 			fdp->fdidx_ready = eventp->fdcnt_ready;
 			eventp->fdtabs_ready[eventp->fdcnt_ready++] = fdp;
-			x = 1;
 			continue;
 		}
 
@@ -478,7 +476,6 @@ static void event_loop(ACL_EVENT *eventp)
 				fdp->fdidx_ready = eventp->fdcnt_ready;
 				eventp->fdtabs_ready[eventp->fdcnt_ready++] = fdp;
 			}
-			r = 1;
 		}
 
 		/* 检查描述字是否可写 */
@@ -493,7 +490,6 @@ static void event_loop(ACL_EVENT *eventp)
 				fdp->fdidx_ready = eventp->fdcnt_ready;
 				eventp->fdtabs_ready[eventp->fdcnt_ready++] = fdp;
 			}
-			w = 1;
 		}
 	}
 

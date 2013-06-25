@@ -158,7 +158,7 @@ static void json_escape_append(ACL_VSTRING *buf, const char *src)
 
 ACL_VSTRING *acl_json_build(ACL_JSON *json, ACL_VSTRING *buf)
 {
-	ACL_JSON_NODE *node, *parent, *prev;
+	ACL_JSON_NODE *node, *prev;
 	ACL_ITER iter;
 
 	if (buf == NULL)
@@ -172,7 +172,6 @@ ACL_VSTRING *acl_json_build(ACL_JSON *json, ACL_VSTRING *buf)
 	acl_foreach(iter, json) {
 		node = (ACL_JSON_NODE*) iter.data;
 		prev = acl_json_node_prev(node);
-		parent = acl_json_node_parent(node);
 
 		/* 只有当标签的对应值为 JSON 对象或数组对象时 tag_node 非空 */
 		if (node->tag_node != NULL) {

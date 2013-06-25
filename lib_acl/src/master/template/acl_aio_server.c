@@ -1132,12 +1132,11 @@ void acl_aio_server_main(int argc, char **argv, ACL_AIO_SERVER_FN service,...)
 	const char *myname = "acl_aio_server_main";
 	ACL_VSTREAM *stream = 0;
 	int     key, f_flag = 0;
-	char   *root_dir = 0, *user_name = 0, debug_me = 0;
+	char   *root_dir = 0, *user_name = 0 /*, debug_me = 0 */;
 	char   *service_name = acl_mystrdup(acl_safe_basename(argv[0]));
 	va_list ap;
 	ACL_MASTER_SERVER_INIT_FN pre_init = 0;
 	ACL_MASTER_SERVER_INIT_FN post_init = 0;
-	ACL_MASTER_SERVER_LOOP_FN loop = 0;
 	int     alone = 0, zerolimit = 0;
 	char   *transport = 0, *generation, *conf_file_ptr = 0;
 
@@ -1163,9 +1162,11 @@ void acl_aio_server_main(int argc, char **argv, ACL_AIO_SERVER_FN service,...)
 		case 'c':
 			root_dir = "setme";
 			break;
+/*
 		case 'd':
 			debug_me = 1;
 			break;
+*/
 		case 'l':
 			alone = 1;
 			break;
@@ -1240,9 +1241,11 @@ void acl_aio_server_main(int argc, char **argv, ACL_AIO_SERVER_FN service,...)
 		case ACL_MASTER_SERVER_POST_INIT:
 			post_init = va_arg(ap, ACL_MASTER_SERVER_INIT_FN);
 			break;
+/*
 		case ACL_MASTER_SERVER_LOOP:
 			loop = va_arg(ap, ACL_MASTER_SERVER_LOOP_FN);
 			break;
+*/
 		case ACL_MASTER_SERVER_EXIT:
 			aio_server_onexit = va_arg(ap, ACL_MASTER_SERVER_EXIT_FN);
 			break;
