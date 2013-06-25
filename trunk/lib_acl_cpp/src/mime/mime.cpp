@@ -761,14 +761,12 @@ static void mime_node_dump(const char* from_path, const char* dump_path,
 		acl::string result(8192);
 		const char* ptr = pbuf;
 		ssize_t n;
-		size_t n1;
 
 		while (dlen > 0)
 		{
 			n = dlen > 8192 ? 8192 : dlen;
 			//n = dlen;
 			decoder->decode_update(ptr, n, &result);
-			n1 = result.length();
 			if (result.length() > 0)
 			{
 				out.write(result.c_str(), result.length());
@@ -779,7 +777,6 @@ static void mime_node_dump(const char* from_path, const char* dump_path,
 		}
 
 		decoder->decode_finish(&result);
-		n1 = result.length();
 		if (result.length() > 0)
 			out.write(result.c_str(), result.length());
 		delete decoder;

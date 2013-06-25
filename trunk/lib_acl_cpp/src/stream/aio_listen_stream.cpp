@@ -41,7 +41,7 @@ namespace acl
 		if (sstream == NULL)
 			return (false);
 
-		snprintf(addr_, sizeof(addr_), ACL_VSTREAM_LOCAL(sstream));
+		snprintf(addr_, sizeof(addr_), "%s", ACL_VSTREAM_LOCAL(sstream));
 
 		stream_ = acl_aio_open(handle_->get_handle(), sstream);
 
