@@ -828,7 +828,7 @@ static int mime_state_multi_bound(MIME_STATE *state, const char *s, int n)
 {
 	MIME_NODE *node = state->curr_node;
 	const unsigned char *cp;
-	const unsigned char *startn = NULL;
+	//const unsigned char *startn = NULL;
 
 	acl_assert(state->curr_bound != NULL);
 	acl_assert(node->parent != NULL);
@@ -877,7 +877,7 @@ static int mime_state_multi_bound(MIME_STATE *state, const char *s, int n)
 				cp++;
 				break;
 			}
-			startn = cp;
+			//startn = cp;
 		}
 	}
 

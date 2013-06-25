@@ -427,6 +427,7 @@ namespace acl {
 	string& string::operator >>(string* s)
 	{
 		s = this;
+		(void) s;  // avoid g++4.6.3 warning
 		clear();
 		return (*this);
 	}
