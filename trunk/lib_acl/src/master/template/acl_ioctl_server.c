@@ -801,13 +801,11 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service,..
 	ACL_VSTREAM *stream = 0;
 	char   *root_dir = 0;
 	char   *user_name = 0;
-	int     debug_me = 0;
 	char   *service_name = acl_mystrdup(acl_safe_basename(argv[0]));
 	int     c;
 	va_list ap;
 	ACL_MASTER_SERVER_INIT_FN pre_init = 0;
 	ACL_MASTER_SERVER_INIT_FN post_init = 0;
-	ACL_MASTER_SERVER_LOOP_FN loop = 0;
 	int     key;
 	char   *transport = 0;
 	int     alone = 0;
@@ -842,9 +840,6 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service,..
 			break;
 		case 'c':
 			root_dir = "setme";
-			break;
-		case 'd':
-			debug_me = 1;
 			break;
 		case 'l':
 			alone = 1;
@@ -929,9 +924,6 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service,..
 			break;
 		case ACL_MASTER_SERVER_POST_INIT:
 			post_init = va_arg(ap, ACL_MASTER_SERVER_INIT_FN);
-			break;
-		case ACL_MASTER_SERVER_LOOP:
-			loop = va_arg(ap, ACL_MASTER_SERVER_LOOP_FN);
 			break;
 		case ACL_MASTER_SERVER_EXIT:
 			ioctl_server_onexit = va_arg(ap, ACL_MASTER_SERVER_EXIT_FN);

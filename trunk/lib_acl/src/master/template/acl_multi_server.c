@@ -597,7 +597,6 @@ void acl_multi_server_main(int argc, char **argv, ACL_MULTI_SERVER_FN service,..
 	ACL_VSTREAM *stream = 0;
 	char   *root_dir = 0;
 	char   *user_name = 0;
-	int     debug_me = 0;
 	char   *service_name = acl_mystrdup(acl_safe_basename(argv[0]));
 	int     c;
 	va_list ap;
@@ -636,9 +635,6 @@ void acl_multi_server_main(int argc, char **argv, ACL_MULTI_SERVER_FN service,..
 			break;
 		case 'c':
 			root_dir = "setme";
-			break;
-		case 'd':
-			debug_me = 1;
 			break;
 		case 'l':
 			alone = 1;

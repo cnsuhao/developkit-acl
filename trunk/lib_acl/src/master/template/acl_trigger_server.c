@@ -399,7 +399,6 @@ void acl_trigger_server_main(int argc, char **argv, ACL_TRIGGER_SERVER_FN servic
 	char   *myname = "trigger_server_main";
 	char   *root_dir = 0;
 	char   *user_name = 0;
-	int     debug_me = 0;
 	char   *service_name = acl_mystrdup(acl_safe_basename(argv[0]));
 	ACL_VSTREAM *stream = 0;
 	int     delay;
@@ -447,9 +446,6 @@ void acl_trigger_server_main(int argc, char **argv, ACL_TRIGGER_SERVER_FN servic
 			break;
 		case 'c':
 			root_dir = "setme";
-			break;
-		case 'd':
-			debug_me = 1;
 			break;
 		case 'l':
 			alone = 1;
