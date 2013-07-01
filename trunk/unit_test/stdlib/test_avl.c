@@ -90,7 +90,7 @@ int test_avl_find(AUT_LINE *test_line, void *arg acl_unused)
 	const char *pname;
 
 	AUT_SET_STR(test_line, "name", pname);
-	snprintf(m.name, sizeof(m.name), pname);
+	snprintf(m.name, sizeof(m.name), "%s", pname);
 
 	pm = (MY_TYPE*) avl_find(__avl_tree, &m, NULL);
 	if (pm) {
@@ -109,8 +109,8 @@ int test_avl_add(AUT_LINE *test_line, void *arg acl_unused)
 
 	AUT_SET_STR(test_line, "name", pname);
 	AUT_SET_STR(test_line, "value", pvalue);
-	snprintf(m.name, sizeof(m.name), pname);
-	snprintf(m.value, sizeof(m.value), pvalue);
+	snprintf(m.name, sizeof(m.name), "%s", pname);
+	snprintf(m.value, sizeof(m.value), "%s", pvalue);
 
 	pm = (MY_TYPE*) avl_find(__avl_tree, &m, NULL);
 	if (pm) {
@@ -132,7 +132,7 @@ int test_avl_delete(AUT_LINE *test_line, void *arg acl_unused)
 	const char *pname;
 
 	AUT_SET_STR(test_line, "name", pname);
-	snprintf(m.name, sizeof(m.name), pname);
+	snprintf(m.name, sizeof(m.name), "%s", pname);
 
 	pm = (MY_TYPE*) avl_find(__avl_tree, &m, NULL);
 	if (pm == NULL) {

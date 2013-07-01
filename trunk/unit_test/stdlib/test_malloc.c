@@ -10,6 +10,7 @@ int test_fatal_malloc(AUT_LINE *test_line acl_unused, void *arg acl_unused)
 
 	acl_memory_debug_start();
 	ptr = acl_mymalloc(-1);
+	assert(ptr);
 	acl_memory_debug_stop();
 
 	/*not reached */
