@@ -4,18 +4,18 @@
 namespace acl
 {
 
-	void acl_cpp_init(void)
-	{
-		acl_init();
-	}
+void acl_cpp_init(void)
+{
+	acl_init();
+}
 
 #ifdef WIN32
-	void open_dos(void)
-	{
-		// 打开 DOS 窗口
-		AllocConsole();
-		FILE* fp = freopen("CONOUT$","w+t",stdout);
-	}
+void open_dos(void)
+{
+	// 打开 DOS 窗口
+	AllocConsole();
+	FILE* fp = freopen("CONOUT$","w+t",stdout);
+}
 #endif
 
 }
