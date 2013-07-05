@@ -44,6 +44,7 @@ typedef struct ACL_MASTER_SERV {
 	int     listen_fd_count;	/* nr of descriptors */
 	int     defer_accept;		/* accept timeout if no data from client */
 	ACL_ARRAY *addrs;		/* in which ACL_MASTER_ADDR save */
+	int     max_qlen;		/* max listening qlen */
 	int     max_proc;		/* upper bound on # processes */
 	int     prefork_proc;		/* prefork processes */
 	char   *path;			/* command pathname */

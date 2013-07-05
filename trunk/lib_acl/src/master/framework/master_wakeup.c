@@ -51,6 +51,12 @@ static void master_wakeup_timer_event(int event acl_unused, void *context)
 		return;
 
 	/*
+	 * Don't wakeup services whose is ACL_MASTER_SERV_TYPE_SOCK
+	 */
+	if (serv->type == ACL_MASTER_SERV_TYPE_SOCK)
+		return;
+
+	/*
 	 * Don't wake up services that are throttled. Find out what
 	 * transport to use. We can't block here so we choose a short timeout.
 	 */
