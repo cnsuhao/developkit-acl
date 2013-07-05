@@ -247,7 +247,7 @@ static void init_listeners(ACL_MASTER_SERV *serv)
 	}
 }
 
-/* Fifo service */
+/* FIFO service */
 
 static void service_fifo(ACL_XINETD_CFG_PARSER *xcp, ACL_MASTER_SERV *serv)
 {
@@ -256,6 +256,33 @@ static void service_fifo(ACL_XINETD_CFG_PARSER *xcp, ACL_MASTER_SERV *serv)
 
 	serv->addrs = NULL;
 	serv->type = ACL_MASTER_SERV_TYPE_FIFO;
+	serv->listen_fd_count = 1;
+	serv->name = acl_master_pathname(acl_var_master_queue_dir,
+			private_val ?  ACL_MASTER_CLASS_PRIVATE :
+			ACL_MASTER_CLASS_PUBLIC, name);
+}
+
+/* inet service */
+
+static void service_inet(ACL_XINETD_CFG_PARSER *xcp, ACL_MASTER_SERV *serv)
+{
+	const char *name = get_str_ent(xcp, ACL_VAR_MASTER_SERV_SERVICE, NULL);
+
+	serv->addrs = NULL;
+	serv->type = ACL_MASTER_SERV_TYPE_INET;
+	serv->listen_fd_count = 1;
+	serv->name = acl_mystrdup(name);
+}
+
+/* unix service */
+
+static void service_unix(ACL_XINETD_CFG_PARSER *xcp, ACL_MASTER_SERV *serv)
+{
+	const char *name = get_str_ent(xcp, ACL_VAR_MASTER_SERV_SERVICE, NULL);
+	char private_val = get_bool_ent(xcp, ACL_VAR_MASTER_SERV_PRIVATE, "y");
+
+	serv->addrs = NULL;
+	serv->type = ACL_MASTER_SERV_TYPE_UNIX;
 	serv->listen_fd_count = 1;
 	serv->name = acl_master_pathname(acl_var_master_queue_dir,
 			private_val ?  ACL_MASTER_CLASS_PRIVATE :
@@ -309,16 +336,25 @@ static void service_transport(ACL_XINETD_CFG_PARSER *xcp, ACL_MASTER_SERV *serv)
 	const char *transport;
 
 #undef	STR_SAME
-#define	STR_SAME	!strcmp
+#define	STR_SAME	!strcasecmp
 
 	transport = get_str_ent(xcp, ACL_VAR_MASTER_SERV_TYPE, (const char *) 0);
+	if (transport == NULL || *transport == 0)
+		acl_msg_fatal("master_service no found");
+
 	serv->defer_accept = get_int_ent(xcp, ACL_VAR_MASTER_SERV_DEFER_ACCEPT,
 			ACL_DEF_MASTER_SERV_DEFER_ACCEPT, 0);
 
 	if (STR_SAME(transport, ACL_MASTER_XPORT_NAME_FIFO))
 		service_fifo(xcp, serv);
-	else
+	else if (STR_SAME(transport, ACL_MASTER_XPORT_NAME_UNIX))
+		service_unix(xcp, serv);
+	else if (STR_SAME(transport, ACL_MASTER_XPORT_NAME_INET))
+		service_inet(xcp, serv);
+	else if (STR_SAME(transport, ACL_MASTER_XPORT_NAME_SOCK))
 		service_sock(xcp, serv);
+	else
+		acl_msg_fatal("unknown master_service: %s", transport);
 
 	init_listeners(serv);
 }
@@ -361,9 +397,13 @@ static void service_wakeup_time(ACL_XINETD_CFG_PARSER *xcp,
 
 static void service_proc(ACL_XINETD_CFG_PARSER *xcp, ACL_MASTER_SERV *serv)
 {
+
 	/*
 	 * Concurrency limit. Zero means no limit.
 	 */
+
+	serv->max_qlen = get_int_ent(xcp, ACL_VAR_MASTER_SERV_MAX_QLEN,
+			ACL_DEF_MASTER_SERV_MAX_QLEN, 0);
 	serv->max_proc = get_int_ent(xcp, ACL_VAR_MASTER_SERV_MAX_PROC,
 			ACL_DEF_MASTER_SERV_MAX_PROC, 0);
 	serv->prefork_proc = get_int_ent(xcp, ACL_VAR_MASTER_SERV_PREFORK_PROC,

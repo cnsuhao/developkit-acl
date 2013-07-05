@@ -38,6 +38,9 @@ extern char *acl_var_master_conf_dir;
 #define	ACL_VAR_MASTER_NOTIFY_ADDR		"master_notify_addr"
 #define	ACL_VAR_MASTER_NOTIFY_RECIPIENTS	"master_notify_recipients"
 
+#define	ACL_DEF_MASTER_SERV_MAX_QLEN		"128"
+#define	ACL_VAR_MASTER_SERV_MAX_QLEN		"master_backlog"
+
 #define	ACL_DEF_MASTER_SERV_MAX_PROC		"5"
 #define	ACL_VAR_MASTER_SERV_MAX_PROC		"master_maxproc"
 

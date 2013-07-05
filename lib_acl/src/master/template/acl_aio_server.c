@@ -1013,6 +1013,9 @@ static ACL_ASTREAM **create_listener(ACL_AIO *aio, int event_mode acl_unused,
 	} else if (strcasecmp(transport, ACL_MASTER_XPORT_NAME_UNIX) == 0) {
 		aio_server_accept = aio_server_accept_local;
 		fdtype = ACL_VSTREAM_TYPE_LISTEN | ACL_VSTREAM_TYPE_LISTEN_UNIX;
+	} else if (strcasecmp(transport, ACL_MASTER_XPORT_NAME_SOCK) == 0) {
+		aio_server_accept = aio_server_accept_local;
+		fdtype = ACL_VSTREAM_TYPE_LISTEN | ACL_VSTREAM_TYPE_LISTEN_UNIX;
 #ifdef MASTER_XPORT_NAME_PASS
 	} else if (strcasecmp(transport, ACL_MASTER_XPORT_NAME_PASS) == 0) {
 		aio_server_accept = aio_server_accept_pass;

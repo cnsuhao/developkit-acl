@@ -45,8 +45,8 @@ static void master_listen_sock(ACL_MASTER_SERV *serv)
 	int   i, service_type;
 	int   qlen;
 
-	qlen = serv->max_proc > acl_var_master_proc_limit
-		? serv->max_proc : acl_var_master_proc_limit;
+	qlen = serv->max_qlen > acl_var_master_proc_limit
+		? serv->max_qlen : acl_var_master_proc_limit;
 	if (qlen < 128) {
 		acl_msg_warn("%s(%d): qlen(%d) too small, use 128 now",
 			myname, __LINE__, qlen);
@@ -100,6 +100,63 @@ static void master_listen_sock(ACL_MASTER_SERV *serv)
 	}
 }
 
+static void master_listen_inet(ACL_MASTER_SERV *serv)
+{
+	const char *myname = "master_listen_inet";
+	int   qlen;
+
+	qlen = serv->max_qlen > acl_var_master_proc_limit
+		? serv->max_qlen : acl_var_master_proc_limit;
+	if (qlen < 128) {
+		acl_msg_warn("%s(%d): qlen(%d) too small, use 128 now",
+			myname, __LINE__, qlen);
+		qlen = 128;
+	}
+
+	serv->listen_fds[0] = acl_inet_listen(serv->name, qlen, ACL_NON_BLOCKING);
+	if (serv->listen_fds[0] == ACL_SOCKET_INVALID)
+		acl_msg_fatal("%s(%d)->%s: listen on addr(%s) error(%s)",
+			__FILE__, __LINE__, myname, serv->name, strerror(errno));
+
+	if (serv->defer_accept > 0)
+		acl_tcp_defer_accept(serv->listen_fds[0], serv->defer_accept);
+
+	serv->listen_streams[0] = acl_vstream_fdopen(serv->listen_fds[0],
+			O_RDONLY, acl_var_master_buf_size,
+			acl_var_master_rw_timeout, ACL_VSTREAM_TYPE_LISTEN_INET);
+	acl_close_on_exec(serv->listen_fds[0], ACL_CLOSE_ON_EXEC);
+	acl_msg_info("%s(%d), %s: listen on inet: %s, qlen: %d",
+		__FILE__, __LINE__, myname, serv->name, qlen);
+}
+
+static void master_listen_unix(ACL_MASTER_SERV *serv)
+{
+	const char *myname = "master_listen_unix";
+	int   qlen;
+
+	qlen = serv->max_qlen > acl_var_master_proc_limit
+		? serv->max_qlen : acl_var_master_proc_limit;
+	if (qlen < 128) {
+		acl_msg_warn("%s(%d): qlen(%d) too small, use 128 now",
+			myname, __LINE__, qlen);
+		qlen = 128;
+	}
+
+	acl_set_eugid(acl_var_master_owner_uid, acl_var_master_owner_gid);
+	serv->listen_fds[0] = acl_unix_listen(serv->name, qlen, ACL_NON_BLOCKING);
+	if (serv->listen_fds[0] == ACL_SOCKET_INVALID)
+		acl_msg_fatal("%s(%d)->%s: listen on addr(%s) error(%s)",
+			__FILE__, __LINE__, myname, serv->name, strerror(errno));
+
+	serv->listen_streams[0] = acl_vstream_fdopen(serv->listen_fds[0],
+			O_RDONLY, acl_var_master_buf_size,
+			acl_var_master_rw_timeout, ACL_VSTREAM_TYPE_LISTEN_UNIX);
+	acl_close_on_exec(serv->listen_fds[0], ACL_CLOSE_ON_EXEC);
+	acl_set_ugid(getuid(), getgid());
+	acl_msg_info("%s(%d), %s: listen on domain socket: %s, qlen: %d",
+		__FILE__, __LINE__, myname, serv->name, qlen);
+}
+
 static void master_listen_fifo(ACL_MASTER_SERV *serv)
 {
 	const char *myname = "master_listen_fifo";
@@ -137,10 +194,25 @@ void    acl_master_listen_init(ACL_MASTER_SERV *serv)
 	switch (serv->type) {
 
 	/*
-	 * INET/UNIX domain or stream listener endpoints
+	 * SOCK: INET/UNIX domain or stream listener endpoints
 	 */
 	case ACL_MASTER_SERV_TYPE_SOCK:
 		master_listen_sock(serv);
+		break;
+
+	/*      
+	 * INET-domain listener endpoints can be wildcarded (the default) or
+	 * bound to specific interface addresses.
+	 */
+	case ACL_MASTER_SERV_TYPE_INET:
+		master_listen_inet(serv);
+		break;
+
+	/*
+	 * UNIX-domain or stream listener endpoints always come as singlets.
+	 */
+	case ACL_MASTER_SERV_TYPE_UNIX:
+		master_listen_unix(serv);
 		break;
 
 	/*
@@ -149,6 +221,7 @@ void    acl_master_listen_init(ACL_MASTER_SERV *serv)
 	case ACL_MASTER_SERV_TYPE_FIFO:
 		master_listen_fifo(serv);
 		break;
+
 	default:
 		acl_msg_panic("%s: unknown service type: %d",
 			myname, serv->type);
