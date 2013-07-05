@@ -1101,9 +1101,6 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 						RelativePath=".\src\master\template\acl_ioctl_server.c">
 					</File>
 					<File
-						RelativePath=".\src\master\template\acl_listener_server.c">
-					</File>
-					<File
 						RelativePath=".\src\master\template\acl_master_log.c">
 					</File>
 					<File
@@ -1781,9 +1778,6 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				</File>
 				<File
 					RelativePath=".\include\master\acl_ioctl_params.h">
-				</File>
-				<File
-					RelativePath=".\include\master\acl_listener_params.h">
 				</File>
 				<File
 					RelativePath=".\include\master\acl_master.h">
