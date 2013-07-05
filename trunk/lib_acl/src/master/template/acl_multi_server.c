@@ -778,7 +778,7 @@ void acl_multi_server_main(int argc, char **argv, ACL_MULTI_SERVER_FN service,..
 			fdtype = ACL_VSTREAM_TYPE_LISTEN | ACL_VSTREAM_TYPE_LISTEN_UNIX;
 		} else if (strcasecmp(transport, ACL_MASTER_XPORT_NAME_SOCK) == 0) {
 			multi_server_accept = multi_server_accept_local;
-			fdtype = ACL_VSTREAM_TYPE_LISTEN | ACL_VSTREAM_TYPE_LISTEN_SOCK;
+			fdtype = ACL_VSTREAM_TYPE_LISTEN | ACL_VSTREAM_TYPE_LISTEN_UNIX;
 #ifdef MASTER_XPORT_NAME_PASS
 		} else if (strcasecmp(transport, ACL_MASTER_XPORT_NAME_PASS) == 0) {
 			multi_server_accept = multi_server_accept_pass;
