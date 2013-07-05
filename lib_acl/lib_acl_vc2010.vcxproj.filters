@@ -794,9 +794,6 @@
     <ClCompile Include=".\src\master\template\acl_ioctl_server.c">
       <Filter>Source Files\master\template</Filter>
     </ClCompile>
-    <ClCompile Include=".\src\master\template\acl_listener_server.c">
-      <Filter>Source Files\master\template</Filter>
-    </ClCompile>
     <ClCompile Include=".\src\master\template\acl_master_log.c">
       <Filter>Source Files\master\template</Filter>
     </ClCompile>
@@ -1477,9 +1474,6 @@
       <Filter>Header Files\master</Filter>
     </ClInclude>
     <ClInclude Include=".\include\master\acl_ioctl_params.h">
-      <Filter>Header Files\master</Filter>
-    </ClInclude>
-    <ClInclude Include=".\include\master\acl_listener_params.h">
       <Filter>Header Files\master</Filter>
     </ClInclude>
     <ClInclude Include=".\include\master\acl_master.h">
