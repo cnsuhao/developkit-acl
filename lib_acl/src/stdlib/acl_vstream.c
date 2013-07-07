@@ -1619,6 +1619,15 @@ int acl_vstream_fsync(ACL_VSTREAM *fp)
 	return (0);
 }
 
+void acl_vstream_buffed_space(ACL_VSTREAM *stream)
+{
+	if (stream->wbuf == NULL) {
+		stream->wbuf_size = 8192;
+		stream->wbuf_dlen = 0;
+		stream->wbuf = acl_mymalloc(stream->wbuf_size);
+	}
+}
+
 int acl_vstream_fflush(ACL_VSTREAM *stream)
 {
 	const char *myname = "acl_vstream_fflush";
