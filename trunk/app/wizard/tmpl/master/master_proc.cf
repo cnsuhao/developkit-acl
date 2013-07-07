@@ -9,7 +9,8 @@ service $<PROGRAM>
 #	服务监听为域套接口
 #	master_service = single_echo.sock
 #	服务类型
-	master_type = inet
+	master_type = sock
+#	master_type = inet
 #	master_type = unix
 
 #	当子进程异常退出时，如果该值非空，则将子进程异常退出的消息通知该服务
