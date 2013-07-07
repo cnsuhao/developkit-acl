@@ -58,6 +58,11 @@ int acl_access_add(const char *data, const char *sep1, const char *sep2)
 	if (__host_allow_all)
 		return (0);
 
+	if (strcasecmp(data, "all") == 0) {
+		__host_allow_all = 1;
+		return (0);
+	}
+
 	if (strcmp(sep1, "0.0.0.0") == 0 && strcmp(sep2, "255.255.255.255") == 0) {
 		__host_allow_all = 1;
 		return (0);

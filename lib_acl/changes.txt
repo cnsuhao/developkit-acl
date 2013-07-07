@@ -3,6 +3,9 @@
 374.1) bugfix: acl_vstream.h, 因为 ACL_VSTREAM 流对象中的写缓冲 wbuf 采取了
 写时分配的策略，所以会造成宏 ACL_VSTREAM_PUTC 的空指针问题，现在增加了判断
 以预分配 wbuf 空间
+374.2) master 服务器框架：因为支持同一进程同时监听多个地址且允许 TCP 与 UNIX
+域套接口混用，所以目前各个服务器模板针对此种情况，均默认调用 UNIX 域套接口的
+accept 过程
 
 373) 2013.6.25
 373.1) compile: 消除了在 gcc-4.6.3 下的一些编译警告
