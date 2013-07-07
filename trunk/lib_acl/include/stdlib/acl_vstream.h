@@ -519,6 +519,12 @@ ACL_API int acl_vstream_can_read(ACL_VSTREAM *stream);
 ACL_API int acl_vstream_fsync(ACL_VSTREAM *fp);
 
 /**
+ * 对于带缓冲方式的写，该函数保证缓冲区空间非空
+ * @param stream {ACL_VSTREAM*} 数据流
+ */
+ACL_API void acl_vstream_buffed_space(ACL_VSTREAM *stream);
+
+/**
  * 刷新写缓冲区里的数据
  * @param stream: socket 数据流
  * @return 刷新写缓冲区里的数据量或出错 ACL_VSTREAM_EOF
@@ -744,12 +750,15 @@ ACL_API const char *acl_vstream_strerror(ACL_VSTREAM *stream);
  * @param stream {ACL_VSTREAM*} 数据流指针
  * @return {int} ACL_VSTREAM_EOF(出错) 或所写入字节的 ASCII
  */
-#define	ACL_VSTREAM_PUTC(ch, stream_ptr) (                                     \
-    (stream_ptr)->wbuf_dlen == stream_ptr->wbuf_size ?                         \
-        (acl_vstream_fflush((stream_ptr)) == ACL_VSTREAM_EOF ?                 \
-            ACL_VSTREAM_EOF :                                                  \
-            ((stream_ptr)->wbuf[(size_t) (stream_ptr)->wbuf_dlen++] = (ch))):  \
-        ((stream_ptr)->wbuf[(size_t) (stream_ptr)->wbuf_dlen++] = (ch)))
+#define ACL_VSTREAM_PUTC(ch, stream_ptr) (                                   \
+  (stream_ptr)->wbuf_size == 0 ?                                             \
+    (acl_vstream_buffed_space((stream_ptr)),                                 \
+        ((stream_ptr)->wbuf[(size_t) (stream_ptr)->wbuf_dlen++] = (ch)))     \
+    : ((stream_ptr)->wbuf_dlen == stream_ptr->wbuf_size ?                    \
+        (acl_vstream_fflush((stream_ptr)) == ACL_VSTREAM_EOF ?               \
+          ACL_VSTREAM_EOF                                                    \
+          : ((stream_ptr)->wbuf[(size_t) (stream_ptr)->wbuf_dlen++] = (ch))) \
+        : ((stream_ptr)->wbuf[(size_t) (stream_ptr)->wbuf_dlen++] = (ch))))
 
 /**
  * 由流获得套接字

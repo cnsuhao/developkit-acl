@@ -1,4 +1,9 @@
 
+374) 2013.7.7
+374.1) bugfix: acl_vstream.h, 因为 ACL_VSTREAM 流对象中的写缓冲 wbuf 采取了
+写时分配的策略，所以会造成宏 ACL_VSTREAM_PUTC 的空指针问题，现在增加了判断
+以预分配 wbuf 空间
+
 373) 2013.6.25
 373.1) compile: 消除了在 gcc-4.6.3 下的一些编译警告
 
