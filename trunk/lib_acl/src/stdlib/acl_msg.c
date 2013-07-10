@@ -304,6 +304,7 @@ void acl_msg_fatal(const char *fmt,...)
 	}
 
 	va_end (ap);
+	acl_close_log();
 	acl_assert(0);
 }
 
@@ -326,6 +327,7 @@ void acl_msg_fatal2(const char *fmt, va_list ap)
 		vprintf(fmt, ap);
 		printf("\r\n");
 	}
+	acl_close_log();
 	acl_assert(0);
 }
 
@@ -352,6 +354,7 @@ void acl_msg_fatal_status(int status, const char *fmt,...)
 	}
 
 	va_end (ap);
+	acl_close_log();
 	acl_assert(0);
 }
 
@@ -373,7 +376,8 @@ void acl_msg_fatal_status2(int status, const char *fmt, va_list ap)
 		printf("\r\n");
 	}
 
-	exit(1);
+	acl_close_log();
+	acl_assert(0);
 }
 
 void acl_msg_panic(const char *fmt,...)
@@ -401,6 +405,7 @@ void acl_msg_panic(const char *fmt,...)
 	}
 
 	va_end (ap);
+	acl_close_log();
 	acl_assert(0);
 }
 
@@ -424,6 +429,7 @@ void acl_msg_panic2(const char *fmt, va_list ap)
 		printf("\r\n");
 	}
 
+	acl_close_log();
 	acl_assert(0);
 }
 #endif  /* USE_PRINTF_MACRO */

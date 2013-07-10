@@ -421,7 +421,8 @@ static void event_loop(ACL_EVENT *eventp)
 #endif
 
 	if (eventp->nested++ > 0)
-		acl_msg_fatal("%s(%d): recursive call", myname, __LINE__);
+		acl_msg_fatal("%s(%d): recursive call(%d)",
+			myname, __LINE__, eventp->nested);
 	if (nready < 0) {
 		if (acl_last_error() != ACL_EINTR) {
 			char  ebuf[256];

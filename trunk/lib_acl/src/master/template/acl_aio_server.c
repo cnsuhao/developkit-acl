@@ -611,38 +611,37 @@ static void aio_server_accept_local(ACL_ASTREAM *astream, void *context)
 
 	for (i = 0; i < acl_var_aio_max_accept; i++) {
 		fd = acl_unix_accept(listen_fd);
-		if (fd >= 0) {
+		if (fd >= 0)
 			fds[i] = fd;
-			continue;
-		}
-
-		if (errno == EMFILE) {
+		else if (errno == EMFILE) {
 			delay_listen = 1;
-			acl_msg_warn("accept connection: %s", strerror(errno));
-		} else if (errno != EAGAIN && errno != EINTR)
+			acl_msg_warn("accept connection: %s", acl_last_serror());
+			break;
+		} else if (errno != EAGAIN && errno != EINTR) {
 			acl_msg_fatal("%s: accept connection: %s",
 				myname, strerror(errno));
-		break;
+			break;
+		} else
+			break;
 	}
 
-	if (acl_var_aio_master_maxproc > 1) {
-		if (acl_master_notify(acl_var_aio_pid, aio_server_generation,
+	if (acl_var_aio_master_maxproc > 1 && i >= acl_var_aio_min_notify
+		&& acl_master_notify(acl_var_aio_pid, aio_server_generation,
 			ACL_MASTER_STAT_TAKEN) < 0)
-		{
-			aio_server_abort(astream, NULL);
-		}
+	{
+		aio_server_abort(astream, NULL);
 	}
 
 	for (j = 0; j < i; j++)
 		aio_server_wakeup(aio, fds[j]);
 
-	if (acl_var_aio_master_maxproc > 1) {
-		if (acl_master_notify(acl_var_aio_pid, aio_server_generation,
+	if (acl_var_aio_master_maxproc > 1 && i >= acl_var_aio_min_notify
+		&& acl_master_notify(acl_var_aio_pid, aio_server_generation,
 			ACL_MASTER_STAT_AVAIL) < 0)
-		{
-			aio_server_abort(astream, NULL);
-		}
+	{
+		aio_server_abort(astream, NULL);
 	}
+
 	if (aio_server_lock != 0
 		&& acl_myflock(ACL_VSTREAM_FILE(aio_server_lock),
 			ACL_INTERNAL_LOCK, ACL_MYFLOCK_OP_NONE) < 0)
@@ -655,9 +654,9 @@ static void aio_server_accept_local(ACL_ASTREAM *astream, void *context)
 		acl_aio_request_timer(aio, restart_listen, astream, 2000000, 0);
 	}
 
-	if (time_left >= 0)
-		acl_aio_request_timer(aio, aio_server_timeout, aio,
-			(acl_int64) time_left * 1000000, 0);
+	if (time_left > 0)
+		acl_aio_request_timer(aio, aio_server_timeout,
+			(void*) aio, (acl_int64) time_left * 1000000, 0);
 }
 
 #ifdef MASTER_XPORT_NAME_PASS
@@ -696,38 +695,35 @@ static void aio_server_accept_pass(ACL_ASTREAM *astream, void *context)
 
 	for (i = 0; i < acl_var_aio_max_accept; i++) {
 		fd = PASS_ACCEPT(listen_fd);
-		if (fd >= 0) {
+		if (fd >= 0)
 			fds[i] = fd;
-			continue;
-		}
-
-		if (errno == EMFILE) {
+		else if (errno == EMFILE) {
 			delay_listen = 1;
-			acl_msg_warn("accept connection: %s", strerror(errno));
+			acl_msg_warn("accept connection: %s", acl_last_serror());
+			break;
 		} else if (errno != EAGAIN && errno != EINTR)
 			acl_msg_fatal("%s: accept connection: %s",
 				myname, strerror(errno));
 			break;
-		}
+		} else
+			break;
 	}
 
-	if (acl_var_aio_master_maxproc > 1) {
-		if (acl_master_notify(acl_var_aio_pid, aio_server_generation,
+	if (acl_var_aio_master_maxproc > 1 && i >= acl_var_aio_min_notify
+		&& acl_master_notify(acl_var_aio_pid, aio_server_generation,
 			ACL_MASTER_STAT_TAKEN) < 0)
-		{
-			aio_server_abort(astream, NULL);
-		}
+	{
+		aio_server_abort(astream, NULL);
 	}
 
 	for (j = 0; j < i; j++)
 		aio_server_wakeup(aio, fds[j]);
 
-	if (acl_var_aio_master_maxproc > 1) {
-		if (acl_master_notify(acl_var_aio_pid, aio_server_generation,
+	if (acl_var_aio_master_maxproc > 1 && i >= acl_var_aio_min_notify
+		&& acl_master_notify(acl_var_aio_pid, aio_server_generation,
 			ACL_MASTER_STAT_AVAIL) < 0)
-		{
-			aio_server_abort(astream, NULL);
-		}
+	{
+		aio_server_abort(astream, NULL);
 	}
 
 	if (aio_server_lock != 0
@@ -742,7 +738,7 @@ static void aio_server_accept_pass(ACL_ASTREAM *astream, void *context)
 		acl_aio_request_timer(aio, restart_listen, astream, 2000000, 0);
 	}
 
-	if (time_left >= 0)
+	if (time_left > 0)
 		acl_aio_request_timer(aio, aio_server_timeout, (void *) aio,
 			(acl_int64) time_left * 1000000, 0);
 }
@@ -783,26 +779,24 @@ static void aio_server_accept_inet(ACL_ASTREAM *astream, void *context)
 
 	for (i = 0; i < acl_var_aio_max_accept; i++) {
 		fd = acl_inet_accept(listen_fd);
-		if (fd >= 0) {
+		if (fd >= 0)
 			fds[i] = fd;
-			continue;
-		}
-
-		if (errno == EMFILE) {
+		else if (errno == EMFILE) {
 			delay_listen = 1;
-			acl_msg_warn("accept connection: %s", strerror(errno));
-		} else if (errno != EAGAIN && errno != EINTR)
+			acl_msg_warn("accept connection: %s", acl_last_serror());
+		} else if (errno != EAGAIN && errno != EINTR) {
 			acl_msg_fatal("%s: accept connection: %s",
 				myname, strerror(errno));
-		break;
+			break;
+		} else
+			break;
 	}
 
-	if (acl_var_aio_master_maxproc > 1 && i >= acl_var_aio_min_notify) {
-		if (acl_master_notify(acl_var_aio_pid,
+	if (acl_var_aio_master_maxproc > 1 && i >= acl_var_aio_min_notify
+		&& acl_master_notify(acl_var_aio_pid,
 			aio_server_generation, ACL_MASTER_STAT_TAKEN) < 0)
-		{
-			aio_server_abort(astream, NULL);
-		}
+	{
+		aio_server_abort(astream, NULL);
 	}
 
 	for (j = 0; j < i; j++) {
@@ -811,12 +805,11 @@ static void aio_server_accept_inet(ACL_ASTREAM *astream, void *context)
 		aio_server_wakeup(aio, fds[j]);
 	}
 
-	if (acl_var_aio_master_maxproc > 1 && i >= 15) {
-		if (acl_master_notify(acl_var_aio_pid,
-			aio_server_generation, ACL_MASTER_STAT_AVAIL) < 0)
-		{
-			aio_server_abort(astream, NULL);
-		}
+	if (acl_var_aio_master_maxproc > 1 && i >= acl_var_aio_min_notify
+		&& acl_master_notify(acl_var_aio_pid, aio_server_generation,
+			ACL_MASTER_STAT_AVAIL) < 0)
+	{
+		aio_server_abort(astream, NULL);
 	}
 
 	if (aio_server_lock != 0

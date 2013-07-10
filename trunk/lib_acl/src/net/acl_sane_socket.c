@@ -13,6 +13,7 @@
 #ifdef	ACL_UNIX
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <sys/un.h>
 #endif
 
 #ifdef ACL_BCB_COMPILER
@@ -24,30 +25,61 @@
 
 #endif
 
+#ifdef	WIN32
+struct SOCK_ADDR {
+	union {
+		struct sockaddr_in in;
+	} addr;
+};
+#else
+struct SOCK_ADDR {
+	union {
+		struct sockaddr_in in;
+		struct sockaddr_un un;
+	} addr;
+};
+#endif
+
 int acl_getpeername(ACL_SOCKET sockfd, char *buf, size_t size)
 {
-	struct sockaddr_in sk_addr;
+	struct SOCK_ADDR addr;
+	struct sockaddr *sa = (struct sockaddr*) &addr;
 	socklen_t len;
 	char  ip[32];
 	int   port;
 
 	if (sockfd == ACL_SOCKET_INVALID || buf == NULL || size <= 0)
-		return (-1);
+		return -1;
 
-	len = sizeof(sk_addr);
-	if (getpeername(sockfd,  (struct sockaddr *)&sk_addr, &len) == -1)
-		return (-1);
+	len = sizeof(addr);
+	if (getpeername(sockfd, sa, &len) == -1)
+		return -1;
 
-	if (acl_inet_ntoa(sk_addr.sin_addr, ip, sizeof(ip)) == NULL)
-		return (-1);
-	port = ntohs(sk_addr.sin_port);
+#ifdef	WIN32
+	if (acl_inet_ntoa(addr.addr.in.sin_addr, ip, sizeof(ip)) == NULL)
+		return -1;
+	port = ntohs(addr.addr.in.sin_port);
 	snprintf(buf, size, "%s:%d", ip, port);
 	return (0);
+#else
+	if (sa->sa_family == AF_INET) {
+		if (acl_inet_ntoa(addr.addr.in.sin_addr, ip, sizeof(ip)) == NULL)
+			return -1;
+		port = ntohs(addr.addr.in.sin_port);
+		snprintf(buf, size, "%s:%d", ip, port);
+		return 0;
+	} else if (sa->sa_family == AF_UNIX) {
+		snprintf(buf, size, "%s", addr.addr.un.sun_path);
+		return 0;
+	} else
+		return -1;
+#endif
 }
 
 int acl_getsockname(ACL_SOCKET sockfd, char *buf, size_t size)
 {
-	struct sockaddr_in sk_addr;
+	struct SOCK_ADDR addr;
+	struct sockaddr *sa = (struct sockaddr*) &addr;
 	socklen_t len;
 	char  ip[32];
 	int   port;
@@ -55,14 +87,29 @@ int acl_getsockname(ACL_SOCKET sockfd, char *buf, size_t size)
 	if (sockfd == ACL_SOCKET_INVALID || buf == NULL || size <= 0)
 		return (-1);
 
-	len = sizeof(sk_addr);
-	if (getsockname(sockfd,  (struct sockaddr *)&sk_addr, &len) == -1)
+	len = sizeof(addr);
+	if (getsockname(sockfd, sa, &len) == -1)
 		return (-1);
-	if (acl_inet_ntoa(sk_addr.sin_addr, ip, sizeof(ip)) == NULL)
+
+#ifdef	WIN32
+	if (acl_inet_ntoa(addr.addr.in.sin_addr, ip, sizeof(ip)) == NULL)
 		return (-1);
 	
-	port = ntohs(sk_addr.sin_port);
+	port = ntohs(addr.addr.in.sin_port);
 	snprintf(buf, size, ip, port);
 	snprintf(buf, size, "%s:%d", ip, port);
 	return (0);
+#else
+	if (sa->sa_family == AF_INET) {
+		if (acl_inet_ntoa(addr.addr.in.sin_addr, ip, sizeof(ip)) == NULL)
+			return -1;
+		port = ntohs(addr.addr.in.sin_port);
+		snprintf(buf, size, "%s:%d", ip, port);
+		return 0;
+	} else if (sa->sa_family == AF_UNIX) {
+		snprintf(buf, size, "%s", addr.addr.un.sun_path);
+		return 0;
+	} else
+		return -1;
+#endif
 }
