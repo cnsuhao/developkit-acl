@@ -50,6 +50,19 @@ public:
 		return addr_;
 	}
 
+	/**
+	 * 当正常监听服务器地址后调用本函数可以获得监听套接口
+	 * @return {int}
+	 */
+#ifdef	WIN32
+	SOCKET sock_handle() const
+#else
+	int sock_handle() const
+#endif
+	{
+		return fd_;
+	}
+
 private:
 	int   backlog_;
 	bool  block_;
