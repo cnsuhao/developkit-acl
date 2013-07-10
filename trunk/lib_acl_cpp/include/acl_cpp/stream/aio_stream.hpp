@@ -181,9 +181,14 @@ namespace acl
 		 */
 #ifdef WIN32
 		SOCKET get_socket() const;
+		SOCKET sock_handle() const
 #else
 		int get_socket() const;
+		int sock_handle() const
 #endif
+		{
+			return get_socket();
+		}
 
 		/**
 		 * 获得异步流事件句柄
