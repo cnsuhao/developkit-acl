@@ -480,8 +480,11 @@ static void service_args(ACL_XINETD_CFG_PARSER *xcp, ACL_MASTER_SERV *serv,
 		acl_argv_add(serv->args, "-l", (char *) 0);
 	if (serv->max_proc == 0)
 		acl_argv_add(serv->args, "-z", (char *) 0);
-	if (strcmp(acl_safe_basename(command), name) != 0)
-		acl_argv_add(serv->args, "-n", name, (char *) 0);
+	if (strcmp(acl_safe_basename(command), name) != 0) {
+		char *tmp = acl_concatenate("\"", name, "\"", 0);
+		acl_argv_add(serv->args, "-n", tmp, (char *) 0);
+		acl_myfree(tmp);
+	}
 
 	transport = get_str_ent(xcp, ACL_VAR_MASTER_SERV_TYPE, (const char *) 0);
 	acl_argv_add(serv->args, "-t", transport, (char *) 0);
