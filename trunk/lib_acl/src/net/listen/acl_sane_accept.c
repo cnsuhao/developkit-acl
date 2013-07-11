@@ -137,7 +137,7 @@ ACL_SOCKET acl_accept(ACL_SOCKET sock, char *buf, size_t size, int* sock_type)
 		size_t n;
 #ifndef	WIN32
 		if (sa->sa_family == AF_UNIX)
-			snprintf(buf, size, addr.sa.un.sun_path);
+			snprintf(buf, size, "%s", addr.sa.un.sun_path);
 #endif
 		if (sa->sa_family != AF_INET)
 			return fd;
