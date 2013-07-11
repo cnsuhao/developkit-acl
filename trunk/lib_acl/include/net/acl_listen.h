@@ -18,6 +18,17 @@ extern "C" {
  */
 ACL_API ACL_SOCKET acl_sane_accept(ACL_SOCKET sock, struct sockaddr * sa, socklen_t *len);
 
+/**
+ * 方便通用的监听套接字的函数，用来接收客户端连接
+ * @param sock {ACL_SOCKET} 监听套接字
+ * @param buf {char*} 当成功接收一个客户端连接后，如果该 buf 非空则存放客户端地址，格式：
+ *  ip:port (针对 TCP 套接口), file_path (针对 UNIX 域套接口)
+ * @param size {size_t} buf 缓冲区大小
+ * @param sock_type {int*} 该指针非空时，用来存放客户端连接的 SOCKET 类型，AF_INET/AF_UNIX
+ * @return {ACL_SOCKET} 客户端连接句柄, 返回值 != ACL_SOCKET_INVALID 则表明成功收到一个客户端连接
+ */
+ACL_API ACL_SOCKET acl_accept(ACL_SOCKET sock, char *buf, size_t size, int* sock_type);
+
 /* in acl_inet_listen.c */
 
 /**

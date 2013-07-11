@@ -1,3 +1,11 @@
+375) 2013.7.11
+375.1) feature: acl_sane_socket.c, 增加了 acl_getsocktype 函数，可以获得当前
+socket 句柄类型是 TCP 套接口还是 UNIX 域套接口;
+acl_getsockname/acl_getpeername 支持 UNIX 域套接口
+375.2) feature: acl_sane_accept.c, 增加了 acl_accept 函数，比较方便地接收客户
+端连接，同时兼容 TCP 套接口及 UNIX 域套接口
+375.3) master/template: 进一步完善了 acl_aio_server.c, acl_ioctl_server.c,
+acl_single_server.c acl_multi_server.c, 内部统一改为 acl_accept 方式
 
 374) 2013.7.7
 374.1) bugfix: acl_vstream.h, 因为 ACL_VSTREAM 流对象中的写缓冲 wbuf 采取了

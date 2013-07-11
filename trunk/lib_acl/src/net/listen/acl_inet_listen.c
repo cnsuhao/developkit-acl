@@ -130,19 +130,20 @@ ACL_SOCKET acl_inet_accept_ex(ACL_SOCKET listen_fd, char *ipbuf, size_t size)
 	 */
 	fd = acl_sane_accept(listen_fd, (struct sockaddr *)&client_addr, &addr_len);
 	if (fd == ACL_SOCKET_INVALID)
-		return (fd);
+		return fd;
 	if (ipbuf != NULL && size > 0) {
-		int   n;
+		size_t n;
 
-		acl_inet_ntoa(client_addr.sin_addr, ipbuf, size);
-		n = (int) strlen(ipbuf);
-		size -= n;
-		if (size > 3) {
-			unsigned short port = ntohs(client_addr.sin_port);
-			ipbuf += n;
-			snprintf(ipbuf, size, ":%d", (int) port);
-		}
+		if (acl_inet_ntoa(client_addr.sin_addr, ipbuf, size) == NULL)
+			return fd;
+		n = strlen(ipbuf);
+		if (n >= size)
+			return fd;
+
+		snprintf(ipbuf + n, size - n, ":%u",
+			(unsigned short) ntohs(client_addr.sin_port));
+		ipbuf[size - 1] = 0;
 	}
 
-	return (fd);
+	return fd;
 }

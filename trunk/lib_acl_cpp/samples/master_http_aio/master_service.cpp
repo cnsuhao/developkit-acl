@@ -31,7 +31,7 @@ master_service::~master_service()
 
 bool master_service::on_accept(acl::aio_socket_stream* client)
 {
-	acl_tcp_nodelay(client->get_socket(), 1);
+	//acl_tcp_nodelay(client->get_socket(), 1);
 
 	// 如果允许在主线程中预读，则设置流的预读标志位
 	if (var_cfg_preread)
