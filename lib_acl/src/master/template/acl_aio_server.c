@@ -312,8 +312,8 @@ static void aio_server_abort(ACL_ASTREAM *astream, void *context acl_unused)
 		if (n > 0) {
 			/* set idle timeout to 1 second */
 			acl_var_aio_idle_limit = 1;
-			acl_aio_request_timer(__h_aio, aio_server_timeout,
-				(void*) aio, (acl_int64) acl_var_aio_idle_limit * 1000000, 0);
+			acl_aio_request_timer(__h_aio, aio_server_timeout, (void*) aio,
+				(acl_int64) acl_var_aio_idle_limit * 1000000, 0);
 			return;
 		}
 	}
@@ -341,8 +341,8 @@ static void aio_server_timeout(int event acl_unused, void *context)
 
 	/* if there are some fds not be closed, the timer should be reset again */
 	if (n > 0 && acl_var_aio_idle_limit > 0) {                                         
-		acl_aio_request_timer(aio, aio_server_timeout,
-			(void *) aio, (acl_int64) acl_var_aio_idle_limit * 1000000, 0);
+		acl_aio_request_timer(aio, aio_server_timeout, (void *) aio,
+			(acl_int64) acl_var_aio_idle_limit * 1000000, 0);
 		return;
 	}
 
@@ -350,8 +350,7 @@ static void aio_server_timeout(int event acl_unused, void *context)
 	inter = time(NULL) - last;
 
 	if (inter >= 0 && inter < acl_var_aio_idle_limit) {
-		acl_aio_request_timer(aio, aio_server_timeout,
-			(void *) aio,
+		acl_aio_request_timer(aio, aio_server_timeout, (void *) aio,
 			(acl_int64) (acl_var_aio_idle_limit - inter) * 1000000, 0);
 		return;
 	}
@@ -577,88 +576,6 @@ static void restart_listen(int event acl_unused, void *context)
 	acl_aio_listen(stream);
 }
 
-/* aio_server_accept_local - accept client connection request */
-
-static void aio_server_accept_local(ACL_ASTREAM *astream, void *context)
-{
-	const char *myname = "aio_server_accept_local";
-	ACL_VSTREAM *vstream = acl_aio_vstream(astream);
-	int     listen_fd = ACL_VSTREAM_SOCK(vstream);
-	ACL_AIO *aio = (ACL_AIO *) context;
-	int     time_left = -1;
-	int     fd;
-	int    *fds;
-	int     i, j;
-	int     delay_listen = 0;
-
-	/*
-	 * Be prepared for accept() to fail because some other process already
-	 * got the connection (the number of processes competing for clients
-	 * is kept small, so this is not a "thundering herd" problem). If the
-	 * accept() succeeds, be sure to disable non-blocking I/O, in order to
-	 * minimize confusion.
-	 */
-	if (acl_var_aio_idle_limit > 0)
-		time_left = (int) ((acl_aio_cancel_timer(aio, aio_server_timeout,
-			(void *) aio) + 999999) / 1000000);
-	else
-		time_left = acl_var_aio_idle_limit;
-
-	if (aio_server_pre_accept)
-		aio_server_pre_accept(aio_server_name, aio_server_argv);
-
-	fds = (int*) tls_alloc(sizeof(int) * acl_var_aio_max_accept);
-
-	for (i = 0; i < acl_var_aio_max_accept; i++) {
-		fd = acl_unix_accept(listen_fd);
-		if (fd >= 0)
-			fds[i] = fd;
-		else if (errno == EMFILE) {
-			delay_listen = 1;
-			acl_msg_warn("accept connection: %s", acl_last_serror());
-			break;
-		} else if (errno != EAGAIN && errno != EINTR) {
-			acl_msg_fatal("%s: accept connection: %s",
-				myname, strerror(errno));
-			break;
-		} else
-			break;
-	}
-
-	if (acl_var_aio_master_maxproc > 1 && i >= acl_var_aio_min_notify
-		&& acl_master_notify(acl_var_aio_pid, aio_server_generation,
-			ACL_MASTER_STAT_TAKEN) < 0)
-	{
-		aio_server_abort(astream, NULL);
-	}
-
-	for (j = 0; j < i; j++)
-		aio_server_wakeup(aio, fds[j]);
-
-	if (acl_var_aio_master_maxproc > 1 && i >= acl_var_aio_min_notify
-		&& acl_master_notify(acl_var_aio_pid, aio_server_generation,
-			ACL_MASTER_STAT_AVAIL) < 0)
-	{
-		aio_server_abort(astream, NULL);
-	}
-
-	if (aio_server_lock != 0
-		&& acl_myflock(ACL_VSTREAM_FILE(aio_server_lock),
-			ACL_INTERNAL_LOCK, ACL_MYFLOCK_OP_NONE) < 0)
-	{
-		acl_msg_fatal("%s: select unlock: %s", myname, strerror(errno));
-	}
-
-	if (delay_listen) {
-		acl_aio_disable_read(astream);
-		acl_aio_request_timer(aio, restart_listen, astream, 2000000, 0);
-	}
-
-	if (time_left > 0)
-		acl_aio_request_timer(aio, aio_server_timeout,
-			(void*) aio, (acl_int64) time_left * 1000000, 0);
-}
-
 #ifdef MASTER_XPORT_NAME_PASS
 
 /* aio_server_accept_pass - accept descriptor */
@@ -701,12 +618,11 @@ static void aio_server_accept_pass(ACL_ASTREAM *astream, void *context)
 			delay_listen = 1;
 			acl_msg_warn("accept connection: %s", acl_last_serror());
 			break;
-		} else if (errno != EAGAIN && errno != EINTR)
+		} else if (errno == EAGAIN || errno == EINTR)
+			break;
+		else
 			acl_msg_fatal("%s: accept connection: %s",
 				myname, strerror(errno));
-			break;
-		} else
-			break;
 	}
 
 	if (acl_var_aio_master_maxproc > 1 && i >= acl_var_aio_min_notify
@@ -745,19 +661,15 @@ static void aio_server_accept_pass(ACL_ASTREAM *astream, void *context)
 
 #endif
 
-/* aio_server_accept_inet - accept client connection request */
+/* aio_server_accept_sock - accept client connection request */
 
-static void aio_server_accept_inet(ACL_ASTREAM *astream, void *context)
+static void aio_server_accept_sock(ACL_ASTREAM *astream, void *context)
 {
 	const char *myname = "aio_serer_accept_inet";
 	ACL_VSTREAM *vstream = acl_aio_vstream(astream);
-	int     listen_fd = ACL_VSTREAM_FILE(vstream);
 	ACL_AIO *aio = (ACL_AIO *) context;
-	int     time_left = -1;
-	int     fd;
-	int    *fds;
-	int     i, j;
-	int     delay_listen = 0;
+	int     listen_fd = ACL_VSTREAM_FILE(vstream);
+	int     time_left = -1, fd, *fds, i, j, delay_listen = 0, sock_type;
 
 	/*
 	 * Be prepared for accept() to fail because some other process already
@@ -778,18 +690,20 @@ static void aio_server_accept_inet(ACL_ASTREAM *astream, void *context)
 	fds = (int*) tls_alloc(sizeof(int) * acl_var_aio_max_accept);
 
 	for (i = 0; i < acl_var_aio_max_accept; i++) {
-		fd = acl_inet_accept(listen_fd);
-		if (fd >= 0)
+		fd = acl_accept(listen_fd, NULL, 0, &sock_type);
+		if (fd >= 0) {
+			/* TCP 连接避免发送延迟现象 */
+			if (sock_type == AF_INET)
+				acl_tcp_set_nodelay(fds[i]);
 			fds[i] = fd;
-		else if (errno == EMFILE) {
+		} else if (errno == EMFILE) {
 			delay_listen = 1;
 			acl_msg_warn("accept connection: %s", acl_last_serror());
-		} else if (errno != EAGAIN && errno != EINTR) {
+		} else if (errno == EAGAIN || errno == EINTR)
+			break;
+		else
 			acl_msg_fatal("%s: accept connection: %s",
 				myname, strerror(errno));
-			break;
-		} else
-			break;
 	}
 
 	if (acl_var_aio_master_maxproc > 1 && i >= acl_var_aio_min_notify
@@ -799,11 +713,8 @@ static void aio_server_accept_inet(ACL_ASTREAM *astream, void *context)
 		aio_server_abort(astream, NULL);
 	}
 
-	for (j = 0; j < i; j++) {
-		/* 避免发送延迟现象 */
-		acl_tcp_set_nodelay(fds[j]);
+	for (j = 0; j < i; j++)
 		aio_server_wakeup(aio, fds[j]);
-	}
 
 	if (acl_var_aio_master_maxproc > 1 && i >= acl_var_aio_min_notify
 		&& acl_master_notify(acl_var_aio_pid, aio_server_generation,
@@ -1001,14 +912,14 @@ static ACL_ASTREAM **create_listener(ACL_AIO *aio, int event_mode acl_unused,
 	if (transport == 0)
 		acl_msg_fatal("no transport type specified");
 	if (strcasecmp(transport, ACL_MASTER_XPORT_NAME_INET) == 0) {
-		aio_server_accept = aio_server_accept_inet;
+		aio_server_accept = aio_server_accept_sock;
 		fdtype = ACL_VSTREAM_TYPE_LISTEN | ACL_VSTREAM_TYPE_LISTEN_INET;
 	} else if (strcasecmp(transport, ACL_MASTER_XPORT_NAME_UNIX) == 0) {
-		aio_server_accept = aio_server_accept_local;
+		aio_server_accept = aio_server_accept_sock;
 		fdtype = ACL_VSTREAM_TYPE_LISTEN | ACL_VSTREAM_TYPE_LISTEN_UNIX;
 	} else if (strcasecmp(transport, ACL_MASTER_XPORT_NAME_SOCK) == 0) {
-		aio_server_accept = aio_server_accept_local;
-		fdtype = ACL_VSTREAM_TYPE_LISTEN | ACL_VSTREAM_TYPE_LISTEN_UNIX;
+		aio_server_accept = aio_server_accept_sock;
+		fdtype = ACL_VSTREAM_TYPE_LISTEN | ACL_VSTREAM_TYPE_LISTEN_INET;
 #ifdef MASTER_XPORT_NAME_PASS
 	} else if (strcasecmp(transport, ACL_MASTER_XPORT_NAME_PASS) == 0) {
 		aio_server_accept = aio_server_accept_pass;
@@ -1104,6 +1015,7 @@ static void run_loop(const char *procname)
 				acl_msg_fatal("select lock: %s", strerror(errno));
 			}
 		}
+
 		acl_watchdog_start(watchdog);
 
 		if (acl_var_aio_max_threads == 0)  /* single thread mode */
@@ -1112,7 +1024,7 @@ static void run_loop(const char *procname)
 			sleep(1);
 		if (__listen_disabled == 1) {
 			__listen_disabled = 2;
-			/* 该进程不再负责监听，从而防止 acl_master 主进程无法正常重启 */
+			/* 该进程不再负责监听，防止 acl_master 主进程无法正常重启 */
 			disable_listen();
 		}
 	}
@@ -1158,11 +1070,6 @@ void acl_aio_server_main(int argc, char **argv, ACL_AIO_SERVER_FN service,...)
 		case 'c':
 			root_dir = "setme";
 			break;
-/*
-		case 'd':
-			debug_me = 1;
-			break;
-*/
 		case 'l':
 			alone = 1;
 			break;
@@ -1189,12 +1096,6 @@ void acl_aio_server_main(int argc, char **argv, ACL_AIO_SERVER_FN service,...)
 			zerolimit = 1;
 			break;
 		default:
-#if 0
-			usage(argc, argv);
-			acl_msg_fatal("%s(%d)->%s: invalid option: %s",
-				__FILE__, __LINE__, myname,
-				optind > 0 ? argv[optind - 1] : "unknown");
-#endif
 			break;
 		}
 	}
@@ -1237,11 +1138,6 @@ void acl_aio_server_main(int argc, char **argv, ACL_AIO_SERVER_FN service,...)
 		case ACL_MASTER_SERVER_POST_INIT:
 			post_init = va_arg(ap, ACL_MASTER_SERVER_INIT_FN);
 			break;
-/*
-		case ACL_MASTER_SERVER_LOOP:
-			loop = va_arg(ap, ACL_MASTER_SERVER_LOOP_FN);
-			break;
-*/
 		case ACL_MASTER_SERVER_EXIT:
 			aio_server_onexit = va_arg(ap, ACL_MASTER_SERVER_EXIT_FN);
 			break;

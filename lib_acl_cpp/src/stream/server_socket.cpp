@@ -70,15 +70,7 @@ socket_stream* server_socket::accept(int timeout /* = 0 */)
 			return NULL;
 	}
 
-	ACL_SOCKET fd;
-#ifndef WIN32
-	if (unix_sock_)
-	{
-		fd = acl_unix_accept(fd_);
-	}
-	else
-#endif
-		fd = acl_inet_accept(fd_);
+	ACL_SOCKET fd = acl_accept(fd_, NULL, 0, NULL);
 	if (fd == ACL_SOCKET_INVALID)
 	{
 		if (block_)

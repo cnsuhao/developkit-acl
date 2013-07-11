@@ -470,83 +470,6 @@ static void ioctl_restart_listen(int event acl_unused, void *context)
 		ioctl_server_accept, __h_ioctl);
 }
 
-/* ioctl_server_accept_local - accept client connection request */
-
-static void ioctl_server_accept_local(int event_type, ACL_IOCTL *h_ioctl,
-	ACL_VSTREAM *stream, void *context)
-{
-	const char *myname = "ioctl_server_accept_local";
-	int     listen_fd = ACL_VSTREAM_SOCK(stream);
-	int     time_left = -1;
-	int     delay_listen = 0;
-	int     fd;
-	int     i = 0;
-
-	if (__listen_streams == NULL) {
-		acl_msg_info("Server stoping ...");
-		return;
-	}
-
-	if (event_type != ACL_EVENT_READ)
-		acl_msg_fatal("%s, %s(%d): unknown event_type(%d)",
-			__FILE__, myname, __LINE__, event_type);
-
-	/*
-	 * Be prepared for accept() to fail because some other process already
-	 * got the connection (the number of processes competing for clients
-	 * is kept small, so this is not a "thundering herd" problem). If the
-	 * accept() succeeds, be sure to disable non-blocking I/O, in order to
-	 * minimize confusion.
-	 */
-	if (acl_var_ioctl_idle_limit > 0)
-		time_left = (int) ((acl_ioctl_cancel_timer(h_ioctl,
-			ioctl_server_timeout, h_ioctl) + 999999) / 1000000);
-	else
-		time_left = acl_var_ioctl_idle_limit;
-
-	if (ioctl_server_pre_accept)
-		ioctl_server_pre_accept(ioctl_server_name,
-					ioctl_server_argv);
-
-	while (i++ < acl_var_ioctl_max_accept) {
-		fd = acl_unix_accept(listen_fd);
-		if (fd >= 0) {
-			ioctl_server_wakeup(h_ioctl, fd, NULL, NULL);
-			continue;
-		}
-
-		if (errno == EMFILE) {
-			delay_listen = 1;
-			acl_msg_warn("accept connection: %s", strerror(errno));
-		} else if (errno != EAGAIN && errno != EINTR) {
-			acl_msg_warn("accept connection: %s, stoping ...",
-					strerror(errno));
-			acl_ioctl_disable_readwrite(h_ioctl, stream);
-			ioctl_server_abort(0, h_ioctl, stream, h_ioctl);
-			return;
-		}
-
-		break;
-	}
-
-	if (ioctl_server_lock != 0
-	    && acl_myflock(ACL_VSTREAM_FILE(ioctl_server_lock),
-		    	ACL_INTERNAL_LOCK, ACL_MYFLOCK_OP_NONE) < 0)
-		acl_msg_fatal("select unlock: %s", strerror(errno));
-
-	if (delay_listen) {
-		acl_ioctl_disable_readwrite(h_ioctl, stream);
-		acl_ioctl_request_timer(h_ioctl, ioctl_restart_listen,
-			stream, 2000000);
-	} else
-		acl_ioctl_enable_listen(h_ioctl, stream,
-			0, ioctl_server_accept, context);
-
-	if (time_left >= 0)
-		acl_ioctl_request_timer(h_ioctl, ioctl_server_timeout,
-			h_ioctl, (acl_int64) time_left * 1000000);
-}
-
 #ifdef MASTER_XPORT_NAME_PASS
 
 /* ioctl_server_accept_pass - accept descriptor */
@@ -629,17 +552,14 @@ static void ioctl_server_accept_pass(int event_type, ACL_IOCTL *h_ioctl,
 
 #endif
 
-/* ioctl_server_accept_inet - accept client connection request */
+/* ioctl_server_accept_sock - accept client connection request */
 
-static void ioctl_server_accept_inet(int event_type, ACL_IOCTL *h_ioctl,
+static void ioctl_server_accept_sock(int event_type, ACL_IOCTL *h_ioctl,
 	ACL_VSTREAM *stream, void *context)
 {
 	const char  *myname = "ioctl_serer_accept_inet";
 	int     listen_fd = ACL_VSTREAM_SOCK(stream);
-	int     time_left = -1;
-	int     fd;
-	int     i = 0;
-	int     delay_listen = 0;
+	int     time_left = -1, i = 0, delay_listen = 0, fd, sock_type;
 	char    remote_addr[64], local_addr[64];
 
 	if (__listen_streams == NULL) {
@@ -668,23 +588,29 @@ static void ioctl_server_accept_inet(int event_type, ACL_IOCTL *h_ioctl,
 		ioctl_server_pre_accept(ioctl_server_name, ioctl_server_argv);
 
 	while (i++ < acl_var_ioctl_max_accept) {
-		fd = acl_inet_accept_ex(listen_fd, remote_addr, sizeof(remote_addr));
+		fd = acl_accept(listen_fd, remote_addr,
+			sizeof(remote_addr), &sock_type);
 		if (fd < 0) {
 			if (errno == EMFILE) {
 				delay_listen = 1;
-				acl_msg_warn("accept connection: %s", strerror(errno));
-			} else if (errno != EAGAIN && errno != EINTR) {
-				acl_msg_warn("accept connection: %s, stoping ...",
+				acl_msg_warn("accept connection: %s",
 					strerror(errno));
-				acl_ioctl_disable_readwrite(h_ioctl, stream);
-				ioctl_server_abort(0, h_ioctl, stream, h_ioctl);
-				return;
+				break;
 			}
-			break;
+
+			if (errno == EAGAIN || errno == EINTR)
+				break;
+
+			acl_msg_warn("accept connection: %s, stoping ...",
+				strerror(errno));
+			acl_ioctl_disable_readwrite(h_ioctl, stream);
+			ioctl_server_abort(0, h_ioctl, stream, h_ioctl);
+			return;
 		}
 
-	        /* 避免发送延迟现象 */
-		acl_tcp_set_nodelay(fd);
+	        /* 如果为 TCP 套接口，则设置 nodelay 选项以避免发送延迟现象 */
+		if (sock_type == AF_INET)
+			acl_tcp_set_nodelay(fd);
 		if (acl_getsockname(fd, local_addr, sizeof(local_addr)) < 0)
 			memset(local_addr, 0, sizeof(local_addr));
 		ioctl_server_wakeup(h_ioctl, fd, remote_addr, local_addr);
@@ -705,10 +631,9 @@ static void ioctl_server_accept_inet(int event_type, ACL_IOCTL *h_ioctl,
 		acl_ioctl_enable_listen(h_ioctl, stream, 0,
 			ioctl_server_accept, context);
 
-	if (time_left > 0) {
+	if (time_left > 0)
 		acl_ioctl_request_timer(h_ioctl, ioctl_server_timeout,
 			h_ioctl, (acl_int64) time_left * 1000000);
-	}
 }
 
 static void ioctl_server_init(const char *procname)
@@ -795,7 +720,7 @@ static void usage(int argc, char *argv[])
 
 /* acl_ioctl_server_main - the real main program */
 
-void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service,...)
+void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service, ...)
 {
 	const char *myname = "acl_ioctl_server_main";
 	ACL_VSTREAM *stream = 0;
@@ -867,12 +792,6 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service,..
 			zerolimit = 1;
 			break;
 		default:
-#if 0
-			usage(argc, argv);
-			acl_msg_fatal("%s(%d)->%s: invalid option: %s",
-				__FILE__, __LINE__, myname,
-				optind > 0 ? argv[optind - 1] : "unknown");
-#endif
 			break;
 		}
 	}
@@ -983,14 +902,14 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service,..
 		if (transport == 0)
 			acl_msg_fatal("no transport type specified");
 		if (strcasecmp(transport, ACL_MASTER_XPORT_NAME_INET) == 0) {
-			ioctl_server_accept = ioctl_server_accept_inet;
+			ioctl_server_accept = ioctl_server_accept_sock;
 			fdtype = ACL_VSTREAM_TYPE_LISTEN | ACL_VSTREAM_TYPE_LISTEN_INET;
 		} else if (strcasecmp(transport, ACL_MASTER_XPORT_NAME_UNIX) == 0) {
-			ioctl_server_accept = ioctl_server_accept_local;
+			ioctl_server_accept = ioctl_server_accept_sock;
 			fdtype = ACL_VSTREAM_TYPE_LISTEN | ACL_VSTREAM_TYPE_LISTEN_UNIX;
 		} else if (strcasecmp(transport, ACL_MASTER_XPORT_NAME_SOCK) == 0) {
-			ioctl_server_accept = ioctl_server_accept_local;
-			fdtype = ACL_VSTREAM_TYPE_LISTEN | ACL_VSTREAM_TYPE_LISTEN_UNIX;
+			ioctl_server_accept = ioctl_server_accept_sock;
+			fdtype = ACL_VSTREAM_TYPE_LISTEN | ACL_VSTREAM_TYPE_LISTEN_INET;
 #ifdef MASTER_XPORT_NAME_PASS
 		} else if (strcasecmp(transport, ACL_MASTER_XPORT_NAME_PASS) == 0) {
 			ioctl_server_accept = ioctl_server_accept_pass;
@@ -1133,8 +1052,9 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service,..
 
 	__listen_streams = (ACL_VSTREAM **)
 		acl_mycalloc(__socket_count + 1, sizeof(ACL_VSTREAM *));
-	for (i = 0; i < __socket_count + 1; i++)
+	for (i = 0; i < __socket_count + 1; i++) {
 		__listen_streams[i] = NULL;
+	}
 
 	i = 0;
 	for (fd = ACL_MASTER_LISTEN_FD; fd < ACL_MASTER_LISTEN_FD + __socket_count; fd++) {

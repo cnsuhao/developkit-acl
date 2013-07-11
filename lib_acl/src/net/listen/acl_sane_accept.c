@@ -9,8 +9,13 @@
 #endif
 
 #include <errno.h>
+#include <stdio.h>
+#include <string.h>
+
 #ifdef ACL_UNIX
 #include <sys/socket.h>
+#include <sys/un.h>
+#include <netinet/in.h>
 #endif
 
 #ifdef ACL_BCB_COMPILER
@@ -21,6 +26,7 @@
 
 #include "stdlib/acl_msg.h"
 #include "net/acl_tcp_ctl.h"
+#include "net/acl_sane_inet.h"
 #include "net/acl_listen.h"
 
 #endif
@@ -99,3 +105,52 @@ ACL_SOCKET acl_sane_accept(ACL_SOCKET sock, struct sockaddr * sa, socklen_t *len
 	return (fd);
 }
 
+ACL_SOCKET acl_accept(ACL_SOCKET sock, char *buf, size_t size, int* sock_type)
+{
+#ifdef	WIN32
+	struct {
+		union {
+			struct sockaddr_in in;
+		} sa;
+	} addr;
+#else
+	struct {
+		union {
+			struct sockaddr_in in;
+	                struct sockaddr_un un;
+		} sa;
+	} addr;
+#endif
+	socklen_t len = sizeof(addr);
+	struct sockaddr *sa = (struct sockaddr*) &addr;
+	ACL_SOCKET fd;
+
+	memset(&addr, 0, sizeof(addr));
+	fd = acl_sane_accept(sock, sa, &len);
+	if (fd == ACL_SOCKET_INVALID)
+		return fd;
+
+	if (sock_type != NULL)
+		*sock_type = sa->sa_family;
+
+	if (buf != NULL && size > 0) {
+		size_t n;
+#ifndef	WIN32
+		if (sa->sa_family == AF_UNIX)
+			snprintf(buf, size, addr.sa.un.sun_path);
+#endif
+		if (sa->sa_family != AF_INET)
+			return fd;
+		if (acl_inet_ntoa(addr.sa.in.sin_addr, buf, size) == NULL)
+			return fd;
+		n = strlen(buf);
+		if (n >= size)
+			return fd;
+
+		snprintf(buf + n, size - n, ":%u",
+			(unsigned short) ntohs(addr.sa.in.sin_port));
+		buf[size - 1] = 0;
+	}
+
+	return fd;
+}
