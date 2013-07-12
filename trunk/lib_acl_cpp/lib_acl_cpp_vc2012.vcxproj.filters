@@ -666,6 +666,12 @@
     <ClInclude Include="include\acl_cpp\stream\aio_fstream.hpp">
       <Filter>include\stream</Filter>
     </ClInclude>
+    <ClInclude Include="include\acl_cpp\db\mysql_pool.hpp">
+      <Filter>include\db</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\db\sqlite_pool.hpp">
+      <Filter>include\db</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="lib_acl_cpp_vc2010.rc" />
