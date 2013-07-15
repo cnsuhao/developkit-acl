@@ -1,6 +1,8 @@
 #ifndef	__IOCTL_INTERNAL_INCLUDE_H__
 #define	__IOCTL_INTERNAL_INCLUDE_H__
 
+#include "thread/acl_pthread_pool.h"
+
 /* 服务器框架用句柄 */
 struct ACL_IOCTL {
 	int   event_mode;       /* ACL_EVENT_SELECT/ACL_EVENT_KERNEL */
@@ -9,7 +11,7 @@ struct ACL_IOCTL {
 	int   idle_timeout;
 	int   delay_sec;
 	int   delay_usec;
-	ACL_WORK_QUEUE *wq;	/* 线程池句柄 */
+	acl_pthread_pool_t *tp; /* 线程池句柄 */
 
 	ACL_EVENT *event;	/* 事件循环句柄 */
 	int   enable_dog;
@@ -21,8 +23,9 @@ struct ACL_IOCTL {
 };
 
 typedef struct ACL_IOCTL_CTX {
-	ACL_IOCTL *h_ioctl;
-	ACL_VSTREAM *h_stream;
+	ACL_IOCTL *ioc;
+	ACL_VSTREAM *stream;
+	int   event_type;
 
 	ACL_IOCTL_NOTIFY_FN notify_fn;
 	ACL_IOCTL_WORKER_FN worker_fn;

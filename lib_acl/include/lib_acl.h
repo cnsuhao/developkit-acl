@@ -8,7 +8,6 @@ extern "C" {
 #include "init/acl_init.h"
 #include "stdlib/acl_stdlib.h"
 #include "net/acl_net.h"
-#include "svr/acl_svr.h"
 #include "thread/acl_thread.h"
 #include "msg/acl_aqueue.h"
 #include "msg/acl_msgio.h"

@@ -12,7 +12,7 @@
 
 #include "stdlib/acl_stdlib.h"
 #include "event/acl_events.h"
-#include "svr/acl_svr.h"
+#include "thread/acl_pthread_pool.h"
 #include "net/acl_net.h"
 #include "ioctl/acl_ioctl.h"
 
@@ -20,38 +20,29 @@
 
 #include "ioctl_internal.h"
 
-static void worker_callback_r(int event_type, void *context)
+static void worker_callback_r(void *context)
 {
-	ACL_WORKER_ATTR *worker_attr;
-	ACL_IOCTL_CTX *ctx;
-	ACL_IOCTL *h_ioctl;
-	ACL_VSTREAM *h_stream;
-	ACL_IOCTL_NOTIFY_FN notify_fn;
-	void *arg;
+	ACL_IOCTL_CTX *ctx = (ACL_IOCTL_CTX *) context;
+	ACL_IOCTL *ioc = ctx->ioc;
+	ACL_VSTREAM *stream = ctx->stream;
+	ACL_IOCTL_NOTIFY_FN notify_fn = ctx->notify_fn;
+	void *arg = ctx->context;
 
-	worker_attr = (ACL_WORKER_ATTR *) context;
-	ctx         = (ACL_IOCTL_CTX *) (worker_attr->run_data);
-	h_ioctl     = ctx->h_ioctl;
-	h_stream    = ctx->h_stream;
-	notify_fn   = ctx->notify_fn;
-	arg         = ctx->context;
-
-	notify_fn(event_type, h_ioctl, h_stream, arg);
+	notify_fn(ctx->event_type, ioc, stream, arg);
 }
 
 void read_notify_callback_r(int event_type, void *context)
 {
-	ACL_IOCTL_CTX *ctx;
-	ACL_IOCTL *h_ioctl;
+	ACL_IOCTL_CTX *ctx = (ACL_IOCTL_CTX *) context;
+	ACL_IOCTL *ioc = ctx->ioc;
 
-	ctx     = (ACL_IOCTL_CTX *) context;
-	h_ioctl = ctx->h_ioctl;
+	ctx->event_type = event_type;
 
 	switch (event_type) {
 	case ACL_EVENT_READ:
 	case ACL_EVENT_RW_TIMEOUT:
 	case ACL_EVENT_XCPT:
-		acl_workq_add(h_ioctl->wq, worker_callback_r, event_type, ctx);
+		acl_pthread_pool_add(ioc->tp, worker_callback_r, ctx);
 		break;
 	default:
 		acl_msg_fatal("%s(%d): unknown event type(%d)",
@@ -63,17 +54,16 @@ void read_notify_callback_r(int event_type, void *context)
 
 void write_notify_callback_r(int event_type, void *context)
 {
-	ACL_IOCTL_CTX *ctx;
-	ACL_IOCTL *h_ioctl;
+	ACL_IOCTL_CTX *ctx = (ACL_IOCTL_CTX *) context;
+	ACL_IOCTL *ioc = ctx->ioc;
 
-	ctx     = (ACL_IOCTL_CTX *) context;
-	h_ioctl = ctx->h_ioctl;
+	ctx->event_type = event_type;
 
 	switch (event_type) {
 	case ACL_EVENT_WRITE:
 	case ACL_EVENT_RW_TIMEOUT:
 	case ACL_EVENT_XCPT:
-		acl_workq_add(h_ioctl->wq, worker_callback_r, event_type, ctx);
+		acl_pthread_pool_add(ioc->tp, worker_callback_r, ctx);
 		break;
 	default:
 		acl_msg_fatal("%s(%d): unknown event type(%d)",
@@ -85,23 +75,19 @@ void write_notify_callback_r(int event_type, void *context)
 
 void listen_notify_callback_r(int event_type, void *context)
 {
-	ACL_IOCTL_CTX *ctx;
-	ACL_IOCTL *h_ioctl;
-	ACL_VSTREAM *h_stream;
-	ACL_IOCTL_NOTIFY_FN notify_fn;
-	void *arg;
+	ACL_IOCTL_CTX *ctx= (ACL_IOCTL_CTX *) context;
+	ACL_IOCTL *ioc = ctx->ioc;
+	ACL_VSTREAM *stream = ctx->stream;
+	ACL_IOCTL_NOTIFY_FN notify_fn = ctx->notify_fn;
+	void *arg = ctx->context;
 
-	ctx       = (ACL_IOCTL_CTX *) context;
-	h_ioctl   = ctx->h_ioctl;
-	h_stream  = ctx->h_stream;
-	notify_fn = ctx->notify_fn;
-	arg       = ctx->context;
+	ctx->event_type = event_type;
 
 	switch (event_type) {
 	case ACL_EVENT_READ:
 	case ACL_EVENT_RW_TIMEOUT:
 	case ACL_EVENT_XCPT:
-		notify_fn(event_type, h_ioctl, h_stream, arg);
+		notify_fn(event_type, ioc, stream, arg);
 		break;
 	default:
 		acl_msg_fatal("%s(%d): unknown event type(%d)",
@@ -111,40 +97,41 @@ void listen_notify_callback_r(int event_type, void *context)
 	}
 }
 
-static void worker_ready_callback(int event_type acl_unused, void *context)
+static void worker_ready_callback(void *context)
 {
-	ACL_WORKER_ATTR *worker_attr = (ACL_WORKER_ATTR *) context;
-	ACL_IOCTL_CTX *ctx = (ACL_IOCTL_CTX *) (worker_attr->run_data);
-	ACL_IOCTL *h_ioctl = ctx->h_ioctl;
+	ACL_IOCTL_CTX *ctx = (ACL_IOCTL_CTX *) context;
+	ACL_IOCTL *ioc = ctx->ioc;
 	ACL_IOCTL_WORKER_FN callback = ctx->worker_fn;
 	void *arg = ctx->context;
 
 	acl_myfree(ctx);
-	callback(h_ioctl, arg);
+	callback(ioc, arg);
 }
 
-int acl_ioctl_add(ACL_IOCTL *h_ioctl, ACL_IOCTL_WORKER_FN callback, void *arg)
+int acl_ioctl_add(ACL_IOCTL *ioc, ACL_IOCTL_WORKER_FN callback, void *arg)
 {
-	char  myname[] = "acl_ioctl_add";
+	const char *myname = "acl_ioctl_add";
 	ACL_IOCTL_CTX *ctx;
 	int   ret;
 
-	if (h_ioctl == NULL || h_ioctl->wq == NULL)
+	if (ioc == NULL || ioc->tp == NULL)
 		acl_msg_fatal("%s(%d): input invalid", myname, __LINE__);
 
 	ctx = acl_mymalloc(sizeof(ACL_IOCTL_CTX));
-	ctx->h_ioctl   = h_ioctl;
+	ctx->ioc       = ioc;
 	ctx->worker_fn = callback;
 	ctx->context   = arg;
 
-	ret = acl_workq_add(h_ioctl->wq, worker_ready_callback, 0, ctx);
-	if (ret != 0)
+	ret = acl_pthread_pool_add(ioc->tp, worker_ready_callback, ctx);
+	if (ret != 0) {
+		acl_msg_error("thread pool add failed!");
 		acl_myfree(ctx);
+	}
 
 	return (ret);
 }
 
-int acl_ioctl_nworker(ACL_IOCTL *h_ioctl)
+int acl_ioctl_nworker(ACL_IOCTL *ioc)
 {
-	return (acl_workq_nworker(h_ioctl->wq));
+	return acl_pthread_pool_size(ioc->tp);
 }

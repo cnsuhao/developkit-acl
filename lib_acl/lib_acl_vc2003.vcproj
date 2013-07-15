@@ -765,13 +765,6 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				</File>
 			</Filter>
 			<Filter
-				Name="svr"
-				Filter="">
-				<File
-					RelativePath=".\src\svr\acl_workq.c">
-				</File>
-			</Filter>
-			<Filter
 				Name="msg"
 				Filter="">
 				<File
@@ -1639,19 +1632,6 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				</File>
 				<File
 					RelativePath=".\include\thread\acl_thread.h">
-				</File>
-			</Filter>
-			<Filter
-				Name="svr"
-				Filter="">
-				<File
-					RelativePath=".\include\svr\acl_svr.h">
-				</File>
-				<File
-					RelativePath=".\include\svr\acl_task.h">
-				</File>
-				<File
-					RelativePath=".\include\svr\acl_workq.h">
 				</File>
 			</Filter>
 			<Filter
