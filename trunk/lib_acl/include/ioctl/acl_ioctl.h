@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include "stdlib/acl_define.h"
+#include "event/acl_events.h"
 #include "stdlib/acl_vstream.h"
 
 typedef struct ACL_IOCTL ACL_IOCTL;

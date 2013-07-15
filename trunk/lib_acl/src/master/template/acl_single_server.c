@@ -42,6 +42,8 @@
 #include "stdlib/acl_split_at.h"
 #include "stdlib/unix/acl_safe_open.h"
 #include "net/acl_listen.h"
+#include "net/acl_tcp_ctl.h"
+#include "net/acl_sane_socket.h"
 #include "event/acl_events.h"
 
 /* Global library. */

@@ -1,5 +1,7 @@
 376) 2013.7.15
-376.1) lib_acl: 去掉了 svr 模块，其中的线程池功能完全由 thread/ 下的 acl_pthread_pool_xxx 代替；同时修改了 ioctl 中的线程池模块，改为 acl_pthread_pool_xxx
+376.1) lib_acl: 去掉了 svr 模块，该模块的功能完全由 thread/ 下的线程池模块
+(acl_pthread_pool_xxx) 代替；同时修改了 ioctl/ 模块中对于 svn 模块的依赖，
+替换为 threead/ 下的线程池模块
 
 375) 2013.7.11
 375.1) feature: acl_sane_socket.c, 增加了 acl_getsocktype 函数，可以获得当前

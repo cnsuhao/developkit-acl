@@ -7,9 +7,10 @@ int main(int argc acl_unused, char *argv[] acl_unused)
 			ACL_SLICE_FLAG_GC2 |
 			ACL_SLICE_FLAG_RTGC_OFF |
 			ACL_SLICE_FLAG_LP64_ALIGN);
-	if (argc == 2 && strncasecmp(argv[1], "zdb", 3) == 0)
+	if (argc == 2 && strncasecmp(argv[1], "zdb", 3) == 0) {
+		acl_msg_open("test.log", "zdb_test");
 		zdb_test_main(argv[1]);
-	else
+	} else
 		zdb_test_main("zdb:help");
 	return (0);
 }
