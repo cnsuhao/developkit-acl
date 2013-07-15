@@ -176,7 +176,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include=".\src\acl_StdAfx.c">
+    <ClCompile Include=".\src\acl_stdafx.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include=".\src\stdlib\acl_chunk_chain.c">
