@@ -237,7 +237,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
-				RelativePath=".\src\acl_StdAfx.c">
+				RelativePath=".\src\acl_stdafx.c">
 				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
