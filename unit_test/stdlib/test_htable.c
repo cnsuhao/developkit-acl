@@ -135,12 +135,11 @@ typedef struct __THR_CTX {
 
 static __HTABLE_RWLOCK_CTX __rwlock_ctx;
 
-static void __htable_rwlock_fn(int event acl_unused, void *arg acl_unused)
+static void __htable_rwlock_fn(void *arg)
 {
 	const char *myname = "__htable_rwlock_fn";
-	ACL_WORKER_ATTR *wq = (ACL_WORKER_ATTR *) arg;
 	char  key[256];
-	__HTABLE_RWLOCK_CTX *ctx = (__HTABLE_RWLOCK_CTX *) wq->run_data;
+	__HTABLE_RWLOCK_CTX *ctx = (__HTABLE_RWLOCK_CTX *) arg;
 	__THR_CTX *thr_ctx = acl_mycalloc(1, sizeof(__THR_CTX));
 
 #ifdef	LINUX2
@@ -170,7 +169,7 @@ static void __htable_rwlock_fn(int event acl_unused, void *arg acl_unused)
 
 int test_htable_rwlock(AUT_LINE *test_line, void *arg acl_unused)
 {
-	ACL_WORK_QUEUE *wq;
+	acl_pthread_pool_t *tp;
 	int  threads = 100, thread_idle = 120;
 	int   i, n = 1000;
 	ACL_HASH_FN hash_fn;
@@ -188,19 +187,16 @@ int test_htable_rwlock(AUT_LINE *test_line, void *arg acl_unused)
 			ACL_HTABLE_CTL_HASH_FN, hash_fn,
 			ACL_HTABLE_CTL_END);
 
-	wq = acl_workq_create(threads, thread_idle, NULL, NULL);
-	/*
-	 * acl_workq_start(wq);
-	 */
+	tp = acl_thread_pool_create(threads, thread_idle);
 
 	for (i = 0; i < n; i++) {
-		if (acl_workq_add(wq, __htable_rwlock_fn, 0, &__rwlock_ctx))
+		if (acl_pthread_pool_add(tp, __htable_rwlock_fn, &__rwlock_ctx))
 			acl_msg_fatal("acl_workq_add error(%s)", strerror(errno));
 	}
 
 	sleep(2);
 
-	acl_workq_stop(wq);
+	acl_pthread_pool_stop(tp);
 	acl_htable_stat(__rwlock_ctx.table);
 
 	acl_htable_free(__rwlock_ctx.table, (void (*) (void *))acl_myfree_fn);

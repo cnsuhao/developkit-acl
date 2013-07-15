@@ -40,6 +40,7 @@
 #include "stdlib/unix/acl_watchdog.h"
 #include "stdlib/acl_split_at.h"
 #include "net/acl_listen.h"
+#include "net/acl_tcp_ctl.h"
 #include "event/acl_events.h"
 
 /* Global library. */

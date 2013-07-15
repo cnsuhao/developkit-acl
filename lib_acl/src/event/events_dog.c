@@ -11,7 +11,6 @@
 
 #include "stdlib/acl_mymalloc.h"
 #include "stdlib/acl_msg.h"
-#include "svr/acl_svr.h"
 #include "net/acl_vstream_net.h"
 #include "stdlib/acl_iostuff.h"
 #include "event/acl_events.h"
