@@ -50,9 +50,6 @@
     <Filter Include="Source Files\thread">
       <UniqueIdentifier>{ab7e8b79-4337-4406-b611-ebfe8dec8a8c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\svr">
-      <UniqueIdentifier>{0fe51747-de91-4caf-8e12-c9abd1ead677}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\msg">
       <UniqueIdentifier>{84458eeb-c970-48e9-89ce-e6e3bacd61d0}</UniqueIdentifier>
     </Filter>
@@ -134,9 +131,6 @@
     </Filter>
     <Filter Include="Header Files\thread">
       <UniqueIdentifier>{9c48db63-1706-4dbf-b270-fdb6ece0e265}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\svr">
-      <UniqueIdentifier>{0a19afb3-1f37-493e-8e0f-d142459b3d78}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\msg">
       <UniqueIdentifier>{388a38a0-dee2-49ff-8cad-b75d8959b35b}</UniqueIdentifier>
@@ -583,9 +577,6 @@
     </ClCompile>
     <ClCompile Include=".\src\thread\acl_sem.c">
       <Filter>Source Files\thread</Filter>
-    </ClCompile>
-    <ClCompile Include=".\src\svr\acl_workq.c">
-      <Filter>Source Files\svr</Filter>
     </ClCompile>
     <ClCompile Include=".\src\msg\acl_aqueue.c">
       <Filter>Source Files\msg</Filter>
@@ -1379,15 +1370,6 @@
     </ClInclude>
     <ClInclude Include=".\include\thread\acl_thread.h">
       <Filter>Header Files\thread</Filter>
-    </ClInclude>
-    <ClInclude Include=".\include\svr\acl_svr.h">
-      <Filter>Header Files\svr</Filter>
-    </ClInclude>
-    <ClInclude Include=".\include\svr\acl_task.h">
-      <Filter>Header Files\svr</Filter>
-    </ClInclude>
-    <ClInclude Include=".\include\svr\acl_workq.h">
-      <Filter>Header Files\svr</Filter>
     </ClInclude>
     <ClInclude Include=".\include\msg\acl_aqueue.h">
       <Filter>Header Files\msg</Filter>

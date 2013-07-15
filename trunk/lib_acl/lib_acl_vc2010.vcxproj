@@ -353,7 +353,6 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClCompile Include=".\src\thread\acl_pthread_pool.c" />
     <ClCompile Include=".\src\thread\acl_pthread_rwlock.c" />
     <ClCompile Include=".\src\thread\acl_sem.c" />
-    <ClCompile Include=".\src\svr\acl_workq.c" />
     <ClCompile Include=".\src\msg\acl_aqueue.c" />
     <ClCompile Include=".\src\msg\acl_msgio.c" />
     <ClCompile Include=".\src\xml\acl_xml.c" />
@@ -618,9 +617,6 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include=".\include\thread\acl_pthread_rwlock.h" />
     <ClInclude Include=".\include\thread\acl_sem.h" />
     <ClInclude Include=".\include\thread\acl_thread.h" />
-    <ClInclude Include=".\include\svr\acl_svr.h" />
-    <ClInclude Include=".\include\svr\acl_task.h" />
-    <ClInclude Include=".\include\svr\acl_workq.h" />
     <ClInclude Include=".\include\msg\acl_aqueue.h" />
     <ClInclude Include=".\include\msg\acl_msgio.h" />
     <ClInclude Include=".\include\xml\acl_xml.h" />

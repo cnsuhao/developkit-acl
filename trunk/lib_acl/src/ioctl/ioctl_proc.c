@@ -12,7 +12,7 @@
 
 #include "stdlib/acl_stdlib.h"
 #include "event/acl_events.h"
-#include "svr/acl_svr.h"
+#include "thread/acl_pthread_pool.h"
 #include "net/acl_net.h"
 #include "ioctl/acl_ioctl.h"
 
@@ -22,25 +22,20 @@
 
 void read_notify_callback(int event_type, void *context)
 {
-	ACL_IOCTL_CTX *ctx;
-	ACL_IOCTL *h_ioctl;
-	ACL_VSTREAM *h_stream;
-	ACL_IOCTL_NOTIFY_FN notify_fn;
-	void *arg;
+	ACL_IOCTL_CTX *ctx = (ACL_IOCTL_CTX *) context;
+	ACL_IOCTL *ioc = (ACL_IOCTL*) ctx->ioc;
+	ACL_VSTREAM *stream = ctx->stream;
+	ACL_IOCTL_NOTIFY_FN notify_fn = ctx->notify_fn;
+	void *arg = ctx->context;
 
-	ctx         = (ACL_IOCTL_CTX *) context;
-	h_ioctl     = ctx->h_ioctl;
-	h_stream    = ctx->h_stream;
-	notify_fn   = ctx->notify_fn;
-	arg         = ctx->context;
-
-	acl_event_disable_read(h_ioctl->event, h_stream);
+	ctx->event_type = event_type;
+	acl_event_disable_read(ioc->event, stream);
 
 	switch (event_type) {
 	case ACL_EVENT_READ:
 	case ACL_EVENT_RW_TIMEOUT:
 	case ACL_EVENT_XCPT:
-		notify_fn(event_type, h_ioctl, h_stream, arg);
+		notify_fn(event_type, ioc, stream, arg);
 		break;
 	default:
 		acl_msg_fatal("%s(%d): unknown event type(%d)",
@@ -52,25 +47,21 @@ void read_notify_callback(int event_type, void *context)
 
 void write_notify_callback(int event_type, void *context)
 {
-	ACL_IOCTL_CTX *ctx;
-	ACL_IOCTL *h_ioctl;
-	ACL_VSTREAM *h_stream;
-	ACL_IOCTL_NOTIFY_FN notify_fn;
-	void *arg;
+	ACL_IOCTL_CTX *ctx = (ACL_IOCTL_CTX *) context;
+	ACL_IOCTL *ioc = (ACL_IOCTL*) ctx->ioc;
+	ACL_VSTREAM *stream = ctx->stream;
+	ACL_IOCTL_NOTIFY_FN notify_fn = ctx->notify_fn;
+	void *arg = ctx->context;
 
-	ctx         = (ACL_IOCTL_CTX *) context;
-	h_ioctl     = ctx->h_ioctl;
-	h_stream    = ctx->h_stream;
-	notify_fn   = ctx->notify_fn;
-	arg         = ctx->context;
+	ctx->event_type = event_type;
 
-	acl_event_disable_write(h_ioctl->event, h_stream);
+	acl_event_disable_write(ioc->event, stream);
 
 	switch (event_type) {
 	case ACL_EVENT_WRITE:
 	case ACL_EVENT_RW_TIMEOUT:
 	case ACL_EVENT_XCPT:
-		notify_fn(event_type, h_ioctl, h_stream, arg);
+		notify_fn(event_type, ioc, stream, arg);
 		break;
 	default:
 		acl_msg_fatal("%s(%d): unknown event type(%d)",
@@ -82,24 +73,20 @@ void write_notify_callback(int event_type, void *context)
 
 void listen_notify_callback(int event_type, void *context)
 {
-	ACL_IOCTL_CTX *ctx;
-	ACL_IOCTL *h_ioctl;
-	ACL_VSTREAM *h_stream;
-	ACL_IOCTL_NOTIFY_FN notify_fn;
-	void *arg;
+	ACL_IOCTL_CTX *ctx= (ACL_IOCTL_CTX *) context;
+	ACL_IOCTL *ioc = (ACL_IOCTL*) ctx->ioc;
+	ACL_VSTREAM *stream = ctx->stream;
+	ACL_IOCTL_NOTIFY_FN notify_fn = ctx->notify_fn;
+	void *arg = ctx->context;
 
-	ctx       = (ACL_IOCTL_CTX *) context;
-	h_ioctl   = ctx->h_ioctl;
-	h_stream  = ctx->h_stream;
-	notify_fn = ctx->notify_fn;
-	arg       = ctx->context;
+	ctx->event_type = event_type;
 
 	switch (event_type) {
 	case ACL_EVENT_RW_TIMEOUT:
 	case ACL_EVENT_XCPT:
-		acl_event_disable_read(h_ioctl->event, h_stream);
+		acl_event_disable_read(ioc->event, stream);
 	case ACL_EVENT_READ:
-		notify_fn(event_type, h_ioctl, h_stream, arg);
+		notify_fn(event_type, ioc, stream, arg);
 		break;
 	default:
 		acl_msg_fatal("%s(%d): unknown event type(%d)",
