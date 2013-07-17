@@ -220,6 +220,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClCompile Include=".\src\icmp\icmp_stream.c" />
     <ClCompile Include=".\src\icmp\icmp_timer.c" />
     <ClCompile Include="src\proto_snprintf.c" />
+    <ClCompile Include="src\smtp\smtp_client.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include=".\src\StdAfx.h" />
@@ -233,6 +234,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include=".\include\http\lib_http_util.h" />
     <ClInclude Include=".\include\icmp\lib_icmp.h" />
     <ClInclude Include=".\include\icmp\lib_icmp_type.h" />
+    <ClInclude Include="include\smtp\smtp_client.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".\changes.txt" />
