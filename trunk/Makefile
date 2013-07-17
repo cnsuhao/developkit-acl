@@ -71,6 +71,8 @@ install:
 	cp -Rf lib_acl/include/* $(ACL_INC)/
 	cp -f lib_protocol/lib/lib_protocol.a $(PROTO_LIB)/$(RPATH)/
 	cp -Rf lib_protocol/include/* $(PROTO_INC)/
+	cp -f lib_acl_cpp/lib/lib_acl_cpp.a $(ACL_LIB)/$(RPATH)/
+	cp -Rf lib_acl_cpp/include/acl_cpp/* $(INC_PATH)/acl_cpp/
 #	cp -f lib_dict/lib/lib_dict.a $(DICT_LIB)/$(RPATH)/
 #	cp -Rf lib_dict/include/* $(DICT_INC)/
 #	cp -f lib_tls/lib/lib_tls.a $(TLS_LIB)/$(RPATH)/
@@ -83,6 +85,8 @@ uninstall:
 	rm -Rf $(ACL_INC)/*
 	rm -f $(PROTO_LIB)/$(RPATH)/lib_protocol.a
 	rm -Rf $(PROTO_INC)/*
+	rm -f $(ACL_LIB)/$(RPATH)/lib_acl_cpp.a
+	rm -Rf $(INC_PATH)/acl_cpp/*
 	rm -f $(DICT_LIB)/$(RPATH)/lib_dict.a
 	rm -Rf $(DICT_INC)/*
 	rm -f $(TLS_LIB)/$(RPATH)/lib_tls.a
