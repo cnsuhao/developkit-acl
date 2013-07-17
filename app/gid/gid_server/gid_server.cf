@@ -4,13 +4,14 @@ service server {
 	master_disable = no
 #	服务地址及端口号
 #	master_service = 127.0.0.1:6010
-	master_service = :7072
+	master_service = 127.0.0.1:7070, 127.0.0.1:7071, 127.0.0.1:7072, 127.0.0.1:7073
 
 #	服务监听为域套接口
 #	master_service = aio_echo.sock
 #	服务类型
-	master_type = inet
+#	master_type = inet
 #	master_type = unix
+	master_type = sock
 
 #	当子进程异常退出时，如果该值非空，则将子进程异常退出的消息通知该服务
 #	master_notify_addr = 127.0.0.1:5801
@@ -32,7 +33,7 @@ service server {
 #	进程程序名
 	master_command = gid_server
 #	进程日志记录文件
-	master_log = ./var/gid_server.log
+	master_log = {install_path}/var/gid_server.log
 #	进程启动参数，只能为: -u [是否允许以某普通用户的身份运行]
 #	master_args = -u
 #	传递给服务子进程的环境变量, 可以通过 getenv("SERVICE_ENV") 获得此值
@@ -48,7 +49,7 @@ service server {
 	ioctl_pid_dir =  ./var
 #	进程运行时所在的路径
 #	ioctl_queue_dir = /home/guozhaohui/opt/analyse/var
-	ioctl_queue_dir = ./var
+	ioctl_queue_dir = {install_path}/var
 #	读写超时时间, 单位为秒
 	ioctl_rw_timeout = 120
 #	读缓冲区的缓冲区大小
@@ -76,12 +77,7 @@ service server {
 #	线程的堆栈空间大小，单位为字节，0表示使用系统缺省值
 	ioctl_stacksize = 0
 #	允许访问 udserver 的客户端IP地址范围
-#	ioctl_access_allow = 0.0.0.0:255.255.255.255, 127.0.0.1:127.0.0.1, 10.0.8.6:10.0.8.6
-	ioctl_access_allow = 127.0.0.1:127.0.0.1, \
-				10.0.250.218:10.0.250.218, 10.0.250.38:10.0.250.38, \
-				10.0.190.13:10.0.190.13, 10.0.251.146:10.0.251.146,  \
-				10.0.250.152:10.0.250.152, 10.0.250.167:10.0.250.167, \
-				10.0.251.108:10.0.251.108, 10.0.251.110:10.0.251.110
+	ioctl_access_allow = 0.0.0.0:255.255.255.255
 
 
 ##	app_main.c 需要的参数项
@@ -94,16 +90,17 @@ service server {
 #	是否调试内存状态
 #	debug_mem = 0
 #	存储的根目录
-	gid_path = ./var
+	gid_path = {install_path}/var/gid
 #	是否立刻同步至磁盘
 	sync_gid = 1
 #	步进值
 	gid_step = 1
 #	是否循环读取请求命令
 	loop_enable = 1
-#	是否采用HTTP协议方式
-	use_http = 1
+#	缺省的服务协议
+	proto_default = http
+#	协议与端口的对照表
+	proto_list = http|127.0.0.1:7070|127.0.0.1:7071, cmdline|127.0.0.1:7072|127.0.0.1:7073
 #	测试用
 	test_user_id = 10001
 }
-
