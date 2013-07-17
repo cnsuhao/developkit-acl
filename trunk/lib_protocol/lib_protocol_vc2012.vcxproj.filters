@@ -27,6 +27,12 @@
     <Filter Include="Header Files\icmp">
       <UniqueIdentifier>{32468a59-0a82-4ab3-9c3a-424addc3a127}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\smtp">
+      <UniqueIdentifier>{474743d2-f4d7-4525-8eb5-9bf65f7d6f21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\smtp">
+      <UniqueIdentifier>{0a4abcbb-914a-472f-b553-191ecd38ffe5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="lib_protocol.rc">
@@ -106,6 +112,9 @@
     <ClCompile Include="src\proto_snprintf.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\smtp\smtp_client.c">
+      <Filter>Source Files\smtp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include=".\src\StdAfx.h">
@@ -140,6 +149,9 @@
     </ClInclude>
     <ClInclude Include=".\include\icmp\lib_icmp_type.h">
       <Filter>Header Files\icmp</Filter>
+    </ClInclude>
+    <ClInclude Include="include\smtp\smtp_client.h">
+      <Filter>Header Files\smtp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
