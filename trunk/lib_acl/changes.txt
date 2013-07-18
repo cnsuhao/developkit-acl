@@ -2,6 +2,8 @@
 377.1) performance: event/event_kernel_thr.c, 优化多线程方式下事件引擎的
 运行速度；acl_master 框架中，当事件引擎选用 kernel 方式时，不需要打开
 ioctl_enable_dog 选项
+377.2) compile: linux32 gcc4 当打开编译选项 strict-aliasing rules 时，
+acl_sane_socket.c 中的声明的 SOCK_ADDR 类型被转换别的类型时会报警告
 
 376) 2013.7.15
 376.1) lib_acl: 去掉了 svr 模块，该模块的功能完全由 thread/ 下的线程池模块

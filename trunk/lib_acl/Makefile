@@ -11,9 +11,14 @@ RANLIB  = ranlib
 LIB_NAME  = lib_acl.a
 
 #CFLAGS = -c -g -W -Wall -Wcast-qual -Wcast-align
+#-fno-strict-aliasing
 CFLAGS = -c -g -W -Wall -Wcast-align \
--Wpointer-arith -Werror -Wshadow -O3 \
--Waggregate-return -Wmissing-prototypes \
+-Wpointer-arith \
+-Werror \
+-Wshadow \
+-O3 \
+-Waggregate-return \
+-Wmissing-prototypes \
 -D_REENTRANT \
 -D_USE_FAST_MACRO \
 -Wno-long-long \

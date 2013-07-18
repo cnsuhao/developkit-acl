@@ -118,6 +118,7 @@ ACL_SOCKET acl_accept(ACL_SOCKET sock, char *buf, size_t size, int* sock_type)
 		union {
 			struct sockaddr_in in;
 	                struct sockaddr_un un;
+			struct sockaddr sa;
 		} sa;
 	} addr;
 #endif
