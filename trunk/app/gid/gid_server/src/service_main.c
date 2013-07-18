@@ -54,6 +54,7 @@ ACL_CONFIG_STR_TABLE service_conf_str_tab[] = {
 typedef struct PROTO {
 	char  name[32];
 	char  addr[256];
+	size_t len;
 	int   (*service)(ACL_VSTREAM*);
 } PROTO;
 
@@ -88,6 +89,7 @@ static void proto_add(const char *data)
 		proto->service = service;
 		snprintf(proto->name, sizeof(proto->name), "%s", tokens->argv[0]);
 		snprintf(proto->addr, sizeof(proto->addr), "%s", tokens->argv[i]);
+		proto->len = strlen(proto->addr);
 		acl_array_append(__proto_map, proto);
 	}
 
@@ -148,7 +150,7 @@ int service_main(ACL_VSTREAM *client, void *ctx acl_unused)
 
 	acl_foreach(iter, __proto_map) {
 		proto = (PROTO*) iter.data;
-		if (strcmp(proto->addr, addr) == 0) {
+		if (acl_strrncasecmp(proto->addr, addr, proto->len) == 0) {
 			service = proto->service;
 			break;
 		}
