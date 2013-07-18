@@ -38,11 +38,8 @@ typedef struct EVENT_POLL_THR {
 	ACL_FD_MAP *fdmap;
 } EVENT_POLL_THR;
 
-static void event_enable_read(ACL_EVENT *eventp,
-			ACL_VSTREAM *stream,
-			int timeout,
-			ACL_EVENT_NOTIFY_RDWR callback,
-			void *context)
+static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
+	int timeout, ACL_EVENT_NOTIFY_RDWR callback, void *context)
 {
 	const char *myname = "event_enable_read";
 	EVENT_POLL_THR *event_thr = (EVENT_POLL_THR *) eventp;
@@ -107,11 +104,8 @@ static void event_enable_read(ACL_EVENT *eventp,
 		event_dog_notify(event_thr->event.evdog);
 }
 
-static void event_enable_listen(ACL_EVENT *eventp,
-			ACL_VSTREAM *stream,
-			int timeout,
-			ACL_EVENT_NOTIFY_RDWR callback,
-			void *context)
+static void event_enable_listen(ACL_EVENT *eventp, ACL_VSTREAM *stream,
+	int timeout, ACL_EVENT_NOTIFY_RDWR callback, void *context)
 {
 	const char *myname = "event_enable_listen";
 	EVENT_POLL_THR *event_thr = (EVENT_POLL_THR *) eventp;
@@ -131,7 +125,8 @@ static void event_enable_listen(ACL_EVENT *eventp,
 	if (fdp == NULL)
 		fdp = event_fdtable_alloc();
 	if (fdp == NULL)
-		acl_msg_fatal("%s(%d), %s: alloc fdtable error", __FILE__, __LINE__, myname);
+		acl_msg_fatal("%s(%d), %s: alloc fdtable error",
+			__FILE__, __LINE__, myname);
 
 	if (fdp->flag & EVENT_FDTABLE_FLAG_WRITE)
 		acl_msg_panic("%s(%d)->%s: fd %d: multiple I/O request",
@@ -171,11 +166,8 @@ static void event_enable_listen(ACL_EVENT *eventp,
 	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 }
 
-static void event_enable_write(ACL_EVENT *eventp,
-			ACL_VSTREAM *stream,
-			int timeout,
-			ACL_EVENT_NOTIFY_RDWR callback,
-			void *context)
+static void event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
+	int timeout, ACL_EVENT_NOTIFY_RDWR callback, void *context)
 {
 	const char *myname = "event_enable_write";
 	EVENT_POLL_THR *event_thr = (EVENT_POLL_THR *) eventp;
@@ -194,7 +186,8 @@ static void event_enable_write(ACL_EVENT *eventp,
 	if (fdp == NULL)
 		fdp = event_fdtable_alloc();
 	if (fdp == NULL)
-		acl_msg_fatal("%s(%d), %s: alloc fdtable error", __FILE__, __LINE__, myname);
+		acl_msg_fatal("%s(%d), %s: alloc fdtable error",
+			__FILE__, __LINE__, myname);
 
 	if (fdp->flag & EVENT_FDTABLE_FLAG_READ)
 		acl_msg_panic("%s(%d)->%s: fd %d: multiple I/O request",
@@ -391,10 +384,8 @@ static void event_loop(ACL_EVENT *eventp)
 
 	if (nready < 0) {
 		if (acl_last_error() != ACL_EINTR) {
-			char  ebuf[256];
 			acl_msg_fatal("%s(%d), %s: event_loop: select: %s",
-				__FILE__, __LINE__, myname,
-				acl_last_strerror(ebuf, sizeof(ebuf)));
+				__FILE__, __LINE__, myname, acl_last_serror());
 		}
 		goto TAG_DONE;
 	} else if (nready == 0)
@@ -488,10 +479,10 @@ static void event_free(ACL_EVENT *eventp)
 
 	if (eventp == NULL)
 		acl_msg_fatal("%s, %s(%d): eventp null",
-				__FILE__, myname, __LINE__);
+			__FILE__, myname, __LINE__);
 
-	acl_pthread_mutex_destroy(&event_thr->event.tm_mutex);
-	acl_pthread_mutex_destroy(&event_thr->event.tb_mutex);
+	LOCK_DESTROY(&event_thr->event.tm_mutex);
+	LOCK_DESTROY(&event_thr->event.tb_mutex);
 
 	acl_fdmap_free(event_thr->fdmap);
 	acl_myfree(event_thr->fds);
@@ -500,9 +491,7 @@ static void event_free(ACL_EVENT *eventp)
 
 ACL_EVENT *event_new_poll_thr(int fdsize)
 {
-	const char *myname = "event_new_poll_thr";
 	EVENT_POLL_THR *event_thr;
-	int   status;
 
 	event_thr = (EVENT_POLL_THR*) event_alloc(sizeof(EVENT_POLL_THR));
 
@@ -525,19 +514,8 @@ ACL_EVENT *event_new_poll_thr(int fdsize)
 	event_thr->event.event.timer_keep           = event_timer_keep_thr;
 	event_thr->event.event.timer_ifkeep         = event_timer_ifkeep_thr;
 
-	status = acl_pthread_mutex_init(&event_thr->event.tm_mutex, NULL);
-	if (status != 0) {
-		char tbuf[256];
-		acl_msg_fatal("%s(%d)->%s: pthread_mutex_init error=%s",
-			__FILE__, __LINE__, myname, acl_last_strerror(tbuf, sizeof(tbuf)));
-	}
-
-	status = acl_pthread_mutex_init(&event_thr->event.tb_mutex, NULL);
-	if (status != 0) {
-		char tbuf[256];
-		acl_msg_fatal("%s(%d)->%s: pthread_mutex_init error=%s",
-			__FILE__, __LINE__, myname, acl_last_strerror(tbuf, sizeof(tbuf)));
-	}
+	LOCK_INIT(&event_thr->event.tm_mutex);
+	LOCK_INIT(&event_thr->event.tb_mutex);
 
 	event_thr->fds = (struct pollfd *) acl_mycalloc(fdsize + 1, sizeof(struct pollfd));
 	event_thr->fdmap = acl_fdmap_create(fdsize);

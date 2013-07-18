@@ -157,8 +157,13 @@ typedef struct EVENT_THR {
 	ACL_EVENT event;
 
 	/* just for thread */
+#ifdef	EVENT_USE_SPINLOCK
+	pthread_spinlock_t tm_mutex;
+	pthread_spinlock_t tb_mutex;
+#else
 	acl_pthread_mutex_t tm_mutex;
 	acl_pthread_mutex_t tb_mutex;
+#endif
 	EVENT_DOG *evdog;
 	int     blocked;
 } EVENT_THR;
@@ -234,23 +239,69 @@ struct ACL_EVENT_TIMER {
 #define ACL_FIRST_TIMER(head) \
 	(acl_ring_succ(head) != (head) ? ACL_RING_TO_TIMER(acl_ring_succ(head)) : 0)
 
-#define	THREAD_LOCK(mutex_in) do { \
-	int   status; \
-	acl_pthread_mutex_t *mutex_ptr = mutex_in; \
-	status = acl_pthread_mutex_lock(mutex_ptr); \
+#ifdef	EVENT_USE_SPINLOCK
+
+# define LOCK_INIT(mutex_in) do { \
+	pthread_spinlock_t *sp = mutex_in; \
+	int   status = pthread_spin_init(sp, PTHREAD_PROCESS_PRIVATE); \
+	if (status != 0) \
+		acl_msg_fatal("%s(%d): init lock error(%s)", \
+			__FILE__, __LINE__, strerror(status)); \
+} while (0)
+
+# define LOCK_DESTROY(mutex_in) do { \
+	pthread_spinlock_t *sp = mutex_in; \
+	pthread_spin_destroy(sp); \
+} while (0)
+
+# define THREAD_LOCK(mutex_in) do { \
+	pthread_spinlock_t *sp = mutex_in; \
+	int   status = pthread_spin_lock(sp); \
 	if (status != 0) \
 		acl_msg_fatal("%s(%d): lock error(%s)", \
 			__FILE__, __LINE__, strerror(status)); \
 } while (0)
 
-#define	THREAD_UNLOCK(mutex_in) do { \
-	int   status; \
-	acl_pthread_mutex_t *mutex_ptr = mutex_in; \
-	status = acl_pthread_mutex_unlock(mutex_ptr); \
+# define THREAD_UNLOCK(mutex_in) do { \
+	pthread_spinlock_t *sp = mutex_in; \
+	int   status = pthread_spin_unlock(sp); \
 	if (status != 0) \
 		acl_msg_fatal("%s(%d): unlock error(%s)", \
 			__FILE__, __LINE__, strerror(status)); \
 } while (0)
+
+#else
+
+# define LOCK_INIT(mutex_in) do { \
+	acl_pthread_mutex_t *mutex_ptr = (mutex_in); \
+	int   status = acl_pthread_mutex_init(mutex_ptr, NULL); \
+	if (status != 0) \
+		acl_msg_fatal("%s(%d): init lock error(%s)", \
+			__FILE__, __LINE__, strerror(status)); \
+} while (0)
+
+# define LOCK_DESTROY(mutex_in) do { \
+	acl_pthread_mutex_t *mutex_ptr = (mutex_in); \
+	(void) acl_pthread_mutex_destroy(mutex_ptr); \
+} while (0)
+
+# define THREAD_LOCK(mutex_in) do { \
+	acl_pthread_mutex_t *mutex_ptr = (mutex_in); \
+	int   status = acl_pthread_mutex_lock(mutex_ptr); \
+	if (status != 0) \
+		acl_msg_fatal("%s(%d): lock error(%s)", \
+			__FILE__, __LINE__, strerror(status)); \
+} while (0)
+
+# define THREAD_UNLOCK(mutex_in) do { \
+	acl_pthread_mutex_t *mutex_ptr = (mutex_in); \
+	int   status = acl_pthread_mutex_unlock(mutex_ptr); \
+	if (status != 0) \
+		acl_msg_fatal("%s(%d): unlock error(%s)", \
+			__FILE__, __LINE__, strerror(status)); \
+} while (0)
+
+#endif
 
 #define SET_TIME(x) {  \
 	struct timeval _tv;  \

@@ -38,11 +38,8 @@ typedef struct EVENT_SELECT_THR {
 	fd_set xmask;
 } EVENT_SELECT_THR;
 
-static void event_enable_read(ACL_EVENT *eventp,
-			ACL_VSTREAM *stream,
-			int timeout,
-			ACL_EVENT_NOTIFY_RDWR callback,
-			void *context)
+static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
+	int timeout, ACL_EVENT_NOTIFY_RDWR callback, void *context)
 {
 	const char *myname = "event_enable_read";
 	EVENT_SELECT_THR *event_thr = (EVENT_SELECT_THR *) eventp;
@@ -112,11 +109,8 @@ static void event_enable_read(ACL_EVENT *eventp,
 		event_dog_notify(event_thr->event.evdog);
 }
 
-static void event_enable_listen(ACL_EVENT *eventp,
-			ACL_VSTREAM *stream,
-			int timeout,
-			ACL_EVENT_NOTIFY_RDWR callback,
-			void *context)
+static void event_enable_listen(ACL_EVENT *eventp, ACL_VSTREAM *stream,
+	int timeout, ACL_EVENT_NOTIFY_RDWR callback, void *context)
 {
 	const char *myname = "event_enable_listen";
 	EVENT_SELECT_THR *event_thr = (EVENT_SELECT_THR *) eventp;
@@ -181,11 +175,8 @@ static void event_enable_listen(ACL_EVENT *eventp,
 	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 }
 
-static void event_enable_write(ACL_EVENT *eventp,
-			ACL_VSTREAM *stream,
-			int timeout,
-			ACL_EVENT_NOTIFY_RDWR callback,
-			void *context)
+static void event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
+	int timeout, ACL_EVENT_NOTIFY_RDWR callback, void *context)
 {
 	const char *myname = "event_enable_write";
 	EVENT_SELECT_THR *event_thr = (EVENT_SELECT_THR *) eventp;
@@ -409,10 +400,8 @@ static void event_loop(ACL_EVENT *eventp)
 
 	if (nready < 0) {
 		if (acl_last_error() != ACL_EINTR) {
-			char  ebuf[256];
 			acl_msg_fatal("%s(%d), %s: event_loop: select: %s",
-				__FILE__, __LINE__, myname,
-				acl_last_strerror(ebuf, sizeof(ebuf)));
+				__FILE__, __LINE__, myname, acl_last_serror());
 		}
 		goto TAG_DONE;
 	} else if (nready == 0)
@@ -510,18 +499,15 @@ static void event_free(ACL_EVENT *eventp)
 		acl_msg_fatal("%s, %s(%d): eventp null",
 				__FILE__, myname, __LINE__);
 
-	acl_pthread_mutex_destroy(&event_thr->event.tm_mutex);
-	acl_pthread_mutex_destroy(&event_thr->event.tb_mutex);
+	LOCK_DESTROY(&event_thr->event.tm_mutex);
+	LOCK_DESTROY(&event_thr->event.tb_mutex);
 
 	acl_myfree(eventp);
 }
 
 ACL_EVENT *event_new_select_thr(void)
 {
-	const char *myname = "event_new_select_thr";
 	EVENT_SELECT_THR *event_thr;
-	int   status;
-	char  ebuf[256];
 
 	event_thr = (EVENT_SELECT_THR*) event_alloc(sizeof(EVENT_SELECT_THR));
 
@@ -548,17 +534,8 @@ ACL_EVENT *event_new_select_thr(void)
         FD_ZERO(&event_thr->wmask);
         FD_ZERO(&event_thr->xmask);
 
-	status = acl_pthread_mutex_init(&event_thr->event.tm_mutex, NULL);
-	if (status != 0) {
-		acl_msg_fatal("%s(%d)->%s: pthread_mutex_init error=%s",
-			__FILE__, __LINE__, myname, acl_last_strerror(ebuf, sizeof(ebuf)));
-	}
-
-	status = acl_pthread_mutex_init(&event_thr->event.tb_mutex, NULL);
-	if (status != 0) {
-		acl_msg_fatal("%s(%d)->%s: pthread_mutex_init error=%s",
-			__FILE__, __LINE__, myname, acl_last_strerror(ebuf, sizeof(ebuf)));
-	}
+	LOCK_INIT(&event_thr->event.tm_mutex);
+	LOCK_INIT(&event_thr->event.tb_mutex);
 
 	return ((ACL_EVENT *) event_thr);
 }

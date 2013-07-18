@@ -65,36 +65,34 @@ static void event_dog_open(EVENT_DOG *evdog)
 {
 	const char *myname = "event_dog_open";
 	const char *addr = "127.0.0.1:0";
-	char  ebuf[256];
+	char  buf[32];
+
+	buf[0] = 'x';
+	buf[1] = 0;
 
 	evdog->sstream = acl_vstream_listen(addr, 32);
 	if (evdog->sstream == NULL)
 		acl_msg_fatal("%s(%d): listen on addr(%s) error(%s)",
-			myname, __LINE__, addr,
-			acl_last_strerror(ebuf, sizeof(ebuf)));
+			myname, __LINE__, addr, acl_last_serror());
 
 	evdog->server = acl_vstream_connect(evdog->sstream->local_addr,
 			ACL_BLOCKING, 0, 0, 1024);
 	if (evdog->server == NULL)
 		acl_msg_fatal("%s(%d): connect to addr(%s) error(%s)",
-			myname, __LINE__, addr,
-			acl_last_strerror(ebuf, sizeof(ebuf)));
+			myname, __LINE__, addr, acl_last_serror());
 
-	if (acl_vstream_writen(evdog->server, ebuf, 1) == ACL_VSTREAM_EOF)
+	if (acl_vstream_writen(evdog->server, buf, 1) == ACL_VSTREAM_EOF)
 		acl_msg_fatal("%s(%d): pre write error(%s)",
-			myname, __LINE__,
-			acl_last_strerror(ebuf, sizeof(ebuf)));
+			myname, __LINE__, acl_last_serror());
 
-	evdog->client = acl_vstream_accept(evdog->sstream, ebuf, sizeof(ebuf));
+	evdog->client = acl_vstream_accept(evdog->sstream, buf, sizeof(buf));
 	if (evdog->client == NULL)
 		acl_msg_fatal("%s(%d): accept error(%s)",
-			myname, __LINE__,
-			acl_last_strerror(ebuf, sizeof(ebuf)));
+			myname, __LINE__, acl_last_serror());
 
-	if (acl_vstream_readn(evdog->client, ebuf, 1) == ACL_VSTREAM_EOF)
+	if (acl_vstream_readn(evdog->client, buf, 1) == ACL_VSTREAM_EOF)
 		acl_msg_fatal("%s(%d): pre read error(%s)",
-			myname, __LINE__,
-			acl_last_strerror(ebuf, sizeof(ebuf)));
+			myname, __LINE__, acl_last_serror());
 
 	acl_vstream_close(evdog->sstream);
 	evdog->sstream = NULL;

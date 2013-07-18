@@ -48,18 +48,14 @@ typedef struct EVENT_KERNEL_THR {
 #endif
 } EVENT_KERNEL_THR;
 
-static void event_enable_read(ACL_EVENT *eventp,
-			ACL_VSTREAM *stream,
-			int timeout,
-			ACL_EVENT_NOTIFY_RDWR callback,
-			void *context)
+static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
+	int timeout, ACL_EVENT_NOTIFY_RDWR callback, void *context)
 {
 	const char *myname = "event_enable_read";
 	EVENT_KERNEL_THR *event_thr = (EVENT_KERNEL_THR *) eventp;
 	ACL_EVENT_FDTABLE *fdp;
 	ACL_SOCKET sockfd;
-	char  ebuf[256];
-	int   err = 0;
+	int   err = 0, add = 0;
 
 	sockfd = ACL_VSTREAM_SOCK(stream);
 
@@ -75,9 +71,8 @@ static void event_enable_read(ACL_EVENT *eventp,
 		fdp = event_fdtable_alloc();
 	if (fdp == NULL)
 		acl_msg_fatal("%s(%d): alloc fdtable error", __FILE__, __LINE__);
-
 	if (fdp->flag & EVENT_FDTABLE_FLAG_WRITE)
-		acl_msg_panic("%s(%d)->%s: fd %d: multiple I/O request",
+		acl_msg_panic("%s(%d), %s: fd %d: multiple I/O request",
 			__FILE__, __LINE__, myname, sockfd);
 
 	if ((fdp->flag & EVENT_FDTABLE_FLAG_READ) == 0) {
@@ -95,12 +90,7 @@ static void event_enable_read(ACL_EVENT *eventp,
 #ifdef	USE_FDMAP
 		acl_fdmap_add(event_thr->fdmap, sockfd, fdp);
 #endif
-		EVENT_REG_ADD_READ(err, event_thr->event_fd, sockfd, fdp);
-		if (err < 0) {
-			acl_msg_fatal("%s: %s: %s, err(%d), fd(%d)",
-				myname, EVENT_REG_ADD_TEXT,
-				acl_last_strerror(ebuf, sizeof(ebuf)), err, sockfd);
-		}
+		add = 1;
 	}
 
 	if (fdp->r_callback != callback || fdp->r_context != context) {
@@ -118,24 +108,29 @@ static void event_enable_read(ACL_EVENT *eventp,
 
 	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 
+	if (add) {
+		EVENT_REG_ADD_READ(err, event_thr->event_fd, sockfd, fdp);
+		if (err < 0) {
+			acl_msg_fatal("%s: %s: %s, err(%d), fd(%d)",
+				myname, EVENT_REG_ADD_TEXT,
+				acl_last_serror(), err, sockfd);
+		}
+	}
+
 	/* 主要是为了减少通知次数 */
 	if (event_thr->event.blocked && event_thr->event.evdog
 	    && event_dog_client(event_thr->event.evdog) != stream)
 		event_dog_notify(event_thr->event.evdog);
 }
 
-static void event_enable_listen(ACL_EVENT *eventp,
-			ACL_VSTREAM *stream,
-			int timeout,
-			ACL_EVENT_NOTIFY_RDWR callback,
-			void *context)
+static void event_enable_listen(ACL_EVENT *eventp, ACL_VSTREAM *stream,
+	int timeout, ACL_EVENT_NOTIFY_RDWR callback, void *context)
 {
 	const char *myname = "event_enable_listen";
 	EVENT_KERNEL_THR *event_thr = (EVENT_KERNEL_THR *) eventp;
 	ACL_EVENT_FDTABLE *fdp;
 	ACL_SOCKET sockfd;
-	char  ebuf[256];
-	int   err = 0;
+	int   err = 0, add = 0;
 
 	sockfd = ACL_VSTREAM_SOCK(stream);
 
@@ -169,11 +164,7 @@ static void event_enable_listen(ACL_EVENT *eventp,
 #ifdef	USE_FDMAP
 		acl_fdmap_add(event_thr->fdmap, sockfd, fdp);
 #endif
-		EVENT_REG_ADD_READ(err, event_thr->event_fd, sockfd, fdp);
-		if (err < 0)
-			acl_msg_fatal("%s: %s: %s, err(%d), fd(%d)",
-				myname, EVENT_REG_ADD_TEXT,
-				acl_last_strerror(ebuf, sizeof(ebuf)), err, sockfd);
+		add = 1;
 	}
 
 	if (fdp->r_callback != callback || fdp->r_context != context) {
@@ -190,20 +181,24 @@ static void event_enable_listen(ACL_EVENT *eventp,
 	}
 
 	THREAD_UNLOCK(&event_thr->event.tb_mutex);
+
+	if (add) {
+		EVENT_REG_ADD_READ(err, event_thr->event_fd, sockfd, fdp);
+		if (err < 0)
+			acl_msg_fatal("%s: %s: %s, err(%d), fd(%d)",
+				myname, EVENT_REG_ADD_TEXT,
+				acl_last_serror(), err, sockfd);
+	}
 }
 
-static void event_enable_write(ACL_EVENT *eventp,
-			ACL_VSTREAM *stream,
-			int timeout,
-			ACL_EVENT_NOTIFY_RDWR callback,
-			void *context)
+static void event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
+	int timeout, ACL_EVENT_NOTIFY_RDWR callback, void *context)
 {
 	const char *myname = "event_enable_write";
 	EVENT_KERNEL_THR *event_thr = (EVENT_KERNEL_THR *) eventp;
 	ACL_EVENT_FDTABLE *fdp;
 	ACL_SOCKET sockfd;
-	char  ebuf[256];
-	int   err = 0;
+	int   err = 0, add = 0;
 
 	sockfd = ACL_VSTREAM_SOCK(stream);
 
@@ -236,12 +231,7 @@ static void event_enable_write(ACL_EVENT *eventp,
 #ifdef	USE_FDMAP
 		acl_fdmap_add(event_thr->fdmap, sockfd, fdp);
 #endif
-		EVENT_REG_ADD_WRITE(err, event_thr->event_fd, sockfd, fdp);
-		if (err < 0) {
-			acl_msg_fatal("%s: %s: %s, err(%d), fd(%d)",
-				myname, EVENT_REG_ADD_TEXT,
-				acl_last_strerror(ebuf, sizeof(ebuf)), err, sockfd);
-		}
+		add = 1;
 	}
 
 	if (fdp->w_callback != callback || fdp->w_context != context) {
@@ -259,6 +249,15 @@ static void event_enable_write(ACL_EVENT *eventp,
 
 	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 
+	if (add) {
+		EVENT_REG_ADD_WRITE(err, event_thr->event_fd, sockfd, fdp);
+		if (err < 0) {
+			acl_msg_fatal("%s: %s: %s, err(%d), fd(%d)",
+				myname, EVENT_REG_ADD_TEXT,
+				acl_last_serror(), err, sockfd);
+		}
+	}
+
 	if (event_thr->event.blocked && event_thr->event.evdog
 	    && event_dog_client(event_thr->event.evdog) != stream)
 		event_dog_notify(event_thr->event.evdog);
@@ -272,7 +271,6 @@ static void event_disable_readwrite(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 	EVENT_KERNEL_THR *event_thr = (EVENT_KERNEL_THR *) eventp;
 	ACL_EVENT_FDTABLE *fdp;
 	ACL_SOCKET sockfd;
-	char  ebuf[256];
 	int   err = 0;
 
 	sockfd = ACL_VSTREAM_SOCK(stream);
@@ -326,7 +324,7 @@ static void event_disable_readwrite(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 
 	if (err < 0) {
 		acl_msg_fatal("%s: %s: %s", myname, EVENT_REG_DEL_TEXT,
-			acl_last_strerror(ebuf, sizeof(ebuf)));
+			acl_last_serror());
 	}
 
 #ifdef	USE_FDMAP
@@ -435,19 +433,14 @@ static void event_loop(ACL_EVENT *eventp)
 	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 
 	event_thr->event.blocked = 1;
-	EVENT_BUFFER_READ(nready,
-			event_thr->event_fd,
-			event_thr->event_buf,
-			event_thr->event_fdslots,
-			delay);
+	EVENT_BUFFER_READ(nready, event_thr->event_fd, event_thr->event_buf,
+		event_thr->event_fdslots, delay);
 	event_thr->event.blocked = 0;
 
 	if (nready < 0) {
 		if (acl_last_error() != ACL_EINTR) {
-			char  ebuf[256];
 			acl_msg_fatal("%s(%d), %s: event_loop: select: %s",
-				__FILE__, __LINE__, myname,
-				acl_last_strerror(ebuf, sizeof(ebuf)));
+				__FILE__, __LINE__, myname, acl_last_serror());
 		}
 		goto TAG_DONE;
 	} else if (nready == 0)
@@ -544,10 +537,10 @@ static void event_free(ACL_EVENT *eventp)
 
 	if (eventp == NULL)
 		acl_msg_fatal("%s, %s(%d): eventp null",
-				__FILE__, myname, __LINE__);
+			__FILE__, myname, __LINE__);
 
-	acl_pthread_mutex_destroy(&event_thr->event.tm_mutex);
-	acl_pthread_mutex_destroy(&event_thr->event.tb_mutex);
+	LOCK_DESTROY(&event_thr->event.tm_mutex);
+	LOCK_DESTROY(&event_thr->event.tb_mutex);
 
 #ifdef	USE_FDMAP
 	acl_fdmap_free(event_thr->fdmap);
@@ -559,9 +552,7 @@ static void event_free(ACL_EVENT *eventp)
 
 ACL_EVENT *event_new_kernel_thr(int fdsize acl_unused)
 {
-	const char *myname = "event_new_kernel_thr";
 	EVENT_KERNEL_THR *event_thr;
-	int   status;
 	static int __default_max_events = 1024;
 
 	event_thr = (EVENT_KERNEL_THR*) event_alloc(sizeof(EVENT_KERNEL_THR));
@@ -585,19 +576,8 @@ ACL_EVENT *event_new_kernel_thr(int fdsize acl_unused)
 	event_thr->event.event.timer_keep           = event_timer_keep_thr;
 	event_thr->event.event.timer_ifkeep         = event_timer_ifkeep_thr;
 
-	status = acl_pthread_mutex_init(&event_thr->event.tm_mutex, NULL);
-	if (status != 0) {
-		char tbuf[256];
-		acl_msg_fatal("%s(%d)->%s: pthread_mutex_init error=%s",
-			__FILE__, __LINE__, myname, acl_last_strerror(tbuf, sizeof(tbuf)));
-	}
-
-	status = acl_pthread_mutex_init(&event_thr->event.tb_mutex, NULL);
-	if (status != 0) {
-		char tbuf[256];
-		acl_msg_fatal("%s(%d)->%s: pthread_mutex_init error=%s",
-			__FILE__, __LINE__, myname, acl_last_strerror(tbuf, sizeof(tbuf)));
-	}
+	LOCK_INIT(&event_thr->event.tm_mutex);
+	LOCK_INIT(&event_thr->event.tb_mutex);
 
 	EVENT_REG_INIT_HANDLE(event_thr->event_fd, fdsize);
 	event_thr->event_fdslots = __default_max_events;
