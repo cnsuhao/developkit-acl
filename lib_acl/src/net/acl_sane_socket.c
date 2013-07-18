@@ -36,6 +36,7 @@ struct SOCK_ADDR {
 	union {
 		struct sockaddr_in in;
 		struct sockaddr_un un;
+		struct sockaddr sa;
 	} sa;
 };
 #endif
