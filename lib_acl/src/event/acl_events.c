@@ -73,9 +73,8 @@ static int event_limit(int fdsize)
 
 #ifdef ACL_UNIX
 	if ((fdsize = acl_open_limit(fdsize)) < 0) {
-		char  tbuf[256];
 		acl_msg_fatal("%s: unable to determine open file limit, err=%s",
-			myname, acl_last_strerror(tbuf, sizeof(tbuf)));
+			myname, acl_last_serror());
 	}
 #else
 	if (fdsize == 0)

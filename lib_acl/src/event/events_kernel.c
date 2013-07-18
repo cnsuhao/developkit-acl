@@ -698,20 +698,15 @@ static void event_loop(ACL_EVENT *eventp)
 
 	/* 调用 epoll/kquque/devpoll 系统调用检测可用描述字 */
 
-	EVENT_BUFFER_READ(nready,
-			ev->event_fd,
-			ev->event_buf,
-			ev->event_fdslots,
-			delay);
+	EVENT_BUFFER_READ(nready, ev->event_fd, ev->event_buf,
+		ev->event_fdslots, delay);
 
 	if (eventp->nested++ > 0)
 		acl_msg_fatal("%s(%d): recursive call", myname, __LINE__);
 	if (nready < 0) {
 		if (acl_last_error() != ACL_EINTR) {
-			char  ebuf[256];
 			acl_msg_fatal("%s(%d), %s: select: %s",
-				__FILE__, __LINE__, myname,
-				acl_last_strerror(ebuf, sizeof(ebuf)));
+				__FILE__, __LINE__, myname, acl_last_serror());
 		}
 		goto TAG_DONE;
 	} else if (nready == 0)

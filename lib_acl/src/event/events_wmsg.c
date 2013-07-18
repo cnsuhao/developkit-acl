@@ -636,11 +636,8 @@ static BOOL InitApplication(const char *class_name, HINSTANCE hInstance)
 
 	/* Register the window class. */
 	if (RegisterClassEx(&wcx) == 0) {
-		char  buf[256];
-
 		acl_msg_error("%s(%d): RegisterClassEx error(%d, %s)",
-			myname, __LINE__, acl_last_error(),
-			acl_last_strerror(buf, sizeof(buf)));
+			myname, __LINE__, acl_last_error(), acl_last_serror());
 		return (FALSE);
 	} else
 		return (TRUE);

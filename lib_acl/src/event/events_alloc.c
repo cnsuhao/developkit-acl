@@ -148,17 +148,11 @@ ACL_EVENT *event_alloc(size_t size)
 {
 	const char *myname = "event_alloc";
 	ACL_EVENT *eventp;
-	char  ebuf[256];
 
 	if (size < sizeof(ACL_EVENT))
 		acl_msg_fatal("%s(%d): size(%d) too small",
 			myname, __LINE__, (int) size);
 	eventp = acl_mycalloc(1, size);
-	if (eventp == NULL) {
-		acl_msg_fatal("%s(%d): calloc error(%s)",
-			myname, __LINE__,
-			acl_last_strerror(ebuf, sizeof(ebuf)));
-	}
 
 	ACL_SAFE_STRNCPY(eventp->name, "events_alloc", sizeof(eventp->name));
 	eventp->init_fn              = NULL;
