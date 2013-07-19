@@ -153,6 +153,13 @@ struct	ACL_EVENT {
 	int  (*timer_ifkeep)(ACL_EVENT *eventp, ACL_EVENT_NOTIFY_TIME, void *);
 };
 
+/*
+如果采用自旋锁，性能反而下降非常厉害，可能与加锁时间片长有关系
+#ifdef	ACL_HAS_SPINLOCK
+#define	EVENT_USE_SPINLOCK
+#endif
+*/
+
 typedef struct EVENT_THR {
 	ACL_EVENT event;
 

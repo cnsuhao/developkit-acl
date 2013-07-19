@@ -9,6 +9,7 @@ extern "C" {
 
 extern ACL_EVENT_FDTABLE *event_fdtable_alloc(void);
 extern void event_fdtable_free(ACL_EVENT_FDTABLE *fdp);
+extern void event_fdtable_reset(ACL_EVENT_FDTABLE *fdp);
 
 #ifdef	__cplusplus
 }
