@@ -35,6 +35,8 @@
 
 #endif
 
+#include "../event/events_fdtable.h"
+
  /*
   * Initialization of the three pre-defined streams. Pre-allocate a static
   * I/O buffer for the standard error stream, so that the error handler can
@@ -2299,6 +2301,8 @@ void acl_vstream_reset(ACL_VSTREAM *stream)
 		stream->read_buf_len = 0;
 		ACL_SAFE_STRNCPY(stream->errbuf, "OK", sizeof(stream->errbuf));
 		acl_vstream_clean_close_handle(stream);
+		if (stream->fdp != NULL)
+			event_fdtable_reset(stream->fdp);
 	}
 }
 
@@ -2335,6 +2339,8 @@ void acl_vstream_free(ACL_VSTREAM *stream)
 		acl_array_destroy(stream->close_handle_lnk, NULL);
 	}
 
+	if (stream->fdp != NULL)
+		event_fdtable_free(stream->fdp);
 	if (stream->read_buf != NULL)
 		acl_myfree(stream->read_buf);
 	if (stream->wbuf != NULL)
@@ -2416,6 +2422,8 @@ int acl_vstream_close(ACL_VSTREAM *stream)
 	else if (ACL_VSTREAM_FILE(stream) != ACL_FILE_INVALID && stream->fclose_fn)
 		ret = stream->fclose_fn(ACL_VSTREAM_FILE(stream));
 
+	if (stream->fdp != NULL)
+		event_fdtable_free(stream->fdp);
 	if (stream->read_buf != NULL)
 		acl_myfree(stream->read_buf);
 	if (stream->wbuf != NULL)
