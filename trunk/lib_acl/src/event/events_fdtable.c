@@ -21,8 +21,6 @@
 ACL_EVENT_FDTABLE *event_fdtable_alloc()
 {
 	ACL_EVENT_FDTABLE *fdp = acl_mycalloc(1, sizeof(ACL_EVENT_FDTABLE));
-	if (fdp == NULL)
-		return (NULL);
 	fdp->fdidx = -1;
 	fdp->fdidx_ready = -1;
 	return (fdp);
@@ -31,4 +29,11 @@ ACL_EVENT_FDTABLE *event_fdtable_alloc()
 void event_fdtable_free(ACL_EVENT_FDTABLE *fdp)
 {
 	acl_myfree(fdp);
+}
+
+void event_fdtable_reset(ACL_EVENT_FDTABLE *fdp)
+{
+	memset(fdp, 0, sizeof(ACL_EVENT_FDTABLE));
+	fdp->fdidx = -1;
+	fdp->fdidx_ready = -1;
 }
