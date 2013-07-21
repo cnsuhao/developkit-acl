@@ -96,8 +96,6 @@ static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 		add = 1;
 	}
 
-	THREAD_UNLOCK(&event_thr->event.tb_mutex);
-
 	if (timeout > 0) {
 		fdp->r_timeout = timeout * 1000000;
 		fdp->r_ttl = eventp->event_present + fdp->r_timeout;
@@ -114,6 +112,8 @@ static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 				acl_last_serror(), err, sockfd);
 		}
 	}
+
+	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 
 	/* 主要是为了减少通知次数 */
 	if (event_thr->event.blocked && event_thr->event.evdog
@@ -147,6 +147,11 @@ static void event_enable_listen(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 		fdp->stream = stream;
 	}
 
+	if (fdp->r_callback != callback || fdp->r_context != context) {
+		fdp->r_callback = callback;
+		fdp->r_context = context;
+	}
+
 	THREAD_LOCK(&event_thr->event.tb_mutex);
 
 	if ((fdp->flag & EVENT_FDTABLE_FLAG_READ) == 0) {
@@ -164,19 +169,12 @@ static void event_enable_listen(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 		add = 1;
 	}
 
-	THREAD_UNLOCK(&event_thr->event.tb_mutex);
-
 	if (timeout > 0) {
 		fdp->r_timeout = timeout * 1000000;
 		fdp->r_ttl = eventp->event_present + fdp->r_timeout;
 	} else {
 		fdp->r_ttl = 0;
 		fdp->r_timeout = 0;
-	}
-
-	if (fdp->r_callback != callback || fdp->r_context != context) {
-		fdp->r_callback = callback;
-		fdp->r_context = context;
 	}
 
 	if (add) {
@@ -186,6 +184,8 @@ static void event_enable_listen(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 				myname, EVENT_REG_ADD_TEXT,
 				acl_last_serror(), err, sockfd);
 	}
+
+	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 }
 
 static void event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
@@ -231,8 +231,6 @@ static void event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 		add = 1;
 	}
 
-	THREAD_UNLOCK(&event_thr->event.tb_mutex);
-
 	if (timeout > 0) {
 		fdp->w_timeout = timeout * 1000000;
 		fdp->w_ttl = eventp->event_present + fdp->w_timeout;
@@ -254,6 +252,8 @@ static void event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 				acl_last_serror(), err, sockfd);
 		}
 	}
+
+	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 
 	if (event_thr->event.blocked && event_thr->event.evdog
 	    && event_dog_client(event_thr->event.evdog) != stream)
@@ -310,8 +310,6 @@ static void event_disable_readwrite(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 		eventp->fdtabs_ready[fdp->fdidx_ready] = NULL;
 	}
 
-	THREAD_UNLOCK(&event_thr->event.tb_mutex);
-
 #ifdef	EVENT_REG_DEL_BOTH
 	EVENT_REG_DEL_BOTH(err, event_thr->event_fd, sockfd);
 	if (fdp->flag & EVENT_FDTABLE_FLAG_READ)
@@ -328,6 +326,8 @@ static void event_disable_readwrite(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 		stream->nrefer--;
 	}
 #endif
+
+	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 
 	if (err < 0) {
 		acl_msg_fatal("%s: %s: %s", myname, EVENT_REG_DEL_TEXT,
