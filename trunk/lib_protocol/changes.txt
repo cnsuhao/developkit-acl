@@ -1,4 +1,7 @@
 
+239) 2013.7.23
+239.1) bugfix: http_hdr_req.c->http_hdr_req_create() 分离 URL 时有误
+
 238) 2013.5.22
 238.1) performance: http 协议库提高了 HTTP 头的解析速度，由原来的每秒 5 万
 多次提升至每秒 17 万多次
