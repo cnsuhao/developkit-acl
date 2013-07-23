@@ -61,8 +61,6 @@
 #include "template.h"
 
 int   acl_var_aio_pid;
-char *acl_var_aio_procname;
-char *acl_var_aio_log_file;
 
 int   acl_var_aio_buf_size;
 int   acl_var_aio_rw_timeout;
@@ -70,21 +68,16 @@ int   acl_var_aio_in_flow_delay;
 int   acl_var_aio_max_threads;
 int   acl_var_aio_thread_idle_limit;
 int   acl_var_aio_idle_limit;
-char *acl_var_aio_queue_dir;
-char *acl_var_aio_owner;
 int   acl_var_aio_delay_sec;
 int   acl_var_aio_delay_usec;
-char *acl_var_aio_event_mode;
 int   acl_var_aio_daemon_timeout;
 int   acl_var_aio_use_limit;
-char *acl_var_aio_pid_dir;
-char *acl_var_aio_access_allow;
 int   acl_var_aio_master_maxproc;
 int   acl_var_aio_max_accept;
 int   acl_var_aio_min_notify;
-char *acl_var_aio_accept_alone;
-int   acl_var_aio_enable_core;
 int   acl_var_aio_quick_abort;
+int   acl_var_aio_enable_core;
+int   acl_var_aio_accept_timer;
 
 static ACL_CONFIG_INT_TABLE __conf_int_tab[] = {
         { ACL_VAR_AIO_BUF_SIZE, ACL_DEF_AIO_BUF_SIZE, &acl_var_aio_buf_size, 0, 0 },
@@ -102,8 +95,19 @@ static ACL_CONFIG_INT_TABLE __conf_int_tab[] = {
 	{ ACL_VAR_AIO_MIN_NOTIFY, ACL_DEF_AIO_MIN_NOTIFY, &acl_var_aio_min_notify, 0, 0 },
 	{ ACL_VAR_AIO_QUICK_ABORT, ACL_DEF_AIO_QUICK_ABORT, &acl_var_aio_quick_abort, 0, 0 },
 	{ ACL_VAR_AIO_ENABLE_CORE, ACL_DEF_AIO_ENABLE_CORE, &acl_var_aio_enable_core, 0, 0 },
+	{ ACL_VAR_AIO_ACCEPT_TIMER, ACL_DEF_AIO_ACCEPT_TIMER, &acl_var_aio_accept_timer, 0, 0 },
         { 0, 0, 0, 0, 0 },
 };
+
+char *acl_var_aio_procname;
+char *acl_var_aio_log_file;
+
+char *acl_var_aio_queue_dir;
+char *acl_var_aio_owner;
+char *acl_var_aio_event_mode;
+char *acl_var_aio_pid_dir;
+char *acl_var_aio_access_allow;
+char *acl_var_aio_accept_alone;
 
 static ACL_CONFIG_STR_TABLE __conf_str_tab[] = {
         { ACL_VAR_AIO_QUEUE_DIR, ACL_DEF_AIO_QUEUE_DIR, &acl_var_aio_queue_dir },
@@ -663,15 +667,19 @@ static void aio_server_accept_pass(ACL_ASTREAM *astream, void *context)
 
 #endif
 
-/* aio_server_accept_sock - accept client connection request */
+/* aio_server_accept_sock2 - accept client connection request */
 
-static void aio_server_accept_sock(ACL_ASTREAM *astream, void *context)
+static int aio_server_accept_sock2(ACL_ASTREAM *astream, ACL_AIO *aio)
 {
-	const char *myname = "aio_serer_accept_inet";
+	const char *myname = "aio_serer_accept_sock2";
 	ACL_VSTREAM *vstream = acl_aio_vstream(astream);
-	ACL_AIO *aio = (ACL_AIO *) context;
-	int     listen_fd = ACL_VSTREAM_FILE(vstream);
-	int     time_left = -1, fd, *fds, i, j, delay_listen = 0, sock_type;
+	int    listen_fd = ACL_VSTREAM_SOCK(vstream);
+	int    fd, *fds, i, j, delay_listen = 0, sock_type;
+
+	if (aio_server_pre_accept)
+		aio_server_pre_accept(aio_server_name, aio_server_argv);
+
+	fds = (int*) tls_alloc(sizeof(int) * acl_var_aio_max_accept);
 
 	/*
 	 * Be prepared for accept() to fail because some other process already
@@ -680,32 +688,23 @@ static void aio_server_accept_sock(ACL_ASTREAM *astream, void *context)
 	 * accept() succeeds, be sure to disable non-blocking I/O, in order to
 	 * minimize confusion.
 	 */
-	if (acl_var_aio_idle_limit > 0)
-		time_left = (int) ((acl_aio_cancel_timer(aio, aio_server_timeout,
-			(void *) aio) + 999999) / 1000000);
-	else
-		time_left = acl_var_aio_idle_limit;
-
-	if (aio_server_pre_accept)
-		aio_server_pre_accept(aio_server_name, aio_server_argv);
-
-	fds = (int*) tls_alloc(sizeof(int) * acl_var_aio_max_accept);
 
 	for (i = 0; i < acl_var_aio_max_accept; i++) {
 		fd = acl_accept(listen_fd, NULL, 0, &sock_type);
 		if (fd >= 0) {
 			/* TCP 连接避免发送延迟现象 */
 			if (sock_type == AF_INET)
-				acl_tcp_set_nodelay(fds[i]);
+				acl_tcp_set_nodelay(fd);
 			fds[i] = fd;
 		} else if (errno == EMFILE) {
 			delay_listen = 1;
-			acl_msg_warn("accept connection: %s", acl_last_serror());
+			acl_msg_warn("%s(%d), %s: accept connection: %s",
+				__FILE__, __LINE__, myname, acl_last_serror());
 		} else if (errno == EAGAIN || errno == EINTR)
 			break;
 		else
-			acl_msg_fatal("%s: accept connection: %s",
-				myname, strerror(errno));
+			acl_msg_fatal("%s(%d), %s: accept connection: %s",
+				__FILE__, __LINE__, myname, acl_last_serror());
 	}
 
 	if (acl_var_aio_master_maxproc > 1 && i >= acl_var_aio_min_notify
@@ -729,13 +728,40 @@ static void aio_server_accept_sock(ACL_ASTREAM *astream, void *context)
 		&& acl_myflock(ACL_VSTREAM_FILE(aio_server_lock),
 			ACL_INTERNAL_LOCK, ACL_MYFLOCK_OP_NONE) < 0)
 	{
-		acl_msg_fatal("%s: select unlock: %s", myname, strerror(errno));
+		acl_msg_fatal("%s(%d), %s: select unlock: %s",
+			__FILE__, __LINE__, myname, acl_last_serror());
 	}
 
 	if (delay_listen) {
 		acl_aio_disable_read(astream);
 		acl_aio_request_timer(aio, restart_listen, astream, 2000000, 0);
 	}
+
+	return i;
+}
+
+static void aio_server_accept_timer(int event acl_unused, void *context)
+{
+	ACL_ASTREAM *astream = (ACL_ASTREAM*) context;
+	ACL_AIO *aio = acl_aio_handle(astream);
+
+	(void) aio_server_accept_sock2(astream, aio);
+	acl_aio_request_timer(aio, aio_server_accept_timer,
+		astream, (acl_int64) acl_var_aio_accept_timer * 1000000, 0);
+}
+
+static void aio_server_accept_sock(ACL_ASTREAM *astream, void *context)
+{
+	ACL_AIO *aio = (ACL_AIO *) context;
+	int    time_left = -1;
+
+	if (acl_var_aio_idle_limit > 0)
+		time_left = (int) ((acl_aio_cancel_timer(aio, aio_server_timeout,
+			(void *) aio) + 999999) / 1000000);
+	else
+		time_left = acl_var_aio_idle_limit;
+
+	(void) aio_server_accept_sock2(astream, aio);
 
 	if (time_left > 0)
 		acl_aio_request_timer(aio, aio_server_timeout,
@@ -959,6 +985,11 @@ static ACL_ASTREAM **create_listener(ACL_AIO *aio, int event_mode acl_unused,
 		/* 设置异步监听 */
 		acl_aio_listen(astream);
 		listen_astreams[i++] = astream;
+
+		/* 为了保证 accept 的优先级，可以设置接收定时器 */
+		if (acl_var_aio_accept_timer > 0)
+			acl_aio_request_timer(aio, aio_server_accept_timer,
+				astream, (acl_int64) acl_var_aio_accept_timer * 1000000, 0);
 	}
 
 	return (listen_astreams);
