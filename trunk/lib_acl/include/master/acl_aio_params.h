@@ -97,6 +97,10 @@ extern int   acl_var_aio_enable_core;
 #define	ACL_DEF_AIO_QUICK_ABORT		1
 extern int acl_var_aio_quick_abort;
 
+#define	ACL_VAR_AIO_ACCEPT_TIMER	"aio_accept_timer"
+#define	ACL_DEF_AIO_ACCEPT_TIMER	0
+extern int acl_var_aio_accept_timer;
+
 #endif /* ACL_UNIX */
 
 #ifdef	__cplusplus

@@ -1,3 +1,9 @@
+
+378) 2013.7.23
+378.1) feature: acl_aio_server.c, aio_accept_timer 添加了一个配置参数：
+aio_accept_timer，当该值 > 0 时，内部便启动一个定时器，定时尝试接收客户
+端连接，从而达到提升连接事件优先的目的
+
 377) 2013.7.18
 377.1) performance: event/event_kernel_thr.c, 优化多线程方式下事件引擎的
 运行速度；acl_master 框架中，当事件引擎选用 kernel 方式时，不需要打开
