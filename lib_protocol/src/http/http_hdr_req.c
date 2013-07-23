@@ -176,17 +176,17 @@ HTTP_HDR_REQ *http_hdr_req_create(const char *url,
 	acl_vstring_strcpy(req_line, method);
 	acl_vstring_strcat(req_line, " ");
 
-#if 1
-	ptr = strrchr(url, '/');
+	if (strncasecmp(url, "http://", sizeof("http://") - 1) == 0)
+		url += sizeof("http://") - 1;
+	else if (strncasecmp(url, "https://", sizeof("https://") - 1) == 0)
+		url += sizeof("https://") -1;
+	ptr = strchr(url, '/');
 	if (ptr)
 		acl_vstring_strcat(req_line, ptr);
 	else {
 		ACL_VSTRING_ADDCH(req_line, '/');
 		ACL_VSTRING_TERMINATE(req_line);
 	}
-#else
-	acl_vstring_strcat(req_line, url);
-#endif
 
 	acl_vstring_strcat(req_line, " ");
 	acl_vstring_strcat(req_line, version);
