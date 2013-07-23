@@ -73,8 +73,10 @@ bool master_service::thread_on_read(acl::socket_stream* stream)
 	return keep_alive ? true : false;
 }
 
-bool master_service::thread_on_accept(acl::socket_stream*)
+bool master_service::thread_on_accept(acl::socket_stream* conn)
 {
+	if (0)
+		acl_tcp_so_linger(conn->sock_handle(), 1, 0);
 	return true;
 }
 

@@ -3,6 +3,13 @@
 
 int main(int argc, char* argv[])
 {
+#if 0
+	acl_mem_slice_init(8, 1024, 100000,
+			ACL_SLICE_FLAG_GC2 |
+			ACL_SLICE_FLAG_RTGC_OFF |
+			ACL_SLICE_FLAG_LP64_ALIGN);
+#endif
+
 	// ≥ı ºªØ acl ø‚
 	acl::acl_cpp_init();
 
