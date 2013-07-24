@@ -1199,6 +1199,9 @@ int tpl_save_as(const tpl_t* tpl, const char* filename)
     return TPL_OPEN_ERROR;
 }
 
+#ifdef WIN32
+#define write _write
+#endif
 
 int tpl_write(const tpl_t* tpl, int fd)
 {  
