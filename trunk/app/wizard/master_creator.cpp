@@ -51,12 +51,25 @@ static bool create_common()
 {
 	if (copy_and_replace("Makefile", "Makefile") == false)
 		return false;
-	string file(master_name);
-	file << ".sln";
+	string file;
+
+	// for vc2003
+	file.format("%s.sln", master_name);
 	if (copy_and_replace("master_service.sln", file.c_str()) == false)
 		return false;
 	file.format("%s.vcproj", master_name);
 	if (copy_and_replace("master_service.vcproj", file.c_str()) == false)
+		return false;
+
+	// for vc2012
+	file.format("%s_vc2012.sln", master_name);
+	if (copy_and_replace("master_service_vc2012.sln", file.c_str()) == false)
+		return false;
+	file.format("%s_vc2012.vcxproj", master_name);
+	if (copy_and_replace("master_service_vc2012.vcxproj", file.c_str()) == false)
+		return false;
+	file.format("%s_vc2012.vcxproj.filters", master_name);
+	if (copy_and_replace("master_service_vc2012.vcxproj.filters", file.c_str()) == false)
 		return false;
 
 	const char* name = "common_files";
