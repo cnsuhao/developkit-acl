@@ -737,6 +737,7 @@ const std::list<acl::string>& string::split(const char* sep)
 		char* ptr = (char*) it.data;
 		m_psList->push_back(ptr);
 	}
+	acl_argv_free(argv);
 	return (*m_psList);
 }
 
@@ -754,6 +755,7 @@ const std::vector<acl::string>& string::split2(const char* sep)
 		char* ptr = (char*) it.data;
 		m_psList2->push_back(ptr);
 	}
+	acl_argv_free(argv)£»
 	return (*m_psList2);
 }
 
