@@ -14,26 +14,25 @@ static void __get_host_from_url(char *buf, size_t size, const char *url);
 static void __hdr_init(HTTP_HDR_REQ *hh)
 {
 	const char  *myname = "__hdr_init";
-	char  ebuf[256];
 
 	hh->url_part = acl_vstring_alloc(128);
 	if (hh->url_part == NULL)
 		acl_msg_fatal("%s, %s(%d): alloc error(%s)",
-			__FILE__, myname, __LINE__, acl_last_strerror(ebuf, sizeof(ebuf)));
+			__FILE__, myname, __LINE__, acl_last_serror());
 	hh->url_path = acl_vstring_alloc(64);
 	if (hh->url_path == NULL)
 		acl_msg_fatal("%s, %s(%d): alloc error(%s)",
-			__FILE__, myname, __LINE__, acl_last_strerror(ebuf, sizeof(ebuf)));
+			__FILE__, myname, __LINE__, acl_last_serror());
 
 	hh->url_params = acl_vstring_alloc(64);
 	if (hh->url_params == NULL)
 		acl_msg_fatal("%s, %s(%d): alloc error(%s)",
-			__FILE__, myname, __LINE__, acl_last_strerror(ebuf, sizeof(ebuf)));
+			__FILE__, myname, __LINE__, acl_last_serror());
 
 	hh->file_path = acl_vstring_alloc(256);
 	if (hh->file_path == NULL)
 		acl_msg_fatal("%s, %s(%d): alloc error(%s)",
-			__FILE__, myname, __LINE__, acl_last_strerror(ebuf, sizeof(ebuf)));
+			__FILE__, myname, __LINE__, acl_last_serror());
 }
 
 static void __request_args_free_fn(void *arg)
@@ -113,7 +112,7 @@ HTTP_HDR_REQ *http_hdr_req_new(void)
 	if (var_http_tls_cache <= 0) {
 		hh = (HTTP_HDR_REQ *) http_hdr_new(sizeof(HTTP_HDR_REQ));
 		__hdr_init(hh);
-		return (hh);
+		return hh;
 	}
 
 #ifdef	USE_TLS_EX
@@ -128,7 +127,7 @@ HTTP_HDR_REQ *http_hdr_req_new(void)
 	if (hh) {
 		__hdr_reset(hh, 1);
 		http_hdr_reset((HTTP_HDR *) hh);
-		return (hh);
+		return hh;
 	}
 #else
 	acl_pthread_once(&once_control, cache_init);
@@ -141,13 +140,13 @@ HTTP_HDR_REQ *http_hdr_req_new(void)
 	if (hh) {
 		__hdr_reset(hh, 1);
 		http_hdr_reset((HTTP_HDR *) hh);
-		return (hh);
+		return hh;
 	}
 #endif
 
 	hh = (HTTP_HDR_REQ *) http_hdr_new(sizeof(HTTP_HDR_REQ));
 	__hdr_init(hh);
-	return (hh);
+	return hh;
 }
 
 HTTP_HDR_REQ *http_hdr_req_create(const char *url,
@@ -158,19 +157,20 @@ HTTP_HDR_REQ *http_hdr_req_create(const char *url,
 	ACL_VSTRING *req_line = acl_vstring_alloc(256);
 	HTTP_HDR_ENTRY *entry;
 	const char *ptr;
-	static char *__user_agent = "Mozilla/5.0 (Windows; U; Windows NT 5.0; zh-CN; rv:1.9.0.3) Gecko/2008092417 ACL/3.0.6";
+	static char *__user_agent = "Mozilla/5.0 (Windows; U; Windows NT 5.0"
+		"; zh-CN; rv:1.9.0.3) Gecko/2008092417 ACL/3.0.6";
 
 	if (url == NULL || *url == 0) {
 		acl_msg_error("%s(%d): url invalid", myname, __LINE__);
-		return (NULL);
+		return NULL;
 	}
 	if (method == NULL || *method == 0) {
 		acl_msg_error("%s(%d): method invalid", myname, __LINE__);
-		return (NULL);
+		return NULL;
 	}
 	if (version == NULL || *version == 0) {
 		acl_msg_error("%s(%d): version invalid", myname, __LINE__);
-		return (NULL);
+		return NULL;
 	}
 
 	acl_vstring_strcpy(req_line, method);
@@ -197,7 +197,7 @@ HTTP_HDR_REQ *http_hdr_req_create(const char *url,
 	if (entry == NULL) {
 		acl_msg_error("%s(%d): http_hdr_entry_new return null for (%s)",
 			myname, __LINE__, acl_vstring_str(req_line));
-		return (NULL);
+		return NULL;
 	}
 
 	hdr_req = http_hdr_req_new();
@@ -205,7 +205,7 @@ HTTP_HDR_REQ *http_hdr_req_create(const char *url,
 	hdr_req->flag |= (HTTP_HDR_REQ_FLAG_PARSE_PARAMS | HTTP_HDR_REQ_FLAG_PARSE_COOKIE);
 	if (http_hdr_req_line_parse(hdr_req) < 0) {
 		http_hdr_req_free(hdr_req);
-		return (NULL);
+		return NULL;
 	}
 
 	hdr_req->host[0] = 0;
@@ -215,22 +215,20 @@ HTTP_HDR_REQ *http_hdr_req_create(const char *url,
 	http_hdr_put_str(&hdr_req->hdr, "Connection", "Close");
 	http_hdr_put_str(&hdr_req->hdr, "User-Agent", __user_agent);
 
-	return (hdr_req);
+	return hdr_req;
 }
 
 static void clone_table_entry(ACL_HTABLE_INFO *info, void *arg)
 {
 	const char *myname = "clone_table_entry";
 	ACL_HTABLE *table = (ACL_HTABLE*) arg;
-	char *name, *value, ebuf[256];
+	char *value;
 
-	name = acl_mystrdup(info->key.key);
 	value = acl_mystrdup(info->value);
 
-	if (acl_htable_enter(table, name, value) == NULL)
+	if (acl_htable_enter(table, info->key.key, value) == NULL)
 		acl_msg_fatal("%s, %s(%d): acl_htable_enter error=%s",
-			__FILE__, myname, __LINE__,
-			acl_last_strerror(ebuf, sizeof(ebuf)));
+			__FILE__, myname, __LINE__, acl_last_serror());
 }
 
 HTTP_HDR_REQ *http_hdr_req_clone(const HTTP_HDR_REQ* hdr_req)
@@ -259,7 +257,7 @@ HTTP_HDR_REQ *http_hdr_req_clone(const HTTP_HDR_REQ* hdr_req)
 				(void*) hh->cookies_table);
 	}
 
-	return (hh);
+	return hh;
 }
 
 /* 释放一个 HTTP_HDR_REQ 结构 */
@@ -318,7 +316,6 @@ static void __add_cookie_item(ACL_HTABLE *table, const char *data)
 	char *value;
 	char *ptr;
 	int   i, j;
-	char  ebuf[256];
 
 #undef	RETURN
 #define	RETURN do {  \
@@ -368,10 +365,10 @@ static void __add_cookie_item(ACL_HTABLE *table, const char *data)
 	name = ptr;
 
 	/* 有些站点的COOKIE比较弱，如和讯的reg.hexun.com，COOKIE名会有重复
-	* 的情况，所以必须判断一下，不必重复存储相同名字的COOKIE值，即如果
-	* 出现重复COOKIE名，则只存储第一个，这样就避免了采用哈希方式存储的
-	* 漏内存的现象发生。--- zsx, 2008.1.8
-	*/
+	 * 的情况，所以必须判断一下，不必重复存储相同名字的COOKIE值，即如果
+	 * 出现重复COOKIE名，则只存储第一个，这样就避免了采用哈希方式存储的
+	 * 漏内存的现象发生。--- zsx, 2008.1.8
+	 */
 	if (acl_htable_find(table, name) != NULL) {
 		RETURN;
 	}
@@ -379,7 +376,7 @@ static void __add_cookie_item(ACL_HTABLE *table, const char *data)
 	str = acl_vstring_alloc(256);
 	if (str == NULL)
 		acl_msg_fatal("%s, %s(%d): vstring_alloc error=%s",
-			__FILE__, myname, __LINE__, acl_last_strerror(ebuf, sizeof(ebuf)));
+			__FILE__, myname, __LINE__, acl_last_serror());
 	j = 0;
 
 	for (i = 1; i < argv->argc; i++) {
@@ -405,8 +402,7 @@ static void __add_cookie_item(ACL_HTABLE *table, const char *data)
 
 	if (acl_htable_enter(table, name, value) == NULL)
 		acl_msg_fatal("%s, %s(%d): acl_htable_enter error=%s",
-			__FILE__, myname, __LINE__,
-			acl_last_strerror(ebuf, sizeof(ebuf)));
+			__FILE__, myname, __LINE__, acl_last_serror());
 
 	RETURN;
 }
@@ -424,14 +420,15 @@ int http_hdr_req_cookies_parse(HTTP_HDR_REQ *hh)
 		acl_msg_fatal("%s, %s(%d): input invalid",
 			__FILE__, myname, __LINE__);
 	if ((hh->flag & HTTP_HDR_REQ_FLAG_PARSE_COOKIE) == 0)
-		return (0);
+		return 0;
 
 	entry = http_hdr_entry((HTTP_HDR *) hh, "Cookie");
 	if (entry == NULL)
-		return (0);
+		return 0;
 
 	if (hh->cookies_table == NULL)
-		hh->cookies_table = acl_htable_create(__http_hdr_max_cookies, 0);
+		hh->cookies_table = acl_htable_create(__http_hdr_max_cookies,
+					ACL_HTABLE_FLAG_KEY_REUSE);
 	if (hh->cookies_table == NULL)
 		acl_msg_fatal("%s, %s(%d): htable create error(%s)",
 			__FILE__, myname, __LINE__, acl_last_serror());
@@ -443,7 +440,7 @@ int http_hdr_req_cookies_parse(HTTP_HDR_REQ *hh)
 		__add_cookie_item(hh->cookies_table, ptr);
 	}
 	acl_argv_free(argv);
-	return (0);
+	return 0;
 }
 
 const char *http_hdr_req_cookie_get(HTTP_HDR_REQ *hh, const char *name)
@@ -453,16 +450,16 @@ const char *http_hdr_req_cookie_get(HTTP_HDR_REQ *hh, const char *name)
 	if (hh == NULL || name == NULL) {
 		acl_msg_error("%s, %s(%d): input invalid",
 				__FILE__, myname, __LINE__);
-		return (NULL);
+		return NULL;
 	}
 
 	if (hh->cookies_table == NULL) {
 		acl_msg_warn("%s, %s(%d): cookies_table null",
 				__FILE__, myname, __LINE__);
-		return (NULL);
+		return NULL;
 	}
 
-	return (acl_htable_find(hh->cookies_table, name));
+	return acl_htable_find(hh->cookies_table, name);
 }
 
 /*--------------- 分析HTTP协议请求头中第一行数据信息的函数集合   -------------*/
@@ -475,7 +472,6 @@ static void __add_request_item(ACL_HTABLE *table, const char *data)
 	ACL_ARGV *argv;
 	const char *name;
 	char *value;
-	char  ebuf[256];
 
 	argv = acl_argv_split(data, "=");
 	if (argv->argc != 2) {
@@ -496,12 +492,11 @@ static void __add_request_item(ACL_HTABLE *table, const char *data)
 	value = acl_mystrdup(acl_argv_index(argv, 1));
 	if (value == NULL)
 		acl_msg_fatal("%s, %s(%d): strdup error=%s", __FILE__, myname,
-			__LINE__, acl_last_strerror(ebuf, sizeof(ebuf)));
+			__LINE__, acl_last_serror());
 
-	if (acl_htable_enter(table, name, value) == NULL) {
+	if (acl_htable_enter(table, name, value) == NULL)
 		acl_msg_error("%s, %s(%d): acl_htable_enter error=%s", __FILE__,
-			myname, __LINE__, acl_last_strerror(ebuf, sizeof(ebuf)));
-	}
+			myname, __LINE__, acl_last_serror());
 
 	acl_argv_free(argv);
 }
@@ -653,7 +648,7 @@ int http_hdr_req_line_parse(HTTP_HDR_REQ *hh)
 	if (hh == NULL) {
 		acl_msg_error("%s, %s(%d): input invalid",
 				__FILE__, myname, __LINE__);
-		return (-1);
+		return -1;
 	}
 	if (hh->hdr.entry_lnk == NULL)
 		acl_msg_fatal("%s, %s(%d): entry_lnk null",
@@ -662,20 +657,20 @@ int http_hdr_req_line_parse(HTTP_HDR_REQ *hh)
 	if (acl_array_size(hh->hdr.entry_lnk) <= 0) {
 		acl_msg_error("%s, %s(%d): no method",
 				__FILE__, myname, __LINE__);
-		return (-1);
+		return -1;
 	}
 
 	entry = (HTTP_HDR_ENTRY *) acl_array_index(hh->hdr.entry_lnk, 0);
 	if (entry == NULL) {
 		acl_msg_error("%s, %s(%d): null array",
 				__FILE__, myname, __LINE__);
-		return (-1);
+		return -1;
 	}
 
 	if (entry->value == NULL || *(entry->value) == 0) {
 		acl_msg_error("%s, %s(%d): entry->value invalid",
 				__FILE__, myname, __LINE__);
-		return (-1);
+		return -1;
 	}
 
 	if (strcasecmp(entry->name, "POST") != 0
@@ -686,7 +681,7 @@ int http_hdr_req_line_parse(HTTP_HDR_REQ *hh)
 		acl_msg_error("%s, %s(%d): invalid http method=%s",
 				__FILE__, myname, __LINE__,
 				entry->name);
-		return (-1);
+		return -1;
 
 	}
 
@@ -701,7 +696,7 @@ int http_hdr_req_line_parse(HTTP_HDR_REQ *hh)
 			__FILE__, myname, __LINE__,
 			entry->value, request_argv->argc);
 		acl_argv_free(request_argv);
-		return (-1);
+		return -1;
 	}
 
 	/* data[0]: "/path/test.cgi?name=value&name2=value2"
@@ -727,12 +722,12 @@ int http_hdr_req_line_parse(HTTP_HDR_REQ *hh)
 
 	acl_argv_free(request_argv);
 
-	return (ret);
+	return ret;
 }
 
 int http_hdr_req_parse(HTTP_HDR_REQ *hh)
 {
-	return (http_hdr_req_parse3(hh, 1, 1));
+	return http_hdr_req_parse3(hh, 1, 1);
 }
 
 int http_hdr_req_parse3(HTTP_HDR_REQ *hh, int parse_params, int parse_cookie)
@@ -740,13 +735,13 @@ int http_hdr_req_parse3(HTTP_HDR_REQ *hh, int parse_params, int parse_cookie)
 	if (parse_params)
 		hh->flag |= HTTP_HDR_REQ_FLAG_PARSE_PARAMS;
 	if (http_hdr_req_line_parse(hh) < 0)
-		return (-1);
+		return -1;
 	if (parse_cookie) {
 		hh->flag |= HTTP_HDR_REQ_FLAG_PARSE_COOKIE;
 		if (http_hdr_req_cookies_parse(hh) < 0)
-			return (-1);
+			return -1;
 	}
-	return (http_hdr_parse(&hh->hdr));
+	return http_hdr_parse(&hh->hdr);
 }
 
 int http_hdr_req_rewrite2(HTTP_HDR_REQ *hh, const char *url)
@@ -764,7 +759,7 @@ int http_hdr_req_rewrite2(HTTP_HDR_REQ *hh, const char *url)
 	n = acl_array_size(hh->hdr.entry_lnk);
 	if (n <= 0) {
 		acl_msg_error("%s(%d): first entry null", myname, __LINE__);
-		return (-1);
+		return -1;
 	}
 
 	/* url: http[s]://domain[/path?params], /[path?params] */
@@ -824,7 +819,7 @@ int http_hdr_req_rewrite2(HTTP_HDR_REQ *hh, const char *url)
 	hh->flag |= (HTTP_HDR_REQ_FLAG_PARSE_PARAMS | HTTP_HDR_REQ_FLAG_PARSE_COOKIE);
 	if (http_hdr_req_line_parse(hh) < 0)
 		return (-1);
-	return (0);
+	return 0;
 }
 
 HTTP_HDR_REQ *http_hdr_req_rewrite(const HTTP_HDR_REQ *hh, const char *url)
@@ -833,22 +828,16 @@ HTTP_HDR_REQ *http_hdr_req_rewrite(const HTTP_HDR_REQ *hh, const char *url)
 
 	if (http_hdr_req_rewrite2(hdr_req, url) < 0) {
 		http_hdr_req_free(hdr_req);
-		return (NULL);
+		return NULL;
 	}
-	return (hdr_req);
+	return hdr_req;
 }
 
 /* 取得HTTP请求的方法 */
 
 const char *http_hdr_req_method(HTTP_HDR_REQ *hh)
 {
-	const char *myname = "http_hdr_req_method";
-
-	if (hh == NULL)
-		acl_msg_fatal("%s, %s(%d): input invalid",
-				__FILE__, myname, __LINE__);
-
-	return (hh->method);
+	return hh->method;
 }
 
 /* 获取请求URL中某个请求字段的数据, 如取: /cgi-bin/n1=v1&n2=v2 中的 n2的值v2 */
@@ -860,16 +849,13 @@ const char *http_hdr_req_param(HTTP_HDR_REQ *hh, const char *name)
 	if (hh == NULL || name == NULL) {
 		acl_msg_error("%s, %s(%d): input invalid",
 				__FILE__, myname, __LINE__);
-		return (NULL);
+		return NULL;
 	}
 
-	if (hh->params_table == NULL) {
-		acl_msg_warn("%s, %s(%d): params_table null",
-				__FILE__, myname, __LINE__);
-		return (NULL);
-	}
+	if (hh->params_table == NULL)
+		return NULL;
 
-	return (acl_htable_find(hh->params_table, name));
+	return acl_htable_find(hh->params_table, name);
 }
 
 const char *http_hdr_req_url_part(HTTP_HDR_REQ *hh)
@@ -879,44 +865,28 @@ const char *http_hdr_req_url_part(HTTP_HDR_REQ *hh)
 	if (hh == NULL) {
 		acl_msg_error("%s, %s(%d): input invalid",
 				__FILE__, myname, __LINE__);
-		return (NULL);
+		return NULL;
 	}
 
 	if (ACL_VSTRING_LEN(hh->url_part) == 0)
-		return (NULL);
-	return (acl_vstring_str(hh->url_part));
+		return NULL;
+	return acl_vstring_str(hh->url_part);
 }
 
 const char *http_hdr_req_url_path(HTTP_HDR_REQ *hh)
 {
-	const char *myname = "http_hdr_req_url_path";
-
-	if (hh == NULL) {
-		acl_msg_error("%s, %s(%d): input invalid",
-				__FILE__, myname, __LINE__);
-		return (NULL);
-	}
-
 	if (ACL_VSTRING_LEN(hh->url_path) == 0)
-		return (NULL);
+		return NULL;
 
-	return (acl_vstring_str(hh->url_path));
+	return acl_vstring_str(hh->url_path);
 }
 
 const char *http_hdr_req_host(HTTP_HDR_REQ *hh)
 {
-	const char *myname = "http_hdr_req_host";
-
-	if (hh == NULL) {
-		acl_msg_error("%s, %s(%d): invalid input",
-				__FILE__, myname, __LINE__);
-		return (NULL);
-	}
-
 	if (hh->host[0] != 0)
-		return (hh->host);
+		return hh->host;
 	else
-		return (NULL);
+		return NULL;
 }
 
 static void free_vstring(ACL_VSTRING *buf)
@@ -926,15 +896,8 @@ static void free_vstring(ACL_VSTRING *buf)
 
 const char *http_hdr_req_url(HTTP_HDR_REQ *hh)
 {
-	const char *myname = "http_hdr_req_url";
 	static acl_pthread_key_t key = -1;
 	ACL_VSTRING *buf;
-
-	if (hh == NULL) {
-		acl_msg_error("%s, %s(%d): invalid input",
-				__FILE__, myname, __LINE__);
-		return (NULL);
-	}
 
 	buf = acl_pthread_tls_get(&key);
 	if (buf == NULL) {
@@ -944,7 +907,7 @@ const char *http_hdr_req_url(HTTP_HDR_REQ *hh)
 
 	acl_vstring_strcpy(buf, hh->host);
 	acl_vstring_strcat(buf, acl_vstring_str(hh->url_part));
-	return (acl_vstring_str(buf));
+	return acl_vstring_str(buf);
 }
 
 int http_hdr_req_range(HTTP_HDR_REQ *hdr_req, http_off_t *range_from,
@@ -954,8 +917,6 @@ int http_hdr_req_range(HTTP_HDR_REQ *hdr_req, http_off_t *range_from,
 	char  buf[256], *ptr1;
 	const char *ptr;
 
-	if (hdr_req == NULL)
-		acl_msg_fatal("%s(%d): hdr_req null", myname, __LINE__);
 	if (range_from == NULL)
 		acl_msg_fatal("%s(%d): range_from null", myname, __LINE__);
 	if (range_to == NULL)
@@ -966,10 +927,10 @@ int http_hdr_req_range(HTTP_HDR_REQ *hdr_req, http_off_t *range_from,
 	 */
 	ptr = http_hdr_entry_value(&hdr_req->hdr, "Range");
 	if (ptr == NULL)
-		return (-1);
+		return -1;
 	ptr = strstr(ptr, "bytes=");
 	if (ptr == NULL)
-		return (-1);
+		return -1;
 	ptr += strlen("bytes=");
 	ACL_SAFE_STRNCPY(buf, ptr, sizeof(buf));
 	ptr1 = buf;
@@ -985,10 +946,10 @@ int http_hdr_req_range(HTTP_HDR_REQ *hdr_req, http_off_t *range_from,
 				*range_to = acl_atoi64(ptr1);
 			if (*range_to <= 0)
 				*range_to = -1;
-			return (0);
+			return 0;
 		}
 		ptr1++;
 	}
 
-	return (-1);
+	return -1;
 }
