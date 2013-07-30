@@ -1,3 +1,6 @@
+240) 2013.7.30
+240.1) warning: http_hdr_req.c::http_hdr_req_new() 内部使用了线程局部变量，
+当用 valgrind 检查时会报内存泄露警告，通过在主线程中将其释放去掉了此警告
 
 239) 2013.7.23
 239.1) bugfix: http_hdr_req.c->http_hdr_req_create() 分离 URL 时有误
