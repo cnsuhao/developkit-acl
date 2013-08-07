@@ -31,13 +31,9 @@
 #endif
 
 ACL_VSTREAM *acl_vstream_listen_ex(const char *addr,
-				   int qlen,
-				   int block_mode,
-				   int io_bufsize,
-				   int io_timeout)
+	int qlen, int block_mode, int io_bufsize, int io_timeout)
 {
 	const char *myname = "acl_vstream_listen_ex";
-	char  ebuf[256];
 	ACL_SOCKET  listenfd;
 	struct sockaddr_in local;
 	ACL_VSTREAM *listen_stream;
@@ -46,7 +42,7 @@ ACL_VSTREAM *acl_vstream_listen_ex(const char *addr,
 	if (addr == 0 || *addr == 0 || qlen <= 0)
 	{
 		acl_msg_error("%s: input invalid", myname);
-		return (NULL);
+		return NULL;
 	}
 
 #ifdef	ACL_UNIX
@@ -54,17 +50,16 @@ ACL_VSTREAM *acl_vstream_listen_ex(const char *addr,
 	if (strchr(addr, '/') != NULL) {
 		listenfd = acl_unix_listen(addr, qlen, 0);
 		if (listenfd == ACL_SOCKET_INVALID)
-			return (NULL);
+			return NULL;
 		acl_non_blocking(listenfd, block_mode);
 		listen_stream = acl_vstream_fdopen(listenfd,
-					ACL_VSTREAM_FLAG_RW,
-					io_bufsize,
-					io_timeout,
-					ACL_VSTREAM_TYPE_LISTEN_UNIX);
+			ACL_VSTREAM_FLAG_RW, io_bufsize,
+			io_timeout, ACL_VSTREAM_TYPE_LISTEN_UNIX);
 		if (listen_stream == NULL) {
 			acl_socket_close(listenfd);
-			acl_msg_error("%s: open vstream error, addr(%s)", myname, addr);
-			return (NULL);
+			acl_msg_error("%s: open vstream error, addr(%s)"
+				myname, addr);
+			return NULL;
 		}
 		snprintf(listen_stream->local_addr,
 			sizeof(listen_stream->local_addr), "%s", addr);
@@ -76,25 +71,25 @@ ACL_VSTREAM *acl_vstream_listen_ex(const char *addr,
 	listenfd = acl_inet_listen(addr, qlen, block_mode);
 	if (listenfd == ACL_SOCKET_INVALID) {
 		acl_msg_error("%s: listen addr(%s) error(%s)",
-			myname, addr, acl_last_strerror(ebuf, sizeof(ebuf)));
-		return (NULL);
+			myname, addr, acl_last_serror());
+		return NULL;
 	}
 	listen_stream = acl_vstream_fdopen(listenfd,
-		ACL_VSTREAM_FLAG_RW,
-		io_bufsize,
-		io_timeout,
-		ACL_VSTREAM_TYPE_LISTEN_INET);
+		ACL_VSTREAM_FLAG_RW, io_bufsize,
+		io_timeout, ACL_VSTREAM_TYPE_LISTEN_INET);
 	if (listen_stream == NULL) {
 		acl_socket_close(listenfd);
-		acl_msg_error("%s: open vstream error, addr(%s)", myname, addr);
-		return (NULL);
+		acl_msg_error("%s: open vstream error addr(%s)", myname, addr);
+		return NULL;
 	}
 
 	memset(&local, 0, sizeof(local));
 	len = (int) sizeof(struct sockaddr);
-	if (getsockname(listenfd, (struct sockaddr*) &local, (socklen_t *) &len) < 0) {
+	if (getsockname(listenfd, (struct sockaddr*) &local,
+		(socklen_t *) &len) < 0)
+	{
 		acl_msg_warn("%s: getsockname error(%s) for sock(%d)",
-			myname, acl_last_strerror(ebuf, sizeof(ebuf)), listenfd);
+			myname, acl_last_serror(), listenfd);
 		snprintf(listen_stream->local_addr,
 			sizeof(listen_stream->local_addr), "%s", addr);
 	} else {
@@ -108,51 +103,51 @@ ACL_VSTREAM *acl_vstream_listen_ex(const char *addr,
 	}
 
 	sprintf(listen_stream->errbuf, "+OK");
-	return (listen_stream);
+	return listen_stream;
 }
 
 ACL_VSTREAM *acl_vstream_listen(const char *addr, int qlen)
 {
-	return (acl_vstream_listen_ex(addr, qlen, ACL_BLOCKING, 0, 0));
+	return acl_vstream_listen_ex(addr, qlen, ACL_BLOCKING, 0, 0);
 }
 
 ACL_VSTREAM *acl_vstream_accept_ex(ACL_VSTREAM *listen_stream,
-				   ACL_VSTREAM *client_stream,
-				   char *ipbuf,
-				   int bsize)
+	ACL_VSTREAM *client_stream, char *ipbuf, int bsize)
 {
 	const char *myname = "acl_vstream_accept_ex";
 	ACL_SOCKET connfd = ACL_SOCKET_INVALID;
+	ACL_SOCKET servfd = ACL_VSTREAM_SOCK(listen_stream);
 	char buf[256];
 
 	if ((listen_stream->type | ACL_VSTREAM_TYPE_LISTEN_INET)) {
 #ifdef ACL_MS_WINDOWS
-		if (listen_stream->iocp_sock != ACL_SOCKET_INVALID) {
-			ACL_SOCKET listenfd = ACL_VSTREAM_SOCK(listen_stream);
-			int  ret;
+		if (!(listen_stream->type & ACL_VSTREAM_TYPE_LISTEN_IOCP))
+			connfd = acl_inet_accept_ex(servfd, buf, sizeof(buf));
+		else if (listen_stream->iocp_sock == ACL_SOCKET_INVALID)
+			return NULL;
+		else {
+			int   ret;
 
 			connfd = listen_stream->iocp_sock;
 			listen_stream->iocp_sock = ACL_SOCKET_INVALID;
 
 			/* iocp 方式下，需调用下面过程以允许调用 getpeername/getsockname */
-			ret = setsockopt(connfd, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT,
-				(char *)&listenfd, sizeof(listenfd));
-			if (ret != SOCKET_ERROR && acl_getpeername(connfd,
-				buf, sizeof(buf)) < 0)
-			{
-				buf[0] = 0;
-			} else
-				buf[0] = 0;
-		} else
+			ret = setsockopt(connfd, SOL_SOCKET,
+				SO_UPDATE_ACCEPT_CONTEXT,
+				(char *)&servfd, sizeof(servfd));
+			buf[0] = 0;
+			if (ret != SOCKET_ERROR)
+				acl_getpeername(connfd, buf, sizeof(buf));
+		}
+#else
+		connfd = acl_inet_accept_ex(servfd, buf, sizeof(buf));
 #endif
-			connfd = acl_inet_accept_ex(ACL_VSTREAM_SOCK(listen_stream),
-						buf, sizeof(buf));
 
 		if (connfd != ACL_SOCKET_INVALID && ipbuf != NULL && bsize > 0)
 			ACL_SAFE_STRNCPY(ipbuf, buf, bsize);
 #ifdef	ACL_UNIX
 	} else if ((listen_stream->type | ACL_VSTREAM_TYPE_LISTEN_UNIX)) {
-		connfd = acl_unix_accept(ACL_VSTREAM_SOCK(listen_stream));
+		connfd = acl_unix_accept(servfd);
 		listen_stream->remote_addr[0] = 0;
 		if (ipbuf)
 			ipbuf[0] = 0;
@@ -163,7 +158,7 @@ ACL_VSTREAM *acl_vstream_accept_ex(ACL_VSTREAM *listen_stream,
 			__FILE__, __LINE__, myname, listen_stream->flag);
 
 	if (connfd == ACL_SOCKET_INVALID)
-		return (NULL);
+		return NULL;
 
 	if (client_stream != NULL) {
 		acl_vstream_reset(client_stream);
@@ -180,24 +175,23 @@ ACL_VSTREAM *acl_vstream_accept_ex(ACL_VSTREAM *listen_stream,
 		client_stream->context = listen_stream->context;
 	}
 	if (client_stream == NULL)
-		return (NULL);
+		return NULL;
 
-	ACL_SAFE_STRNCPY(client_stream->remote_addr, buf, sizeof(client_stream->remote_addr));
+	ACL_SAFE_STRNCPY(client_stream->remote_addr, buf,
+		sizeof(client_stream->remote_addr));
 
-	return (client_stream);
+	return client_stream;
 }
 
-ACL_VSTREAM *acl_vstream_accept(ACL_VSTREAM *listen_stream, char *ipbuf, int bsize)
+ACL_VSTREAM *acl_vstream_accept(ACL_VSTREAM *listen_stream,
+	char *ipbuf, int bsize)
 {
-	return (acl_vstream_accept_ex(listen_stream, NULL, ipbuf, bsize));
+	return acl_vstream_accept_ex(listen_stream, NULL, ipbuf, bsize);
 }
 
 ACL_VSTREAM *acl_vstream_connect_ex(const char *addr,
-				int block_mode,
-				int connect_timeout,
-				int rw_timeout,
-				int rw_bufsize,
-				int *he_errorp)
+	int block_mode, int connect_timeout, int rw_timeout,
+	int rw_bufsize, int *he_errorp)
 {
 	const char *myname = "acl_vstream_connect_ex";
 	ACL_VSTREAM *connect_stream;
@@ -209,13 +203,14 @@ ACL_VSTREAM *acl_vstream_connect_ex(const char *addr,
 
 	ptr = strchr(addr, ':');
 	if (ptr != NULL) {
-		connfd = acl_inet_connect_ex(addr, block_mode, connect_timeout, he_errorp);
+		connfd = acl_inet_connect_ex(addr, block_mode,
+			connect_timeout, he_errorp);
 	}
 #ifdef ACL_MS_WINDOWS
 	else {
 		acl_msg_error("%s(%d): addr(%s) invalid, examples(192.168.0.1:80)",
 			myname, __LINE__, addr);
-		return (NULL);
+		return NULL;
 	}
 #elif defined(ACL_UNIX)
 	else {
@@ -228,12 +223,12 @@ ACL_VSTREAM *acl_vstream_connect_ex(const char *addr,
 #endif
 
 	if (connfd == ACL_SOCKET_INVALID)
-		return (NULL);
+		return NULL;
 	connect_stream = acl_vstream_fdopen(connfd, ACL_VSTREAM_FLAG_RW,
-				rw_bufsize, rw_timeout, ACL_VSTREAM_TYPE_SOCK);
+		rw_bufsize, rw_timeout, ACL_VSTREAM_TYPE_SOCK);
 	if (connect_stream == NULL) {
 		acl_socket_close(connfd);
-		return (NULL);
+		return NULL;
 	}
 
 	if (acl_getpeername(ACL_VSTREAM_SOCK(connect_stream),
@@ -245,21 +240,15 @@ ACL_VSTREAM *acl_vstream_connect_ex(const char *addr,
 			"%s", addr);
 	}
 
-	return (connect_stream);
+	return connect_stream;
 }
 
 ACL_VSTREAM *acl_vstream_connect(const char *addr,
-				 int block_mode,
-				 int connect_timeout,
-				 int rw_timeout,
-				 int rw_bufsize)
+	int block_mode, int connect_timeout,
+	int rw_timeout,int rw_bufsize)
 {
-	return (acl_vstream_connect_ex(addr,
-			block_mode,
-			connect_timeout,
-			rw_timeout,
-			rw_bufsize,
-			NULL));
+	return acl_vstream_connect_ex(addr, block_mode, connect_timeout,
+			rw_timeout, rw_bufsize, NULL);
 }
 
 
