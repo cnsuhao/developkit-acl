@@ -75,6 +75,7 @@ struct ACL_VSTREAM {
 #define	ACL_VSTREAM_TYPE_LISTEN		(1 << 2)
 #define	ACL_VSTREAM_TYPE_LISTEN_INET    (1 << 3)
 #define	ACL_VSTREAM_TYPE_LISTEN_UNIX    (1 << 4)
+#define ACL_VSTREAM_TYPE_LISTEN_IOCP    (1 << 5)
 
 	acl_off_t offset;               /**< cached seek info */
 	acl_off_t sys_offset;           /**< cached seek info */

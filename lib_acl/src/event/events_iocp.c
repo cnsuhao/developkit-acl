@@ -386,6 +386,7 @@ static void enable_listen(EVENT_KERNEL *ev, ACL_EVENT_FDTABLE *fdp)
 	memset(&fdp->event_read->overlapped, 0,
 		sizeof(fdp->event_read->overlapped));
 
+	fdp->stream->type |= ACL_VSTREAM_TYPE_LISTEN_IOCP;
 	fdp->stream->iocp_sock = sock;
 
 	if (AcceptEx(ACL_VSTREAM_SOCK(fdp->stream), sock,
