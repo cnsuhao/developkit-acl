@@ -1,4 +1,8 @@
 
+379) 2013.8.7
+379.1) bugfix: 在 iocp 方式下不能通过 getpeername/getsockname 获得
+远程/本地的地址，通过在 acl_vstream_accept_ex 中添加 setsockopt 调用，
+将监听套接字中的一些属性拷贝至客户端连接中解决了此类问题
 
 378) 2013.7.23
 378.1) feature: acl_aio_server.c, aio_accept_timer 添加了一个配置参数：

@@ -128,12 +128,26 @@ ACL_VSTREAM *acl_vstream_accept_ex(ACL_VSTREAM *listen_stream,
 	if ((listen_stream->type | ACL_VSTREAM_TYPE_LISTEN_INET)) {
 #ifdef ACL_MS_WINDOWS
 		if (listen_stream->iocp_sock != ACL_SOCKET_INVALID) {
+			ACL_SOCKET listenfd = ACL_VSTREAM_SOCK(listen_stream);
+			int  ret;
+
 			connfd = listen_stream->iocp_sock;
 			listen_stream->iocp_sock = ACL_SOCKET_INVALID;
+
+			/* iocp 方式下，需调用下面过程以允许调用 getpeername/getsockname */
+			ret = setsockopt(connfd, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT,
+				(char *)&listenfd, sizeof(listenfd));
+			if (ret != SOCKET_ERROR && acl_getpeername(connfd,
+				buf, sizeof(buf)) < 0)
+			{
+				buf[0] = 0;
+			} else
+				buf[0] = 0;
 		} else
 #endif
 			connfd = acl_inet_accept_ex(ACL_VSTREAM_SOCK(listen_stream),
 						buf, sizeof(buf));
+
 		if (connfd != ACL_SOCKET_INVALID && ipbuf != NULL && bsize > 0)
 			ACL_SAFE_STRNCPY(ipbuf, buf, bsize);
 #ifdef	ACL_UNIX
