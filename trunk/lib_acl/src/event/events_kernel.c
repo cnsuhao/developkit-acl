@@ -588,7 +588,6 @@ static void event_set_all(ACL_EVENT *eventp)
 {
 	EVENT_KERNEL *ev = (EVENT_KERNEL *) eventp;
 	ACL_EVENT_FDTABLE *fdp;
-	int   i;
 
 	/* 优先处理添加读/写监控任务, 这样可以把中间的 ADD 状态转换成正式状态 */
 

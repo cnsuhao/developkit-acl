@@ -57,7 +57,7 @@ ACL_VSTREAM *acl_vstream_listen_ex(const char *addr, int qlen,
 			io_timeout, ACL_VSTREAM_TYPE_LISTEN_UNIX);
 		if (listen_stream == NULL) {
 			acl_socket_close(listenfd);
-			acl_msg_error("%s: open vstream error, addr(%s)"
+			acl_msg_error("%s: open vstream error, addr(%s)",
 				myname, addr);
 			return NULL;
 		}
