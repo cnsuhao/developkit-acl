@@ -108,7 +108,7 @@ static ACL_EVENT_FDTABLE *stream_on_open(EVENT_WMSG *ev, ACL_VSTREAM *stream)
 		acl_msg_fatal("%s(%d): add key(%s) error",
 			myname, __LINE__, key);
 
-	return (fdp);
+	return fdp;
 }
 
 static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
@@ -381,10 +381,10 @@ static int event_isrset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
 
 	if (fdp == NULL) {
 		acl_msg_warn("%s(%d): fdp null", myname, __LINE__);
-		return (0);
+		return 0;
 	}
 
-	return ((fdp->flag & EVENT_FDTABLE_FLAG_READ));
+	return (fdp->flag & EVENT_FDTABLE_FLAG_READ) == 0 ? 0 : 1;
 }
 
 static int event_iswset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
@@ -395,10 +395,10 @@ static int event_iswset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
 
 	if (fdp == NULL) {
 		acl_msg_warn("%s(%d): fdp null", myname, __LINE__);
-		return (0);
+		return 0;
 	}
 
-	return ((fdp->flag & EVENT_FDTABLE_FLAG_WRITE));
+	return (fdp->flag & EVENT_FDTABLE_FLAG_WRITE) == 0 ? 0 : 1;
 }
 
 static int event_isxset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
@@ -409,10 +409,10 @@ static int event_isxset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
 
 	if (fdp == NULL) {
 		acl_msg_warn("%s(%d): fdp null", myname, __LINE__);
-		return (0);
+		return 0;
 	}
 
-	return ((fdp->flag & EVENT_FDTABLE_FLAG_EXPT));
+	return (fdp->flag & EVENT_FDTABLE_FLAG_EXPT) == 0 ? 0 : 1;
 }
 
 #ifdef USE_TLS
@@ -423,7 +423,7 @@ static acl_pthread_once_t once_control = ACL_PTHREAD_ONCE_INIT;
 static EVENT_WMSG *get_hwnd_event(HWND hWnd acl_unused)
 {
 	EVENT_WMSG *ev = acl_pthread_getspecific(__event_key);
-	return (ev);
+	return ev;
 }
 
 static void finish_thread_event(void *arg acl_unused)
@@ -452,7 +452,7 @@ static void set_hwnd_event(HWND hWnd acl_unused, EVENT_WMSG *ev)
 static EVENT_WMSG *get_hwnd_event(HWND hWnd)
 {
 	EVENT_WMSG *ev = (EVENT_WMSG*) GetWindowLongPtr(hWnd, GWL_USERDATA);
-	return (ev);
+	return ev;
 }
 
 static void set_hwnd_event(HWND hWnd, EVENT_WMSG *ev)
@@ -469,7 +469,7 @@ static ACL_EVENT_FDTABLE *event_fdtable_find(EVENT_WMSG *ev, ACL_SOCKET sockfd)
 
 	snprintf(key, sizeof(key), "%d", sockfd);
 	fdp = acl_htable_find(ev->htbl, key);
-	return (fdp);
+	return fdp;
 }
 
 static void handleClose(EVENT_WMSG *ev, ACL_SOCKET sockfd)
@@ -668,14 +668,14 @@ static HWND InitInstance(const char *class_name, HINSTANCE hInstance)
 	if (hWnd == NULL)
 		acl_msg_error("%s(%d): create windows error: %s",
 			myname, __LINE__, acl_last_serror());
-	return (hWnd);
+	return hWnd;
 }
 
 static HWND CreateSockWindow(const char *class_name, HINSTANCE hInstance)
 {
 	if (InitApplication(class_name, hInstance) == FALSE)
 		return (FALSE);
-	return (InitInstance(class_name, hInstance));
+	return InitInstance(class_name, hInstance);
 }
 
 static void event_loop(ACL_EVENT *eventp acl_unused)
@@ -776,7 +776,7 @@ static acl_int64 event_set_timer(ACL_EVENT *eventp, ACL_EVENT_NOTIFY_TIME callba
 			event_timer_callback);
 	}
 
-	return (when);
+	return when;
 }
 
 static acl_int64 event_del_timer(ACL_EVENT *eventp,
@@ -789,7 +789,7 @@ static acl_int64 event_del_timer(ACL_EVENT *eventp,
 		KillTimer(ev->hWnd, ev->tid);
 		ev->timer_active = 0;
 	}
-	return (when);
+	return when;
 }
 
 static void event_free(ACL_EVENT *eventp)
@@ -860,13 +860,13 @@ ACL_EVENT *event_new_wmsg(UINT nMsg)
 	ev->ctx = NULL;
 
 	set_hwnd_event(hWnd, ev);
-	return (eventp);
+	return eventp;
 }
 
 HWND acl_event_wmsg_hwnd(ACL_EVENT *eventp)
 {
 	EVENT_WMSG *ev = (EVENT_WMSG*) eventp;
-	return (ev->hWnd);
+	return ev->hWnd;
 }
 
 #endif /* ACL_EVENTS_STYLE_WMSG */

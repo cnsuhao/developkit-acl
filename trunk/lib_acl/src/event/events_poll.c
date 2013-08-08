@@ -502,14 +502,14 @@ static int event_isrset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
 {
 	ACL_EVENT_FDTABLE *fdp = (ACL_EVENT_FDTABLE *) stream->fdp;
 
-	return (fdp == NULL ? 0 : (fdp->flag & EVENT_FDTABLE_FLAG_READ));
+	return fdp == NULL ? 0 : (fdp->flag & EVENT_FDTABLE_FLAG_READ);
 }
 
 static int event_iswset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
 {
 	ACL_EVENT_FDTABLE *fdp = (ACL_EVENT_FDTABLE *) stream->fdp;
 
-	return (fdp == NULL ? 0 : (fdp->flag & EVENT_FDTABLE_FLAG_WRITE));
+	return fdp == NULL ? 0 : (fdp->flag & EVENT_FDTABLE_FLAG_WRITE);
 
 }
 
@@ -517,7 +517,7 @@ static int event_isxset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
 {
 	ACL_EVENT_FDTABLE *fdp = (ACL_EVENT_FDTABLE *) stream->fdp;
 
-	return (fdp == NULL ? 0 : (fdp->flag & EVENT_FDTABLE_FLAG_EXPT));
+	return fdp == NULL ? 0 : (fdp->flag & EVENT_FDTABLE_FLAG_EXPT);
 }
 
 static void event_free(ACL_EVENT *eventp)
@@ -559,6 +559,6 @@ ACL_EVENT *event_new_poll(int fdsize)
 	ev->fds = (struct pollfd *)
 		acl_mycalloc(fdsize + 1, sizeof(struct pollfd));
 	ev->fdmap = acl_fdmap_create(fdsize);
-	return (eventp);
+	return eventp;
 }
 #endif	/* ACL_EVENTS_POLL_STYLE */

@@ -22,7 +22,8 @@ extern "C" {
  * @param len {socklen_t} sa 的地址长度
  * @return {int} 0: 连接成功; -1: 连接失败
  */
-ACL_API int acl_sane_connect(ACL_SOCKET sock, const struct sockaddr * sa, socklen_t len);
+ACL_API int acl_sane_connect(ACL_SOCKET sock, const struct sockaddr * sa,
+		socklen_t len);
 
 /* in acl_timed_connect.c */
 
@@ -34,7 +35,8 @@ ACL_API int acl_sane_connect(ACL_SOCKET sock, const struct sockaddr * sa, sockle
  * @param timeout {int} 连接超时时间
  * @return {int} 0: 连接成功; -1: 连接失败
  */
-ACL_API int acl_timed_connect(ACL_SOCKET fd, const struct sockaddr * sa, socklen_t len, int timeout);
+ACL_API int acl_timed_connect(ACL_SOCKET fd, const struct sockaddr * sa,
+		socklen_t len, int timeout);
 
 /* in acl_inet_connect.c */
 
@@ -50,7 +52,9 @@ ACL_API ACL_SOCKET acl_inet_connect(const char *addr, int block_mode, int timeou
 
 /**
  * 远程连接网络服务器地址
- * @param addr {const char*} 远程服务器的监听地址，如：192.168.0.1:80
+ * @param addr {const char*} 远程服务器的监听地址，如：192.168.0.1:80，
+ *  当本机有多个网卡地址且想通过某个指定网卡连接服务器时的地址格式：
+ local_ip@remote_ip:remote_port，如：192.168.1.1@211.150.111.12:80
  * @param block_mode {int} 阻塞模式还是非阻塞模式, ACL_BLOCKING 或 ACL_NON_BLOCKING
  * @param timeout {int} 连接超时时间，如果 block_mode 为 ACL_NON_BLOCKING 则该值将被忽略
  * @param h_error {int*} 当连接失败时存储失败原因错误号

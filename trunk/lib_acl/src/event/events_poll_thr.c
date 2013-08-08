@@ -285,11 +285,10 @@ static int event_isrset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
 	ACL_EVENT_FDTABLE *fdp;
 
 	fdp = (ACL_EVENT_FDTABLE *) stream->fdp;
-	if (fdp == NULL) {
-		return (0);
-	}
+	if (fdp == NULL)
+		return 0;
 
-	return ((fdp->flag & EVENT_FDTABLE_FLAG_READ));
+	return (fdp->flag & EVENT_FDTABLE_FLAG_READ) == 0 ? 0 : 1;
 }
 
 static int event_iswset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
@@ -297,11 +296,10 @@ static int event_iswset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
 	ACL_EVENT_FDTABLE *fdp;
 
 	fdp = (ACL_EVENT_FDTABLE *) stream->fdp;
-	if (fdp == NULL) {
-		return (0);
-	}
+	if (fdp == NULL)
+		return 0;
 
-	return ((fdp->flag & EVENT_FDTABLE_FLAG_WRITE));
+	return (fdp->flag & EVENT_FDTABLE_FLAG_WRITE) == 0 ? 0 : 1;
 }
 
 static int event_isxset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
@@ -309,11 +307,10 @@ static int event_isxset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
 	ACL_EVENT_FDTABLE *fdp;
 
 	fdp = (ACL_EVENT_FDTABLE *) stream->fdp;
-	if (fdp == NULL) {
-		return (0);
-	}
+	if (fdp == NULL)
+		return 0;
 
-	return ((fdp->flag & EVENT_FDTABLE_FLAG_EXPT));
+	return (fdp->flag & EVENT_FDTABLE_FLAG_EXPT) == 0 ? 0 : 1;
 }
 
 static void event_loop(ACL_EVENT *eventp)
@@ -340,12 +337,12 @@ static void event_loop(ACL_EVENT *eventp)
 	 * If any timer is scheduled, adjust the delay appropriately.
 	 */
 	if ((timer = ACL_FIRST_TIMER(&eventp->timer_head)) != 0) {
-		n = (int) (timer->when - eventp->event_present + 1000000 - 1) / 1000000;
-		if (n <= 0) {
+		n = (int) (timer->when - eventp->event_present + 1000000 - 1)
+			/ 1000000;
+		if (n <= 0)
 			delay = 0;
-		} else if (n < eventp->delay_sec) {
+		else if (n < eventp->delay_sec)
 			delay = n * 1000 + eventp->delay_usec / 1000;
-		}
 	}
 
 	THREAD_UNLOCK(&event_thr->event.tm_mutex);
@@ -353,9 +350,8 @@ static void event_loop(ACL_EVENT *eventp)
 	THREAD_LOCK(&event_thr->event.tb_mutex);
 
 	if (event_thr_prepare(eventp) == 0) {
-		if (eventp->fdcnt_ready == 0) {
+		if (eventp->fdcnt_ready == 0)
 			sleep(1);
-		}
 
 		THREAD_UNLOCK(&event_thr->event.tb_mutex);
 		goto TAG_DONE;
@@ -507,7 +503,7 @@ ACL_EVENT *event_new_poll_thr(int fdsize)
 
 	event_thr->fds = (struct pollfd *) acl_mycalloc(fdsize + 1, sizeof(struct pollfd));
 	event_thr->fdmap = acl_fdmap_create(fdsize);
-	return ((ACL_EVENT *) event_thr);
+	return (ACL_EVENT *) event_thr;
 }
 
 #endif	/* ACL_EVENTS_POLL_STYLE */

@@ -14,15 +14,12 @@ extern "C" {
  * @param qlen {int} 监听队列的长度
  * @param block_mode {int} 是阻塞监听还是非阻塞监听, ACL_BLOCKING: 阻塞模式,
  *  ACL_NON_BLOCKING: 非阻塞模式
- * @param io_bufsize {int} 接收的新的客户端套接字的IO缓冲区大小
- * @param io_timeout {int} 接收的新的客户端套接字的IO读写超时时间，单位为秒
+ * @param bufsize {int} 接收的新的客户端套接字的IO缓冲区大小
+ * @param rw_timeout {int} 接收的新的客户端套接字的IO读写超时时间，单位为秒
  * @return {ACL_VSTREAM*} 监听流指针
  */
-ACL_API ACL_VSTREAM *acl_vstream_listen_ex(const char *addr,
-					int qlen,
-					int block_mode,
-					int io_bufsize,
-					int io_timeout);
+ACL_API ACL_VSTREAM *acl_vstream_listen_ex(const char *addr, int qlen,
+		int block_mode, int io_bufsize, int rw_timeout);
 
 /**
  * 监听某个地址（对于UNIX，还可以监听域套接字）
@@ -43,9 +40,7 @@ ACL_API ACL_VSTREAM *acl_vstream_listen(const char *addr, int qlen);
  * @return {ACL_VSTREAM*} 如果不为空则表示新接收的客户端流
  */
 ACL_API ACL_VSTREAM *acl_vstream_accept_ex(ACL_VSTREAM *listen_stream,
-					ACL_VSTREAM *client_stream,
-					char *ipbuf,
-					int bsize);
+		ACL_VSTREAM *client_stream, char *ipbuf, int bsize);
 
 /**
  * 从监听流中接收一个客户端连接流
@@ -55,8 +50,7 @@ ACL_API ACL_VSTREAM *acl_vstream_accept_ex(ACL_VSTREAM *listen_stream,
  * @return {ACL_VSTREAM*} 如果不为空则表示新接收的客户端流
  */
 ACL_API ACL_VSTREAM *acl_vstream_accept(ACL_VSTREAM *listen_stream,
-					char *ipbuf,
-					int bsize);
+		char *ipbuf, int bsize);
 
 /**
  * 远程连接服务器
@@ -66,18 +60,14 @@ ACL_API ACL_VSTREAM *acl_vstream_accept(ACL_VSTREAM *listen_stream,
  *  网卡地址为: 60.28.250.199, 远程连接 www.sina.com 的 80 端口, 如果由OS自动绑定本地
  *  IP 地址，则可以写为：www.sina.com:80
  * @param block_mode {int} 阻塞连接还是非阻塞连接，ACL_BLOCKING, ACL_NON_BLOCKING
- * @param connect_timeout {int} 连接超时时间(秒)
+ * @param conn_timeout {int} 连接超时时间(秒)
  * @param rw_timeout {int} 连接流成功后的读写超时时间，单位为秒
- * @param rw_bufsize {int} 连接流成功后的缓冲区大小
- * @param he_errorp {int*} 如果不为空，则存储连接失败后的错误号
+ * @param bufsize {int} 连接流成功后的缓冲区大小
+ * @param errorp {int*} 如果不为空，则存储连接失败后的错误号
  * @return {ACL_VSTREAM*} 如果不为空，则表示连接成功后的数据流
  */
-ACL_API ACL_VSTREAM *acl_vstream_connect_ex(const char *addr,
-					int block_mode,
-					int connect_timeout,
-					int rw_timeout,
-					int rw_bufsize,
-					int *he_errorp);
+ACL_API ACL_VSTREAM *acl_vstream_connect_ex(const char *addr, int block_mode,
+		int conn_timeout, int rw_timeout, int bufsize, int *errorp);
 
 /**
  * 远程连接服务器
@@ -89,11 +79,8 @@ ACL_API ACL_VSTREAM *acl_vstream_connect_ex(const char *addr,
  * @param rw_bufsize {int} 连接流成功后的缓冲区大小
  * @return {ACL_VSTREAM*} 如果不为空，则表示连接成功后的数据流
  */
-ACL_API ACL_VSTREAM *acl_vstream_connect(const char *addr,
-					int block_mode,
-					int connect_timeout,
-					int rw_timeout,
-					int rw_bufsize);
+ACL_API ACL_VSTREAM *acl_vstream_connect(const char *addr, int block_mode,
+		int connect_timeout, int rw_timeout, int rw_bufsize);
 
 #ifdef __cplusplus
 }

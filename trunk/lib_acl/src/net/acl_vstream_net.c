@@ -30,8 +30,8 @@
 
 #endif
 
-ACL_VSTREAM *acl_vstream_listen_ex(const char *addr,
-	int qlen, int block_mode, int io_bufsize, int io_timeout)
+ACL_VSTREAM *acl_vstream_listen_ex(const char *addr, int qlen,
+	int block_mode, int io_bufsize, int io_timeout)
 {
 	const char *myname = "acl_vstream_listen_ex";
 	ACL_SOCKET  listenfd;

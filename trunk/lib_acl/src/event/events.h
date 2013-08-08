@@ -108,13 +108,13 @@ struct	ACL_EVENT {
 	ACL_SOCKET   maxfd;
 
 	/* 事件引擎的循环检查过程 */
-	void (*loop_fn)(ACL_EVENT *eventp);
+	void (*loop_fn)(ACL_EVENT *ev);
 	/* 有些事件引擎可能需要提前进行初始化 */
-	void (*init_fn)(ACL_EVENT *eventp);
+	void (*init_fn)(ACL_EVENT *ev);
 	/* 释放事件引擎对象 */
-	void (*free_fn)(ACL_EVENT *eventp);
+	void (*free_fn)(ACL_EVENT *ev);
 	/* 当在多线程下使用事件引擎时，需要此接口及时唤醒事件引擎 */
-	void (*add_dog_fn)(ACL_EVENT *eventp);
+	void (*add_dog_fn)(ACL_EVENT *ev);
 
 	/* 开始监控某个套接字的可读状态 */
 	void (*enable_read_fn)(ACL_EVENT *, ACL_VSTREAM *, int,
@@ -141,13 +141,13 @@ struct	ACL_EVENT {
 	int  (*isxset_fn)(ACL_EVENT *, ACL_VSTREAM *);
 
 	/* 添加定时器任务 */
-	acl_int64 (*timer_request)(ACL_EVENT *eventp, ACL_EVENT_NOTIFY_TIME,
+	acl_int64 (*timer_request)(ACL_EVENT *ev, ACL_EVENT_NOTIFY_TIME,
 		void *, acl_int64, int);
 	/* 取消定时器任务 */
-	acl_int64 (*timer_cancel)(ACL_EVENT *eventp,
+	acl_int64 (*timer_cancel)(ACL_EVENT *ev,
 		ACL_EVENT_NOTIFY_TIME, void *);
 	/* 设置定时器是否为循环执行 */
-	void (*timer_keep)(ACL_EVENT *eventp, ACL_EVENT_NOTIFY_TIME,
+	void (*timer_keep)(ACL_EVENT *ev, ACL_EVENT_NOTIFY_TIME,
 		void *, int);
 	/* 定时器是否循环执行的 */
 	int  (*timer_ifkeep)(ACL_EVENT *eventp, ACL_EVENT_NOTIFY_TIME, void *);
@@ -195,10 +195,11 @@ typedef struct EVENT_THR {
 } while (0);
 
 /* in events.c */
-int  event_prepare(ACL_EVENT *eventp);
-void event_fire(ACL_EVENT *eventp);
-int  event_thr_prepare(ACL_EVENT *eventp);
-void event_thr_fire(ACL_EVENT *eventp);
+void event_check_fds(ACL_EVENT *ev);
+int  event_prepare(ACL_EVENT *ev);
+void event_fire(ACL_EVENT *ev);
+int  event_thr_prepare(ACL_EVENT *ev);
+void event_thr_fire(ACL_EVENT *ev);
 
 /* in events_alloc.c */
 ACL_EVENT *event_alloc(size_t size);
@@ -317,29 +318,26 @@ struct ACL_EVENT_TIMER {
 }
 
 /* in events_timer.c */
-acl_int64 event_timer_request(ACL_EVENT *eventp,
-		ACL_EVENT_NOTIFY_TIME callback,
-		void *context,
-		acl_int64 delay,
-		int keep);
-acl_int64 event_timer_cancel(ACL_EVENT *eventp,
-		ACL_EVENT_NOTIFY_TIME callback,
-		void *context);
-void event_timer_keep(ACL_EVENT *eventp, ACL_EVENT_NOTIFY_TIME, void *, int);
-int  event_timer_ifkeep(ACL_EVENT *eventp, ACL_EVENT_NOTIFY_TIME, void *);
+acl_int64 event_timer_request(ACL_EVENT *ev, ACL_EVENT_NOTIFY_TIME callback,
+	void *context, acl_int64 delay, int keep);
+acl_int64 event_timer_cancel(ACL_EVENT *ev, ACL_EVENT_NOTIFY_TIME callback,
+	void *context);
+void event_timer_keep(ACL_EVENT *ev, ACL_EVENT_NOTIFY_TIME callback,
+	void *context, int keep);
+int  event_timer_ifkeep(ACL_EVENT *ev, ACL_EVENT_NOTIFY_TIME callback,
+	void *context);
 
 /* in events_timer_thr.c */
-acl_int64 event_timer_request_thr(ACL_EVENT *eventp,
-		ACL_EVENT_NOTIFY_TIME callback,
-		void *context,
-		acl_int64 delay,
-		int keep);
-acl_int64 event_timer_cancel_thr(ACL_EVENT *eventp,
-		ACL_EVENT_NOTIFY_TIME callback,
-		void *context);
+acl_int64 event_timer_request_thr(ACL_EVENT *ev,
+	ACL_EVENT_NOTIFY_TIME callback, void *context,
+	acl_int64 delay, int keep);
+acl_int64 event_timer_cancel_thr(ACL_EVENT *ev,
+	ACL_EVENT_NOTIFY_TIME callback, void *context);
 
-void event_timer_keep_thr(ACL_EVENT *eventp, ACL_EVENT_NOTIFY_TIME, void *, int);
-int  event_timer_ifkeep_thr(ACL_EVENT *eventp, ACL_EVENT_NOTIFY_TIME, void *);
+void event_timer_keep_thr(ACL_EVENT *ev, ACL_EVENT_NOTIFY_TIME callback,
+	void *context, int keep);
+int  event_timer_ifkeep_thr(ACL_EVENT *ev, ACL_EVENT_NOTIFY_TIME callback,
+	void *context);
 
 #ifdef	__cplusplus
 }

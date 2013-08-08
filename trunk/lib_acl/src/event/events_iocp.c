@@ -596,7 +596,7 @@ static int disable_read(EVENT_KERNEL *ev, ACL_EVENT_FDTABLE *fdp)
 	fdp->flag &= ~EVENT_FDTABLE_FLAG_DEL_READ;
 	fdp->flag &= ~EVENT_FDTABLE_FLAG_READ;
 	fdp->event_type &= ~ACL_EVENT_READ;
-	return (1);
+	return 1;
 }
 
 static int disable_write(EVENT_KERNEL *ev, ACL_EVENT_FDTABLE *fdp)
@@ -606,7 +606,7 @@ static int disable_write(EVENT_KERNEL *ev, ACL_EVENT_FDTABLE *fdp)
 	fdp->flag &= ~EVENT_FDTABLE_FLAG_DEL_WRITE;
 	fdp->flag &= ~EVENT_FDTABLE_FLAG_WRITE;
 	fdp->event_type &= ~ACL_EVENT_WRITE;
-	return (1);
+	return 1;
 }
 
 static void event_set_all(ACL_EVENT *eventp)
@@ -621,32 +621,7 @@ static void event_set_all(ACL_EVENT *eventp)
 
 	if (eventp->event_present - ev->last_check >= 1000000) {
 		ev->last_check = eventp->event_present;
-		for (i = 0; i < eventp->fdcnt; i++) {
-			fdp = eventp->fdtabs[i];
-			if ((fdp->stream->flag & ACL_VSTREAM_FLAG_BAD) != 0) {
-				fdp->stream->flag &= ~ACL_VSTREAM_FLAG_BAD;
-				fdp->event_type |= ACL_EVENT_XCPT;
-				fdp->fdidx_ready = eventp->fdcnt_ready;
-				eventp->fdtabs_ready[eventp->fdcnt_ready++] = fdp;
-			} else if ((fdp->flag & EVENT_FDTABLE_FLAG_READ)) {
-				if (ACL_VSTREAM_BFRD_CNT(fdp->stream) > 0) {
-					fdp->stream->sys_read_ready = 0;
-					fdp->event_type |= ACL_EVENT_READ;
-					fdp->fdidx_ready = eventp->fdcnt_ready;
-					eventp->fdtabs_ready[eventp->fdcnt_ready++] = fdp;
-				} else if (fdp->r_ttl > 0 && eventp->event_present > fdp->r_ttl) {
-					fdp->event_type |= ACL_EVENT_RW_TIMEOUT;
-					fdp->fdidx_ready = eventp->fdcnt_ready;
-					eventp->fdtabs_ready[eventp->fdcnt_ready++] = fdp;
-				}
-			} else if ((fdp->flag & EVENT_FDTABLE_FLAG_WRITE)) {
-				if (fdp->w_ttl > 0 && eventp->event_present > fdp->w_ttl) {
-					fdp->event_type |= ACL_EVENT_RW_TIMEOUT;
-					fdp->fdidx_ready = eventp->fdcnt_ready;
-					eventp->fdtabs_ready[eventp->fdcnt_ready++] = fdp;
-				}
-			}
-		}
+		event_check_fds(eventp);
 	}
 
 	/* 处理任务项 */
@@ -711,7 +686,8 @@ static void event_loop(ACL_EVENT *eventp)
 	 * If any timer is scheduled, adjust the delay appropriately.
 	 */
 	if ((timer = ACL_FIRST_TIMER(&eventp->timer_head)) != 0) {
-		n = (int) (timer->when - eventp->event_present + 1000000 - 1) / 1000000;
+		n = (int) (timer->when - eventp->event_present + 1000000 - 1)
+			/ 1000000;
 		if (n <= 0) {
 			delay = 0;
 		} else if (delay > eventp->delay_sec) {
@@ -724,15 +700,13 @@ static void event_loop(ACL_EVENT *eventp)
 	event_set_all(eventp);
 
 	if (eventp->fdcnt == 0) {
-		if (eventp->fdcnt_ready == 0) {
+		if (eventp->fdcnt_ready == 0)
 			sleep(1);
-		}
 		goto TAG_DONE;
 	}
 
-	if (eventp->fdcnt_ready > 0) {
+	if (eventp->fdcnt_ready > 0)
 		delay = 0;
-	}
 
 TAG_DONE:
 
@@ -823,14 +797,14 @@ static int event_isrset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
 {
 	ACL_EVENT_FDTABLE *fdp = (ACL_EVENT_FDTABLE *) stream->fdp;
 
-	return (fdp == NULL ? 0 : (fdp->flag & EVENT_FDTABLE_FLAG_READ));
+	return fdp == NULL ? 0 : (fdp->flag & EVENT_FDTABLE_FLAG_READ);
 }
 
 static int event_iswset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
 {
 	ACL_EVENT_FDTABLE *fdp = (ACL_EVENT_FDTABLE *) stream->fdp;
 
-	return (fdp == NULL ? 0 : (fdp->flag & EVENT_FDTABLE_FLAG_WRITE));
+	return fdp == NULL ? 0 : (fdp->flag & EVENT_FDTABLE_FLAG_WRITE);
 
 }
 
@@ -838,7 +812,7 @@ static int event_isxset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
 {
 	ACL_EVENT_FDTABLE *fdp = (ACL_EVENT_FDTABLE *) stream->fdp;
 
-	return (fdp == NULL ? 0 : (fdp->flag & EVENT_FDTABLE_FLAG_EXPT));
+	return fdp == NULL ? 0 : (fdp->flag & EVENT_FDTABLE_FLAG_EXPT);
 }
 
 static void event_free(ACL_EVENT *eventp)
@@ -882,7 +856,7 @@ ACL_EVENT *event_new_iocp(int fdsize acl_unused)
 		acl_msg_fatal("%s(%d): create iocp error(%s)",
 			myname, __LINE__, acl_last_serror());
 	acl_ring_init(&ev->fdp_delay_list);
-	return (eventp);
+	return eventp;
 }
 
 #endif
