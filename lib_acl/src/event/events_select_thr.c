@@ -308,21 +308,21 @@ static int event_isrset(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 {
 	EVENT_SELECT_THR *event_thr = (EVENT_SELECT_THR *) eventp;
 
-	return (FD_ISSET(ACL_VSTREAM_SOCK(stream), &event_thr->rmask));
+	return FD_ISSET(ACL_VSTREAM_SOCK(stream), &event_thr->rmask);
 }
 
 static int event_iswset(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 {
 	EVENT_SELECT_THR *event_thr = (EVENT_SELECT_THR *) eventp;
 
-	return (FD_ISSET(ACL_VSTREAM_SOCK(stream), &event_thr->wmask));
+	return FD_ISSET(ACL_VSTREAM_SOCK(stream), &event_thr->wmask);
 }
 
 static int event_isxset(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 {
 	EVENT_SELECT_THR *event_thr = (EVENT_SELECT_THR *) eventp;
 
-	return (FD_ISSET(ACL_VSTREAM_SOCK(stream), &event_thr->xmask));
+	return FD_ISSET(ACL_VSTREAM_SOCK(stream), &event_thr->xmask);
 }
 
 static void event_loop(ACL_EVENT *eventp)
@@ -351,15 +351,14 @@ static void event_loop(ACL_EVENT *eventp)
 	 * If any timer is scheduled, adjust the delay appropriately.
 	 */
 	if ((timer = ACL_FIRST_TIMER(&eventp->timer_head)) != 0) {
-		select_delay = (int) (timer->when - eventp->event_present + 1000000 - 1) / 1000000;
-		if (select_delay < 0) {
+		select_delay = (int) (timer->when - eventp->event_present + 1000000 - 1)
+			/ 1000000;
+		if (select_delay < 0)
 			select_delay = 0;
-		} else if (eventp->delay_sec >= 0 && select_delay > eventp->delay_sec) {
+		else if (eventp->delay_sec >= 0 && select_delay > eventp->delay_sec)
 			select_delay = eventp->delay_sec;
-		}
-	} else {
+	} else
 		select_delay = eventp->delay_sec;
-	}
 
 	THREAD_UNLOCK(&event_thr->event.tm_mutex);
 
@@ -537,6 +536,6 @@ ACL_EVENT *event_new_select_thr(void)
 	LOCK_INIT(&event_thr->event.tm_mutex);
 	LOCK_INIT(&event_thr->event.tb_mutex);
 
-	return ((ACL_EVENT *) event_thr);
+	return (ACL_EVENT *) event_thr;
 }
 

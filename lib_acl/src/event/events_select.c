@@ -371,17 +371,17 @@ static void event_loop(ACL_EVENT *eventp)
 	/* 根据定时器任务的最近任务计算 select 的检测超时上限 */
 
 	if ((timer = ACL_FIRST_TIMER(&eventp->timer_head)) != 0) {
-		select_delay = (int) (timer->when - eventp->event_present + 1000000 - 1) / 1000000;
-		if (select_delay < 0) {
+		select_delay = (int) (timer->when - eventp->event_present
+			+ 1000000 - 1) / 1000000;
+		if (select_delay < 0)
 			select_delay = 0;
-		} else if (eventp->delay_sec >= 0
+		else if (eventp->delay_sec >= 0
 			&& select_delay > eventp->delay_sec)
 		{
 			select_delay = eventp->delay_sec;
 		}
-	} else {
+	} else
 		select_delay = eventp->delay_sec;
-	}
 
 	/* 调用 event_prepare 检查有多少个描述字需要通过 select 进行检测 */
 
@@ -400,13 +400,12 @@ static void event_loop(ACL_EVENT *eventp)
 		tv.tv_sec  = 0;
 		tv.tv_usec = 0;
 		tvp = &tv;
-	} else if (select_delay < 0) {
-		tvp = NULL;
-	} else {
+	} else if (select_delay >= 0) {
 		tv.tv_sec  = select_delay;
 		tv.tv_usec = eventp->delay_usec;
 		tvp = &tv;
-	}
+	} else
+		tvp = NULL;
 
 	rmask = ev->rmask;
 	wmask = ev->wmask;
@@ -534,21 +533,21 @@ static int event_isrset(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 {
 	EVENT_SELECT *ev = (EVENT_SELECT *) eventp;
 
-	return (FD_ISSET(ACL_VSTREAM_SOCK(stream), &ev->rmask));
+	return FD_ISSET(ACL_VSTREAM_SOCK(stream), &ev->rmask);
 }
 
 static int event_iswset(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 {
 	EVENT_SELECT *ev = (EVENT_SELECT *) eventp;
 
-	return (FD_ISSET(ACL_VSTREAM_SOCK(stream), &ev->wmask));
+	return FD_ISSET(ACL_VSTREAM_SOCK(stream), &ev->wmask);
 }
 
 static int event_isxset(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 {
 	EVENT_SELECT *ev = (EVENT_SELECT *) eventp;
 
-	return (FD_ISSET(ACL_VSTREAM_SOCK(stream), &ev->xmask));
+	return FD_ISSET(ACL_VSTREAM_SOCK(stream), &ev->xmask);
 }
 
 static void event_free(ACL_EVENT *eventp)
@@ -588,5 +587,5 @@ ACL_EVENT *event_new_select(void)
 	FD_ZERO(&ev->rmask);
 	FD_ZERO(&ev->wmask);
 	FD_ZERO(&ev->xmask);
-	return (eventp);
+	return eventp;
 }

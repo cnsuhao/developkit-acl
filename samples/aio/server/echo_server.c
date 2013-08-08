@@ -97,6 +97,13 @@ static int __gets_callback(ACL_ASTREAM *stream, void *context acl_unused,
 
 static int __accept_callback(ACL_ASTREAM *client, void *context acl_unused)
 {
+	char buf[64];
+
+	if (acl_getpeername(ACL_VSTREAM_SOCK(acl_aio_vstream(client)), buf, sizeof(buf)) == 0)
+		printf("connect from %s\r\n", buf);
+	else
+		printf("can't get client addr %s\r\n", acl_last_serror());
+
 	acl_aio_ctl(client,
 		ACL_AIO_CTL_READ_HOOK_ADD, __gets_callback, NULL,
 		ACL_AIO_CTL_WRITE_HOOK_ADD, __write_callback, NULL,
@@ -117,12 +124,18 @@ static void __listen_callback(ACL_ASTREAM *sstream, void *context)
 	ACL_VSTREAM *cstream;
 	ACL_ASTREAM *client;
 	ACL_AIO *aio = (ACL_AIO *) context;
+	char buf[64];
 	int   i;
 
 	for (i = 0; i < 10; i++) {
 		cstream = acl_vstream_accept(acl_aio_vstream(sstream), NULL, 0);
 		if (cstream == NULL)
 			break;
+
+		if (acl_getpeername(ACL_VSTREAM_SOCK(cstream), buf, sizeof(buf)) == 0)
+			printf("connect from %s\r\n", buf);
+		else
+			printf("can't get client addr %s\r\n", acl_last_serror());
 		cstream->rw_timeout = 0;
 		acl_non_blocking(ACL_VSTREAM_SOCK(cstream), ACL_NON_BLOCKING);
 		client = acl_aio_open(aio, cstream);

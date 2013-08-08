@@ -412,9 +412,8 @@ static void event_disable_readwrite(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 	ACL_EVENT_FDTABLE *fdp = (ACL_EVENT_FDTABLE *) stream->fdp;
 	int   err = 0;
 
-	if (fdp == NULL) {
+	if (fdp == NULL)
 		return;
-	}
 
 	if (fdp->flag == 0 || fdp->fdidx < 0 || fdp->fdidx >= eventp->fdcnt) {
 		acl_msg_warn("%s(%d): sockfd(%d) no set, fdp no null",
@@ -546,7 +545,7 @@ static int disable_read(EVENT_KERNEL *ev, ACL_EVENT_FDTABLE *fdp)
 			myname, EVENT_REG_DEL_TEXT, acl_last_serror(),
 			err, sockfd, ret);
 	}
-	return (ret);
+	return ret;
 }
 
 static int disable_write(EVENT_KERNEL *ev, ACL_EVENT_FDTABLE *fdp)
@@ -597,32 +596,7 @@ static void event_set_all(ACL_EVENT *eventp)
 
 	if (eventp->event_present - ev->last_check >= 1000000) {
 		ev->last_check = eventp->event_present;
-		for (i = 0; i < eventp->fdcnt; i++) {
-			fdp = eventp->fdtabs[i];
-			if ((fdp->stream->flag & ACL_VSTREAM_FLAG_BAD) != 0) {
-				fdp->stream->flag &= ~ACL_VSTREAM_FLAG_BAD;
-				fdp->event_type |= ACL_EVENT_XCPT;
-				fdp->fdidx_ready = eventp->fdcnt_ready;
-				eventp->fdtabs_ready[eventp->fdcnt_ready++] = fdp;
-			} else if ((fdp->flag & EVENT_FDTABLE_FLAG_READ)) {
-				if (ACL_VSTREAM_BFRD_CNT(fdp->stream) > 0) {
-					fdp->stream->sys_read_ready = 0;
-					fdp->event_type |= ACL_EVENT_READ;
-					fdp->fdidx_ready = eventp->fdcnt_ready;
-					eventp->fdtabs_ready[eventp->fdcnt_ready++] = fdp;
-				} else if (fdp->r_ttl > 0 &&  eventp->event_present > fdp->r_ttl) {
-					fdp->event_type |= ACL_EVENT_RW_TIMEOUT;
-					fdp->fdidx_ready = eventp->fdcnt_ready;
-					eventp->fdtabs_ready[eventp->fdcnt_ready++] = fdp;
-				}
-			} else if ((fdp->flag & EVENT_FDTABLE_FLAG_WRITE)) {
-				if (fdp->w_ttl > 0 && eventp->event_present > fdp->w_ttl) {
-					fdp->event_type |= ACL_EVENT_RW_TIMEOUT;
-					fdp->fdidx_ready = eventp->fdcnt_ready;
-					eventp->fdtabs_ready[eventp->fdcnt_ready++] = fdp;
-				}
-			}
-		}
+		event_check_fds(eventp);
 	}
 
 	/* 处理任务项 */
@@ -672,7 +646,8 @@ static void event_loop(ACL_EVENT *eventp)
 	/* 根据定时器任务的最近任务计算 epoll/kqueue/devpoll 的检测超时上限 */
 
 	if ((timer = ACL_FIRST_TIMER(&eventp->timer_head)) != 0) {
-		n = (int) (timer->when - eventp->event_present + 1000000 - 1) / 1000000;
+		n = (int) (timer->when - eventp->event_present + 1000000 - 1)
+			/ 1000000;
 		if (n <= 0) {
 			delay = 0;
 		} else if (delay > eventp->delay_sec) {
@@ -685,9 +660,8 @@ static void event_loop(ACL_EVENT *eventp)
 	event_set_all(eventp);
 
 	if (eventp->fdcnt == 0) {
-		if (eventp->fdcnt_ready == 0) {
+		if (eventp->fdcnt_ready == 0)
 			sleep(1);
-		}
 		goto TAG_DONE;
 	}
 
@@ -705,8 +679,8 @@ static void event_loop(ACL_EVENT *eventp)
 		acl_msg_fatal("%s(%d): recursive call", myname, __LINE__);
 	if (nready < 0) {
 		if (acl_last_error() != ACL_EINTR) {
-			acl_msg_fatal("%s(%d), %s: select: %s",
-				__FILE__, __LINE__, myname, acl_last_serror());
+			acl_msg_fatal("%s(%d), %s: select: %s", __FILE__,
+				__LINE__, myname, acl_last_serror());
 		}
 		goto TAG_DONE;
 	} else if (nready == 0)
@@ -832,14 +806,14 @@ static int event_isrset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
 {
 	ACL_EVENT_FDTABLE *fdp = (ACL_EVENT_FDTABLE *) stream->fdp;
 
-	return (fdp == NULL ? 0 : (fdp->flag & EVENT_FDTABLE_FLAG_READ));
+	return fdp == NULL ? 0 : (fdp->flag & EVENT_FDTABLE_FLAG_READ);
 }
 
 static int event_iswset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
 {
 	ACL_EVENT_FDTABLE *fdp = (ACL_EVENT_FDTABLE *) stream->fdp;
 
-	return (fdp == NULL ? 0 : (fdp->flag & EVENT_FDTABLE_FLAG_WRITE));
+	return fdp == NULL ? 0 : (fdp->flag & EVENT_FDTABLE_FLAG_WRITE);
 
 }
 
@@ -847,7 +821,7 @@ static int event_isxset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
 {
 	ACL_EVENT_FDTABLE *fdp = (ACL_EVENT_FDTABLE *) stream->fdp;
 
-	return (fdp == NULL ? 0 : (fdp->flag & EVENT_FDTABLE_FLAG_EXPT));
+	return fdp == NULL ? 0 : (fdp->flag & EVENT_FDTABLE_FLAG_EXPT);
 }
 
 static void event_free(ACL_EVENT *eventp)
@@ -898,6 +872,6 @@ ACL_EVENT *event_new_kernel(int fdsize acl_unused)
 #ifdef	USE_FDMAP
 	ev->fdmap = acl_fdmap_create(fdsize);
 #endif
-	return (eventp);
+	return eventp;
 }
 #endif	/* ACL_EVENTS_KERNEL_STYLE */
