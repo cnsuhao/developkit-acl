@@ -367,13 +367,6 @@ bool db_mysql::open(const char* local_charset /* = GBK */)
 #endif
 	}
 
-	if (local_charset)
-	{
-		if (!__mysql_set_character_set(conn_, local_charset))
-			logger_warn("set mysql charset(%s) error(%s)",
-				local_charset, __mysql_character_set_name(conn_));
-	}
-
 	my_bool reconnect = 1;
 
 #if MYSQL_VERSION_ID >= 50500
@@ -394,6 +387,13 @@ bool db_mysql::open(const char* local_charset /* = GBK */)
 		__mysql_close(conn_);
 		conn_ = NULL;
 		return false;
+	}
+
+	if (local_charset)
+	{
+		if (!__mysql_set_character_set(conn_, local_charset))
+			logger_warn("set mysql charset(%s) error(%s)",
+				local_charset, __mysql_character_set_name(conn_));
 	}
 
 #if MYSQL_VERSION_ID >= 50000
