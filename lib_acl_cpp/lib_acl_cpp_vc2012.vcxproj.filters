@@ -322,6 +322,12 @@
     <ClCompile Include="src\stream\aio_fstream.cpp">
       <Filter>src\stream</Filter>
     </ClCompile>
+    <ClCompile Include="src\db\mysql_pool.cpp">
+      <Filter>src\db</Filter>
+    </ClCompile>
+    <ClCompile Include="src\db\sqlite_pool.cpp">
+      <Filter>src\db</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\acl_stdafx.hpp">

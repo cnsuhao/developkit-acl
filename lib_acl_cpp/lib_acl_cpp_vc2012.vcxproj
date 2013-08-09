@@ -215,6 +215,8 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClCompile Include="src\db\db_service_mysql.cpp" />
     <ClCompile Include="src\db\db_service_sqlite.cpp" />
     <ClCompile Include="src\db\db_sqlite.cpp" />
+    <ClCompile Include="src\db\mysql_pool.cpp" />
+    <ClCompile Include="src\db\sqlite_pool.cpp" />
     <ClCompile Include="src\hsocket\hsclient.cpp" />
     <ClCompile Include="src\hsocket\hserror.cpp" />
     <ClCompile Include="src\hsocket\hspool.cpp" />
