@@ -222,6 +222,7 @@ db_handle::db_handle()
 : result_(NULL)
 , id_(NULL)
 {
+	time(&when_);
 }
 
 db_handle::~db_handle()
@@ -339,15 +340,15 @@ const db_row* db_handle::operator [](size_t idx) const
 		return (NULL);
 	if (idx >= result_->length())
 		return (NULL);
-	return ((*result_)[idx]);
+	return (*result_)[idx];
 }
 
 size_t db_handle::length() const
 {
 	if (result_ == NULL)
-		return (0);
+		return 0;
 	else
-		return (result_->length());
+		return result_->length();
 }
 
 bool db_handle::empty() const
@@ -355,18 +356,19 @@ bool db_handle::empty() const
 	return (length() == 0 ? true : false);
 }
 
-void db_handle::set_id(const char* id)
+db_handle& db_handle::set_id(const char* id)
 {
 	if (id == NULL || *id == 0)
-		return;
+		return *this;
 	if (id_)
 		acl_myfree(id_);
 	id_ = acl_mystrdup(id);
+	return *this;
 }
 
-const char* db_handle::get_id() const
+db_handle& db_handle::set_when(time_t now)
 {
-	return id_;
+	when_ = now;
+	return *this;
 }
-
 } // namespace acl

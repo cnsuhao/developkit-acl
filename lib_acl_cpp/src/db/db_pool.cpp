@@ -8,7 +8,7 @@
 namespace acl
 {
 
-db_pool::db_pool(int dblimit /* = 64 */)
+db_pool::db_pool(int dblimit /* = 64 */, int idle /* = 0 */)
 {
 	if (dblimit > 0)
 		dblimit_ = dblimit;
@@ -49,6 +49,7 @@ db_handle* db_pool::peek()
 		conn = *it;
 		pool_.erase(it);
 		locker_->unlock();
+		conn->set_when(time(NULL));
 		return conn;
 	}
 	else if (dbcount_ >= dblimit_)
@@ -67,6 +68,7 @@ db_handle* db_pool::peek()
 	conn = create();
 
 	conn->set_id(id_);
+	conn->set_when(time(NULL));
 	return conn;
 }
 
@@ -85,7 +87,10 @@ void db_pool::put(db_handle* conn, bool keep /* = true */)
 
 	if (keep)
 	{
-		pool_.push_back(conn);
+		conn->set_when(time(NULL));
+		// 将归还的连接放在链表首部，这样在调用释放过期连接
+		// 时比较方便，有利于尽快将不忙的数据库连接关闭
+		pool_.push_front(conn);
 		// 如果该连接句柄不是由本连接池产生的，则需要
 		// 重新设置连接句柄的 ID 标识
 		if (!eq)
@@ -99,7 +104,51 @@ void db_pool::put(db_handle* conn, bool keep /* = true */)
 			dbcount_--;
 		delete conn;
 	}
+
+	(void) dbidle_erase(ttl_, false);
 	locker_->unlock();
+}
+
+int db_pool::dbidle_erase(time_t ttl, bool exclusive /* = true */)
+{
+	if (ttl < 0)
+		return 0;
+	if (exclusive)
+		locker_->lock();
+	if (ttl == 0)
+	{
+		int   n = 0;
+		std::list<db_handle*>::iterator it = pool_.begin();
+		for (; it != pool_.end(); ++it)
+		{
+			delete *it;
+			n++;
+		};
+		pool_.clear();
+		dbcount_ = 0;
+		locker_->unlock();
+		return n;
+	}
+
+	int n = 0;
+	time_t now = time(NULL), when;
+	std::list<db_handle*>::reverse_iterator next, it = pool_.rbegin();
+	for (next = it; it != pool_.rend(); it = next)
+	{
+		++next;
+		when = (*it)->get_when();
+		if (when <= 0)
+			continue;
+		if (now - when < ttl)
+			break;
+		delete *it;
+		pool_.erase(it.base());
+		n++;
+		dbcount_--;
+	}
+
+	locker_->unlock();
+	return n;
 }
 
 } // namespace acl

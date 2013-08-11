@@ -352,25 +352,47 @@ public:
 	 */
 	void print_out(size_t max = 0) const;
 
-	//////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////
 	/**
 	 * 设置本实例的唯一 ID
 	 * @param id {const char*} 唯一 ID
+	 * @return {db_handle&}
 	 */
-	void set_id(const char* id);
+	db_handle& set_id(const char* id);
 
 	/**
 	 * 获得本实例的唯一 ID
 	 * @return {const char*} 为空时，表示未曾设置过唯一ID
 	 */
-	const char* get_id() const;
+	const char* get_id() const
+	{
+		return id_;
+	}
 
+	/**
+	 * 设置本数据库连接句柄当前被使用的时间
+	 * @param now {time_t}
+	 * @return {db_handle&}
+	 */
+	db_handle& set_when(time_t now);
+
+	/**
+	 * 获得该连接句柄上次被使用的时间
+	 * @return {time_t}
+	 */
+	time_t get_when() const
+	{
+		return when_;
+	}
 protected:
 	// 临时结果对象
 	db_rows* result_;
 
 	// 实例唯一 ID
 	char* id_;
+
+	// 该数据库连接句柄最近被使用的时间
+	time_t when_;
 };
 
 } // namespace acl
