@@ -15,6 +15,7 @@ db_pool::db_pool(int dblimit /* = 64 */, int idle /* = 0 */)
 	else
 		dblimit_ = 64;
 
+	ttl_ = idle;
 	dbcount_ = 0;
 	locker_ = NEW locker(true);
 }
