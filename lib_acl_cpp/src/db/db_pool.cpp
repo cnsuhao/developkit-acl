@@ -107,8 +107,8 @@ void db_pool::put(db_handle* conn, bool keep /* = true */)
 		pool_.push_front(conn);
 		// 如果该连接句柄不是由本连接池产生的，则需要
 		// 重新设置连接句柄的 ID 标识
-		//if (!eq)
-		//	conn->set_id(id_);
+		if (!eq)
+			conn->set_id(id_);
 	}
 	else
 	{
