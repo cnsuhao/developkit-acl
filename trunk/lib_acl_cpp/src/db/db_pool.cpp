@@ -8,16 +8,18 @@
 namespace acl
 {
 
-db_pool::db_pool(int dblimit /* = 64 */, int idle /* = 0 */)
+db_pool::db_pool(int dblimit /* = 64 */)
 {
 	if (dblimit > 0)
 		dblimit_ = dblimit;
 	else
 		dblimit_ = 64;
 
-	ttl_ = idle;
+	ttl_ = -1;
 	dbcount_ = 0;
+	id_[0] = 0;
 	locker_ = NEW locker(true);
+	set_id();
 }
 
 db_pool::~db_pool()
@@ -38,6 +40,12 @@ void db_pool::set_id()
 		(int) tv.tv_sec, (int) tv.tv_usec, rand());
 }
 
+db_pool& db_pool::set_idle(int idle)
+{
+	ttl_ = idle;
+	return *this;
+}
+
 db_handle* db_pool::peek()
 {
 	db_handle* conn;
@@ -51,6 +59,7 @@ db_handle* db_pool::peek()
 		pool_.erase(it);
 		locker_->unlock();
 		conn->set_when(time(NULL));
+		printf("peek %s\r\n", conn->get_id());
 		return conn;
 	}
 	else if (dbcount_ >= dblimit_)
@@ -68,7 +77,10 @@ db_handle* db_pool::peek()
 	// 创建 mysql 或 sqlite 连接句柄
 	conn = create();
 
+	static int __id = 0;
+	snprintf(id_, sizeof(id_), "id: %d", __id++);
 	conn->set_id(id_);
+	printf("create db id: %s\r\n", id_);
 	conn->set_when(time(NULL));
 	return conn;
 }
@@ -84,6 +96,7 @@ void db_pool::put(db_handle* conn, bool keep /* = true */)
 	else
 		eq = false;
 
+	printf("put: %s\r\n", id);
 	locker_->lock();
 
 	if (keep)
@@ -94,8 +107,8 @@ void db_pool::put(db_handle* conn, bool keep /* = true */)
 		pool_.push_front(conn);
 		// 如果该连接句柄不是由本连接池产生的，则需要
 		// 重新设置连接句柄的 ID 标识
-		if (!eq)
-			conn->set_id(id_);
+		//if (!eq)
+		//	conn->set_id(id_);
 	}
 	else
 	{
@@ -106,7 +119,8 @@ void db_pool::put(db_handle* conn, bool keep /* = true */)
 		delete conn;
 	}
 
-	(void) dbidle_erase(ttl_, false);
+	if (ttl_ >= 0)
+		(void) dbidle_erase(ttl_, false);
 	locker_->unlock();
 }
 
@@ -116,6 +130,12 @@ int db_pool::dbidle_erase(time_t ttl, bool exclusive /* = true */)
 		return 0;
 	if (exclusive)
 		locker_->lock();
+	if (pool_.empty())
+	{
+		locker_->unlock();
+		return 0;
+	}
+
 	if (ttl == 0)
 	{
 		int   n = 0;
@@ -133,17 +153,27 @@ int db_pool::dbidle_erase(time_t ttl, bool exclusive /* = true */)
 
 	int n = 0;
 	time_t now = time(NULL), when;
-	std::list<db_handle*>::reverse_iterator next, it = pool_.rbegin();
-	for (next = it; it != pool_.rend(); it = next)
+
+	std::list<db_handle*>::iterator it, next;
+	std::list<db_handle*>::reverse_iterator rit = pool_.rbegin();
+
+	for (; rit != pool_.rend();)
 	{
-		++next;
+		it = --rit.base();
 		when = (*it)->get_when();
 		if (when <= 0)
+		{
+			++rit;
 			continue;
+		}
+
 		if (now - when < ttl)
 			break;
+
 		delete *it;
-		pool_.erase(it.base());
+		next = pool_.erase(it);
+		rit = std::list<db_handle*>::reverse_iterator(next);
+
 		n++;
 		dbcount_--;
 	}

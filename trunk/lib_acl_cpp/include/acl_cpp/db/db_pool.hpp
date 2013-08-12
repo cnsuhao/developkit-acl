@@ -13,10 +13,8 @@ public:
 	/**
 	 * 数据库构造函数
 	 * @param dblimit {int} 数据库连接池的最大连接数限制
-	 * @param idle {int} 连接池中空闲连接的连接存活时间，当该值
-	 *  为 -1 时，表示不处理空闲连接，为 0 时表示内部不保留任何长连接
 	 */
-	db_pool(int dblimit = 64, int idle = -1);
+	db_pool(int dblimit = 64);
 	virtual ~db_pool();
 
 	/**
@@ -48,6 +46,16 @@ public:
 	 * @return {int} 被释放的数据库连接的个数(>= 0)
 	 */
 	int dbidle_erase(time_t ttl, bool exclusive = true);
+
+	/**
+	 * 设置连接池中空闲连接的生存周期，当通过本函数设置了数据库空闲连接
+	 * 的生存周期后(idle >= 0)，则当用户调用 db_pool::put 时会自动检查
+	 * 过期连接并关闭，否则内部空闲连接一直保持
+	 * @param idle {int} 连接池中空闲连接的连接存活时间，当该值
+	 *  为 -1 时，表示不处理空闲连接，为 0 时表示内部不保留任何长连接
+	 * @return {db_pool&}
+	 */
+	db_pool& set_idle(int idle);
 
 	/**
 	 * 获得当前数据库连接池的最大连接数限制
