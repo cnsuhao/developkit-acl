@@ -59,7 +59,6 @@ db_handle* db_pool::peek()
 		pool_.erase(it);
 		locker_->unlock();
 		conn->set_when(time(NULL));
-		printf("peek %s\r\n", conn->get_id());
 		return conn;
 	}
 	else if (dbcount_ >= dblimit_)
@@ -80,7 +79,6 @@ db_handle* db_pool::peek()
 	static int __id = 0;
 	snprintf(id_, sizeof(id_), "id: %d", __id++);
 	conn->set_id(id_);
-	printf("create db id: %s\r\n", id_);
 	conn->set_when(time(NULL));
 	return conn;
 }
@@ -96,7 +94,6 @@ void db_pool::put(db_handle* conn, bool keep /* = true */)
 	else
 		eq = false;
 
-	printf("put: %s\r\n", id);
 	locker_->lock();
 
 	if (keep)
