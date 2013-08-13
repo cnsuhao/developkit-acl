@@ -15,9 +15,11 @@ static void usage(const char* procname)
 
 static void get(const char* addr, int id, int num)
 {
-	acl::mem_cache client(__key, addr);
+	acl::mem_cache client(addr);
 	acl::string buf, key;
 	int   i;
+
+	client.set_prefix(__key);
 
 	for (i = 0; i < num; i++)
 	{
@@ -38,9 +40,11 @@ static void get(const char* addr, int id, int num)
 
 static void mod(const char* addr, int id, int num)
 {
-	acl::mem_cache client(__key, addr);
+	acl::mem_cache client(addr);
 	acl::string key;
 	int   i;
+
+	client.set_prefix(__key);
 
 	for (i = 0; i < num; i++)
 	{
@@ -61,9 +65,11 @@ static void mod(const char* addr, int id, int num)
 
 static void set(const char* addr, int id, int num)
 {
-	acl::mem_cache client(__key, addr);
+	acl::mem_cache client(addr);
 	acl::string buf, key;
 	int   i;
+
+	client.set_prefix(__key);
 
 	for (i = 0; i < num; i++)
 	{
@@ -90,9 +96,11 @@ static void set(const char* addr, int id, int num)
 
 static void del(const char* addr, int id, int num)
 {
-	acl::mem_cache client(__key, addr);
+	acl::mem_cache client(addr);
 	acl::string key;
 	int   i;
+
+	client.set_prefix(__key);
 
 	for (i = 0; i < num; i++)
 	{
@@ -129,8 +137,11 @@ static void thread_main(void *arg)
 
 static void test1(void)
 {
-	acl::mem_cache client("WEBMAIL", "127.0.0.1:16815", false, 180, 300, false);
+	acl::mem_cache client("127.0.0.1:16815", 180, 300);
 	acl::string buf, key("F6B7AB8F24790F6224DEC0D674FFAC4D");
+
+	client.set_prefix("WEBMAIL").auto_retry(false).encode_key(false);
+
 	if (client.get(key.c_str(), buf) == false)
 		printf("error\r\n");
 	else

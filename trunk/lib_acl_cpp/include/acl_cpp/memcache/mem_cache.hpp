@@ -24,15 +24,36 @@ public:
 	*  地看出该类应用的含义来
 	* @param addr {const char*} memcached 服务器监听地址，格式为：
 	*  ip:port，如: 127.0.0.1:11211
-	* @param retry {bool} 当错误原因是因为IO问题时是否需要重试操作
 	* @param conn_timeout {int} 连接超时时间(秒)
 	* @param rw_timeout {int} IO 读写超时时间(秒)
-	* @param encode_key {bool} 是否对查询键值进行编码
 	*/
-	mem_cache(const char* key_pre = NULL, const char* addr = "127.0.0.1:11211",
-		bool retry = true, int conn_timeout = 180, int rw_timeout = 300,
-		bool encode_key = true);
+	mem_cache(const char* addr = "127.0.0.1:11211",
+		int conn_timeout = 180, int rw_timeout = 300);
 	~mem_cache();
+
+	/**
+	 * 设置 key 的前缀，即实际的 key 将由 该前缀+原始key 组成，缺省时不设前缀，
+	 * 当多个应用共用同一个 memcached 服务时，建议应用设置自身的 key 前缀，这样
+	 * 可以避免与其它应用的 key 产生重复问题
+	 * @param keypre {const char*} 非空时设置 key 前缀，否则取消 key 前缀
+	 * @return {mem_cache&}
+	 */
+	mem_cache& set_prefix(const char* keypre);
+
+	/**
+	 * 在保持的长连接中断时是否要求自动重连，缺省为自动重连
+	 * @param onoff {bool} 为 true 时表示长连接意外断开后自动重连
+	 * @return {mem_cache&}
+	 */
+	mem_cache& auto_retry(bool onoff);
+
+	/**
+	 * 设置是否针对 KEY 键值进行编码，缺少时不对 key 编码，当应用的 key 中可能
+	 * 会有特殊字符或二进制值时，建议调用此函数对 key 进行编码
+	 * @parma onoff {bool} 为 true 表示内部需要对 key 进行编码
+	 * @return {mem_cache&}
+	 */
+	mem_cache& encode_key(bool onoff);
 
 	/**
 	* 向 memcached 中修改或添加新的数据缓存对象
@@ -155,23 +176,23 @@ private:
 	bool get(const string& key, string& buf, unsigned short* flags);
 	const string& get_key(const char* key, size_t klen);
 
-	string* m_key_pre;
-	rfc2047 m_coder;
-	int   m_conn_timeout;
-	int   m_rw_timeout;
-	bool  m_encode_key;
+	string* keypre_;
+	rfc2047 coder_;
+	int   conn_timeout_;
+	int   rw_timeout_;
+	bool  encode_key_;
 
-	bool  m_opened;
-	bool  m_retry;
-	char* m_addr;
-	char* m_ip;
-	int   m_port;
-	int   m_enum;
-	string m_ebuf;
-	string m_kbuf;
+	bool  opened_;
+	bool  retry_;
+	char* addr_;
+	char* ip_;
+	int   port_;
+	int   enum_;
+	string ebuf_;
+	string kbuf_;
 
-	socket_stream* m_conn;
-	string m_line;
+	socket_stream* conn_;
+	string line_;
 	bool error_happen(const char* line);
 };
 
