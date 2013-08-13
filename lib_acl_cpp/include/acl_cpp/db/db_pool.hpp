@@ -45,7 +45,7 @@ public:
 	 * @param exclusive {bool} 内部是否需要加互斥锁
 	 * @return {int} 被释放的数据库连接的个数(>= 0)
 	 */
-	int dbidle_erase(time_t ttl, bool exclusive = true);
+	int check_idle(time_t ttl, bool exclusive = true);
 
 	/**
 	 * 设置连接池中空闲连接的生存周期，当通过本函数设置了数据库空闲连接
@@ -56,6 +56,13 @@ public:
 	 * @return {db_pool&}
 	 */
 	db_pool& set_idle(int idle);
+
+	/**
+	 * 设置自动检查空闲连接的时间间隔，缺省值为 30 秒
+	 * @param n {int} 时间间隔
+	 * @return {db_pool&}
+	 */
+	db_pool& set_check_inter(int n);
 
 	/**
 	 * 获得当前数据库连接池的最大连接数限制
@@ -87,6 +94,8 @@ private:
 	locker* locker_;
 	char  id_[128];  // 本类实例的唯一 ID 标识
 	time_t ttl_;     // 连接池中空闲连接被释放的超时值
+	time_t last_check_;  // 上次检查空闲连接的时间截
+	int    check_inter_; // 检查空闲连接的时间间隔
 
 	// 设置本实例的唯一 ID 标识
 	void set_id();

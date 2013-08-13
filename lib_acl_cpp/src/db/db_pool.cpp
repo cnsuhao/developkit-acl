@@ -19,6 +19,8 @@ db_pool::db_pool(int dblimit /* = 64 */)
 	dbcount_ = 0;
 	id_[0] = 0;
 	locker_ = NEW locker(true);
+	last_check_ = 0;
+	check_inter_ = 30;
 	set_id();
 }
 
@@ -94,11 +96,13 @@ void db_pool::put(db_handle* conn, bool keep /* = true */)
 	else
 		eq = false;
 
+	time_t now = time(NULL);
+
 	locker_->lock();
 
 	if (keep)
 	{
-		conn->set_when(time(NULL));
+		conn->set_when(now);
 		// 将归还的连接放在链表首部，这样在调用释放过期连接
 		// 时比较方便，有利于尽快将不忙的数据库连接关闭
 		pool_.push_front(conn);
@@ -116,12 +120,16 @@ void db_pool::put(db_handle* conn, bool keep /* = true */)
 		delete conn;
 	}
 
-	if (ttl_ >= 0)
-		(void) dbidle_erase(ttl_, false);
+	if (ttl_ >= 0 && now - last_check_ >= check_inter_)
+	{
+		(void) check_idle(ttl_, false);
+		(void) time(&last_check_);
+	}
+
 	locker_->unlock();
 }
 
-int db_pool::dbidle_erase(time_t ttl, bool exclusive /* = true */)
+int db_pool::check_idle(time_t ttl, bool exclusive /* = true */)
 {
 	if (ttl < 0)
 		return 0;

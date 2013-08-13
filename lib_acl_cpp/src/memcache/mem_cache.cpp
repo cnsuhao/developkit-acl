@@ -10,103 +10,129 @@
 namespace acl
 {
 
-mem_cache::mem_cache(const char* key_pre /* = NULL */,
-	const char* addr /* = "127.0.0.1:11211" */, bool retry /* = true */,
-	int conn_timeout /* = 180 */, int rw_timeout /* = 300 */,
-	bool encode_key /* = true */)
-: m_coder(false, false)
-, m_conn_timeout(conn_timeout)
-, m_rw_timeout(rw_timeout)
-, m_encode_key(encode_key)	
-, m_opened(false)
-, m_retry(retry)
-, m_conn(NULL)
+mem_cache::mem_cache(const char* addr /* = "127.0.0.1:11211" */,
+	int conn_timeout /* = 180 */, int rw_timeout /* = 300 */)
+: keypre_(NULL)
+, coder_(false, false)
+, conn_timeout_(conn_timeout)
+, rw_timeout_(rw_timeout)
+, encode_key_(false)
+, opened_(false)
+, retry_(true)
+, conn_(NULL)
 {
-	if (key_pre && *key_pre)
-	{
-		bool beCoding = false;
-
-		m_key_pre = NEW acl::string(strlen(key_pre));
-		while (*key_pre)
-		{
-			if (SPECIAL_CHAR(*key_pre) || !ACL_ISPRINT(*key_pre))
-			{
-				m_coder.encode_update(key_pre, 1, m_key_pre);
-				beCoding = true;
-			}
-			else if (beCoding)
-			{
-				m_coder.encode_finish(m_key_pre);
-				m_coder.reset();
-				beCoding = false;
-				*m_key_pre << (char) *key_pre;
-			}
-			else
-				*m_key_pre << (char) *key_pre;
-			key_pre++;
-		}
-		if (beCoding)
-			m_coder.encode_finish(m_key_pre);
-	}
-	else
-		m_key_pre = NULL;
-
 	acl_assert(addr && *addr);
-	m_addr = acl_mystrdup(addr);
-	char* ptr = strchr(m_addr, ':');
+	addr_ = acl_mystrdup(addr);
+	char* ptr = strchr(addr_, ':');
 	if (ptr == NULL)
 		logger_fatal("addr(%s) invalid", addr);
 	*ptr++ = 0;
 	if (*ptr == 0)
 		logger_fatal("addr(%s) invalid", addr);
-	m_ip = m_addr;
-	m_port = atoi(ptr);
-	if (m_port <= 0)
+	ip_ = addr_;
+	port_ = atoi(ptr);
+	if (port_ <= 0)
 		logger_fatal("addr(%s) invalid", addr);
 }
 
 mem_cache::~mem_cache()
 {
 	close();
-	if (m_key_pre)
-		delete m_key_pre;
-	acl_myfree(m_addr);
+	if (keypre_)
+		delete keypre_;
+	acl_myfree(addr_);
+}
+
+mem_cache& mem_cache::set_prefix(const char* keypre)
+{
+	if (keypre == NULL || *keypre == 0)
+	{
+		if (keypre_)
+		{
+			delete keypre_;
+			keypre_ = NULL;
+		}
+		return *this;
+	}
+
+	bool beCoding = false;
+
+	if (keypre_ == NULL)
+		keypre_ = NEW acl::string(strlen(keypre));
+	else
+		keypre_->clear();
+
+	while (*keypre)
+	{
+		if (SPECIAL_CHAR(*keypre) || !ACL_ISPRINT(*keypre))
+		{
+			coder_.encode_update(keypre, 1, keypre_);
+			beCoding = true;
+		}
+		else if (beCoding)
+		{
+			coder_.encode_finish(keypre_);
+			coder_.reset();
+			beCoding = false;
+			*keypre_ << (char) *keypre;
+		}
+		else
+			*keypre_ << (char) *keypre;
+		keypre++;
+	}
+
+	if (beCoding)
+		coder_.encode_finish(keypre_);
+
+	return *this;
+}
+
+mem_cache& mem_cache::auto_retry(bool onoff)
+{
+	retry_ = onoff;
+	return *this;
+}
+
+mem_cache& mem_cache::encode_key(bool onoff)
+{
+	encode_key_ = onoff;
+	return *this;
 }
 
 void mem_cache::close()
 {
-	if (m_opened == false)
+	if (opened_ == false)
 		return;
 
-	if (m_conn)
+	if (conn_)
 	{
-		delete m_conn;
-		m_conn = NULL;
+		delete conn_;
+		conn_ = NULL;
 	}
-	m_opened = false;
+	opened_ = false;
 }
 
 bool mem_cache::open()
 {
-	if (m_opened)
+	if (opened_)
 		return (true);
 
-	m_conn = NEW socket_stream();
+	conn_ = NEW socket_stream();
 	char  addr[64];
 
-	snprintf(addr, sizeof(addr), "%s:%d", m_ip, m_port);
-	if (m_conn->open(addr, m_conn_timeout, m_rw_timeout) == false)
+	snprintf(addr, sizeof(addr), "%s:%d", ip_, port_);
+	if (conn_->open(addr, conn_timeout_, rw_timeout_) == false)
 	{
 		logger_error("connect %s error(%s)",
 			addr, acl::last_serror());
-		delete m_conn;
-		m_conn = NULL;
-		m_opened = false;
-		m_ebuf.format("connect server(%s) error(%s)",
+		delete conn_;
+		conn_ = NULL;
+		opened_ = false;
+		ebuf_.format("connect server(%s) error(%s)",
 			addr, acl_last_serror());
 		return (false);
 	}
-	m_opened = true;
+	opened_ = true;
 	return (true);
 }
 
@@ -115,53 +141,53 @@ bool mem_cache::set(const acl::string& key, const void* dat, size_t dlen,
 {
 	bool has_tried = false;
 	struct iovec v[4];
-	m_line.format("set %s %u %d %d\r\n", key.c_str(),
+	line_.format("set %s %u %d %d\r\n", key.c_str(),
 		flags, (int) timeout, (int) dlen);
 AGAIN:
 	if (open() == false)
 		return (false);
 
-	v[0].iov_base = (void*) m_line.c_str();
-	v[0].iov_len = m_line.length();
+	v[0].iov_base = (void*) line_.c_str();
+	v[0].iov_len = line_.length();
 	v[1].iov_base = (void*) dat;
 	v[1].iov_len = dlen;
 	v[2].iov_base = (void*) "\r\n";
 	v[2].iov_len = 2;
 
-	if (m_conn->writev(v, 3) < 0)
+	if (conn_->writev(v, 3) < 0)
 	{
 		close();
-		if (m_retry && !has_tried)
+		if (retry_ && !has_tried)
 		{
 			has_tried = true;
 			goto AGAIN;
 		}
-		m_ebuf.format("write set(%s) error", key.c_str());
+		ebuf_.format("write set(%s) error", key.c_str());
 		return (false);
 	}
 
-	if (m_conn->gets(m_line) == false)
+	if (conn_->gets(line_) == false)
 	{
 		close();
-		if (m_retry && !has_tried)
+		if (retry_ && !has_tried)
 		{
 			has_tried = true;
 			goto AGAIN;
 		}
-		m_ebuf.format("reply for set(%s) error", key.c_str());
+		ebuf_.format("reply for set(%s) error", key.c_str());
 		return (false);
 	}
 
-	if (m_line != "STORED")
+	if (line_ != "STORED")
 	{
 		close();
-		if (m_retry && !has_tried)
+		if (retry_ && !has_tried)
 		{
 			has_tried = true;
 			goto AGAIN;
 		}
-		m_ebuf.format("reply(%s) for set(%s) error",
-			m_line.c_str(), key.c_str());
+		ebuf_.format("reply(%s) for set(%s) error",
+			line_.c_str(), key.c_str());
 		return (false);
 	}
 	return (true);
@@ -196,57 +222,58 @@ bool mem_cache::set(const char* key, time_t timeout /* = 0 */)
 	return (set(key, strlen(key), timeout));
 }
 
-bool mem_cache::get(const acl::string& key, acl::string& buf, unsigned short* flags)
+bool mem_cache::get(const acl::string& key, acl::string& buf,
+	unsigned short* flags)
 {
 	bool has_tried = false;
 	buf.clear();
 
-	m_line.format("get %s\r\n", key.c_str());
+	line_.format("get %s\r\n", key.c_str());
 
 AGAIN:
 	if (open() == false)
 		return (false);
-	if (m_conn->write(m_line) < 0)
+	if (conn_->write(line_) < 0)
 	{
 		close();
-		if (m_retry && !has_tried)
+		if (retry_ && !has_tried)
 		{
 			has_tried = true;
 			goto AGAIN;
 		}
-		m_ebuf.format("write get(%s) error", key.c_str());
+		ebuf_.format("write get(%s) error", key.c_str());
 		return (false);
 	}
 
 	// 读取服务器响应行
-	if (m_conn->gets(m_line) == false)
+	if (conn_->gets(line_) == false)
 	{
 		close();
-		if (m_retry && !has_tried)
+		if (retry_ && !has_tried)
 		{
 			has_tried = true;
 			goto AGAIN;
 		}
-		m_ebuf.format("reply for get(%s) error", key.c_str());
+		ebuf_.format("reply for get(%s) error", key.c_str());
 		return (false);
 	}
-	else if (m_line == "END")
+	else if (line_ == "END")
 	{
-		m_ebuf.format("not found");
+		ebuf_.format("not found");
 		return (false);
 	}
-	else if (error_happen(m_line.c_str()))
+	else if (error_happen(line_.c_str()))
 	{
 		close();
 		return (false);
 	}
 
 	// VALUE {key} {flags} {bytes}\r\n
-	ACL_ARGV* tokens = acl_argv_split(m_line.c_str(), " \t");
+	ACL_ARGV* tokens = acl_argv_split(line_.c_str(), " \t");
 	if (tokens->argc < 4 || strcasecmp(tokens->argv[0], "VALUE") != 0)
 	{
 		close();
-		m_ebuf.format("server error for get(%s)", key.c_str());
+		ebuf_.format("server error for get(%s)", key.c_str());
 		acl_argv_free(tokens);
 		return (false);
 	}
@@ -257,7 +284,7 @@ AGAIN:
 	if (len < 0)
 	{
 		close();
-		m_ebuf.format("value's len < 0");
+		ebuf_.format("value's len < 0");
 		acl_argv_free(tokens);
 		return (false);
 	}
@@ -278,10 +305,10 @@ AGAIN:
 		n = sizeof(tmp);
 		if (n > len)
 			n = len;
-		if ((n = m_conn->read(tmp, n, false)) < 0)
+		if ((n = conn_->read(tmp, n, false)) < 0)
 		{
 			close();
-			m_ebuf.format("read data for get cmd error");
+			ebuf_.format("read data for get cmd error");
 			return (false);
 		}
 		buf.append(tmp, n);
@@ -291,18 +318,18 @@ AGAIN:
 	}
 
 	// 读取数据尾部的 "\r\n"
-	if (m_conn->gets(m_line) == false)
+	if (conn_->gets(line_) == false)
 	{
 		close();
-		m_ebuf.format("read data's delimiter error");
+		ebuf_.format("read data's delimiter error");
 		return (false);
 	}
 
 	// 读取 "END\r\n"
-	if (m_conn->gets(m_line) == false || m_line != "END")
+	if (conn_->gets(line_) == false || line_ != "END")
 	{
 		close();
-		m_ebuf.format("END flag not found");
+		ebuf_.format("END flag not found");
 		return (false);
 	}
 	return (true);
@@ -330,31 +357,31 @@ AGAIN:
 	if (open() == false)
 		return (false);
 
-	m_line.format("delete %s\r\n", keybuf.c_str());
-	if (m_conn->write(m_line) < 0)
+	line_.format("delete %s\r\n", keybuf.c_str());
+	if (conn_->write(line_) < 0)
 	{
-		if (m_retry && !has_tried)
+		if (retry_ && !has_tried)
 		{
 			has_tried = true;
 			goto AGAIN;
 		}
-		m_ebuf.format("write (%s) error", m_line.c_str());
+		ebuf_.format("write (%s) error", line_.c_str());
 		return (false);
 	}
 	// DELETED|NOT_FOUND\r\n
-	if (m_conn->gets(m_line) == false)
+	if (conn_->gets(line_) == false)
 	{
-		if (m_retry && !has_tried)
+		if (retry_ && !has_tried)
 		{
 			has_tried = true;
 			goto AGAIN;
 		}
-		m_ebuf.format("reply for(%s) error", m_line.c_str());
+		ebuf_.format("reply for(%s) error", line_.c_str());
 		return (false);
 	}
-	if (m_line != "DELETED" && m_line != "NOT_FOUND")
+	if (line_ != "DELETED" && line_ != "NOT_FOUND")
 	{
-		m_ebuf.format("reply for (%s) error", m_line.c_str());
+		ebuf_.format("reply for (%s) error", line_.c_str());
 		return (false);
 	}
 	return (true);
@@ -369,29 +396,29 @@ const char* mem_cache::last_serror() const
 {
 	static const char* dummy = "ok";
 
-	if (m_ebuf.empty())
+	if (ebuf_.empty())
 		return (dummy);
-	return (m_ebuf.c_str());
+	return (ebuf_.c_str());
 }
 
 int mem_cache::last_error() const
 {
-	return (m_enum);
+	return (enum_);
 }
 
 const acl::string& mem_cache::get_key(const char* key, size_t klen)
 {
-	m_kbuf.clear();
-	if (m_key_pre)
-		m_kbuf.format("%s:", m_key_pre->c_str());
+	kbuf_.clear();
+	if (keypre_)
+		kbuf_.format("%s:", keypre_->c_str());
 
-	m_coder.reset();
+	coder_.reset();
 
-	if (m_encode_key)
+	if (encode_key_)
 	{
-		m_coder.encode_update(key, klen, &m_kbuf);
-		m_coder.encode_finish(&m_kbuf);
-		return (m_kbuf);
+		coder_.encode_update(key, klen, &kbuf_);
+		coder_.encode_finish(&kbuf_);
+		return (kbuf_);
 	}
 
 	bool beCoding = false;
@@ -400,26 +427,26 @@ const acl::string& mem_cache::get_key(const char* key, size_t klen)
 	{
 		if (SPECIAL_CHAR(*key) || !ACL_ISPRINT(*key))
 		{
-			m_coder.encode_update(key, 1, &m_kbuf);
+			coder_.encode_update(key, 1, &kbuf_);
 			beCoding = true;
 		}
 		else if (beCoding)
 		{
-			m_coder.encode_finish(&m_kbuf);
-			m_coder.reset();
+			coder_.encode_finish(&kbuf_);
+			coder_.reset();
 			beCoding = false;
-			m_kbuf << (char) *key;
+			kbuf_ << (char) *key;
 		}
 		else
-			m_kbuf << (char) *key;
+			kbuf_ << (char) *key;
 		key++;
 		klen--;
 	}
 
 	if (beCoding)
-		m_coder.encode_finish(&m_kbuf);
+		coder_.encode_finish(&kbuf_);
 
-	return (m_kbuf);
+	return (kbuf_);
 }
 
 bool mem_cache::error_happen(const char* line)
@@ -428,20 +455,20 @@ bool mem_cache::error_happen(const char* line)
 		return (true);
 	if (strncasecmp(line, "CLIENT_ERROR", sizeof("CLIENT_ERROR") - 1) == 0)
 	{
-		m_ebuf.format("%s", line);
+		ebuf_.format("%s", line);
 		const char* ptr = line + sizeof("CLIENT_ERROR") - 1;
 		if (*ptr == ' ' || *ptr == '\t')
 			ptr++;
-		m_enum = atoi(ptr);
+		enum_ = atoi(ptr);
 		return (true);
 	}
 	if (strncasecmp(line, "SERVER_ERROR", sizeof("SERVER_ERROR") - 1) == 0)
 	{
-		m_ebuf.format("%s", line);
+		ebuf_.format("%s", line);
 		const char* ptr = line + sizeof("SERVER_ERROR") - 1;
 		if (*ptr == ' ' || *ptr == '\t')
 			ptr++;
-		m_enum = atoi(ptr);
+		enum_ = atoi(ptr);
 		return (true);
 	}
 	return (false);
