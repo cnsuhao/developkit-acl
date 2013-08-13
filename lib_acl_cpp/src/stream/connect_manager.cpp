@@ -1,4 +1,6 @@
 #include "acl_stdafx.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/stdlib/locker.hpp"
 #include "acl_cpp/stream/connect_pool.hpp"
 #include "acl_cpp/stream/connect_manager.hpp"
@@ -24,8 +26,7 @@ connect_manager::~connect_manager()
 
 // 分析一个服务器地址，格式：IP:PORT[:MAX_CONN]
 // 返回值 < 0 表示非法的地址
-static int check_addr(const char* addr, acl::string& buf,
-	int default_count)
+static int check_addr(const char* addr, string& buf, int default_count)
 {
 	// 数据格式：IP:PORT[:CONNECT_COUNT]
 	ACL_ARGV* tokens = acl_argv_split(addr, ":|");
