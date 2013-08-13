@@ -302,6 +302,8 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClCompile Include="src\stream\aio_ostream.cpp" />
     <ClCompile Include="src\stream\aio_socket_stream.cpp" />
     <ClCompile Include="src\stream\aio_stream.cpp" />
+    <ClCompile Include="src\stream\connect_manager.cpp" />
+    <ClCompile Include="src\stream\connect_pool.cpp" />
     <ClCompile Include="src\stream\fstream.cpp" />
     <ClCompile Include="src\stream\ifstream.cpp" />
     <ClCompile Include="src\stream\istream.cpp" />
@@ -406,6 +408,9 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include="include\acl_cpp\stream\aio_ostream.hpp" />
     <ClInclude Include="include\acl_cpp\stream\aio_socket_stream.hpp" />
     <ClInclude Include="include\acl_cpp\stream\aio_stream.hpp" />
+    <ClInclude Include="include\acl_cpp\stream\connect_client.hpp" />
+    <ClInclude Include="include\acl_cpp\stream\connect_manager.hpp" />
+    <ClInclude Include="include\acl_cpp\stream\connect_pool.hpp" />
     <ClInclude Include="include\acl_cpp\stream\fstream.hpp" />
     <ClInclude Include="include\acl_cpp\stream\ifstream.hpp" />
     <ClInclude Include="include\acl_cpp\stream\istream.hpp" />
