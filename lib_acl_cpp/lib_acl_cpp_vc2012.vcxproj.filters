@@ -328,6 +328,12 @@
     <ClCompile Include="src\db\sqlite_pool.cpp">
       <Filter>src\db</Filter>
     </ClCompile>
+    <ClCompile Include="src\stream\connect_manager.cpp">
+      <Filter>src\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stream\connect_pool.cpp">
+      <Filter>src\stream</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\acl_stdafx.hpp">
@@ -677,6 +683,15 @@
     </ClInclude>
     <ClInclude Include="include\acl_cpp\db\sqlite_pool.hpp">
       <Filter>include\db</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stream\connect_client.hpp">
+      <Filter>include\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stream\connect_manager.hpp">
+      <Filter>include\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stream\connect_pool.hpp">
+      <Filter>include\stream</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
