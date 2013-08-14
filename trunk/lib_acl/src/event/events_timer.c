@@ -66,7 +66,7 @@ acl_int64 event_timer_request(ACL_EVENT *eventp, ACL_EVENT_NOTIFY_TIME callback,
 		timer->delay = delay;
 		timer->callback = callback;
 		timer->context = context;
-		timer->event_type =ACL_EVENT_TIME;
+		timer->event_type = ACL_EVENT_TIME;
 		timer->nrefer = 1;
 		timer->ncount = 0;
 		timer->keep = keep;

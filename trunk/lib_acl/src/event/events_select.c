@@ -357,12 +357,15 @@ static void event_loop(ACL_EVENT *eventp)
 	void    *worker_arg;
 	ACL_SOCKET sockfd;
 	ACL_EVENT_TIMER *timer;
-	int   select_delay, nready, i;
+	int   nready, i;
+	acl_int64 delay;
 	ACL_EVENT_FDTABLE *fdp;
 	struct timeval tv, *tvp;
 	fd_set rmask;  /* enabled read events */
 	fd_set wmask;  /* enabled write events */
 	fd_set xmask;  /* for bad news mostly */
+
+	delay = eventp->delay_sec * 1000000 + eventp->delay_usec;
 
 	/* 调整事件引擎的时间截 */
 
@@ -371,26 +374,22 @@ static void event_loop(ACL_EVENT *eventp)
 	/* 根据定时器任务的最近任务计算 select 的检测超时上限 */
 
 	if ((timer = ACL_FIRST_TIMER(&eventp->timer_head)) != 0) {
-		select_delay = (int) (timer->when - eventp->event_present
-			+ 1000000 - 1) / 1000000;
-		if (select_delay < 0)
-			select_delay = 0;
-		else if (eventp->delay_sec >= 0
-			&& select_delay > eventp->delay_sec)
-		{
-			select_delay = eventp->delay_sec;
-		}
-	} else
-		select_delay = eventp->delay_sec;
+		acl_int64 n = timer->when - eventp->event_present;
+
+		if (n <= 0)
+			delay = 0;
+		else if (n < delay)
+			delay = n;
+	}
 
 	/* 调用 event_prepare 检查有多少个描述字需要通过 select 进行检测 */
 
 	if (event_prepare(eventp) == 0) {
 		if (eventp->fdcnt_ready == 0) {
-			if (select_delay <= 0)
-				select_delay = 1;
+			if (delay <= 0)
+				delay = 1;
 			/* 为避免循环过快，休眠一下 */
-			sleep(select_delay);
+			sleep(delay);
 		}
 
 		goto TAG_DONE;
@@ -400,9 +399,9 @@ static void event_loop(ACL_EVENT *eventp)
 		tv.tv_sec  = 0;
 		tv.tv_usec = 0;
 		tvp = &tv;
-	} else if (select_delay >= 0) {
-		tv.tv_sec  = select_delay;
-		tv.tv_usec = eventp->delay_usec;
+	} else if (delay >= 0) {
+		tv.tv_sec  = delay / 1000000;
+		tv.tv_usec = delay - tv.tv_sec * 1000000;
 		tvp = &tv;
 	} else
 		tvp = NULL;
