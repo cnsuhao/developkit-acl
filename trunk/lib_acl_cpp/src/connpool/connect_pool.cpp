@@ -1,8 +1,8 @@
 #include "acl_stdafx.hpp"
 #include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/stdlib/locker.hpp"
-#include "acl_cpp/stream/connect_client.hpp"
-#include "acl_cpp/stream/connect_pool.hpp"
+#include "acl_cpp/connpool/connect_client.hpp"
+#include "acl_cpp/connpool/connect_pool.hpp"
 
 namespace acl
 {

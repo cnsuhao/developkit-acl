@@ -328,11 +328,11 @@
     <ClCompile Include="src\db\sqlite_pool.cpp">
       <Filter>src\db</Filter>
     </ClCompile>
-    <ClCompile Include="src\stream\connect_manager.cpp">
-      <Filter>src\stream</Filter>
+    <ClCompile Include="src\connpool\connect_manager.cpp">
+      <Filter>src\connpool</Filter>
     </ClCompile>
-    <ClCompile Include="src\stream\connect_pool.cpp">
-      <Filter>src\stream</Filter>
+    <ClCompile Include="src\connpool\connect_pool.cpp">
+      <Filter>src\connpool</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -684,14 +684,14 @@
     <ClInclude Include="include\acl_cpp\db\sqlite_pool.hpp">
       <Filter>include\db</Filter>
     </ClInclude>
-    <ClInclude Include="include\acl_cpp\stream\connect_client.hpp">
-      <Filter>include\stream</Filter>
+    <ClInclude Include="include\acl_cpp\connpool\connect_client.hpp">
+      <Filter>include\connpool</Filter>
     </ClInclude>
-    <ClInclude Include="include\acl_cpp\stream\connect_manager.hpp">
-      <Filter>include\stream</Filter>
+    <ClInclude Include="include\acl_cpp\connpool\connect_manager.hpp">
+      <Filter>include\connpool</Filter>
     </ClInclude>
-    <ClInclude Include="include\acl_cpp\stream\connect_pool.hpp">
-      <Filter>include\stream</Filter>
+    <ClInclude Include="include\acl_cpp\connpool\connect_pool.hpp">
+      <Filter>include\connpool</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -792,6 +792,12 @@
     </Filter>
     <Filter Include="include\queue">
       <UniqueIdentifier>{9cf41123-21b3-46aa-bca8-5943eadfc59d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\connpool">
+      <UniqueIdentifier>{558e804c-bb2d-4045-81fd-d650d1a5e166}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\connpool">
+      <UniqueIdentifier>{477f1b57-f0e0-4eb7-9343-8f13a8618463}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
