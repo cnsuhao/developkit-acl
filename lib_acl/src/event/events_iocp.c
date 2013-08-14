@@ -675,9 +675,9 @@ static void event_loop(ACL_EVENT *eventp)
 	int   delay, n;
 	ACL_EVENT_FDTABLE *fdp;
 
-	delay = eventp->delay_sec * 1000 + (eventp->delay_usec + 999) / 1000;
-	if (delay <= 0)
-		delay = 100; /* 100 milliseconds at least */
+	delay = (int) (eventp->delay_sec * 1000 + eventp->delay_usec / 1000);
+	if (delay < 0)
+		delay = 0; /* 0 milliseconds at least */
 
 	SET_TIME(eventp->event_present);
 
@@ -686,13 +686,12 @@ static void event_loop(ACL_EVENT *eventp)
 	 * If any timer is scheduled, adjust the delay appropriately.
 	 */
 	if ((timer = ACL_FIRST_TIMER(&eventp->timer_head)) != 0) {
-		n = (int) (timer->when - eventp->event_present + 1000000 - 1)
-			/ 1000000;
-		if (n <= 0) {
+		acl_int64 n = (timer->when - eventp->event_present) / 1000;
+
+		if (n <= 0)
 			delay = 0;
-		} else if (delay > eventp->delay_sec) {
-			delay = n * 1000 + (eventp->delay_usec + 999) / 1000;
-		}
+		else if ((int) n < delay)
+			delay = (int) n;
 	}
 
 	eventp->nested++;

@@ -630,13 +630,13 @@ static void event_loop(ACL_EVENT *eventp)
 	ACL_EVENT_NOTIFY_FN worker_fn;
 	void    *worker_arg;
 	ACL_EVENT_TIMER *timer;
-	int   delay, n, nready;
+	int   delay, nready;
 	ACL_EVENT_FDTABLE *fdp;
 	EVENT_BUFFER *bp;
 
-	delay = eventp->delay_sec * 1000 + eventp->delay_usec / 1000;
-	if (delay <= 0)
-		delay = 100; /* 100 milliseconds at least */
+	delay = (int) (eventp->delay_sec * 1000 + eventp->delay_usec / 1000);
+	if (delay < 0)
+		delay = 0; /* 0 milliseconds at least */
 
 	/* 调整事件引擎的时间截 */
 
@@ -645,13 +645,12 @@ static void event_loop(ACL_EVENT *eventp)
 	/* 根据定时器任务的最近任务计算 epoll/kqueue/devpoll 的检测超时上限 */
 
 	if ((timer = ACL_FIRST_TIMER(&eventp->timer_head)) != 0) {
-		n = (int) (timer->when - eventp->event_present + 1000000 - 1)
-			/ 1000000;
-		if (n <= 0) {
+		acl_int64 n = (timer->when - eventp->event_present) / 1000;
+
+		if (n <= 0)
 			delay = 0;
-		} else if (delay > eventp->delay_sec) {
-			delay = n * 1000 + eventp->delay_usec / 1000;
-		}
+		else if ((int) n < delay)
+			delay = (int) n;
 	}
 
 	/* 设置描述字对象的状态，添加/删除之前设置的描述字对象 */

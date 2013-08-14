@@ -51,8 +51,8 @@ static void event_init(ACL_EVENT *eventp, int fdsize,
 	eventp->maxfd  = 0;
 	eventp->nested = 0;
 
-	eventp->delay_sec  = delay_sec;
-	eventp->delay_usec = delay_usec;
+	eventp->delay_sec  = delay_sec + delay_usec / 1000000;
+	eventp->delay_usec = delay_usec % 1000000;
 	/*
 	acl_ring_init(&eventp->used_ring);
 	acl_ring_init(&eventp->slot_ring);
