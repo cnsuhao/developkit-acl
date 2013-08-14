@@ -297,12 +297,6 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 					RelativePath=".\src\stream\aio_stream.cpp">
 				</File>
 				<File
-					RelativePath=".\src\stream\connect_manager.cpp">
-				</File>
-				<File
-					RelativePath=".\src\stream\connect_pool.cpp">
-				</File>
-				<File
 					RelativePath=".\src\stream\fstream.cpp">
 				</File>
 				<File
@@ -719,6 +713,16 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 					RelativePath=".\src\queue\queue_manager.cpp">
 				</File>
 			</Filter>
+			<Filter
+				Name="connpool"
+				Filter="">
+				<File
+					RelativePath=".\src\connpool\connect_manager.cpp">
+				</File>
+				<File
+					RelativePath=".\src\connpool\connect_pool.cpp">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Í·ÎÄ¼þ"
@@ -762,15 +766,6 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				</File>
 				<File
 					RelativePath=".\include\acl_cpp\stream\aio_stream.hpp">
-				</File>
-				<File
-					RelativePath=".\include\acl_cpp\stream\connect_client.hpp">
-				</File>
-				<File
-					RelativePath=".\include\acl_cpp\stream\connect_manager.hpp">
-				</File>
-				<File
-					RelativePath=".\include\acl_cpp\stream\connect_pool.hpp">
 				</File>
 				<File
 					RelativePath=".\include\acl_cpp\stream\fstream.hpp">
@@ -1101,6 +1096,19 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				</File>
 				<File
 					RelativePath=".\include\acl_cpp\queue\queue_manager.hpp">
+				</File>
+			</Filter>
+			<Filter
+				Name="connpool"
+				Filter="">
+				<File
+					RelativePath=".\include\acl_cpp\connpool\connect_client.hpp">
+				</File>
+				<File
+					RelativePath=".\include\acl_cpp\connpool\connect_manager.hpp">
+				</File>
+				<File
+					RelativePath=".\include\acl_cpp\connpool\connect_pool.hpp">
 				</File>
 			</Filter>
 		</Filter>
