@@ -100,6 +100,12 @@
     <ClCompile Include="src\hsocket\hsrow.cpp">
       <Filter>src\hsocket</Filter>
     </ClCompile>
+    <ClCompile Include="src\connpool\connect_manager.cpp">
+      <Filter>src\connect_pool</Filter>
+    </ClCompile>
+    <ClCompile Include="src\connpool\connect_pool.cpp">
+      <Filter>src\connect_pool</Filter>
+    </ClCompile>
     <ClCompile Include="src\db\db_sqlite.cpp">
       <Filter>src\db</Filter>
     </ClCompile>
@@ -659,6 +665,15 @@
     </ClInclude>
     <ClInclude Include="include\acl_cpp\beanstalk\beanstalk_pool.hpp">
       <Filter>include\beanstalk</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\connpool\connect_client.hpp">
+      <Filter>include\connpool</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\connpool\connect_manager.hpp">
+      <Filter>include\connpool</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\connpool\connect_pool.hpp">
+      <Filter>include\connpool</Filter>
     </ClInclude>
     <ClInclude Include="include\acl_cpp\stream\server_socket.hpp">
       <Filter>include\stream</Filter>
