@@ -389,7 +389,7 @@ static void event_loop(ACL_EVENT *eventp)
 			if (delay <= 0)
 				delay = 1;
 			/* 为避免循环过快，休眠一下 */
-			sleep(delay);
+			sleep((int) delay);
 		}
 
 		goto TAG_DONE;
@@ -400,8 +400,8 @@ static void event_loop(ACL_EVENT *eventp)
 		tv.tv_usec = 0;
 		tvp = &tv;
 	} else if (delay >= 0) {
-		tv.tv_sec  = delay / 1000000;
-		tv.tv_usec = delay - tv.tv_sec * 1000000;
+		tv.tv_sec  = (long) delay / 1000000;
+		tv.tv_usec = (long) delay - tv.tv_sec * 1000000;
 		tvp = &tv;
 	} else
 		tvp = NULL;
