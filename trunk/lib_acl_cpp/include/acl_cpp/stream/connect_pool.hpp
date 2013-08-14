@@ -120,15 +120,15 @@ private:
 	bool  alive_;
 	// 有问题的服务器的可以重试的时间间隔，不可用连接池对象再次被启用的时间间隔
 	int   retry_inter_;
-	time_t last_dead_;
-	char  addr_[64];
+	time_t last_dead_;			// 该连接池对象上次不可用时的时间截
+	char  addr_[64];			// 连接池对应的服务器地址，IP:PORT
 	int   max_;				// 最大连接数
 	int   count_;				// 当前的连接数
 	time_t idle_ttl_;			// 空闲连接的生命周期
 	time_t last_check_;			// 上次检查空闲连接的时间截
 	int   check_inter_;			// 检查空闲连接的时间间隔
 
-	locker lock_;
+	locker lock_;				// 访问 pool_ 时的互斥锁
 	unsigned long long total_used_;		// 该连接池的所有访问量
 	unsigned long long current_used_;	// 某时间段内的访问量
 	time_t last_;				// 上次记录的时间截
