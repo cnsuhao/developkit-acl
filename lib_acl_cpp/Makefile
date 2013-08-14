@@ -180,6 +180,8 @@ $(OBJ_PATH_DST)/%.o: ./src/memcache/%.cpp
 	$(COMPILE_OBJ)
 $(OBJ_PATH_DST)/%.o: ./src/session/%.cpp
 	$(COMPILE_OBJ)
+$(OBJ_PATH_DST)/%.o: ./src/connpool/%.cpp
+	$(COMPILE_OBJ)
 $(OBJ_PATH_DST)/%.o: ./src/mime/%.cpp
 	$(COMPILE_OBJ)
 
