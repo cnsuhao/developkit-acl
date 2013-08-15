@@ -672,7 +672,7 @@ static void event_loop(ACL_EVENT *eventp)
 	ACL_EVENT_NOTIFY_FN worker_fn;
 	void    *worker_arg;
 	ACL_EVENT_TIMER *timer;
-	int   delay, n;
+	int   delay;
 	ACL_EVENT_FDTABLE *fdp;
 
 	delay = (int) (eventp->delay_sec * 1000 + eventp->delay_usec / 1000);
