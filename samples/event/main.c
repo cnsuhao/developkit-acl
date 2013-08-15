@@ -1,22 +1,58 @@
 #include "lib_acl.h"
 
+typedef struct {
+	ACL_VSTREAM *in;
+	ACL_VSTRING *buf;
+	ACL_EVENT *event;
+} STREAM_IN;
+
 static void trigger_event(int event acl_unused, void *context acl_unused)
 {
 	printf("timer trigger now\r\n");
 }
 
+static int __stop_event = 0;
+
+static STREAM_IN *create_stream(ACL_EVENT *eventp)
+{
+	STREAM_IN *in = (STREAM_IN*) acl_mymalloc(sizeof(STREAM_IN));
+
+	in->in = acl_vstream_fhopen(fileno(stdin), 0);  /* 用标准输入做为输入流 */
+	in->buf = acl_vstring_alloc(256);
+	in->event = eventp;
+	return in;
+}
+
+static void free_stream(STREAM_IN *in)
+{
+	acl_vstream_free(in->in);
+	acl_vstring_free(in->buf);
+	acl_myfree(in);
+}
+
 static void read_callback(int event_type acl_unused, void *context)
 {
-	ACL_VSTREAM *in = (ACL_VSTREAM*) context;
-	ACL_EVENT *eventp = (ACL_EVENT*) in->context;
-	char  buf[256];
+	STREAM_IN *in = (STREAM_IN *) context;
+	int   ready;
 
-	if (acl_vstream_gets_nonl(in, buf, sizeof(buf)) == ACL_VSTREAM_EOF) {
-		acl_event_disable_read(eventp, in);
+	/* 尝试从输入流中读取一行数据，并且要求去掉尾部的回车换行符 */
+	if (acl_vstream_gets_nonl_peek(in->in, in->buf, &ready) == ACL_VSTREAM_EOF)
+	{
+		acl_event_disable_read(in->event, in->in);
 		printf(">>>>gets error\r\n");
-		acl_vstream_free(in);
-	} else {
-		printf(">>>>gets: %s\r\n", buf);
+		free_stream(in);
+		__stop_event = 1;
+	} else if (ready) {
+#define	STR	acl_vstring_str
+
+		/* 如果读到完整的一行数据，则显示之 */
+		printf(">>>>gets one line: %s\r\n", STR(in->buf));
+
+		if (strcasecmp(STR(in->buf), "QUIT") == 0) {
+			__stop_event = 1;
+			free_stream(in);
+		} else
+			ACL_VSTRING_RESET(in->buf); /* 清空缓冲区 */
 	}
 }
 
@@ -34,7 +70,7 @@ static void usage(const char *procname)
 int main(int argc acl_unused, char *argv[] acl_unused)
 {
 	ACL_EVENT *eventp;
-	ACL_VSTREAM *in;
+	STREAM_IN *in;
 	char  event_type[64];
 	int   ch, delay_sec = 1, delay_usec = 0;
 	int   timer_delay = 100, timer_keep = 0;
@@ -92,15 +128,16 @@ int main(int argc acl_unused, char *argv[] acl_unused)
 		acl_event_request_timer(eventp, trigger_event, NULL,
 			timer_delay, timer_keep);
 
+	/* 创建输入流对象 */
+	in = create_stream(eventp);
+
 	/* 将标准输入置入异步 IO 监听事件中 */
-	in = acl_vstream_fhopen(0, 0);
-	in->context = eventp;
-	acl_event_enable_read(eventp, in, 0, read_callback, ACL_VSTREAM_IN);
+	acl_event_enable_read(eventp, in->in, 0, read_callback, in);
 
 	printf("begin wait input from standard in\r\n");
 
 	/* 进行事件循环中 */
-	while (1) {
+	while (!__stop_event) {
 		if (meter)
 			ACL_METER_TIME("begin event");
 		acl_event_loop(eventp);
@@ -108,6 +145,9 @@ int main(int argc acl_unused, char *argv[] acl_unused)
 			ACL_METER_TIME("end event");
 	}
 
+	/* 释放事件引擎 */
+	acl_event_free(eventp);
+
+	printf("event stopped!\r\n");
 	return (0);
 }
-
