@@ -100,12 +100,6 @@
     <ClCompile Include="src\hsocket\hsrow.cpp">
       <Filter>src\hsocket</Filter>
     </ClCompile>
-    <ClCompile Include="src\connpool\connect_manager.cpp">
-      <Filter>src\connect_pool</Filter>
-    </ClCompile>
-    <ClCompile Include="src\connpool\connect_pool.cpp">
-      <Filter>src\connect_pool</Filter>
-    </ClCompile>
     <ClCompile Include="src\db\db_sqlite.cpp">
       <Filter>src\db</Filter>
     </ClCompile>
@@ -328,6 +322,8 @@
     <ClCompile Include="src\stream\aio_fstream.cpp">
       <Filter>src\stream</Filter>
     </ClCompile>
+    <ClCompile Include="src\connpool\connect_manager.cpp" />
+    <ClCompile Include="src\connpool\connect_pool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\acl_stdafx.hpp">
@@ -666,21 +662,15 @@
     <ClInclude Include="include\acl_cpp\beanstalk\beanstalk_pool.hpp">
       <Filter>include\beanstalk</Filter>
     </ClInclude>
-    <ClInclude Include="include\acl_cpp\connpool\connect_client.hpp">
-      <Filter>include\connpool</Filter>
-    </ClInclude>
-    <ClInclude Include="include\acl_cpp\connpool\connect_manager.hpp">
-      <Filter>include\connpool</Filter>
-    </ClInclude>
-    <ClInclude Include="include\acl_cpp\connpool\connect_pool.hpp">
-      <Filter>include\connpool</Filter>
-    </ClInclude>
     <ClInclude Include="include\acl_cpp\stream\server_socket.hpp">
       <Filter>include\stream</Filter>
     </ClInclude>
     <ClInclude Include="include\acl_cpp\stream\aio_fstream.hpp">
       <Filter>include\stream</Filter>
     </ClInclude>
+    <ClInclude Include="include\acl_cpp\connpool\connect_client.hpp" />
+    <ClInclude Include="include\acl_cpp\connpool\connect_manager.hpp" />
+    <ClInclude Include="include\acl_cpp\connpool\connect_pool.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="lib_acl_cpp_vc2010.rc" />
@@ -780,6 +770,12 @@
     </Filter>
     <Filter Include="include\queue">
       <UniqueIdentifier>{9cf41123-21b3-46aa-bca8-5943eadfc59d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\connpool">
+      <UniqueIdentifier>{7033a23c-1d75-4ee8-b6f4-751c1877f60d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\connpool">
+      <UniqueIdentifier>{91040771-66ce-4530-816d-10b9166321a2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
