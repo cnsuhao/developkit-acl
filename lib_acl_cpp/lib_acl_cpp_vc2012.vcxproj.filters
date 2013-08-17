@@ -334,6 +334,9 @@
     <ClCompile Include="src\connpool\connect_pool.cpp">
       <Filter>src\connpool</Filter>
     </ClCompile>
+    <ClCompile Include="src\http\http_request_pool.cpp">
+      <Filter>src\http</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\acl_stdafx.hpp">
@@ -692,6 +695,9 @@
     </ClInclude>
     <ClInclude Include="include\acl_cpp\connpool\connect_pool.hpp">
       <Filter>include\connpool</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\http\http_request_pool.h">
+      <Filter>include\http</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
