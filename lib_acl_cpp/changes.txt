@@ -4,6 +4,8 @@
 167) 2013.8.17
 167.1) feature: 增加了 HTTP 客户端连接池类 http_request_pool；同时将 http_request
 类变为 connect_client 的子类
+167.2) feature: memcache 增加了连接池类 memcache_pool；同时将类 mem_cache 改为
+memcache
 
 166) 2013.8.13
 166.1) mem_cache: 调整了构造函数接口，使之更容易使用
