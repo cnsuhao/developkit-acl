@@ -1,6 +1,6 @@
 #include "acl_stdafx.hpp"
 #include "acl_cpp/stdlib/log.hpp"
-#include "acl_cpp/memcache/mem_cache.hpp"
+#include "acl_cpp/memcache/memcache.hpp"
 #include "acl_cpp/session/memcache_session.hpp"
 
 namespace acl
@@ -14,13 +14,13 @@ memcache_session::memcache_session(const char* cache_addr,
 , auth_free_(true)
 {
 	acl_assert(cache_addr && *cache_addr);
-	cache_ = NEW mem_cache(cache_addr, conn_timeout, rw_timeout);
+	cache_ = NEW memcache(cache_addr, conn_timeout, rw_timeout);
 	(*cache_).set_prefix(prefix && *prefix ? prefix : "_")
 		.encode_key(encode_key)
 		.auto_retry(true);
 }
 
-memcache_session::memcache_session(mem_cache* cache, bool auto_free /* = false */,
+memcache_session::memcache_session(memcache* cache, bool auto_free /* = false */,
 	time_t ttl /* = 0 */, const char* sid /* = NULL */)
 : session(ttl, sid)
 , cache_(cache)

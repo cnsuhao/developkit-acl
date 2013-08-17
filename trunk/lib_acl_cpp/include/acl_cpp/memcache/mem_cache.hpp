@@ -1,6 +1,7 @@
 #pragma once
 #include "acl_cpp/acl_cpp_define.hpp"
 #include <time.h>
+#include "acl_cpp/connpool/connect_client.hpp"
 #include "acl_cpp/stdlib/string.hpp"
 #include "acl_cpp/mime/rfc2047.hpp"
 
@@ -8,67 +9,49 @@ namespace acl {
 
 class socket_stream;
 
+typedef class memcache mem_cache;
+
 /**
  * memcached 客户端通信协议库，支持长连接与自动重连
  */
-class ACL_CPP_API mem_cache : public connect_client
+class ACL_CPP_API memcache : public connect_client
 {
 public:
 	/**
 	* 构造函数
-	* @param key_pre {const char*} 每一个应用都应该有自己的键值前缀，
-	*  以便于在使用memcache时和其它的应用区别开，也免得与其它应用的
-	*  键产生重复，该键前缀必须针对所有的应用程序来说是唯一的，如对
-	*  于 receiver_server 程序来说，最好设成 receiver_server，可以方便
-	*  地看出该类应用的含义来
 	* @param addr {const char*} memcached 服务器监听地址，格式为：
 	*  ip:port，如: 127.0.0.1:11211
 	* @param conn_timeout {int} 连接超时时间(秒)
 	* @param rw_timeout {int} IO 读写超时时间(秒)
 	*/
-	mem_cache(const char* addr = "127.0.0.1:11211",
+	memcache(const char* addr = "127.0.0.1:11211",
 		int conn_timeout = 180, int rw_timeout = 300);
 
-	/**
-	 * 构造函数，调用者在使用此构造函数时，必须首先调用 open 函数连接服务器
-	 */
-	mem_cache();
-
-	~mem_cache();
-
-	/**
-	 * 基类 connect_client 的纯虚函数，只有当调用默认的构造函数 mem_cache()
-	 * 时才需要显式地调用本函数用来打开与服务端的连接
-	 * @param addr {const char*} 服务器地址
-	 * @param conn_timeout {int} 连接服务器的超时时间(秒)
-	 * @param rw_timeout {int} IO 读写超时时间(秒)
-	 */
-	virtual bool open(const char* addr, int conn_timeout = 30,
-		int rw_timemout = 60);
+	~memcache();
 
 	/**
 	 * 设置 key 的前缀，即实际的 key 将由 该前缀+原始key 组成，缺省时不设前缀，
 	 * 当多个应用共用同一个 memcached 服务时，建议应用设置自身的 key 前缀，这样
 	 * 可以避免与其它应用的 key 产生重复问题
 	 * @param keypre {const char*} 非空时设置 key 前缀，否则取消 key 前缀
-	 * @return {mem_cache&}
+	 * @return {memcache&}
 	 */
-	mem_cache& set_prefix(const char* keypre);
+	memcache& set_prefix(const char* keypre);
 
 	/**
 	 * 在保持的长连接中断时是否要求自动重连，缺省为自动重连
 	 * @param onoff {bool} 为 true 时表示长连接意外断开后自动重连
-	 * @return {mem_cache&}
+	 * @return {memcache&}
 	 */
-	mem_cache& auto_retry(bool onoff);
+	memcache& auto_retry(bool onoff);
 
 	/**
 	 * 设置是否针对 KEY 键值进行编码，缺少时不对 key 编码，当应用的 key 中可能
 	 * 会有特殊字符或二进制值时，建议调用此函数对 key 进行编码
 	 * @parma onoff {bool} 为 true 表示内部需要对 key 进行编码
-	 * @return {mem_cache&}
+	 * @return {memcache&}
 	 */
-	mem_cache& encode_key(bool onoff);
+	memcache& encode_key(bool onoff);
 
 	/**
 	* 向 memcached 中修改或添加新的数据缓存对象
@@ -172,7 +155,7 @@ public:
 	* 的连接
 	* @return {bool} 打开是否成功
 	*/
-	bool open();
+	virtual bool open();
 
 	/**
 	* 关闭与 memcached 的连接，一般该函数不需要调用，因为类对象在

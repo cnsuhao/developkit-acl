@@ -353,6 +353,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include="include\acl_cpp\http\http_mime.hpp" />
     <ClInclude Include="include\acl_cpp\http\http_pipe.hpp" />
     <ClInclude Include="include\acl_cpp\http\http_request.hpp" />
+    <ClInclude Include="include\acl_cpp\http\http_request_pool.hpp" />
     <ClInclude Include="include\acl_cpp\http\http_response.hpp" />
     <ClInclude Include="include\acl_cpp\http\http_service.hpp" />
     <ClInclude Include="include\acl_cpp\http\http_type.hpp" />
@@ -368,7 +369,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include="include\acl_cpp\master\master_proc.hpp" />
     <ClInclude Include="include\acl_cpp\master\master_threads.hpp" />
     <ClInclude Include="include\acl_cpp\master\master_trigger.hpp" />
-    <ClInclude Include="include\acl_cpp\memcache\memcache_pool.h" />
+    <ClInclude Include="include\acl_cpp\memcache\memcache_pool.hpp" />
     <ClInclude Include="include\acl_cpp\memcache\mem_cache.hpp" />
     <ClInclude Include="include\acl_cpp\mime\mime.hpp" />
     <ClInclude Include="include\acl_cpp\mime\mime_attach.hpp" />

@@ -115,7 +115,8 @@ public:
 
 protected:
 	virtual connect_client* create_connect() = 0;
-private:
+
+protected:
 	// 是否属正常
 	bool  alive_;
 	// 有问题的服务器的可以重试的时间间隔，不可用连接池对象再次被启用的时间间隔

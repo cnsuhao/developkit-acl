@@ -78,7 +78,7 @@ connect_client* connect_pool::peek()
 	}
 
 	conn = create_connect();
-	if (conn->open(addr_) == false)
+	if (conn->open() == false)
 	{
 		delete conn;
 		alive_ = false;
