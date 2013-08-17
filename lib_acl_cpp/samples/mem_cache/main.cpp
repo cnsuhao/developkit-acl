@@ -1,5 +1,5 @@
 #include "lib_acl.h"
-#include "acl_cpp/memcache/mem_cache.hpp"
+#include "acl_cpp/memcache/memcache.hpp"
 #include "acl_cpp/stdlib/string.hpp"
 #include <stdio.h>
 #include <stdlib.h>
