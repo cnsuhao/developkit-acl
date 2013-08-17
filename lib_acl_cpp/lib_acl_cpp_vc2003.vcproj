@@ -676,7 +676,10 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				Name="memcache"
 				Filter="">
 				<File
-					RelativePath=".\src\memcache\mem_cache.cpp">
+					RelativePath=".\src\memcache\memcache.cpp">
+				</File>
+				<File
+					RelativePath=".\src\memcache\memcache_pool.cpp">
 				</File>
 			</Filter>
 			<Filter
@@ -1058,7 +1061,10 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				Name="memcache"
 				Filter="">
 				<File
-					RelativePath=".\include\acl_cpp\memcache\mem_cache.hpp">
+					RelativePath=".\include\acl_cpp\memcache\memcache.hpp">
+				</File>
+				<File
+					RelativePath=".\include\acl_cpp\memcache\memcache_pool.hpp">
 				</File>
 			</Filter>
 			<Filter

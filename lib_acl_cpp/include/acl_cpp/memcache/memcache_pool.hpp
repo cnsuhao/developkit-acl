@@ -8,9 +8,9 @@ namespace acl
 /**
  * memcache 客户端连接池类，该类父类为 connect_pool，该类只需实现父类中的虚函数
  * create_connect 便拥有了连接池父类 connect_pool 的功能；另外，该类创建
- * 的连接对象是 mem_cache 对象，所以在调用 connect_pool::peek 时返回
- * 的便是 http_request 类，调用者需要将 peek 返回的类对象强制转为 mem_cache
- * 类对象，便可以使用 mem_cache 类折所有功能，其中 mem_cache 类为
+ * 的连接对象是 memcache 对象，所以在调用 connect_pool::peek 时返回
+ * 的便是 http_request 类，调用者需要将 peek 返回的类对象强制转为 memcache
+ * 类对象，便可以使用 memcache 类折所有功能，其中 memcache 类为
  * connect_client 的子类
  */
 class memcache_pool : public connect_pool

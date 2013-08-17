@@ -1,7 +1,7 @@
 #include "acl_stdafx.hpp"
 #include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/mime/rfc2047.hpp"
-#include "acl_cpp/memcache/mem_cache.hpp"
+#include "acl_cpp/memcache/memcache.hpp"
 #include "acl_cpp/stdlib/util.hpp"
 #include "acl_cpp/stream/socket_stream.hpp"
 
