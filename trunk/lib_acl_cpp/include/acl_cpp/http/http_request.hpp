@@ -2,6 +2,7 @@
 #include "acl_cpp/acl_cpp_define.hpp"
 #include <vector>
 #include "acl_cpp/http/http_header.hpp"
+#include "acl_cpp/connpool/connect_client.hpp"
 
 namespace acl {
 
@@ -15,7 +16,7 @@ class json;
 /**
  * HTTP 客户端请求类，该类对象支持长连接，同时当连接断时会自动重试
  */
-class ACL_CPP_API http_request
+class ACL_CPP_API http_request : public connect_client
 {
 public:
 	/**
@@ -43,7 +44,29 @@ public:
 	http_request(const char* addr, int conn_timeout = 60,
 		int rw_timeout = 60, bool unzip = true);
 
+	/**
+	 * 构造函数，调用者在使用此构造函数时，必须首先调用 open 函数连接服务器
+	 */
+	http_request();
+
 	virtual ~http_request(void);
+
+	/**
+	 * 基类 connect_client 的纯虚函数，只有当调用默认的构造函数 http_request()
+	 * 时才需要显式地调用本函数用来打开与服务端的连接
+	 * @param addr {const char*} 服务器地址
+	 * @param conn_timeout {int} 连接服务器的超时时间(秒)
+	 * @param rw_timeout {int} IO 读写超时时间(秒)
+	 */
+	virtual bool open(const char* addr, int conn_timeout = 30,
+		int rw_timemout = 60);
+
+	/**
+	 * 设置在读取服务响应数据时是否针对压缩数据进行解压
+	 * @param on {bool}
+	 * @return {http_request&}
+	 */
+	http_request& set_unzip(bool on);
 
 	/**
 	 * 获得 HTTP 请求头对象，然后在返回的 HTTP 请求头对象中添加

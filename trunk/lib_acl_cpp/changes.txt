@@ -1,6 +1,10 @@
 修改历史列表：
 ------------------------------------------------------------------------
 
+167) 2013.8.17
+167.1) feature: 增加了 HTTP 客户端连接池类 http_request_pool；同时将 http_request
+类变为 connect_client 的子类
+
 166) 2013.8.13
 166.1) mem_cache: 调整了构造函数接口，使之更容易使用
 166.2) feature: 添加了通用的客户端连接池管理对象：connect_client, connect_pool,

@@ -237,6 +237,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClCompile Include="src\http\http_mime.cpp" />
     <ClCompile Include="src\http\http_pipe.cpp" />
     <ClCompile Include="src\http\http_request.cpp" />
+    <ClCompile Include="src\http\http_request_pool.cpp" />
     <ClCompile Include="src\http\http_response.cpp" />
     <ClCompile Include="src\http\http_service.cpp" />
     <ClCompile Include="src\http\http_utils.cpp" />
@@ -351,6 +352,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include="include\acl_cpp\http\http_mime.hpp" />
     <ClInclude Include="include\acl_cpp\http\http_pipe.hpp" />
     <ClInclude Include="include\acl_cpp\http\http_request.hpp" />
+    <ClInclude Include="include\acl_cpp\http\http_request_pool.h" />
     <ClInclude Include="include\acl_cpp\http\http_response.hpp" />
     <ClInclude Include="include\acl_cpp\http\http_service.hpp" />
     <ClInclude Include="include\acl_cpp\http\http_type.hpp" />
