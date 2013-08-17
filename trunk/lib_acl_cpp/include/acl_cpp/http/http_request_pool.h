@@ -24,11 +24,11 @@ public:
 	 *  当该值 <= 0 时表示允许连接断开后可以立即重连，否则必须超过该时间间隔后才
 	 *  允许断开重连
 	 */
-	http_reuqest_pool(const char* addr,
-		int count, int retry_inter = 0);
+	http_reuqest_pool(const char* addr, int count, int retry_inter = 0);
 	~http_reuqest_pool();
 
 protected:
+	// 基类纯虚函数
 	virtual connect_client* create_connect();
 };
 
