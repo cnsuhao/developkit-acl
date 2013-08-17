@@ -11,10 +11,9 @@ class socket_stream;
 /**
  * memcached 客户端通信协议库，支持长连接与自动重连
  */
-class ACL_CPP_API mem_cache
+class ACL_CPP_API mem_cache : public connect_client
 {
 public:
-
 	/**
 	* 构造函数
 	* @param key_pre {const char*} 每一个应用都应该有自己的键值前缀，
@@ -29,7 +28,23 @@ public:
 	*/
 	mem_cache(const char* addr = "127.0.0.1:11211",
 		int conn_timeout = 180, int rw_timeout = 300);
+
+	/**
+	 * 构造函数，调用者在使用此构造函数时，必须首先调用 open 函数连接服务器
+	 */
+	mem_cache();
+
 	~mem_cache();
+
+	/**
+	 * 基类 connect_client 的纯虚函数，只有当调用默认的构造函数 mem_cache()
+	 * 时才需要显式地调用本函数用来打开与服务端的连接
+	 * @param addr {const char*} 服务器地址
+	 * @param conn_timeout {int} 连接服务器的超时时间(秒)
+	 * @param rw_timeout {int} IO 读写超时时间(秒)
+	 */
+	virtual bool open(const char* addr, int conn_timeout = 30,
+		int rw_timemout = 60);
 
 	/**
 	 * 设置 key 的前缀，即实际的 key 将由 该前缀+原始key 组成，缺省时不设前缀，

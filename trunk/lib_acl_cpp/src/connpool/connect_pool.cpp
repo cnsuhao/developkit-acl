@@ -83,7 +83,7 @@ connect_client* connect_pool::peek()
 		delete conn;
 		alive_ = false;
 		time(&last_dead_);
-
+		(void) time(&last_dead_);
 		lock_.unlock();
 		return NULL;
 	}
