@@ -25,6 +25,7 @@
 #include "acl_cpp/stdlib/url_coder.hpp"
 
 #include "acl_cpp/memcache/mem_cache.hpp"
+#include "acl_cpp/memcache/memcache_pool.hpp"
 
 #include "acl_cpp/session/session.hpp"
 #include "acl_cpp/session/memcache_session.hpp"
@@ -66,6 +67,7 @@
 #include "acl_cpp/http/HttpServletResponse.hpp"
 #include "acl_cpp/http/http_download.hpp"
 #include "acl_cpp/http/http_utils.hpp"
+#include "acl_cpp/http/http_request_pool.hpp"
 
 #include "acl_cpp/db/db_handle.hpp"
 #include "acl_cpp/db/db_mysql.hpp"

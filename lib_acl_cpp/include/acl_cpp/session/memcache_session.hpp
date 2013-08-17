@@ -4,7 +4,7 @@
 
 namespace acl {
 
-class mem_cache;
+class memcache;
 
 /**
  * session 类，该类使用 memcached 存储 session 数据
@@ -30,7 +30,7 @@ public:
 
 	/**
 	 * 以输入的 memcached 的连接对象为参数的构造函数
-	 * @param cache {mem_cache*} 输入的 memcached 连接对象
+	 * @param cache {memcache*} 输入的 memcached 连接对象
 	 * @param auth_free {bool} 当该参数为 true 时，则要求该
 	 *  memcached_session 对象析构函数中释放传入的 cache 对象；
 	 *  否则则禁止在 memcached_session 的析构函数中释放 cache 对象
@@ -38,7 +38,7 @@ public:
 	 * @param sid {const char*} session 对应的 sid，当为空时，内部
 	 *  会自动生成一个，其它说明请参考基类 session 的说明
 	 */
-	memcache_session(mem_cache* cache, bool auto_free = false,
+	memcache_session(memcache* cache, bool auto_free = false,
 		time_t ttl = 0, const char* sid = NULL);
 
 	~memcache_session(void);
@@ -57,7 +57,7 @@ private:
 	//重新设置 session 在缓存服务器上的缓存时间
 	virtual bool set_timeout(const char* sid, time_t ttl);
 private:
-	mem_cache* cache_;
+	memcache* cache_;
 	bool auth_free_;
 };
 

@@ -66,22 +66,6 @@ http_request::http_request(const char* addr,
 	RESET_RANGE();
 }
 
-http_request::http_request()
-{
-	addr_[0] = 0;
-	conn_timeout_ = 30;
-	rw_timeout_ = 60;
-	unzip_ = true;
-	conv_ = NULL;
-
-	header_.set_url("/");
-	header_.set_keep_alive(true);
-	cookie_inited_ = false;
-	cookies_ = NULL;
-	client_ = NULL;
-	RESET_RANGE();
-}
-
 http_request::~http_request(void)
 {
 	close();
@@ -127,14 +111,8 @@ http_request& http_request::set_unzip(bool on)
 	return *this;
 }
 
-bool http_request::open(const char* addr, int conn_timeout /* = 30 */,
-	int rw_timemout /* = 60 */)
+bool http_request::open()
 {
-	header_.set_host(addr_);
-	ACL_SAFE_STRNCPY(addr_, addr, sizeof(addr_));
-	conn_timeout_ = conn_timeout;
-	rw_timeout_ = rw_timemout;
-
 	bool reuse;
 	return try_open(&reuse);
 }

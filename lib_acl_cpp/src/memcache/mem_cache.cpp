@@ -10,7 +10,7 @@
 namespace acl
 {
 
-mem_cache::mem_cache(const char* addr /* = "127.0.0.1:11211" */,
+memcache::memcache(const char* addr /* = "127.0.0.1:11211" */,
 	int conn_timeout /* = 180 */, int rw_timeout /* = 300 */)
 : keypre_(NULL)
 , coder_(false, false)
@@ -35,7 +35,7 @@ mem_cache::mem_cache(const char* addr /* = "127.0.0.1:11211" */,
 		logger_fatal("addr(%s) invalid", addr);
 }
 
-mem_cache::~mem_cache()
+memcache::~memcache()
 {
 	close();
 	if (keypre_)
@@ -43,7 +43,7 @@ mem_cache::~mem_cache()
 	acl_myfree(addr_);
 }
 
-mem_cache& mem_cache::set_prefix(const char* keypre)
+memcache& memcache::set_prefix(const char* keypre)
 {
 	if (keypre == NULL || *keypre == 0)
 	{
@@ -87,19 +87,19 @@ mem_cache& mem_cache::set_prefix(const char* keypre)
 	return *this;
 }
 
-mem_cache& mem_cache::auto_retry(bool onoff)
+memcache& memcache::auto_retry(bool onoff)
 {
 	retry_ = onoff;
 	return *this;
 }
 
-mem_cache& mem_cache::encode_key(bool onoff)
+memcache& memcache::encode_key(bool onoff)
 {
 	encode_key_ = onoff;
 	return *this;
 }
 
-void mem_cache::close()
+void memcache::close()
 {
 	if (opened_ == false)
 		return;
@@ -112,7 +112,7 @@ void mem_cache::close()
 	opened_ = false;
 }
 
-bool mem_cache::open()
+bool memcache::open()
 {
 	if (opened_)
 		return (true);
@@ -136,7 +136,7 @@ bool mem_cache::open()
 	return (true);
 }
 
-bool mem_cache::set(const acl::string& key, const void* dat, size_t dlen,
+bool memcache::set(const acl::string& key, const void* dat, size_t dlen,
 	time_t timeout, unsigned short flags)
 {
 	bool has_tried = false;
@@ -193,20 +193,20 @@ AGAIN:
 	return (true);
 }
 
-bool mem_cache::set(const char* key, size_t klen, const void* dat,
+bool memcache::set(const char* key, size_t klen, const void* dat,
 	size_t dlen, time_t timeout /* = 0 */, unsigned short flags /* = 0 */)
 {
 	const acl::string& keybuf = get_key(key, klen);
 	return (set(keybuf, dat, dlen, timeout, flags));
 }
 
-bool mem_cache::set(const char* key, const void* dat, size_t dlen,
+bool memcache::set(const char* key, const void* dat, size_t dlen,
 	time_t timeout /* = 0 */, unsigned short flags /* = 0 */)
 {
 	return (set(key, strlen(key), dat, dlen, timeout, flags));
 }
 
-bool mem_cache::set(const char* key, size_t klen, time_t timeout /* = 0 */)
+bool memcache::set(const char* key, size_t klen, time_t timeout /* = 0 */)
 {
 	const acl::string& keybuf = get_key(key, klen);
 	acl::string buf;
@@ -217,12 +217,12 @@ bool mem_cache::set(const char* key, size_t klen, time_t timeout /* = 0 */)
 	return (set(keybuf, buf.c_str(), buf.length(), timeout, flags));
 }
 
-bool mem_cache::set(const char* key, time_t timeout /* = 0 */)
+bool memcache::set(const char* key, time_t timeout /* = 0 */)
 {
 	return (set(key, strlen(key), timeout));
 }
 
-bool mem_cache::get(const acl::string& key, acl::string& buf,
+bool memcache::get(const acl::string& key, acl::string& buf,
 	unsigned short* flags)
 {
 	bool has_tried = false;
@@ -335,20 +335,20 @@ AGAIN:
 	return (true);
 }
 
-bool mem_cache::get(const char* key, size_t klen, acl::string& buf,
+bool memcache::get(const char* key, size_t klen, acl::string& buf,
 	unsigned short* flags /* = NULL */)
 {
 	const acl::string& keybuf = get_key(key, klen);
 	return (get(keybuf, buf, flags));
 }
 
-bool mem_cache::get(const char* key, acl::string& buf,
+bool memcache::get(const char* key, acl::string& buf,
 	unsigned short* flags /* = NULL */)
 {
 	return (get(key, strlen(key), buf, flags));
 }
 
-bool mem_cache::del(const char* key, size_t klen)
+bool memcache::del(const char* key, size_t klen)
 {
 	bool has_tried = false;
 	const acl::string& keybuf = get_key(key, klen);
@@ -387,12 +387,12 @@ AGAIN:
 	return (true);
 }
 
-bool mem_cache::del(const char* key)
+bool memcache::del(const char* key)
 {
 	return (del(key, strlen(key)));
 }
 
-const char* mem_cache::last_serror() const
+const char* memcache::last_serror() const
 {
 	static const char* dummy = "ok";
 
@@ -401,12 +401,12 @@ const char* mem_cache::last_serror() const
 	return (ebuf_.c_str());
 }
 
-int mem_cache::last_error() const
+int memcache::last_error() const
 {
 	return (enum_);
 }
 
-const acl::string& mem_cache::get_key(const char* key, size_t klen)
+const acl::string& memcache::get_key(const char* key, size_t klen)
 {
 	kbuf_.clear();
 	if (keypre_)
@@ -449,7 +449,7 @@ const acl::string& mem_cache::get_key(const char* key, size_t klen)
 	return (kbuf_);
 }
 
-bool mem_cache::error_happen(const char* line)
+bool memcache::error_happen(const char* line)
 {
 	if (strcasecmp(line, "ERROR") == 0)
 		return (true);
@@ -474,7 +474,7 @@ bool mem_cache::error_happen(const char* line)
 	return (false);
 }
 
-void mem_cache::property_list()
+void memcache::property_list()
 {
 }
 

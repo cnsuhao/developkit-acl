@@ -44,22 +44,7 @@ public:
 	http_request(const char* addr, int conn_timeout = 60,
 		int rw_timeout = 60, bool unzip = true);
 
-	/**
-	 * 构造函数，调用者在使用此构造函数时，必须首先调用 open 函数连接服务器
-	 */
-	http_request();
-
 	virtual ~http_request(void);
-
-	/**
-	 * 基类 connect_client 的纯虚函数，只有当调用默认的构造函数 http_request()
-	 * 时才需要显式地调用本函数用来打开与服务端的连接
-	 * @param addr {const char*} 服务器地址
-	 * @param conn_timeout {int} 连接服务器的超时时间(秒)
-	 * @param rw_timeout {int} IO 读写超时时间(秒)
-	 */
-	virtual bool open(const char* addr, int conn_timeout = 30,
-		int rw_timemout = 60);
 
 	/**
 	 * 设置在读取服务响应数据时是否针对压缩数据进行解压
@@ -228,7 +213,14 @@ public:
 	 * 重置请求状态，在同一个连接的多次请求时会调用此函数
 	 */
 	void reset(void);
+
 protected:
+	/**
+	 * 基类 connect_client 的纯虚函数，显式地调用本函数用来打开与服务端的连接
+	 * @reutrn {bool} 连接是否成功
+	 */
+	virtual bool open();
+
 private:
 	char addr_[64];
 	bool keep_alive_;
