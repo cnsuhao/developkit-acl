@@ -295,9 +295,6 @@
     <ClCompile Include="src\session\session.cpp">
       <Filter>src\session</Filter>
     </ClCompile>
-    <ClCompile Include="src\memcache\mem_cache.cpp">
-      <Filter>src\memcache</Filter>
-    </ClCompile>
     <ClCompile Include="src\beanstalk\beanstalk.cpp">
       <Filter>src\beanstalk</Filter>
     </ClCompile>
@@ -338,6 +335,9 @@
       <Filter>src\http</Filter>
     </ClCompile>
     <ClCompile Include="src\memcache\memcache_pool.cpp">
+      <Filter>src\memcache</Filter>
+    </ClCompile>
+    <ClCompile Include="src\memcache\memcache.cpp">
       <Filter>src\memcache</Filter>
     </ClCompile>
   </ItemGroup>
@@ -494,9 +494,6 @@
     </ClInclude>
     <ClInclude Include="include\acl_cpp\master\master_threads.hpp">
       <Filter>include\master</Filter>
-    </ClInclude>
-    <ClInclude Include="include\acl_cpp\memcache\mem_cache.hpp">
-      <Filter>include\memcache</Filter>
     </ClInclude>
     <ClInclude Include="include\acl_cpp\mime\rfc2047.hpp">
       <Filter>include\mime</Filter>
@@ -703,6 +700,9 @@
       <Filter>include\http</Filter>
     </ClInclude>
     <ClInclude Include="include\acl_cpp\memcache\memcache_pool.hpp">
+      <Filter>include\memcache</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\memcache\memcache.hpp">
       <Filter>include\memcache</Filter>
     </ClInclude>
   </ItemGroup>

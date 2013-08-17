@@ -1,5 +1,5 @@
 #include "acl_stdafx.hpp"
-#include "acl_cpp/memcache/mem_cache.hpp"
+#include "acl_cpp/memcache/memcache.hpp"
 #include "acl_cpp/memcache/memcache_pool.hpp"
 
 namespace acl
