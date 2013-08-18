@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{58FE3581-C997-4BD5-9AC6-AEEB54A43D2C}</ProjectGuid>
+    <ProjectGuid>{1F3F3884-7F9B-4BA1-8CA3-61E6758A7193}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <ProjectName>memcache_pool</ProjectName>
   </PropertyGroup>
