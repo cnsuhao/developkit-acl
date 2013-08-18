@@ -44,6 +44,7 @@ all:
 	@(cd master_threads; make)
 	@(cd benchmark; make)
 	@(cd fs_benchmark; make)
+	@(cd http_request_pool; make)
 
 clean:
 	@(cd string; make clean)
@@ -91,3 +92,4 @@ clean:
 	@(cd master_threads; make clean)
 	@(cd benchmark; make clean)
 	@(cd fs_benchmark; make clean)
+	@(cd http_request_pool; make clean)
