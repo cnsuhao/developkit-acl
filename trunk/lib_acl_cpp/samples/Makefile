@@ -45,6 +45,7 @@ all:
 	@(cd benchmark; make)
 	@(cd fs_benchmark; make)
 	@(cd http_request_pool; make)
+	@(cd memcache_pool; make)
 
 clean:
 	@(cd string; make clean)
@@ -93,3 +94,4 @@ clean:
 	@(cd benchmark; make clean)
 	@(cd fs_benchmark; make clean)
 	@(cd http_request_pool; make clean)
+	@(cd memcache_pool; make clean)

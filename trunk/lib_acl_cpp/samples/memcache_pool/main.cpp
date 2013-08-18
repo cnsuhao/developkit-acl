@@ -5,13 +5,12 @@ using namespace acl;
 static int __loop_count = 10;
 static connect_pool* __conn_pool = NULL;
 static acl_pthread_pool_t* __thr_pool = NULL;
-static bool __unzip = false;
 
 // 初始化过程
 static void init(const char* addr, int count)
 {
 	// 创建 HTTP 请求连接池对象
-	__conn_pool = new http_reuqest_pool(addr, count);
+	__conn_pool = new memcache_pool(addr, count);
 
 	// 创建线程池
 	__thr_pool = acl_thread_pool_create(count, 60);
@@ -27,68 +26,37 @@ static void end(void)
 	delete __conn_pool;
 }
 
-// HTTP 请求过程，向服务器发送请求后从服务器读取响应数据
-static bool http_get(http_request* conn, int n)
+// MEMCACHE 请求过程，向服务器发送请求后从服务器读取响应数据
+static bool memcache_get(memcache* conn, const char* key)
 {
-	// 创建 HTTP 请求头数据
-	http_header& header = conn->request_header();
-	header.set_url("/")
-		.set_keep_alive(true)
-		.set_method(HTTP_METHOD_GET)
-		.accept_gzip(__unzip);
+	string buf;
 
-	printf("%lu--%d: begin send request\r\n", acl_pthread_self(), n);
-	// 发送 HTTP 请求数据同时接收 HTTP 响应头
-	if (conn->request(NULL, 0) == false)
+	if (conn->get(key, buf) == false)
 	{
-		printf("%lu--%d: send GET request error\r\n",
-			acl_pthread_self(), n);
+		printf("get key: %s error\r\n", key);
 		return false;
 	}
 
-	char  buf[8192];
-	int   ret, length = 0;
-
-	// 接收 HTTP 响应体数据
-	while (true)
-	{
-		ret = conn->get_body(buf, sizeof(buf));
-		if (ret == 0)
-			break;
-		else if (ret < 0)
-		{
-			printf("%lu--%d: error, length: %d\r\n",
-				acl_pthread_self(), n, length);
-			return false;
-		}
-		length += ret;
-		if (0)
-			printf("%lu--%d: read length: %d, %d\r\n",
-				acl_pthread_self(), n, length, ret);
-	}
-	printf("%lu--%d: read body over, length: %d\r\n",
-		acl_pthread_self(), n, length);
 	return true;
 }
 
 // 线程处理过程
-static void thread_main(void*)
+static void thread_main(void* ctx)
 {
+	char* key = (char*) ctx;
+
 	for (int i = 0; i < __loop_count; i++)
 	{
 		// 从连接池中获取一个 HTTP 连接
-		http_request* conn = (http_request*) __conn_pool->peek();
+		memcache* conn = (memcache*) __conn_pool->peek();
 		if (conn == NULL)
 		{
 			printf("peek connect failed\r\n");
 			break;
 		}
 
-		// 需要对获得的连接重置状态，以清除上次请求过程的临时数据
-		else
-			conn->reset();
 		// 开始新的 HTTP 请求过程
-		if (http_get(conn, i) == false)
+		if (memcache_get(conn, key) == false)
 		{
 			printf("one request failed, close connection\r\n");
 			// 错误连接需要关闭
@@ -96,21 +64,23 @@ static void thread_main(void*)
 		}
 		else
 			__conn_pool->put(conn, true);
+		if (i % 1000 == 0)
+			printf("%lu--%d: read body over\r\n", acl_pthread_self(), i);
 	}
 }
 
-static void run(int cocurrent)
+static void run(int cocurrent, char* key)
 {
 	// 向线程池中添加任务
 	for (int i = 0; i < cocurrent; i++)
-		acl_pthread_pool_add(__thr_pool, thread_main, NULL);
+		acl_pthread_pool_add(__thr_pool, thread_main, key);
 }
 
 static void usage(const char* procname)
 {
 	printf("usage: %s -h [help]\r\n"
-		"	-s http_server_addr [www.sina.com.cn:80]\r\n"
-		"	-z [unzip response body, default: false]\r\n"
+		"	-s memcache_server_addr [127.0.0.1:11211\r\n"
+		"	-k key\r\n"
 		"	-c cocurrent [default: 10]\r\n"
 		"	-n loop_count[default: 10]\r\n", procname);
 }
@@ -118,12 +88,13 @@ static void usage(const char* procname)
 int main(int argc, char* argv[])
 {
 	int   ch, cocurrent = 10;
-	string addr("www.sina.com.cn:80");
+	string addr("127.0.0.1:11211");
+	string  key;
 
 	// 初始化 acl 库
 	acl::acl_cpp_init();
 
-	while ((ch = getopt(argc, argv, "hs:n:c:z")) > 0)
+	while ((ch = getopt(argc, argv, "hs:n:c:k:")) > 0)
 	{
 		switch (ch)
 		{
@@ -139,8 +110,8 @@ int main(int argc, char* argv[])
 		case 'n':
 			__loop_count = atoi(optarg);
 			break;
-		case 'z':
-			__unzip = true;
+		case 'k':
+			key = optarg;
 			break;
 		default:
 			usage(argv[0]);
@@ -148,8 +119,14 @@ int main(int argc, char* argv[])
 		}
 	}
 
+	if (key.empty())
+	{
+		usage(argv[0]);
+		return 0;
+	}
+
 	init(addr, cocurrent);
-	run(cocurrent);
+	run(cocurrent, key.c_str());
 	end();
 
 #ifdef WIN32
