@@ -3,6 +3,7 @@
 
 168) 2013.8.18
 168.1) samples: 增加了测试 http_request_pool 的例子 samples/http_request_pool
+168.2) samples: 增加了测试 memcache_pool 的例子 samples/memcache_pool
 
 167) 2013.8.17
 167.1) feature: 增加了 HTTP 客户端连接池类 http_request_pool；同时将 http_request

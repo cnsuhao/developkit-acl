@@ -83,7 +83,6 @@ memcache& memcache::set_prefix(const char* keypre)
 
 	if (beCoding)
 		coder_.encode_finish(keypre_);
-
 	return *this;
 }
 
