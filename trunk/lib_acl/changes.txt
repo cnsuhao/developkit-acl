@@ -1,4 +1,8 @@
 
+381) 2013.8.19
+381.1) bugfix: acl_json_util.c::json_escape_append 中不应将 "{}[]" 这些字符作为
+特殊字符而转义
+
 380) 2013.8.14
 380.1) event: events_select/events_poll/events_kernel/events_iocp 使事件引擎
 的时钟更为精确
