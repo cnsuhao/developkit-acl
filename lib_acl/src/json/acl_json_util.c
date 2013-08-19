@@ -144,8 +144,7 @@ static void json_escape_append(ACL_VSTRING *buf, const char *src)
 
 	ACL_VSTRING_ADDCH(buf, '"');
 	while (*ptr) {
-		if (*ptr == '"' || *ptr == '\\')
-		{
+		if (*ptr == '"' || *ptr == '\\') {
 			ACL_VSTRING_ADDCH(buf, '\\');
 		}
 		ACL_VSTRING_ADDCH(buf, *ptr);
