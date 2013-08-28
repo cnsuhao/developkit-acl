@@ -8,7 +8,7 @@ CONF_PATH=$HOME_PATH/conf
 LOG_PATH=$HOME_PATH/var/log/acl_master
 
 RUNNING="no"
-PID=
+PID=0
 
 check_proc()
 {
@@ -56,8 +56,12 @@ stop()
 {
 	check_proc
 	if [ "$RUNNING" = "yes" ]; then
+		if [ "$PID" -eq 0 ]; then
+			echo "$PROG_NAME: pid($PID) invalid"
+			exit 1
+		fi
 		echo "stoping $PROG_NAME now ..."
-		kill `sed 1q $PID_FILE`
+		kill $PID
 		rm -f $PID_FILE
 		echo "$PROG_NAME stoped!"
 	else
@@ -69,7 +73,11 @@ reload()
 {
 	check_proc
 	if [ "$RUNNING" = "yes" ]; then
-		kill -HUP `sed 1q $PID_FILE`
+		if [ "$PID" -eq 0 ]; then
+			echo "$PROG_NAME: pid($PID) invalid"
+			exit 1
+		fi
+		kill -HUP $PID
 		echo "$PROG_NAME reloaded!"
 	else
 		echo "$PROG_NAME not running!"
