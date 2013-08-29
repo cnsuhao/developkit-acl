@@ -15,7 +15,7 @@ check_proc()
 	RUNNING="no"
 
 	if [ -f $PID_FILE ]; then
-		PID=`sed 1q $PID_FILE | awk '{print $1}'`
+		PID=`sed 1q $PID_FILE | awk '{print $NF}'`
 		if [ -d "/proc/$PID" ]; then
 			link_path=`ls -l /proc/$PID/exe | awk '{print $NF}'`
 			if [ "$link_path" = "$EXE_PATH" ]; then
