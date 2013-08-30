@@ -16,7 +16,7 @@ namespace acl
 class ACL_CPP_API memcache_pool : public connect_pool
 {
 public:
-	memcache_pool(const char* addr, int count, int retry_inter = 0);
+	memcache_pool(const char* addr, int count);
 	~memcache_pool();
 
 	/**
