@@ -592,6 +592,9 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 					RelativePath=".\src\http\http_request.cpp">
 				</File>
 				<File
+					RelativePath=".\src\http\http_request_manager.cpp">
+				</File>
+				<File
 					RelativePath=".\src\http\http_request_pool.cpp">
 				</File>
 				<File
@@ -677,6 +680,9 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				Filter="">
 				<File
 					RelativePath=".\src\memcache\memcache.cpp">
+				</File>
+				<File
+					RelativePath=".\src\memcache\memcache_manager.cpp">
 				</File>
 				<File
 					RelativePath=".\src\memcache\memcache_pool.cpp">
@@ -974,6 +980,9 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 					RelativePath=".\include\acl_cpp\http\http_request.hpp">
 				</File>
 				<File
+					RelativePath=".\include\acl_cpp\http\http_request_manager.hpp">
+				</File>
+				<File
 					RelativePath=".\include\acl_cpp\http\http_request_pool.h">
 				</File>
 				<File
@@ -1062,6 +1071,9 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				Filter="">
 				<File
 					RelativePath=".\include\acl_cpp\memcache\memcache.hpp">
+				</File>
+				<File
+					RelativePath=".\include\acl_cpp\memcache\memcache_manager.hpp">
 				</File>
 				<File
 					RelativePath=".\include\acl_cpp\memcache\memcache_pool.hpp">

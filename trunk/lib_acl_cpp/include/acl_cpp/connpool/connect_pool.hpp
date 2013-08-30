@@ -19,12 +19,18 @@ public:
 	 * 构造函数
 	 * @param addr {const char*} 服务器监听地址，格式：ip:port(domain:port)
 	 * @param count {int} 连接池最大连接个数限制
+	 */
+	connect_pool(const char* addr, int count);
+	virtual ~connect_pool();
+
+	/**
+	 * 设置连接池异常的重试时间间隔
 	 * @param retry_inter {int} 当连接断开后，重新再次打开连接的时间间隔(秒)，
 	 *  当该值 <= 0 时表示允许连接断开后可以立即重连，否则必须超过该时间间隔后才
-	 *  允许断开重连
+	 *  允许断开重连；未调用本函数时，内部缺省值为 1 秒
+	 * @retrun {connect_pool&}
 	 */
-	connect_pool(const char* addr, int count, int retry_inter = 0);
-	virtual ~connect_pool();
+	connect_pool& set_retry_inter(int retry_inter);
 
 	/**
 	 * 设置连接池中空闲连接的空闲生存周期

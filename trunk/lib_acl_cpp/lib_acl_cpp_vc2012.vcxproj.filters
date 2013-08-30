@@ -340,6 +340,12 @@
     <ClCompile Include="src\memcache\memcache.cpp">
       <Filter>src\memcache</Filter>
     </ClCompile>
+    <ClCompile Include="src\http\http_request_manager.cpp">
+      <Filter>src\http</Filter>
+    </ClCompile>
+    <ClCompile Include="src\memcache\memcache_manager.cpp">
+      <Filter>src\memcache</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\acl_stdafx.hpp">
@@ -703,6 +709,12 @@
       <Filter>include\memcache</Filter>
     </ClInclude>
     <ClInclude Include="include\acl_cpp\memcache\memcache.hpp">
+      <Filter>include\memcache</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\http\http_request_manager.hpp">
+      <Filter>include\http</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\memcache\memcache_manager.hpp">
       <Filter>include\memcache</Filter>
     </ClInclude>
   </ItemGroup>
