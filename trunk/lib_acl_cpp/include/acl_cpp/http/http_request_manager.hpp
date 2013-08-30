@@ -8,7 +8,7 @@ namespace acl
 /**
  * HTTP 客户端请求连接池管理类
  */
-class http_request_manager : acl::connect_manager
+class ACL_CPP_API http_request_manager : public acl::connect_manager
 {
 public:
 	http_request_manager();
