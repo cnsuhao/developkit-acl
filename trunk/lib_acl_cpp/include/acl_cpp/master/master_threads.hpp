@@ -24,7 +24,7 @@ public:
 
 	/**
 	 * 在单独运行时的处理函数，用户可以调用此函数进行一些必要的调试工作
-	 * @param addr {const char*} 服务监听地址
+	 * @param addrs {const char*} 服务监听地址列表，格式：IP:PORT, IP:PORT...
 	 * @param path {const char*} 配置文件全路径
 	 * @param count {unsigned int} 循环服务的次数，达到此值后函数自动返回；
 	 *  若该值为 0 则表示程序一直循环处理外来请求而不返回
@@ -33,7 +33,7 @@ public:
 	 *  且不会启动线程处理客户端请求
 	 * @return {bool} 监听是否成功
 	 */
-	bool run_alone(const char* addr, const char* path = NULL,
+	bool run_alone(const char* addrs, const char* path = NULL,
 		unsigned int count = 1, int threads_count = 1);
 
 protected:
