@@ -45,25 +45,52 @@ void master_threads::run_daemon(int argc, char** argv)
 #endif
 }
 
-bool master_threads::run_alone(const char* addr, const char* path /* = NULL */,
+//////////////////////////////////////////////////////////////////////////
+
+static bool __stop = false;
+static int  __count_limit = 1;
+static int  __count = 0;
+static acl_pthread_pool_t* __thread_pool = NULL;
+
+bool master_threads::run_alone(const char* addrs, const char* path /* = NULL */,
 	unsigned int count /* = 1 */, int threads_count /* = 1 */)
 {
 	// 每个进程只能有一个实例在运行
 	acl_assert(has_called == false);
 	has_called = true;
 	daemon_mode_ = false;
-	acl_assert(addr && *addr);
+	acl_assert(addrs && *addrs);
+
+	__count_limit = count;
 
 #ifdef WIN32
 	acl_init();
 #endif
+	ACL_EVENT* eventp = acl_event_new_select_thr(1, 0);
+	std::vector<ACL_VSTREAM*> sstreams;
+	ACL_ARGV* tokens = acl_argv_split(addrs, ";,| \t");
+	ACL_ITER iter;
 
-	ACL_VSTREAM* sstream = acl_vstream_listen(addr, 128);
-	if (sstream == NULL)
+	acl_foreach(iter, tokens)
 	{
-		logger_error("listen %s error(%s)",
-			addr, acl_last_serror());
-		return false;
+		const char* addr = (const char*) iter.data;
+		ACL_VSTREAM* sstream = acl_vstream_listen(addr, 128);
+		if (sstream == NULL)
+		{
+			logger_error("listen %s error(%s)",
+				addr, acl_last_serror());
+			acl_argv_free(tokens);
+
+			std::vector<ACL_VSTREAM*>::iterator it;
+			for (it = sstreams.begin(); it != sstreams.end(); ++it)
+				acl_vstream_close(*it);
+
+			acl_event_free(eventp);
+			return false;
+		}
+		acl_event_enable_listen(eventp, sstream, 0,
+			listen_callback, sstream);
+		sstreams.push_back(sstream);
 	}
 
 	// 初始化配置参数
@@ -72,45 +99,74 @@ bool master_threads::run_alone(const char* addr, const char* path /* = NULL */,
 	service_pre_jail(NULL);
 	service_init(NULL);
 
-	if (count == 1)
+	if (threads_count > 1)
 	{
-		thread_init(NULL);
-		run_once(sstream);
+		__thread_pool = acl_thread_pool_create(threads_count, 120);
+		acl_pthread_pool_atinit(__thread_pool, thread_begin, NULL);
+		acl_pthread_pool_atfree(__thread_pool, thread_finish, NULL);
 	}
-	else if (threads_count > 1)
-		run_parallel(sstream, count, threads_count);
 	else
-	{
 		thread_init(NULL);
-		run_serial(sstream, count);
-		thread_exit(NULL);
-	}
 
-	acl_vstream_close(sstream);
+	while (!__stop)
+		acl_event_loop(eventp);
+
+	if (__thread_pool)
+		acl_pthread_pool_destroy(__thread_pool);
+	else
+		thread_exit(NULL);
+
+	std::vector<ACL_VSTREAM*>::iterator it = sstreams.begin();
+	for (; it != sstreams.end(); ++it)
+		acl_vstream_close(*it);
+
+	acl_event_free(eventp);
 	service_exit(NULL);
 	return true;
 }
 
-void master_threads::do_serivce(ACL_VSTREAM* client)
+void master_threads::listen_callback(int, void *context)
 {
-	if (service_on_accept(client) == 0)
+	ACL_VSTREAM* sstream = (ACL_VSTREAM*) context;
+	ACL_VSTREAM* client = acl_vstream_accept(sstream, NULL, 0);
+
+	if (client == NULL)
 	{
-		while (true)
+		logger_error("accept error(%s)", acl_last_serror());
+		__stop = true;
+	}
+	else if (__thread_pool != NULL)
+	{
+		acl_pthread_pool_add(__thread_pool, thread_run, client);
+		__count++;
+		if (__count >= __count_limit)
 		{
-			// 当函数返回 1 时表示 client 已经被关闭了
-			if (service_main(client, NULL) == 1)
-				break;
+			__stop = true;
+			printf("%d: stop\r\n", __LINE__);
+		}
+	}
+	else
+	{
+		// 单线程方式串行处理
+		run_once(client);
+		__count++;
+		if (__count >= __count_limit)
+		{
+			__stop = true;
+			printf("%d: stop\r\n", __LINE__);
 		}
 	}
 }
 
-void master_threads::run_once(ACL_VSTREAM* sstream)
+int master_threads::thread_begin(void* arg)
 {
-	ACL_VSTREAM* client = acl_vstream_accept(sstream, NULL, 0);
-	if (client == NULL)
-		logger_error("accept error(%s)", acl_last_serror());
-	else
-		do_serivce(client);  // 该函数内部自动关闭连接
+	thread_init(arg);
+	return 0;
+}
+
+void master_threads::thread_finish(void* arg)
+{
+	thread_exit(arg);
 }
 
 void master_threads::thread_run(void* arg)
@@ -144,54 +200,20 @@ void master_threads::thread_run(void* arg)
 	}
 }
 
-int master_threads::thread_begin(void* arg)
+void master_threads::run_once(ACL_VSTREAM* client)
 {
-	thread_init(arg);
-	return 0;
-}
-
-void master_threads::thread_finish(void* arg)
-{
-	thread_exit(arg);
-}
-
-void master_threads::run_parallel(ACL_VSTREAM* sstream,
-	unsigned int count, int threads_count)
-{
-	acl_assert(threads_count > 1);
-	acl_pthread_pool_t* thrpool = acl_thread_pool_create(threads_count, 120);
-	acl_pthread_pool_atinit(thrpool, thread_begin, NULL);
-	acl_pthread_pool_atfree(thrpool, thread_finish, NULL);
-
-	unsigned int i = 0;
-
-	while (true)
+	if (service_on_accept(client) == 0)
 	{
-		ACL_VSTREAM* client = acl_vstream_accept(sstream, NULL, 0);
-		if (client == NULL)
+		while (true)
 		{
-			logger_error("accept error(%s)", acl_last_serror());
-			break;
+			// 当函数返回 1 时表示 client 已经被关闭了
+			if (service_main(client, NULL) == 1)
+				break;
 		}
-		acl_pthread_pool_add(thrpool, thread_run, client);
-		i++;
-		if (count > 0 && i >= count)
-			break;
 	}
-	acl_pthread_pool_destroy(thrpool);
 }
 
-void master_threads::run_serial(ACL_VSTREAM* sstream, unsigned int count)
-{
-	unsigned int i = 0;
-	while (true)
-	{
-		run_once(sstream);
-		i++;
-		if (count > 0 && i >= count)
-			break;
-	}
-}
+//////////////////////////////////////////////////////////////////////////
 
 void master_threads::proc_set_timer(void (*callback)(int, void*),
 	void* ctx, int delay)
