@@ -42,26 +42,45 @@ void master_proc::run_daemon(int argc, char** argv)
 #endif
 }
 
-bool master_proc::run_alone(const char* addr, const char* path /* = NULL */,
+//////////////////////////////////////////////////////////////////////////
+
+static void close_all_listener(std::vector<ACL_VSTREAM*>& sstreams)
+{
+	std::vector<ACL_VSTREAM*>::iterator it = sstreams.begin();
+	for (; it != sstreams.end(); ++it)
+		acl_vstream_close(*it);
+}
+
+bool master_proc::run_alone(const char* addrs, const char* path /* = NULL */,
 	int   count /* = 1 */)
 {
 	// 每个进程只能有一个实例在运行
 	acl_assert(has_called == false);
 	has_called = true;
 	daemon_mode_ = false;
-	acl_assert(addr && *addr);
+	acl_assert(addrs && *addrs);
 
 #ifdef WIN32
 	acl_init();
 #endif
+	std::vector<ACL_VSTREAM*> sstreams;
+	ACL_ARGV* tokens = acl_argv_split(addrs, ";,| \t");
+	ACL_ITER iter;
 
-	ACL_VSTREAM* sstream = acl_vstream_listen(addr, 128);
-	if (sstream == NULL)
+	acl_foreach(iter, tokens)
 	{
-		logger_error("listen %s error(%s)",
-			addr, acl_last_serror());
-		return false;
+		const char* addr = (const char*) iter.data;
+		ACL_VSTREAM* sstream = acl_vstream_listen(addr, 128);
+		if (sstream == NULL)
+		{
+			logger_error("listen %s error %s",
+				addr, last_serror());
+			close_all_listener(sstreams);
+			acl_argv_free(tokens);
+			return false;
+		}
 	}
+	acl_argv_free(tokens);
 
 	// 初始化配置参数
 	conf_.load(path);
@@ -72,7 +91,7 @@ bool master_proc::run_alone(const char* addr, const char* path /* = NULL */,
 	int   i = 0;
 	while (true)
 	{
-		ACL_VSTREAM* client = acl_vstream_accept(sstream, NULL, 0);
+		ACL_VSTREAM* client = acl_vstream_accept(sstream[0], NULL, 0);
 		if (client == NULL)
 			break;
 
@@ -83,7 +102,7 @@ bool master_proc::run_alone(const char* addr, const char* path /* = NULL */,
 			break;
 	}
 
-	acl_vstream_close(sstream);
+	close_all_listener(sstreams);
 	service_exit(NULL, NULL);
 	return true;
 }

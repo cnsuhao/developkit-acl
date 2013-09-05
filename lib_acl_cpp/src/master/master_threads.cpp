@@ -85,6 +85,7 @@ bool master_threads::run_alone(const char* addrs, const char* path /* = NULL */,
 			for (it = sstreams.begin(); it != sstreams.end(); ++it)
 				acl_vstream_close(*it);
 
+			acl_argv_free(tokens);
 			acl_event_free(eventp);
 			return false;
 		}
@@ -92,6 +93,7 @@ bool master_threads::run_alone(const char* addrs, const char* path /* = NULL */,
 			listen_callback, sstream);
 		sstreams.push_back(sstream);
 	}
+	acl_argv_free(tokens);
 
 	// 初始化配置参数
 	conf_.load(path);
