@@ -1,5 +1,6 @@
 #include "acl_stdafx.hpp"
 #include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/util.hpp"
 #include "acl_cpp/stream/socket_stream.hpp"
 #include "acl_cpp/master/master_proc.hpp"
 
