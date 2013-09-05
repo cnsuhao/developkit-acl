@@ -18,16 +18,13 @@
 #include "stdlib/unix/acl_transfer_fd.h"
 
 #ifdef HAVE_MSGHDR_MSG_CONTROL
-struct CONTROL_DUMMY {
-	struct cmsghdr cm;
-	int   n;
-};
+#define	CONTROL_SIZE	(sizeof(struct cmsghdr) + sizeof(int))
 #endif
 
 int acl_read_fd(int fd, void *ptr, int nbytes, int *recv_fd)
 {
 #ifdef HAVE_MSGHDR_MSG_CONTROL
-	char *myname = "acl_read_fd";
+	const char *myname = "acl_read_fd";
 #endif
 	struct msghdr msg;
 	struct iovec iov[1];
@@ -36,7 +33,7 @@ int acl_read_fd(int fd, void *ptr, int nbytes, int *recv_fd)
 	union {
 		struct cmsghdr cm;
 		/* char   control[CMSG_SPACE(sizeof(int))]; */
-		char   control[sizeof(CONTROL_DUMMY)];
+		char   control[CONTROL_SIZE];
 	} control_un;
 	struct cmsghdr *cmptr;
 
@@ -93,7 +90,7 @@ int acl_write_fd(int fd, void *ptr, int nbytes, int send_fd)
 	union {
 		struct cmsghdr cm;
 		/* char   control[CMSG_SPACE(sizeof(int))]; */
-		char   control[sizeof(CONTROL_DUMMY)];
+		char   control[CONTROL_SIZE];
 	} control_un;
 	struct cmsghdr *cmptr;
 
