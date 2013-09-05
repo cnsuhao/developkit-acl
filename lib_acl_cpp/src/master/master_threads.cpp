@@ -52,6 +52,13 @@ static int  __count_limit = 1;
 static int  __count = 0;
 static acl_pthread_pool_t* __thread_pool = NULL;
 
+static void close_all_listener(std::vector<ACL_VSTREAM*>& sstreams)
+{
+	std::vector<ACL_VSTREAM*>::iterator it;
+	for (it = sstreams.begin(); it != sstreams.end(); ++it)
+		acl_vstream_close(*it);
+}
+
 bool master_threads::run_alone(const char* addrs, const char* path /* = NULL */,
 	unsigned int count /* = 1 */, int threads_count /* = 1 */)
 {
@@ -80,12 +87,7 @@ bool master_threads::run_alone(const char* addrs, const char* path /* = NULL */,
 			logger_error("listen %s error(%s)",
 				addr, acl_last_serror());
 			acl_argv_free(tokens);
-
-			std::vector<ACL_VSTREAM*>::iterator it;
-			for (it = sstreams.begin(); it != sstreams.end(); ++it)
-				acl_vstream_close(*it);
-
-			acl_argv_free(tokens);
+			close_all_listener(sstreams);
 			acl_event_free(eventp);
 			return false;
 		}
@@ -118,10 +120,7 @@ bool master_threads::run_alone(const char* addrs, const char* path /* = NULL */,
 	else
 		thread_exit(NULL);
 
-	std::vector<ACL_VSTREAM*>::iterator it = sstreams.begin();
-	for (; it != sstreams.end(); ++it)
-		acl_vstream_close(*it);
-
+	close_all_listener(sstreams);
 	acl_event_free(eventp);
 	service_exit(NULL);
 	return true;
