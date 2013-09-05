@@ -30,6 +30,7 @@ public:
 	 * @return {bool} 监听是否成功
 	 */
 	bool run_alone(const char* addrs, const char* path = NULL, int count = 1);
+
 protected:
 	master_proc();
 	virtual ~master_proc();
@@ -40,6 +41,7 @@ protected:
 	 * 注：该函数返回后，流连接将会被关闭，用户不应主动关闭该流
 	 */
 	virtual void on_accept(socket_stream* stream) = 0;
+
 private:
 	// 当接收到一个客户端连接时回调此函数
 	static void service_main(ACL_VSTREAM *stream, char *service, char **argv);
@@ -52,6 +54,10 @@ private:
 
 	// 当进程退出时调用的回调函数
 	static void service_exit(char* service, char** argv);
+
+private:
+	// 在单独运行方式下，该函数当监听套接字有新连接到达时被调用
+	static void listen_callback(int event_type, void* context);
 };
 
 }  // namespace acl

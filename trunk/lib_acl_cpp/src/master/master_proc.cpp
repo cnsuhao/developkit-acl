@@ -44,11 +44,35 @@ void master_proc::run_daemon(int argc, char** argv)
 
 //////////////////////////////////////////////////////////////////////////
 
+static int  __count_limit = 1;
+static int  __count = 0;
+static bool __stop = false;
+
 static void close_all_listener(std::vector<ACL_VSTREAM*>& sstreams)
 {
 	std::vector<ACL_VSTREAM*>::iterator it = sstreams.begin();
 	for (; it != sstreams.end(); ++it)
 		acl_vstream_close(*it);
+}
+
+void master_proc::listen_callback(int, void* context)
+{
+	ACL_VSTREAM* sstream = (ACL_VSTREAM*) context;
+	ACL_VSTREAM* client = acl_vstream_accept(sstream, NULL, 0);
+	if (client == NULL)
+	{
+		logger_error("accept error %s", last_serror());
+		__stop = true;
+	}
+	else
+	{
+		service_main(client, NULL, NULL);
+		acl_vstream_close(client); // 因为在 service_main 里不会关闭连接
+
+		__count++;
+		if (__count >= __count_limit)
+			__stop = true;
+	}
 }
 
 bool master_proc::run_alone(const char* addrs, const char* path /* = NULL */,
@@ -58,11 +82,13 @@ bool master_proc::run_alone(const char* addrs, const char* path /* = NULL */,
 	acl_assert(has_called == false);
 	has_called = true;
 	daemon_mode_ = false;
+	__count_limit = count;
 	acl_assert(addrs && *addrs);
 
 #ifdef WIN32
 	acl_init();
 #endif
+	ACL_EVENT* eventp = acl_event_new_select(1, 0);
 	std::vector<ACL_VSTREAM*> sstreams;
 	ACL_ARGV* tokens = acl_argv_split(addrs, ";,| \t");
 	ACL_ITER iter;
@@ -79,6 +105,9 @@ bool master_proc::run_alone(const char* addrs, const char* path /* = NULL */,
 			acl_argv_free(tokens);
 			return false;
 		}
+		acl_event_enable_listen(eventp, sstream, 0,
+			listen_callback, sstream);
+		sstreams.push_back(sstream);
 	}
 	acl_argv_free(tokens);
 
@@ -88,21 +117,11 @@ bool master_proc::run_alone(const char* addrs, const char* path /* = NULL */,
 	service_pre_jail(NULL, NULL);
 	service_init(NULL, NULL);
 
-	int   i = 0;
-	while (true)
-	{
-		ACL_VSTREAM* client = acl_vstream_accept(sstream[0], NULL, 0);
-		if (client == NULL)
-			break;
-
-		service_main(client, NULL, NULL);
-		acl_vstream_close(client); // 因为在 service_main 里不会关闭连接
-
-		if (count > 0 && ++i >= count)
-			break;
-	}
+	while (!__stop)
+		acl_event_loop(eventp);
 
 	close_all_listener(sstreams);
+	acl_event_free(eventp);
 	service_exit(NULL, NULL);
 	return true;
 }
