@@ -185,11 +185,8 @@ ACL_API void acl_event_drain(ACL_EVENT *eventp);
  * @param callback {ACL_EVENT_NOTIFY_RDWR} 数据流可读时的回调函数
  * @param context {void*} 回调函数 callback 所需要的参数
  */
-ACL_API void acl_event_enable_read(ACL_EVENT *eventp,
-				ACL_VSTREAM *stream,
-				int read_timeout,
-				ACL_EVENT_NOTIFY_RDWR callback,
-				void *context);
+ACL_API void acl_event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
+	int read_timeout, ACL_EVENT_NOTIFY_RDWR callback, void *context);
 
 /**
  * 设置数据流可写时(指有空间可以写或描述符出错或描述符关闭)的回调函数
@@ -199,11 +196,8 @@ ACL_API void acl_event_enable_read(ACL_EVENT *eventp,
  * @param callback {ACL_EVENT_NOTIFY_RDWR} 数据流可写时的回调函数
  * @param context {void*} 回调函数 callback 所需要的参数
  */
-ACL_API void acl_event_enable_write(ACL_EVENT *eventp,
-				ACL_VSTREAM *stream,
-				int write_timeout,
-				ACL_EVENT_NOTIFY_RDWR callback,
-				void *context);
+ACL_API void acl_event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
+	int write_timeout, ACL_EVENT_NOTIFY_RDWR callback, void *context);
 
 /**
  * 设置监听套接口(指有新连接到达/被系统中断/出错时)的回调函数
@@ -213,11 +207,8 @@ ACL_API void acl_event_enable_write(ACL_EVENT *eventp,
  * @param callback {ACL_EVENT_NOTIFY_RDWR} 数据流可读时的回调函数
  * @param context {void*} 回调函数 callback 所需要的参数
  */
-ACL_API void acl_event_enable_listen(ACL_EVENT *eventp,
-				ACL_VSTREAM *stream,
-				int read_timeout,
-				ACL_EVENT_NOTIFY_RDWR callback,
-				void *context);
+ACL_API void acl_event_enable_listen(ACL_EVENT *eventp, ACL_VSTREAM *stream,
+	int read_timeout, ACL_EVENT_NOTIFY_RDWR callback, void *context);
 
 /**
  * 将数据流从事件的读监听流集合中清除
@@ -279,10 +270,7 @@ ACL_API int acl_event_isxset(ACL_EVENT *eventp, ACL_VSTREAM *stream);
  * @return {acl_int64} 事件执行的时间截，单位为微秒
  */
 ACL_API acl_int64 acl_event_request_timer(ACL_EVENT *eventp,
-					ACL_EVENT_NOTIFY_TIME callback,
-					void *context,
-					acl_int64 delay,
-					int keep);
+	ACL_EVENT_NOTIFY_TIME callback, void *context, acl_int64 delay, int keep);
 
 /**
  * 取消一个定时事件
@@ -292,8 +280,7 @@ ACL_API acl_int64 acl_event_request_timer(ACL_EVENT *eventp,
  * @return acl_int64 {acl_int64} 距离开始执行事件函数的时间间隔, 以微秒为单位
  */
 ACL_API acl_int64 acl_event_cancel_timer(ACL_EVENT *eventp,
-					ACL_EVENT_NOTIFY_TIME callback,
-					void *context);
+	ACL_EVENT_NOTIFY_TIME callback, void *context);
 
 /**
  * 当定时器处理完毕后，是否需要再次设置该定时器，以方便调用者循环
@@ -355,4 +342,3 @@ ACL_API int acl_event_mode(ACL_EVENT *eventp);
 #endif
 
 #endif
-
