@@ -140,22 +140,16 @@ void master_threads::listen_callback(int, void *context)
 	{
 		acl_pthread_pool_add(__thread_pool, thread_run, client);
 		__count++;
-		if (__count >= __count_limit)
-		{
+		if (__count_limit > 0 && __count >= __count_limit)
 			__stop = true;
-			printf("%d: stop\r\n", __LINE__);
-		}
 	}
 	else
 	{
 		// 单线程方式串行处理
 		run_once(client);
 		__count++;
-		if (__count >= __count_limit)
-		{
+		if (__count_limit > 0 && __count >= __count_limit)
 			__stop = true;
-			printf("%d: stop\r\n", __LINE__);
-		}
 	}
 }
 
