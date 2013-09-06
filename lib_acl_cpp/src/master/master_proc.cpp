@@ -71,7 +71,7 @@ void master_proc::listen_callback(int, void* context)
 		acl_vstream_close(client); // 因为在 service_main 里不会关闭连接
 
 		__count++;
-		if (__count >= __count_limit)
+		if (__count_limit > 0 && __count >= __count_limit)
 			__stop = true;
 	}
 }
