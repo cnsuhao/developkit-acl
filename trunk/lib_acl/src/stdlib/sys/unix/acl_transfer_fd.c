@@ -18,7 +18,14 @@
 #include "stdlib/unix/acl_transfer_fd.h"
 
 #ifdef HAVE_MSGHDR_MSG_CONTROL
-#define	CONTROL_SIZE	(sizeof(struct cmsghdr) + sizeof(int))
+union {
+	struct cmsghdr cm;
+# ifdef	ACL_MACOSX
+	char   control[1024];
+# else
+	char   control[CMSG_SPACE(sizeof(int))];
+# endif
+} control_un;
 #endif
 
 int acl_read_fd(int fd, void *ptr, int nbytes, int *recv_fd)
@@ -30,11 +37,6 @@ int acl_read_fd(int fd, void *ptr, int nbytes, int *recv_fd)
 	struct iovec iov[1];
 	int n;
 #ifdef HAVE_MSGHDR_MSG_CONTROL
-	union {
-		struct cmsghdr cm;
-		/* char   control[CMSG_SPACE(sizeof(int))]; */
-		char   control[CONTROL_SIZE];
-	} control_un;
 	struct cmsghdr *cmptr;
 
 	msg.msg_control = control_un.control;
@@ -87,11 +89,6 @@ int acl_write_fd(int fd, void *ptr, int nbytes, int send_fd)
 	struct iovec  iov[1];
 
 #ifdef HAVE_MSGHDR_MSG_CONTROL
-	union {
-		struct cmsghdr cm;
-		/* char   control[CMSG_SPACE(sizeof(int))]; */
-		char   control[CONTROL_SIZE];
-	} control_un;
 	struct cmsghdr *cmptr;
 
 	msg.msg_control = control_un.control;
