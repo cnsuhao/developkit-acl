@@ -147,6 +147,7 @@ void master_threads::listen_callback(int, void *context)
 	{
 		// 单线程方式串行处理
 		run_once(client);
+
 		__count++;
 		if (__count_limit > 0 && __count >= __count_limit)
 			__stop = true;
@@ -167,8 +168,19 @@ void master_threads::thread_finish(void* arg)
 void master_threads::thread_run(void* arg)
 {
 	ACL_VSTREAM* client = (ACL_VSTREAM*) arg;
+	run_once(client);
+}
+
+void master_threads::run_once(ACL_VSTREAM* client)
+{
 	if (service_on_accept(client) != 0)
 		return;
+
+	socket_stream* stream = (socket_stream*) client->context;
+	acl_assert(stream);
+	ACL_SOCKET fd = stream->sock_handle();
+	int   timeout = stream->get_rw_timeout();
+
 	while (true)
 	{
 		if (ACL_VSTREAM_BFRD_CNT(client) > 0)
@@ -182,29 +194,21 @@ void master_threads::thread_run(void* arg)
 		// acl_read_wait 当 timeout 为 -1 时才是完全阻塞
 		// 等待连接有数据可读，当为 0 时则会立即返回，当
 		// > 0 时则等待最多指定超时时间
-		if(acl_read_wait(ACL_VSTREAM_SOCK(client),
-			client->rw_timeout > 0 ?
-			client->rw_timeout : -1) == 0)
-		{
+		if(acl_read_wait(fd, timeout > 0 ? timeout : -1) == 0)
 			client->sys_read_ready = 1;
+		else if (service_on_timeout(client, NULL) == 0)
+			continue;
+		else
+		{
+			service_on_close(client, NULL);
+			// 删除流对象时会同时关闭套接字
+			delete stream;
+			break;
 		}
 
 		// 当函数返回 1 时表示 client 已经被关闭了
 		if (service_main(client, NULL) == 1)
 			break;
-	}
-}
-
-void master_threads::run_once(ACL_VSTREAM* client)
-{
-	if (service_on_accept(client) == 0)
-	{
-		while (true)
-		{
-			// 当函数返回 1 时表示 client 已经被关闭了
-			if (service_main(client, NULL) == 1)
-				break;
-		}
 	}
 }
 
