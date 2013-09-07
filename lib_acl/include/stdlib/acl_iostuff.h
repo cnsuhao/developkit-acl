@@ -24,7 +24,10 @@ ACL_API int acl_non_blocking(ACL_SOCKET fd, int on);
 /**
  * 写等待操作，直到套接字可写、出错或超时
  * @param fd {ACL_SOCKET} SOCKET 套接字
- * @param timeout {int} 超时时间，单位为秒
+ * @param timeout {int} 超时时间，单位为秒，该值分下面三种情形：
+ *  > 0  : 表示最大超时时间的秒数，
+ *  == 0 : 表示不等待，检测完后立即返回
+ *  < 0  : 时表示直接该套接字可读或出错为止
  * @return {int} 0: 可写; -1: 失败或超时
  */
 ACL_API int acl_write_wait(ACL_SOCKET fd, int timeout);
@@ -32,8 +35,11 @@ ACL_API int acl_write_wait(ACL_SOCKET fd, int timeout);
 /**
  * 读等待操作，直到套接字有数据可读、出错或超时
  * @param fd {ACL_SOCKET} SOCKET 套接字
- * @param timeout {int} 超时时间，单位为秒
- * @return {int} 0: 有数据可读; -1: 失败或超时
+ * @param timeout {int} 超时时间，单位为秒，该值分下面三种情形：
+ *  > 0  : 表示最大超时时间的秒数，
+ *  == 0 : 表示不等待，检测完后立即返回
+ *  < 0  : 时表示直接该套接字可读或出错为止
+ * @return {int} 0: 有数据可读或描述字出错; -1: 失败或超时
  */
 ACL_API int acl_read_wait(ACL_SOCKET fd, int timeout);
 
@@ -51,26 +57,32 @@ ACL_API void acl_doze(unsigned delay);
 ACL_API int acl_readable(ACL_SOCKET fd);
 
 /**
-* 超时读数据
-* @param fd {ACL_SOCKET} 描述符
-* @param buf {void*} 存储区，不能为空
-* @param len {unsigned} buf 存储区大小
-* @param timeout {int} 超时时间，单位为秒
-* @return {int} > 0 读的数据; -1: 出错
+ * 超时读数据
+ * @param fd {ACL_SOCKET} 描述符
+ * @param buf {void*} 存储区，不能为空
+ * @param len {unsigned} buf 存储区大小
+ * @param timeout {int} 超时时间，单位为秒，该值分下面三种情形：
+ *  > 0  : 表示最大超时时间的秒数，
+ *  == 0 : 表示不等待，检测完后立即返回
+ *  < 0  : 时表示直接该套接字可读或出错为止
+ * @return {int} > 0 读的数据; -1: 出错
 */
 ACL_API int acl_timed_read(ACL_SOCKET fd, void *buf, unsigned len,
-					int timeout, void *unused_context);
+	int timeout, void *unused_context);
 
 /**
-* 超时写数据
-* @param fd {ACL_SOCKET} 描述符
-* @param buf {void*} 数据存储区，不能为空
-* @param len {unsigned} 数据长度大小
-* @param timeout {int} 超时时间，单位为秒
-* @return {int} > 0 成功写入的数据; -1: 出错
-*/
+ * 超时写数据
+ * @param fd {ACL_SOCKET} 描述符
+ * @param buf {void*} 数据存储区，不能为空
+ * @param len {unsigned} 数据长度大小
+ * @param timeout {int} 超时时间，单位为秒，该值分下面三种情形：
+ *  > 0  : 表示最大超时时间的秒数，
+ *  == 0 : 表示不等待，检测完后立即返回
+ *  < 0  : 时表示直接该套接字可读或出错为止
+ * @return {int} > 0 成功写入的数据; -1: 出错
+ */
 ACL_API int acl_timed_write(ACL_SOCKET fd, void *buf, unsigned len,
-					int timeout, void *unused_context);
+	int timeout, void *unused_context);
 
 /**
 * 向文件描述符中循环写入数据，直到写完、出错或超时为止
