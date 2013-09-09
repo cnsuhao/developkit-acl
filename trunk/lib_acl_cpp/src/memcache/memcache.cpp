@@ -60,7 +60,7 @@ memcache& memcache::set_prefix(const char* keypre)
 	bool beCoding = false;
 
 	if (keypre_ == NULL)
-		keypre_ = NEW acl::string(strlen(keypre));
+		keypre_ = NEW string(strlen(keypre));
 	else
 		keypre_->clear();
 
@@ -124,8 +124,7 @@ bool memcache::open()
 	snprintf(addr, sizeof(addr), "%s:%d", ip_, port_);
 	if (conn_->open(addr, conn_timeout_, rw_timeout_) == false)
 	{
-		logger_error("connect %s error(%s)",
-			addr, acl::last_serror());
+		logger_error("connect %s error(%s)", addr, last_serror());
 		delete conn_;
 		conn_ = NULL;
 		opened_ = false;
@@ -137,7 +136,7 @@ bool memcache::open()
 	return true;
 }
 
-bool memcache::set(const acl::string& key, const void* dat, size_t dlen,
+bool memcache::set(const string& key, const void* dat, size_t dlen,
 	time_t timeout, unsigned short flags)
 {
 	bool has_tried = false;
@@ -179,7 +178,7 @@ AGAIN:
 		return false;
 	}
 
-	if (res_line_ != "STORED")
+	if (res_line_.compare("STORED", false) != 0)
 	{
 		close();
 		if (retry_ && !has_tried)
@@ -197,8 +196,8 @@ AGAIN:
 bool memcache::set(const char* key, size_t klen, const void* dat,
 	size_t dlen, time_t timeout /* = 0 */, unsigned short flags /* = 0 */)
 {
-	const acl::string& keybuf = get_key(key, klen);
-	return set(keybuf, dat, dlen, timeout, flags);
+	const string& kbuf = build_key(key, klen);
+	return set(kbuf, dat, dlen, timeout, flags);
 }
 
 bool memcache::set(const char* key, const void* dat, size_t dlen,
@@ -209,13 +208,13 @@ bool memcache::set(const char* key, const void* dat, size_t dlen,
 
 bool memcache::set(const char* key, size_t klen, time_t timeout /* = 0 */)
 {
-	const acl::string& keybuf = get_key(key, klen);
-	acl::string buf;
+	const string& kbuf = build_key(key, klen);
+	string buf;
 	unsigned short flags;
 
-	if (get(keybuf, buf, &flags) == false)
+	if (get(kbuf, buf, &flags) == false)
 		return false;
-	return set(keybuf, buf.c_str(), buf.length(), timeout, flags);
+	return set(kbuf, buf.c_str(), buf.length(), timeout, flags);
 }
 
 bool memcache::set(const char* key, time_t timeout /* = 0 */)
@@ -223,7 +222,7 @@ bool memcache::set(const char* key, time_t timeout /* = 0 */)
 	return set(key, strlen(key), timeout);
 }
 
-bool memcache::upload_begin(const char* key, size_t dlen,
+bool memcache::set_begin(const char* key, size_t dlen,
 	time_t timeout /* = 0 */, unsigned short flags /* = 0 */)
 {
 	if (dlen == 0)
@@ -235,8 +234,8 @@ bool memcache::upload_begin(const char* key, size_t dlen,
 	content_length_ = dlen;
 	length_ = 0;
 
-	const acl::string& keybuf = get_key(key, strlen(key));
-	req_line_.format("set %s %u %d %d\r\n", keybuf.c_str(),
+	const string& kbuf = build_key(key, strlen(key));
+	req_line_.format("set %s %u %d %d\r\n", kbuf.c_str(),
 		flags, (int) timeout, (int) dlen);
 
 	bool has_tried = false;
@@ -259,22 +258,24 @@ AGAIN:
 	return true;
 }
 
-bool memcache::upload(const void* data, size_t dlen)
+bool memcache::set_data(const void* data, size_t dlen)
 {
 	if (!opened_)
 	{
 		ebuf_.format("not opened yet!");
 		return false;
 	}
+
 	if (data == NULL || dlen == 0)
 	{
 		ebuf_.format("invalid input, data %s, dlen %d",
 			data ? "not null" : "null", dlen ? (int) dlen : 0);
 		return false;
 	}
+
 	if (dlen + length_ > content_length_)
 	{
-		ebuf_.format("dlen(%d) + uploaded(%d) > length(%d)",
+		ebuf_.format("dlen(%d) + length_(%d) > content_length_(%d)",
 			(int) dlen, (int) length_, (int) content_length_);
 		return false;
 	}
@@ -313,7 +314,7 @@ bool memcache::upload(const void* data, size_t dlen)
 		return false;
 	}
 
-	if (res_line_ != "STORED")
+	if (res_line_.compare("STORED", false) != 0)
 	{
 		close();
 		ebuf_.format("reply(%s) error", res_line_.c_str());
@@ -329,8 +330,8 @@ int memcache::get_begin(const char* key, size_t klen, unsigned short* flags)
 
 	bool has_tried = false;
 
-	const acl::string& keybuf = get_key(key, klen);
-	req_line_.format("get %s\r\n", keybuf.c_str());
+	const string& kbuf = build_key(key, klen);
+	req_line_.format("get %s\r\n", kbuf.c_str());
 
 AGAIN:
 	if (open() == false)
@@ -359,7 +360,7 @@ AGAIN:
 		ebuf_.format("reply for get(%s) error", key);
 		return -1;
 	}
-	else if (res_line_ == "END")
+	else if (res_line_.compare("END", false) == 0)
 	{
 		ebuf_.format("not found");
 		return 0;
@@ -375,7 +376,8 @@ AGAIN:
 	if (tokens->argc < 4 || strcasecmp(tokens->argv[0], "VALUE") != 0)
 	{
 		close();
-		ebuf_.format("server error for get(%s)", key);
+		ebuf_.format("server error for get(%s), value: %s",
+			key, res_line_.c_str());
 		acl_argv_free(tokens);
 		return -1;
 	}
@@ -385,47 +387,53 @@ AGAIN:
 	content_length_ = atoi(tokens->argv[3]);
 	acl_argv_free(tokens);
 
-	if (content_length_ < 0)
-	{
-		close();
-		ebuf_.format("value's len < 0");
-		return -1;
-	}
+	// 如果服务端返回数据体长度值为 0 则当不存在处理
+	if (content_length_ == 0)
+		return 0;
 	return content_length_;
 }
 
 int memcache::get_data(void* buf, size_t size)
 {
-	if (length_)
-	// 得需要保证足够的空间能容纳读取的数据，该种方式
-	// 可能会造成数据量非常大时的缓冲区溢出！
+	acl_assert(content_length_ >= length_);
 
-	char  tmp[4096];
-	int   n;
-	while (true)
+	if (length_ == content_length_)
 	{
-		n = sizeof(tmp);
-		if (n > len)
-			n = len;
-		if ((n = conn_->read(tmp, n, false)) < 0)
+		// 读取数据尾部的 "\r\n"
+		if (conn_->gets(res_line_) == false)
 		{
 			close();
-			ebuf_.format("read data for get cmd error");
-			return false;
+			ebuf_.format("read data CRLF error");
+			return -1;
 		}
-		buf.append(tmp, n);
-		len -= n;
-		if (len <= 0)
-			break;
+		// 读取 "END\r\n"
+		if (conn_->gets(res_line_) == false
+			|| res_line_.compare("END", false) != 0)
+		{
+			close();
+			ebuf_.format("END flag not found");
+			return -1;
+		}
+		return 0;
 	}
 
-	return 0;
+	size_t n = content_length_ - length_;
+	if (n > size)
+		n = size;
+	if (conn_->read(buf, n) < 0)
+	{
+		close();
+		ebuf_.format("read data error!");
+		return -1;
+	}
+	length_ += n;
+	return n;
 }
 
-bool memcache::get(const char* key, size_t klen, acl::string& buf,
+bool memcache::get(const char* key, size_t klen, string& out,
 	unsigned short* flags)
 {
-	buf.clear();
+	out.clear();
 
 	int  len = get_begin(key, klen, flags);
 	if (len <= 0)
@@ -434,45 +442,22 @@ bool memcache::get(const char* key, size_t klen, acl::string& buf,
 	// 得需要保证足够的空间能容纳读取的数据，该种方式
 	// 可能会造成数据量非常大时的缓冲区溢出！
 
-	char  tmp[4096];
+	char  buf[4096];
 	int   n;
 	while (true)
 	{
-		n = sizeof(tmp);
-		if (n > len)
-			n = len;
-		if ((n = conn_->read(tmp, n, false)) < 0)
-		{
-			close();
-			ebuf_.format("read data for get cmd error");
+		n = get_data(buf, sizeof(buf));
+		if (n < 0)
 			return false;
-		}
-		buf.append(tmp, n);
-		len -= n;
-		if (len <= 0)
+		else if (n == 0)
 			break;
+		out.append(buf, n);
 	}
 
-	// 读取数据尾部的 "\r\n"
-	if (conn_->gets(res_line_) == false)
-	{
-		close();
-		ebuf_.format("read data's delimiter error");
-		return false;
-	}
-
-	// 读取 "END\r\n"
-	if (conn_->gets(res_line_) == false || res_line_ != "END")
-	{
-		close();
-		ebuf_.format("END flag not found");
-		return false;
-	}
-	return true;
+	return !out.empty();
 }
 
-bool memcache::get(const char* key, acl::string& buf,
-	unsigned short* flags /* = NULL */)
+bool memcache::get(const char* key, string& buf, unsigned short* flags /* = NULL */)
 {
 	return get(key, strlen(key), buf, flags);
 }
@@ -480,13 +465,13 @@ bool memcache::get(const char* key, acl::string& buf,
 bool memcache::del(const char* key, size_t klen)
 {
 	bool has_tried = false;
-	const acl::string& keybuf = get_key(key, klen);
+	const string& kbuf = build_key(key, klen);
 
 AGAIN:
 	if (open() == false)
 		return false;
 
-	req_line_.format("delete %s\r\n", keybuf.c_str());
+	req_line_.format("delete %s\r\n", kbuf.c_str());
 	if (conn_->write(req_line_) < 0)
 	{
 		if (retry_ && !has_tried)
@@ -508,7 +493,8 @@ AGAIN:
 		ebuf_.format("reply for(%s) error", req_line_.c_str());
 		return false;
 	}
-	if (res_line_ != "DELETED" && res_line_ != "NOT_FOUND")
+	if (res_line_.compare("DELETED", false) != 0
+		&& res_line_.compare("NOT_FOUND", false) != 0)
 	{
 		ebuf_.format("reply(%s) for (%s) error",
 			res_line_.c_str(), req_line_.c_str());
@@ -536,7 +522,7 @@ int memcache::last_error() const
 	return enum_;
 }
 
-const acl::string& memcache::get_key(const char* key, size_t klen)
+const string& memcache::build_key(const char* key, size_t klen)
 {
 	kbuf_.clear();
 	if (keypre_)
