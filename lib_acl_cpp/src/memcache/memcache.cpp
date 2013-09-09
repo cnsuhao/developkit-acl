@@ -19,6 +19,8 @@ memcache::memcache(const char* addr /* = "127.0.0.1:11211" */,
 , encode_key_(false)
 , opened_(false)
 , retry_(true)
+, content_length_(0)
+, length_(0)
 , conn_(NULL)
 {
 	acl_assert(addr && *addr);
@@ -114,7 +116,7 @@ void memcache::close()
 bool memcache::open()
 {
 	if (opened_)
-		return (true);
+		return true;
 
 	conn_ = NEW socket_stream();
 	char  addr[64];
@@ -129,22 +131,22 @@ bool memcache::open()
 		opened_ = false;
 		ebuf_.format("connect server(%s) error(%s)",
 			addr, acl_last_serror());
-		return (false);
+		return false;
 	}
 	opened_ = true;
-	return (true);
+	return true;
 }
 
 bool memcache::set(const acl::string& key, const void* dat, size_t dlen,
 	time_t timeout, unsigned short flags)
 {
 	bool has_tried = false;
-	struct iovec v[4];
+	struct iovec v[3];
 	req_line_.format("set %s %u %d %d\r\n", key.c_str(),
 		flags, (int) timeout, (int) dlen);
 AGAIN:
 	if (open() == false)
-		return (false);
+		return false;
 
 	v[0].iov_base = (void*) req_line_.c_str();
 	v[0].iov_len = req_line_.length();
@@ -162,7 +164,7 @@ AGAIN:
 			goto AGAIN;
 		}
 		ebuf_.format("write set(%s) error", key.c_str());
-		return (false);
+		return false;
 	}
 
 	if (conn_->gets(res_line_) == false)
@@ -174,7 +176,7 @@ AGAIN:
 			goto AGAIN;
 		}
 		ebuf_.format("reply for set(%s) error", key.c_str());
-		return (false);
+		return false;
 	}
 
 	if (res_line_ != "STORED")
@@ -187,22 +189,22 @@ AGAIN:
 		}
 		ebuf_.format("reply(%s) for set(%s) error",
 			res_line_.c_str(), key.c_str());
-		return (false);
+		return false;
 	}
-	return (true);
+	return true;
 }
 
 bool memcache::set(const char* key, size_t klen, const void* dat,
 	size_t dlen, time_t timeout /* = 0 */, unsigned short flags /* = 0 */)
 {
 	const acl::string& keybuf = get_key(key, klen);
-	return (set(keybuf, dat, dlen, timeout, flags));
+	return set(keybuf, dat, dlen, timeout, flags);
 }
 
 bool memcache::set(const char* key, const void* dat, size_t dlen,
 	time_t timeout /* = 0 */, unsigned short flags /* = 0 */)
 {
-	return (set(key, strlen(key), dat, dlen, timeout, flags));
+	return set(key, strlen(key), dat, dlen, timeout, flags);
 }
 
 bool memcache::set(const char* key, size_t klen, time_t timeout /* = 0 */)
@@ -212,26 +214,127 @@ bool memcache::set(const char* key, size_t klen, time_t timeout /* = 0 */)
 	unsigned short flags;
 
 	if (get(keybuf, buf, &flags) == false)
-		return (false);
-	return (set(keybuf, buf.c_str(), buf.length(), timeout, flags));
+		return false;
+	return set(keybuf, buf.c_str(), buf.length(), timeout, flags);
 }
 
 bool memcache::set(const char* key, time_t timeout /* = 0 */)
 {
-	return (set(key, strlen(key), timeout));
+	return set(key, strlen(key), timeout);
 }
 
-bool memcache::get(const acl::string& key, acl::string& buf,
-	unsigned short* flags)
+bool memcache::upload_begin(const char* key, size_t dlen,
+	time_t timeout /* = 0 */, unsigned short flags /* = 0 */)
 {
-	bool has_tried = false;
-	buf.clear();
+	if (dlen == 0)
+	{
+		logger_error("dlen == 0, invalid");
+		return false;
+	}
 
-	req_line_.format("get %s\r\n", key.c_str());
+	content_length_ = dlen;
+	length_ = 0;
+
+	const acl::string& keybuf = get_key(key, strlen(key));
+	req_line_.format("set %s %u %d %d\r\n", keybuf.c_str(),
+		flags, (int) timeout, (int) dlen);
+
+	bool has_tried = false;
 
 AGAIN:
 	if (open() == false)
-		return (false);
+		return false;
+
+	if (conn_->write(req_line_) == -1)
+	{
+		close();
+		if (retry_ && !has_tried)
+		{
+			has_tried = true;
+			goto AGAIN;
+		}
+		ebuf_.format("write set(%s) error", key);
+		return false;
+	}
+	return true;
+}
+
+bool memcache::upload(const void* data, size_t dlen)
+{
+	if (!opened_)
+	{
+		ebuf_.format("not opened yet!");
+		return false;
+	}
+	if (data == NULL || dlen == 0)
+	{
+		ebuf_.format("invalid input, data %s, dlen %d",
+			data ? "not null" : "null", dlen ? (int) dlen : 0);
+		return false;
+	}
+	if (dlen + length_ > content_length_)
+	{
+		ebuf_.format("dlen(%d) + uploaded(%d) > length(%d)",
+			(int) dlen, (int) length_, (int) content_length_);
+		return false;
+	}
+
+	if (dlen + length_ < content_length_)
+	{
+		if (conn_->write(data, dlen) == -1)
+		{
+			close();
+			ebuf_.format("write data error");
+			return false;
+		}
+		length_ += dlen;
+		return true;
+	}
+
+	struct iovec v[2];
+
+	v[0].iov_base = (void*) data;
+	v[0].iov_len = dlen;
+	v[1].iov_base = (void*) "\r\n";
+	v[1].iov_len = 2;
+
+	if (conn_->writev(v, 2) < 0)
+	{
+		close();
+		ebuf_.format("write data2 error!");
+		return false;
+	}
+	length_ += dlen;
+
+	if (conn_->gets(res_line_) == false)
+	{
+		close();
+		ebuf_.format("reply forerror");
+		return false;
+	}
+
+	if (res_line_ != "STORED")
+	{
+		close();
+		ebuf_.format("reply(%s) error", res_line_.c_str());
+		return false;
+	}
+	return true;
+}
+
+int memcache::get_begin(const char* key, size_t klen, unsigned short* flags)
+{
+	content_length_ = 0;
+	length_ = 0;
+
+	bool has_tried = false;
+
+	const acl::string& keybuf = get_key(key, klen);
+	req_line_.format("get %s\r\n", keybuf.c_str());
+
+AGAIN:
+	if (open() == false)
+		return -1;
 	if (conn_->write(req_line_) < 0)
 	{
 		close();
@@ -240,8 +343,8 @@ AGAIN:
 			has_tried = true;
 			goto AGAIN;
 		}
-		ebuf_.format("write get(%s) error", key.c_str());
-		return (false);
+		ebuf_.format("write get(%s) error", key);
+		return -1;
 	}
 
 	// 读取服务器响应行
@@ -253,18 +356,18 @@ AGAIN:
 			has_tried = true;
 			goto AGAIN;
 		}
-		ebuf_.format("reply for get(%s) error", key.c_str());
-		return (false);
+		ebuf_.format("reply for get(%s) error", key);
+		return -1;
 	}
 	else if (res_line_ == "END")
 	{
 		ebuf_.format("not found");
-		return (false);
+		return 0;
 	}
 	else if (error_happen(res_line_.c_str()))
 	{
 		close();
-		return (false);
+		return -1;
 	}
 
 	// VALUE {key} {flags} {bytes}\r\n
@@ -272,27 +375,61 @@ AGAIN:
 	if (tokens->argc < 4 || strcasecmp(tokens->argv[0], "VALUE") != 0)
 	{
 		close();
-		ebuf_.format("server error for get(%s)", key.c_str());
+		ebuf_.format("server error for get(%s)", key);
 		acl_argv_free(tokens);
-		return (false);
+		return -1;
 	}
 	if (flags)
 		*flags = (unsigned short) atoi(tokens->argv[2]);
 
-	int len = atoi(tokens->argv[3]);
-	if (len < 0)
+	content_length_ = atoi(tokens->argv[3]);
+	acl_argv_free(tokens);
+
+	if (content_length_ < 0)
 	{
 		close();
 		ebuf_.format("value's len < 0");
-		acl_argv_free(tokens);
-		return (false);
+		return -1;
 	}
-	else if (len == 0)
+	return content_length_;
+}
+
+int memcache::get_data(void* buf, size_t size)
+{
+	if (length_)
+	// 得需要保证足够的空间能容纳读取的数据，该种方式
+	// 可能会造成数据量非常大时的缓冲区溢出！
+
+	char  tmp[4096];
+	int   n;
+	while (true)
 	{
-		acl_argv_free(tokens);
-		return (true);
+		n = sizeof(tmp);
+		if (n > len)
+			n = len;
+		if ((n = conn_->read(tmp, n, false)) < 0)
+		{
+			close();
+			ebuf_.format("read data for get cmd error");
+			return false;
+		}
+		buf.append(tmp, n);
+		len -= n;
+		if (len <= 0)
+			break;
 	}
-	acl_argv_free(tokens);
+
+	return 0;
+}
+
+bool memcache::get(const char* key, size_t klen, acl::string& buf,
+	unsigned short* flags)
+{
+	buf.clear();
+
+	int  len = get_begin(key, klen, flags);
+	if (len <= 0)
+		return false;
 
 	// 得需要保证足够的空间能容纳读取的数据，该种方式
 	// 可能会造成数据量非常大时的缓冲区溢出！
@@ -308,7 +445,7 @@ AGAIN:
 		{
 			close();
 			ebuf_.format("read data for get cmd error");
-			return (false);
+			return false;
 		}
 		buf.append(tmp, n);
 		len -= n;
@@ -321,7 +458,7 @@ AGAIN:
 	{
 		close();
 		ebuf_.format("read data's delimiter error");
-		return (false);
+		return false;
 	}
 
 	// 读取 "END\r\n"
@@ -329,22 +466,15 @@ AGAIN:
 	{
 		close();
 		ebuf_.format("END flag not found");
-		return (false);
+		return false;
 	}
-	return (true);
-}
-
-bool memcache::get(const char* key, size_t klen, acl::string& buf,
-	unsigned short* flags /* = NULL */)
-{
-	const acl::string& keybuf = get_key(key, klen);
-	return (get(keybuf, buf, flags));
+	return true;
 }
 
 bool memcache::get(const char* key, acl::string& buf,
 	unsigned short* flags /* = NULL */)
 {
-	return (get(key, strlen(key), buf, flags));
+	return get(key, strlen(key), buf, flags);
 }
 
 bool memcache::del(const char* key, size_t klen)
@@ -354,7 +484,7 @@ bool memcache::del(const char* key, size_t klen)
 
 AGAIN:
 	if (open() == false)
-		return (false);
+		return false;
 
 	req_line_.format("delete %s\r\n", keybuf.c_str());
 	if (conn_->write(req_line_) < 0)
@@ -365,7 +495,7 @@ AGAIN:
 			goto AGAIN;
 		}
 		ebuf_.format("write (%s) error", req_line_.c_str());
-		return (false);
+		return false;
 	}
 	// DELETED|NOT_FOUND\r\n
 	if (conn_->gets(res_line_) == false)
@@ -376,20 +506,20 @@ AGAIN:
 			goto AGAIN;
 		}
 		ebuf_.format("reply for(%s) error", req_line_.c_str());
-		return (false);
+		return false;
 	}
 	if (res_line_ != "DELETED" && res_line_ != "NOT_FOUND")
 	{
 		ebuf_.format("reply(%s) for (%s) error",
 			res_line_.c_str(), req_line_.c_str());
-		return (false);
+		return false;
 	}
-	return (true);
+	return true;
 }
 
 bool memcache::del(const char* key)
 {
-	return (del(key, strlen(key)));
+	return del(key, strlen(key));
 }
 
 const char* memcache::last_serror() const
@@ -397,13 +527,13 @@ const char* memcache::last_serror() const
 	static const char* dummy = "ok";
 
 	if (ebuf_.empty())
-		return (dummy);
-	return (ebuf_.c_str());
+		return dummy;
+	return ebuf_.c_str();
 }
 
 int memcache::last_error() const
 {
-	return (enum_);
+	return enum_;
 }
 
 const acl::string& memcache::get_key(const char* key, size_t klen)
@@ -418,7 +548,7 @@ const acl::string& memcache::get_key(const char* key, size_t klen)
 	{
 		coder_.encode_update(key, klen, &kbuf_);
 		coder_.encode_finish(&kbuf_);
-		return (kbuf_);
+		return kbuf_;
 	}
 
 	bool beCoding = false;
@@ -446,13 +576,13 @@ const acl::string& memcache::get_key(const char* key, size_t klen)
 	if (beCoding)
 		coder_.encode_finish(&kbuf_);
 
-	return (kbuf_);
+	return kbuf_;
 }
 
 bool memcache::error_happen(const char* line)
 {
 	if (strcasecmp(line, "ERROR") == 0)
-		return (true);
+		return true;
 	if (strncasecmp(line, "CLIENT_ERROR", sizeof("CLIENT_ERROR") - 1) == 0)
 	{
 		ebuf_.format("%s", line);
@@ -460,7 +590,7 @@ bool memcache::error_happen(const char* line)
 		if (*ptr == ' ' || *ptr == '\t')
 			ptr++;
 		enum_ = atoi(ptr);
-		return (true);
+		return true;
 	}
 	if (strncasecmp(line, "SERVER_ERROR", sizeof("SERVER_ERROR") - 1) == 0)
 	{
@@ -469,9 +599,9 @@ bool memcache::error_happen(const char* line)
 		if (*ptr == ' ' || *ptr == '\t')
 			ptr++;
 		enum_ = atoi(ptr);
-		return (true);
+		return true;
 	}
-	return (false);
+	return false;
 }
 
 void memcache::property_list()
