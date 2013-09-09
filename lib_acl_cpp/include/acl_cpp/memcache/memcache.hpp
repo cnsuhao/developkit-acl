@@ -227,8 +227,8 @@ private:
 	bool  opened_;           // 连接是否打开
 	bool  retry_;            // 是否支持连接中断重试
 	char* addr_;             // 服务地址(ip:port)
-	char* ip_;               // 服务 ip 地址
-	int   port_;             // 服务端口号
+	//char* ip_;               // 服务 ip 地址
+	//int   port_;             // 服务端口号
 	int   enum_;             // 出错号，留作将来扩充用
 	string ebuf_;            // 存储出错信息
 	string kbuf_;            // 存储经转码后的 KEY 值缓冲区
