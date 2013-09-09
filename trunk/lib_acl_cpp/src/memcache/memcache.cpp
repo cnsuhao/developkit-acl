@@ -197,12 +197,12 @@ bool memcache::set(const char* key, const void* dat, size_t dlen,
 
 bool memcache::set(const char* key, size_t klen, time_t timeout /* = 0 */)
 {
-	const string& kbuf = build_key(key, klen);
 	string buf;
 	unsigned short flags;
-
-	if (get(kbuf, buf, &flags) == false)
+	if (get(key, klen, buf, &flags) == false)
 		return false;
+
+	const string& kbuf = build_key(key, klen);
 	return set(kbuf, buf.c_str(), buf.length(), timeout, flags);
 }
 
