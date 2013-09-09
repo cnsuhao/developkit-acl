@@ -101,6 +101,27 @@ public:
 	bool set(const char* key, time_t timeout = 0);
 
 	/**
+	 * 以流式方式上传大数据时，该函数发送数据头
+	 * @param key {const char*} 键值字符串
+	 * @param dlen {size_t} 数据体的数据总长度
+	 * @timeout {time_t} 数据的过期时间(秒)
+	 * @param flags {unsigned short} 附属的标志位
+	 * @return {bool} 是否成功
+	 */
+	bool upload_begin(const char* key, size_t dlen,
+		time_t timeout = 0, unsigned short flags = 0);
+
+	/**
+	 * 循环调用本函数上传数据值，内部会自动计算已经上传的数据总和是否达到了 upload_begin
+	 * 中设置的数据总长度，当达到后会自动补一个 "\r\n"，调用者不应再调用此函数上传数据，
+	 * 除非是一个新的上传过程开始了
+	 * @param data {const void*} 数据地址指针
+	 * @param dlen {data} data 数据长度
+	 * @return {bool} 是否成功
+	 */
+	bool upload(const void* data, size_t dlen);
+
+	/**
 	* 从 memcached 中获得对应键值的缓存数据
 	* @param key {const char*} 字符串键值
 	* @param klen {size_t} 键值长度
@@ -121,6 +142,29 @@ public:
 	*  数据不存在或出错
 	*/
 	bool get(const char* key, string& buf, unsigned short* flags = NULL);
+
+	/**
+	 * 流式方式从服务端获取数据，本函数发送请求协议
+	 * @param key {const char*} 键值字符串
+	 * @param len {size_t} key 字符串长度
+	 * @param flags {unsigned short*} 存储附属的标志位
+	 * @return {int} 返回数据体的长度，分以下三种情形：
+	 *   0：表示不存在
+	 *  -1：表示出错
+	 *  >0：表示数据体的长度
+	 */
+	int get_begin(const char* key, size_t len, unsigned short* flags = NULL);
+
+	/**
+	 * 流式方式从服务端获取数据，循环调用本函数接收数据
+	 * @param buf {void*} 缓冲区地址
+	 * @param size {size_t} 缓冲区大小
+	 * @return {int} 已读到的数据大小，分为以下三种情形：
+	 *  0：表示数据读完
+	 *  > 0: 表示本次读到的数据长度
+	 *  -1：表示出错
+	 */
+	int  get_data(void* buf, size_t size);
 
 	/**
 	* 从 memcached 中删除数据
@@ -189,9 +233,12 @@ private:
 	string ebuf_;
 	string kbuf_;
 
-	socket_stream* conn_;
-	string req_line_;
-	string res_line_;
+	size_t content_length_;  // 当采用流式上传/下载大数据时此值记录数据体的总长度
+	size_t length_;          // 已经上传/下载的数据总和
+
+	socket_stream* conn_;    // 与后端服务的连接对象
+	string req_line_;        // 存储请求数据
+	string res_line_;        // 存储响应数据
 	bool error_happen(const char* line);
 };
 
