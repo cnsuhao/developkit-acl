@@ -25,16 +25,6 @@ memcache::memcache(const char* addr /* = "127.0.0.1:11211" */,
 {
 	acl_assert(addr && *addr);
 	addr_ = acl_mystrdup(addr);
-	char* ptr = strchr(addr_, ':');
-	if (ptr == NULL)
-		logger_fatal("addr(%s) invalid", addr);
-	*ptr++ = 0;
-	if (*ptr == 0)
-		logger_fatal("addr(%s) invalid", addr);
-	ip_ = addr_;
-	port_ = atoi(ptr);
-	if (port_ <= 0)
-		logger_fatal("addr(%s) invalid", addr);
 }
 
 memcache::~memcache()
@@ -121,10 +111,9 @@ bool memcache::open()
 	conn_ = NEW socket_stream();
 	char  addr[64];
 
-	snprintf(addr, sizeof(addr), "%s:%d", ip_, port_);
-	if (conn_->open(addr, conn_timeout_, rw_timeout_) == false)
+	if (conn_->open(addr_, conn_timeout_, rw_timeout_) == false)
 	{
-		logger_error("connect %s error(%s)", addr, last_serror());
+		logger_error("connect %s error(%s)", addr_, last_serror());
 		delete conn_;
 		conn_ = NULL;
 		opened_ = false;
