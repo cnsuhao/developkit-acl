@@ -108,7 +108,7 @@ public:
 	 * @param flags {unsigned short} 附属的标志位
 	 * @return {bool} 是否成功
 	 */
-	bool upload_begin(const char* key, size_t dlen,
+	bool set_begin(const char* key, size_t dlen,
 		time_t timeout = 0, unsigned short flags = 0);
 
 	/**
@@ -119,7 +119,7 @@ public:
 	 * @param dlen {data} data 数据长度
 	 * @return {bool} 是否成功
 	 */
-	bool upload(const void* data, size_t dlen);
+	bool set_data(const void* data, size_t dlen);
 
 	/**
 	* 从 memcached 中获得对应键值的缓存数据
@@ -216,22 +216,22 @@ private:
 	bool set(const string& key, const void* dat, size_t dlen,
 		time_t timeout, unsigned short flags);
 	bool get(const string& key, string& buf, unsigned short* flags);
-	const string& get_key(const char* key, size_t klen);
+	const string& build_key(const char* key, size_t klen);
 
-	string* keypre_;
-	rfc2047 coder_;
-	int   conn_timeout_;
-	int   rw_timeout_;
-	bool  encode_key_;
+	string* keypre_;         // 非空时，该字符串被添加在 KEY 值前组成新的 KEY
+	rfc2047 coder_;          // 当需要对 KEY 编码时的编码器
+	int   conn_timeout_;     // 网络连接超时时间
+	int   rw_timeout_;       // 网络 IO 超时时间
+	bool  encode_key_;       // 是否需要对 KEY 进行编码
 
-	bool  opened_;
-	bool  retry_;
-	char* addr_;
-	char* ip_;
-	int   port_;
-	int   enum_;
-	string ebuf_;
-	string kbuf_;
+	bool  opened_;           // 连接是否打开
+	bool  retry_;            // 是否支持连接中断重试
+	char* addr_;             // 服务地址(ip:port)
+	char* ip_;               // 服务 ip 地址
+	int   port_;             // 服务端口号
+	int   enum_;             // 出错号，留作将来扩充用
+	string ebuf_;            // 存储出错信息
+	string kbuf_;            // 存储经转码后的 KEY 值缓冲区
 
 	size_t content_length_;  // 当采用流式上传/下载大数据时此值记录数据体的总长度
 	size_t length_;          // 已经上传/下载的数据总和
