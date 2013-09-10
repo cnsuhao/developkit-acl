@@ -312,14 +312,19 @@ bool memcache::set_data(const void* data, size_t dlen)
 	return true;
 }
 
-int memcache::get_begin(const char* key, size_t klen, unsigned short* flags)
+int memcache::get_begin(const char* key, unsigned short* flags /* = NULL */)
+{
+	return get_begin(key, strlen(key), flags);
+}
+
+int memcache::get_begin(const void* key, size_t klen, unsigned short* flags)
 {
 	content_length_ = 0;
 	length_ = 0;
 
 	bool has_tried = false;
 
-	const string& kbuf = build_key(key, klen);
+	const string& kbuf = build_key((const char*) key, klen);
 	req_line_.format("get %s\r\n", kbuf.c_str());
 
 AGAIN:
@@ -333,7 +338,7 @@ AGAIN:
 			has_tried = true;
 			goto AGAIN;
 		}
-		ebuf_.format("write get(%s) error", key);
+		ebuf_.format("write get(%s) error", kbuf.c_str());
 		return -1;
 	}
 
@@ -346,7 +351,7 @@ AGAIN:
 			has_tried = true;
 			goto AGAIN;
 		}
-		ebuf_.format("reply for get(%s) error", key);
+		ebuf_.format("reply for get(%s) error", kbuf.c_str());
 		return -1;
 	}
 	else if (res_line_.compare("END", false) == 0)
@@ -366,7 +371,7 @@ AGAIN:
 	{
 		close();
 		ebuf_.format("server error for get(%s), value: %s",
-			key, res_line_.c_str());
+			kbuf.c_str(), res_line_.c_str());
 		acl_argv_free(tokens);
 		return -1;
 	}
