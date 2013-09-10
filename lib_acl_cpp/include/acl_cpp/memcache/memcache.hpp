@@ -112,14 +112,14 @@ public:
 		time_t timeout = 0, unsigned short flags = 0);
 
 	/**
-	 * 循环调用本函数上传数据值，内部会自动计算已经上传的数据总和是否达到了 upload_begin
+	 * 循环调用本函数上传数据值，内部会自动计算已经上传的数据总和是否达到了 set_begin
 	 * 中设置的数据总长度，当达到后会自动补一个 "\r\n"，调用者不应再调用此函数上传数据，
 	 * 除非是一个新的上传过程开始了
 	 * @param data {const void*} 数据地址指针
-	 * @param dlen {data} data 数据长度
+	 * @param len {data} data 数据长度
 	 * @return {bool} 是否成功
 	 */
-	bool set_data(const void* data, size_t dlen);
+	bool set_data(const void* data, size_t len);
 
 	/**
 	* 从 memcached 中获得对应键值的缓存数据
@@ -145,15 +145,26 @@ public:
 
 	/**
 	 * 流式方式从服务端获取数据，本函数发送请求协议
-	 * @param key {const char*} 键值字符串
-	 * @param len {size_t} key 字符串长度
+	 * @param key {const void*} 键值
+	 * @param klen {size_t} key 键值长度
 	 * @param flags {unsigned short*} 存储附属的标志位
 	 * @return {int} 返回数据体的长度，分以下三种情形：
 	 *   0：表示不存在
 	 *  -1：表示出错
 	 *  >0：表示数据体的长度
 	 */
-	int get_begin(const char* key, size_t len, unsigned short* flags = NULL);
+	int get_begin(const void* key, size_t klen, unsigned short* flags = NULL);
+
+	/**
+	 * 流式方式从服务端获取数据，本函数发送请求协议
+	 * @param key {const char*} 键值字符串
+	 * @param flags {unsigned short*} 存储附属的标志位
+	 * @return {int} 返回数据体的长度，分以下三种情形：
+	 *   0：表示不存在
+	 *  -1：表示出错
+	 *  >0：表示数据体的长度
+	 */
+	int get_begin(const char* key, unsigned short* flags = NULL);
 
 	/**
 	 * 流式方式从服务端获取数据，循环调用本函数接收数据
