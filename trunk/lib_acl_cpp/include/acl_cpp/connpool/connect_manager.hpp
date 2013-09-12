@@ -40,18 +40,28 @@ public:
 	connect_pool& set(const char* addr, int count);
 
 	/**
-	 * 获得某个服务器的连接池
+	 * 根据服务端地址获得该服务器的连接池
 	 * @param addr {const char*} redis 服务器地址(ip:port)
 	 * @return {connect_pool*} 返回空表示没有此服务
 	 */
 	connect_pool* get(const char* addr);
 
 	/**
-	 * 在读操作时，从连接池集群中获得一个连接池
-	 * @return {connect_pool*} 返回一个连接池，返回 NULL 表示根据随机方式
-	 *  无法获取有效连接池，应用需要重试其它方式
+	 * 从连接池集群中获得一个连接池，该函数采用轮循方式从连接池集合中获取一个
+	 * 后端服务器的连接池，从而保证了完全的均匀性；
+	 * 此外，该函数为虚接口，允许子类实现自己的轮循方式
+	 * @return {connect_pool*} 返回一个连接池，返回指针永远非空
 	 */
-	connect_pool* peek();
+	virtual connect_pool* peek();
+
+	/**
+	 * 从连接池集群中获得一个连接池，该函数采用哈希定位方式从集合中获取一个
+	 * 后端服务器的连接池；子类可以重载此虚函数，采用自己的集群获取方式
+	 * 该虚函数内部缺省采用 CRC32 的哈希算法
+	 * @param key {const char*} 键值字符串
+	 * @return {connect_pool*} 返回一个可用的连接池，返回指针永远非空
+	 */
+	virtual connect_pool* peek(const char* key);
 
 	/**
 	 * 获得所有的服务器的连接池，该连接池中包含缺省的服务连接池
@@ -64,7 +74,8 @@ public:
 
 	/**
 	 * 获得缺省的服务器连接池
-	 * @return {connect_pool*}
+	 * @return {connect_pool*} 当调用 init 函数的 default_addr 为空时
+	 *  该函数返回 NULL
 	 */
 	connect_pool* get_default_pool()
 	{
