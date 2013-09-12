@@ -158,6 +158,12 @@ connect_pool* connect_manager::peek()
 	return pool;
 }
 
+connect_pool* connect_manager::peek(const char* key)
+{
+	unsigned n = acl_hash_crc32(key, strlen(key));
+	return pools_[n % service_size_];
+}
+
 void connect_manager::statistics_record(int, void* ctx)
 {
 	connect_manager* manager = (connect_manager*) ctx;
