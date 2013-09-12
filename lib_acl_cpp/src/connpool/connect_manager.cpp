@@ -119,7 +119,7 @@ connect_pool& connect_manager::set(const char* addr, int count)
 			return **it;
 	}
 
-	connect_pool* pool = create_pool(pools_.size() - 1, key, count);
+	connect_pool* pool = create_pool(key, count, pools_.size() - 1);
 	pools_.push_back(pool);
 	service_size_ = pools_.size();
 
