@@ -74,6 +74,15 @@ public:
 	}
 
 	/**
+	 * 获得连接池集合中连接池对象的个数
+	 * @return {size_t}
+	 */
+	size_t size() const
+	{
+		return pools_.size();
+	}
+
+	/**
 	 * 获得缺省的服务器连接池
 	 * @return {connect_pool*} 当调用 init 函数的 default_addr 为空时
 	 *  该函数返回 NULL
@@ -97,10 +106,12 @@ public:
 protected:
 	/**
 	 * 纯虚函数，子类必须实现此函数用来创建连接池对象
+	 * @param idx {size_t} 该连接池对象在集合中的下标位置(从 0 开始)
 	 * @param addr {const char*} 服务器监听地址，格式：ip:port
 	 * @param count {int} 连接池的大小限制
 	 */
-	virtual connect_pool* create_pool(const char* addr, int count) = 0;
+	virtual connect_pool* create_pool(size_t idx,
+		const char* addr, int count) = 0;
 private:
 	static void statistics_record(int, void* ctx);
 	void statistics_timer();

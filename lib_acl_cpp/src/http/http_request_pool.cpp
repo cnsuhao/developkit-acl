@@ -5,8 +5,8 @@
 namespace acl
 {
 
-http_request_pool::http_request_pool(const char* addr, int count)
-: connect_pool(addr, count)
+http_request_pool::http_request_pool(size_t idx, const char* addr, int count)
+: connect_pool(idx, addr, count)
 {
 	conn_timeout_ = 30;
 	rw_timeout_ = 30;
