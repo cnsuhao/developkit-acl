@@ -58,7 +58,8 @@ public:
 	 * 从连接池集群中获得一个连接池，该函数采用哈希定位方式从集合中获取一个
 	 * 后端服务器的连接池；子类可以重载此虚函数，采用自己的集群获取方式
 	 * 该虚函数内部缺省采用 CRC32 的哈希算法
-	 * @param key {const char*} 键值字符串
+	 * @param key {const char*} 键值字符串，如果该值为 NULL，则内部
+	 *  自动切换到轮循方式
 	 * @return {connect_pool*} 返回一个可用的连接池，返回指针永远非空
 	 */
 	virtual connect_pool* peek(const char* key);
