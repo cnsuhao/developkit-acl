@@ -7,7 +7,7 @@
 namespace acl
 {
 
-connect_pool::connect_pool(size_t idx, const char* addr, int max)
+connect_pool::connect_pool(const char* addr, int max, size_t idx /* = 0 */)
 : alive_(true)
 , last_dead_(0)
 , idx_(idx)

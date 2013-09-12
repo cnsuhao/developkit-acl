@@ -110,8 +110,8 @@ protected:
 	 * @param addr {const char*} 服务器监听地址，格式：ip:port
 	 * @param count {int} 连接池的大小限制
 	 */
-	virtual connect_pool* create_pool(size_t idx,
-		const char* addr, int count) = 0;
+	virtual connect_pool* create_pool(const char* addr,
+		int count, size_t idx) = 0;
 private:
 	static void statistics_record(int, void* ctx);
 	void statistics_timer();
