@@ -15,9 +15,10 @@ http_request_manager::~http_request_manager()
 
 }
 
-connect_pool* http_request_manager::create_pool(const char* addr, int count)
+connect_pool* http_request_manager::create_pool(size_t idx,
+	const char* addr, int count)
 {
-	http_request_pool* conns = NEW http_request_pool(addr, count);
+	http_request_pool* conns = NEW http_request_pool(idx, addr, count);
 
 	return conns;
 }

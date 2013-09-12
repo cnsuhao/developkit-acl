@@ -17,10 +17,11 @@ class ACL_CPP_API connect_pool
 public:
 	/**
 	 * 构造函数
+	 * @param idx {size_t} 该连接池对象在集合中的下标位置(从 0 开始)
 	 * @param addr {const char*} 服务器监听地址，格式：ip:port(domain:port)
 	 * @param count {int} 连接池最大连接个数限制
 	 */
-	connect_pool(const char* addr, int count);
+	connect_pool(size_t idx, const char* addr, int count);
 	virtual ~connect_pool();
 
 	/**
@@ -89,6 +90,15 @@ public:
 	}
 
 	/**
+	 * 获得该连接池对象在连接池集合中的下标位置
+	 * @return {size_t}
+	 */
+	size_t get_idx() const
+	{
+		return idx_;
+	}
+
+	/**
 	 * 重置统计计数器
 	 * @param inter {int} 统计的时间间隔
 	 */
@@ -130,7 +140,9 @@ protected:
 	// 有问题的服务器的可以重试的时间间隔，不可用连接池对象再次被启用的时间间隔
 	int   retry_inter_;
 	time_t last_dead_;			// 该连接池对象上次不可用时的时间截
-	char  addr_[64];			// 连接池对应的服务器地址，IP:PORT
+
+	size_t idx_;				// 该连接池对象在集合中的下标位置
+	char  addr_[256];			// 连接池对应的服务器地址，IP:PORT
 	int   max_;				// 最大连接数
 	int   count_;				// 当前的连接数
 	time_t idle_ttl_;			// 空闲连接的生命周期
