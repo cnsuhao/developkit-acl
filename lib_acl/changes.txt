@@ -1,4 +1,9 @@
 
+384) 2013.9.13
+384.1) compile: 增加了工程文件 Makefile.db，使用该工程文件编译，则可以使用
+mysql 数据库功能，使用 Makefile 工程文件编译，则可以 lib_acl.a 更为干净
+(即不依赖于任何第三方库)
+
 383) 2013.8.21
 383.1) feature: master 框架允许以非 root 身份启动，需要用户修改 acl_master 的
 配置文件 main.cf，添加 set_ugid = 0，默认情况下该值为 1
