@@ -223,6 +223,7 @@ $(DEF_PATH_DST)/%.inc: ./src/mime/internal/%.cpp
 
 clean:
 	rm -f $(LIB_PATH_DST)/lib_acl_cpp.a
+	rm -f $(LIB_PATH_DST)/lib_acl_cpp.so
 	rm -f $(OBJS_DST)
 	rm -f $(OBJS_DEF)
 	@(cd samples; make clean)
