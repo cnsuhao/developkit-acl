@@ -11,6 +11,8 @@ CFLAGS = -c -g -W -Wall -Wcast-align \
 -D_REENTRANT -D_POSIX_PTHREAD_SEMANTICS \
 -Wno-long-long \
 -fPIC \
+-DHAS_MYSQL \
+-DHAS_SQLITE \
 -Wformat
 #-DHAS_POLARSSL
 #-DUSE_DYNAMIC
@@ -142,7 +144,7 @@ static: depends $(OBJS_DST)
 	@echo 'create $(LIB_PATH_DST)/lib_acl_cpp.a ok!'
 
 shared_ldflags = -l_protocol -l_acl \
-	-lrt -lpthread -lz -ldl
+	-lmysqlclient -lsqlite3 -lrt -lpthread -lz -ldl
 shared: depends $(OBJS_DST)
 	@echo 'creating $(LIB_PATH_DST)/lib_acl_cpp.so'
 	@if test -n "$(rpath)"; then \

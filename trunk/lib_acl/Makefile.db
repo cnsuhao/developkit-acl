@@ -80,7 +80,7 @@ endif
 #	LIB_NAME = lib_acl.a
 #endif
 
-#CFLAGS += -DHAS_MYSQL
+CFLAGS += -DHAS_MYSQL
 
 #Find system type.
 ifneq ($(SYSPATH),)
