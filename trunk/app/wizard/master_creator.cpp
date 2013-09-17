@@ -133,11 +133,33 @@ static bool create_master_aio()
 	if (copy_and_replace("master_aio.cf", file.c_str()) == false)
 		return false;
 
-	const char* name = "master_proc";
+	const char* name = "master_aio";
 	const FILE_FROM_TO tab[] = {
 		{ "main_aio.cpp", "main.cpp" },
 		{ "master_aio.h", "master_service.h" },
 		{ "master_aio.cpp", "master_service.cpp" },
+		{ NULL, NULL }
+	};
+
+	return files_copy(name, tab, src_path_, dst_path_);
+}
+
+static bool create_master_rpc()
+{
+	create_common();
+
+	string file(master_name);
+	file << ".cf";
+	if (copy_and_replace("master_aio.cf", file.c_str()) == false)
+		return false;
+
+	const char* name = "master_rpc";
+	const FILE_FROM_TO tab[] = {
+		{ "main_aio.cpp", "main.cpp" },
+		{ "master_rpc.h", "master_service.h" },
+		{ "master_rpc.cpp", "master_service.cpp" },
+		{ "rpc_manager.cpp", "rpc_manager.cpp" },
+		{ "rpc_manager.h", "rpc_manager.h" },
 		{ NULL, NULL }
 	};
 
@@ -186,7 +208,8 @@ void master_creator()
 
 		printf("choose master_service type:\r\n");
 		printf("t: for master_threads; p: for master_proc; "
-			"a: for master_aio; g: for master_trigger; s: skip choose\r\n");
+			"a: for master_aio; g: for master_trigger; "
+			"r: for master_rpc; s: skip choose\r\n");
 		printf(">"); fflush(stdout);
 
 		n = acl_vstream_gets_nonl(ACL_VSTREAM_IN, buf, sizeof(buf));
@@ -205,6 +228,11 @@ void master_creator()
 		else if (strcasecmp(buf, "a") == 0)
 		{
 			create_master_aio();
+			break;
+		}
+		else if (strcasecmp(buf, "r") == 0)
+		{
+			create_master_rpc();
 			break;
 		}
 		else if (strcasecmp(buf, "g") == 0)
