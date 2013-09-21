@@ -61,8 +61,7 @@ ACL_VSTREAM *acl_vstream_listen_ex(const char *addr, int qlen,
 				myname, addr);
 			return NULL;
 		}
-		snprintf(listen_stream->local_addr,
-			sizeof(listen_stream->local_addr), "%s", addr);
+		acl_vstream_set_local(listen_stream, addr);
 		sprintf(listen_stream->errbuf, "+OK");
 		return (listen_stream);
 	}
@@ -90,16 +89,15 @@ ACL_VSTREAM *acl_vstream_listen_ex(const char *addr, int qlen,
 	{
 		acl_msg_warn("%s: getsockname error(%s) for sock(%d)",
 			myname, acl_last_serror(), listenfd);
-		snprintf(listen_stream->local_addr,
-			sizeof(listen_stream->local_addr), "%s", addr);
+		acl_vstream_set_local(listen_stream, addr);
 	} else {
-		char  ip[32];
+		char  ip[32], buf[64];
 		int   port;
 
 		acl_inet_ntoa(local.sin_addr, ip, sizeof(ip));
 		port = ntohs(local.sin_port);
-		snprintf(listen_stream->local_addr,
-			sizeof(listen_stream->local_addr), "%s:%d", ip, port);
+		snprintf(buf, sizeof(buf), "%s:%d", ip, port);
+		acl_vstream_set_local(listen_stream, buf);
 	}
 
 	sprintf(listen_stream->errbuf, "+OK");
@@ -148,7 +146,6 @@ ACL_VSTREAM *acl_vstream_accept_ex(ACL_VSTREAM *listen_stream,
 #ifdef	ACL_UNIX
 	} else if ((listen_stream->type | ACL_VSTREAM_TYPE_LISTEN_UNIX)) {
 		connfd = acl_unix_accept(servfd);
-		listen_stream->remote_addr[0] = 0;
 		if (ipbuf)
 			ipbuf[0] = 0;
 		buf[0] = 0;
@@ -177,9 +174,7 @@ ACL_VSTREAM *acl_vstream_accept_ex(ACL_VSTREAM *listen_stream,
 	if (client_stream == NULL)
 		return NULL;
 
-	ACL_SAFE_STRNCPY(client_stream->remote_addr, buf,
-		sizeof(client_stream->remote_addr));
-
+	acl_vstream_set_remote(client_stream, buf);
 	return client_stream;
 }
 
@@ -194,9 +189,9 @@ ACL_VSTREAM *acl_vstream_connect_ex(const char *addr,
 	int rw_bufsize, int *he_errorp)
 {
 	const char *myname = "acl_vstream_connect_ex";
-	ACL_VSTREAM *connect_stream;
+	ACL_VSTREAM *client;
 	ACL_SOCKET connfd;
-	char *ptr;
+	char *ptr, buf[256];
 
 	if (addr == NULL || *addr == 0)
 		acl_msg_fatal("%s: addr null", myname);
@@ -208,7 +203,7 @@ ACL_VSTREAM *acl_vstream_connect_ex(const char *addr,
 	}
 #ifdef ACL_MS_WINDOWS
 	else {
-		acl_msg_error("%s(%d): addr(%s) invalid, examples(192.168.0.1:80)",
+		acl_msg_error("%s(%d): addr(%s) invalid",
 			myname, __LINE__, addr);
 		return NULL;
 	}
@@ -224,23 +219,19 @@ ACL_VSTREAM *acl_vstream_connect_ex(const char *addr,
 
 	if (connfd == ACL_SOCKET_INVALID)
 		return NULL;
-	connect_stream = acl_vstream_fdopen(connfd, ACL_VSTREAM_FLAG_RW,
-		rw_bufsize, rw_timeout, ACL_VSTREAM_TYPE_SOCK);
-	if (connect_stream == NULL) {
+	client = acl_vstream_fdopen(connfd, ACL_VSTREAM_FLAG_RW,
+			rw_bufsize, rw_timeout, ACL_VSTREAM_TYPE_SOCK);
+	if (client == NULL) {
 		acl_socket_close(connfd);
 		return NULL;
 	}
 
-	if (acl_getpeername(ACL_VSTREAM_SOCK(connect_stream),
-			connect_stream->remote_addr,
-			sizeof(connect_stream->remote_addr) - 1) < 0)
-	{
-		snprintf(connect_stream->remote_addr,
-			sizeof(connect_stream->remote_addr) - 1,
-			"%s", addr);
-	}
+	if (acl_getpeername(ACL_VSTREAM_SOCK(client), buf, sizeof(buf)) < 0)
+		acl_vstream_set_remote(client, addr);
+	else
+		acl_vstream_set_remote(client, buf);
 
-	return connect_stream;
+	return client;
 }
 
 ACL_VSTREAM *acl_vstream_connect(const char *addr,

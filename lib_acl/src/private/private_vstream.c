@@ -39,6 +39,8 @@
 #include "private_array.h"
 #include "private_vstream.h"
 
+#define	MAX_ADDR_SIZE	256
+
 static int __sys_getc(ACL_VSTREAM *stream);
 
 static int  __read_wait(ACL_SOCKET fd, int timeout)
@@ -591,7 +593,9 @@ ACL_VSTREAM *private_vstream_fdopen(ACL_SOCKET fd, unsigned int oflags,
 		stream->close_fn = acl_socket_close;
 	}
 
-	stream->path = stream->remote_addr;   /* default */
+	stream->remote_addr = calloc(1, MAX_ADDR_SIZE);
+	stream->local_addr = calloc(1, MAX_ADDR_SIZE);
+	stream->path = stream->remote_addr;
 
 	stream->close_handle_lnk = private_array_create(5);
 	if (stream->close_handle_lnk == NULL) {
@@ -623,15 +627,12 @@ ACL_VSTREAM *private_vstream_fopen(const char *path, unsigned int oflags, int mo
 		return (NULL);
 
 	fp = private_vstream_fdopen(ACL_SOCKET_INVALID,
-				oflags,
-				buflen,
-				0,
-				ACL_VSTREAM_TYPE_FILE);
+		oflags, buflen, 0, ACL_VSTREAM_TYPE_FILE);
 	if (fp == NULL)
 		return (NULL);
 
 	fp->fd.h_file = fh;
-	ACL_SAFE_STRNCPY(fp->remote_addr, path, sizeof(fp->remote_addr));
+	snprintf(fp->remote_addr, MAX_ADDR_SIZE, "%s", path);
 	return (fp);
 }
 
@@ -655,8 +656,7 @@ void private_vstream_ctl(ACL_VSTREAM *stream, int name,...)
 			break;
 		case ACL_VSTREAM_CTL_PATH:
 			ptr = va_arg(ap, char*);
-			ACL_SAFE_STRNCPY(stream->remote_addr,
-				ptr, sizeof(stream->remote_addr));
+			snprintf(stream->remote_addr, MAX_ADDR_SIZE, "%s", ptr);
 			break;
 		case ACL_VSTREAM_CTL_FD:
 			ACL_VSTREAM_SOCK(stream) = va_arg(ap, ACL_SOCKET);
@@ -696,7 +696,8 @@ ACL_VSTREAM *private_vstream_connect_ex(const char *addr, int block_mode,
 	acl_assert(addr && *addr);
 	ptr = strchr(addr, ':');
 	if (ptr)
-		fd = acl_inet_connect_ex(addr, ACL_BLOCKING, conn_timeout, he_errorp);
+		fd = acl_inet_connect_ex(addr, ACL_BLOCKING,
+			conn_timeout, he_errorp);
 #ifdef	ACL_MS_WINDOWS
 	else
 		return (NULL);
@@ -714,12 +715,10 @@ ACL_VSTREAM *private_vstream_connect_ex(const char *addr, int block_mode,
 			rw_timeout, ACL_VSTREAM_TYPE_SOCK);
 	acl_assert(stream);
 
-	if (acl_getpeername(ACL_VSTREAM_SOCK(stream),
-			stream->remote_addr,
-			sizeof(stream->remote_addr) - 1) < 0)
+	if (acl_getpeername(ACL_VSTREAM_SOCK(stream), stream->remote_addr,
+		MAX_ADDR_SIZE) < 0)
 	{
-		snprintf(stream->remote_addr,
-			sizeof(stream->remote_addr) - 1, "%s", addr);
+		snprintf(stream->remote_addr, MAX_ADDR_SIZE, "%s", addr);
 	}
 
 	return (stream);
@@ -763,6 +762,8 @@ void private_vstream_free(ACL_VSTREAM *stream)
 
 	ACL_VSTREAM_SOCK(stream) = ACL_SOCKET_INVALID;
 	ACL_VSTREAM_FILE(stream) = ACL_FILE_INVALID;
+	free(stream->remote_addr);
+	free(stream->local_addr);
 	free(stream);
 }
 
@@ -812,6 +813,8 @@ int private_vstream_close(ACL_VSTREAM *stream)
 		free(stream->read_buf);
 	if (stream->wbuf != NULL)
 		free(stream->wbuf);
+	free(stream->remote_addr);
+	free(stream->local_addr);
 	free(stream);
 	return (ret);
 }

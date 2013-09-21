@@ -145,8 +145,7 @@ static void single_server_timeout(int event acl_unused, void *context acl_unused
 
 /* single_server_wakeup - wake up application */
 
-static void single_server_wakeup(int fd,
-	const char *remote_addr, const char *local_addr)
+static void single_server_wakeup(int fd, const char *remote, const char *local)
 {
 	const char *myname = "single_server_wakeup";
 	ACL_VSTREAM *stream;
@@ -165,12 +164,10 @@ static void single_server_wakeup(int fd,
 	acl_close_on_exec(fd, ACL_CLOSE_ON_EXEC);
 	stream = acl_vstream_fdopen(fd, O_RDWR, acl_var_single_buf_size,
 			acl_var_single_rw_timeout, ACL_VSTREAM_TYPE_SOCK);
-	if (remote_addr)
-		ACL_SAFE_STRNCPY(stream->remote_addr, remote_addr,
-			sizeof(stream->remote_addr));
-	if (local_addr)
-		ACL_SAFE_STRNCPY(stream->local_addr, local_addr,
-			sizeof(stream->local_addr));
+	if (remote)
+		acl_vstream_set_remote(stream, remote);
+	if (local)
+		acl_vstream_set_local(stream, local);
 
 	if (acl_master_notify(acl_var_single_pid, single_server_generation,
 		ACL_MASTER_STAT_TAKEN) < 0)
@@ -244,7 +241,7 @@ static void single_server_accept_sock(int event acl_unused, void *context)
 	ACL_VSTREAM *stream = (ACL_VSTREAM *) context;
 	int     listen_fd = ACL_VSTREAM_SOCK(stream);
 	int     time_left = -1, fd, sock_type;
-	char    remote_addr[64], local_addr[64];
+	char    remote[64], local[64];
 
 	/*
 	 * Be prepared for accept() to fail because some other process already
@@ -258,7 +255,7 @@ static void single_server_accept_sock(int event acl_unused, void *context)
 
 	if (single_server_pre_accept)
 		single_server_pre_accept(single_server_name, single_server_argv);
-	fd = acl_accept(listen_fd, remote_addr, sizeof(remote_addr), &sock_type);
+	fd = acl_accept(listen_fd, remote, sizeof(remote), &sock_type);
 	if (single_server_lock != 0
 	    && acl_myflock(ACL_VSTREAM_FILE(single_server_lock),
 	    	ACL_INTERNAL_LOCK, ACL_MYFLOCK_OP_NONE) < 0)
@@ -278,10 +275,10 @@ static void single_server_accept_sock(int event acl_unused, void *context)
 	if (sock_type == AF_INET)
 		acl_tcp_set_nodelay(fd);
 
-	if (acl_getsockname(fd, local_addr, sizeof(local_addr)) < 0)
-		memset(local_addr, 0, sizeof(local_addr));
+	if (acl_getsockname(fd, local, sizeof(local)) < 0)
+		memset(local, 0, sizeof(local));
 
-	single_server_wakeup(fd, remote_addr, local_addr);
+	single_server_wakeup(fd, remote, local);
 }
 
 static void single_server_init(const char *procname)
