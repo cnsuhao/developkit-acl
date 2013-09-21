@@ -22,6 +22,7 @@ extern "C" {
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
+#include <netinet/in.h>
 #endif
 
 #include "acl_array.h"
@@ -124,9 +125,11 @@ struct ACL_VSTREAM {
 	char  errbuf[128];              /**< error info */
 	int   errnum;                   /**< record the system errno here */
 	int   rw_timeout;               /**< read/write timeout */
-	char  local_addr[256];          /**< the local addr of the stream */
-	char  remote_addr[256];         /**< the remote addr of the stream */
-	const char *path;               /**< the path just for file operation */
+	char *local_addr;               /**< the local addr of the stream */
+	char *remote_addr;              /**< the remote addr of the stream */
+	struct sockaddr_in *local_saddr;
+	struct sockaddr_in *remote_saddr;
+	char *path;                     /**< the path just for file operation */
 	void *context;                  /**< the application's special data */
 
 	ACL_ARRAY *close_handle_lnk;    /**< before this stream is free,
@@ -780,14 +783,35 @@ ACL_API const char *acl_vstream_strerror(ACL_VSTREAM *stream);
 #define	ACL_VSTREAM_PATH(stream_ptr) ((stream_ptr)->path)
 
 /**
+ * 当 ACL_VSTREAM 为文件流时，设置文件流的路径
+ * @param stream {ACL_VSTREAM*} 文件流
+ * @param path {const char*} 文件路径
+ */
+void acl_vstream_set_path(ACL_VSTREAM *stream, const char *path);
+
+/**
  * 当 ACL_VSTREAM 为网络流时，用此宏取得对方的地址
  */
 #define	ACL_VSTREAM_PEER(stream_ptr) ((stream_ptr)->remote_addr)
 
 /**
+ * 当 ACL_VSTREAM 为网络流时，此函数设置远程连接地址
+ * @param stream {ACL_VSTREAM*} 网络流，非空
+ * @param addr {const char*} 远程连接地址，非空
+ */
+void acl_vstream_set_remote(ACL_VSTREAM *stream, const char *addr);
+
+/**
  * 当 ACL_VSTREAM 为网络流时，用此宏取得本地的地址
  */
 #define	ACL_VSTREAM_LOCAL(stream_ptr) ((stream_ptr)->local_addr)
+
+/**
+ * 当 ACL_VSTREAM 为网络流时，此函数设置本地地址
+ * @param stream {ACL_VSTREAM*} 网络流，非空
+ * @param addr {const char*} 远程连接地址，非空
+ */
+void acl_vstream_set_local(ACL_VSTREAM *stream, const char *addr);
 
 /**
  * 设定流的读/写套接字

@@ -427,7 +427,7 @@ static void decrease_counter_callback(ACL_VSTREAM *stream acl_unused,
 /* ioctl_server_wakeup - wake up application */
 
 static void ioctl_server_wakeup(ACL_IOCTL *h_ioctl, int fd,
-	const char *remote_addr, const char *local_addr)
+	const char *remote, const char *local)
 {
 	ACL_VSTREAM *stream;
 
@@ -449,13 +449,13 @@ static void ioctl_server_wakeup(ACL_IOCTL *h_ioctl, int fd,
 		acl_msg_fatal("%s(%d): acl_vstream_fdopen error(%s)",
 			__FILE__, __LINE__, strerror(errno));
 
-	if (remote_addr)
-		ACL_SAFE_STRNCPY(stream->remote_addr, remote_addr,
-			sizeof(stream->remote_addr));
-	if (local_addr)
-		ACL_SAFE_STRNCPY(stream->local_addr, local_addr,
-			sizeof(stream->local_addr));
-	/* when the stream is closed, the callback will be called to decrease the counter */
+	if (remote)
+		acl_vstream_set_remote(stream, remote);
+	if (local)
+		acl_vstream_set_local(stream, local);
+	/* when the stream is closed, the callback will be called
+	 * to decrease the counter
+	 */
 	acl_vstream_add_close_handle(stream, decrease_counter_callback, NULL);
 
 	ioctl_server_execute(h_ioctl, stream);
@@ -562,7 +562,7 @@ static void ioctl_server_accept_sock(int event_type, ACL_IOCTL *h_ioctl,
 	const char  *myname = "ioctl_serer_accept_inet";
 	int     listen_fd = ACL_VSTREAM_SOCK(stream);
 	int     time_left = -1, i = 0, delay_listen = 0, fd, sock_type;
-	char    remote_addr[64], local_addr[64];
+	char    remote[64], local[64];
 
 	if (__listen_streams == NULL) {
 		acl_msg_info("Server stoping ...");
@@ -590,8 +590,7 @@ static void ioctl_server_accept_sock(int event_type, ACL_IOCTL *h_ioctl,
 		ioctl_server_pre_accept(ioctl_server_name, ioctl_server_argv);
 
 	while (i++ < acl_var_ioctl_max_accept) {
-		fd = acl_accept(listen_fd, remote_addr,
-			sizeof(remote_addr), &sock_type);
+		fd = acl_accept(listen_fd, remote, sizeof(remote), &sock_type);
 		if (fd < 0) {
 			if (errno == EMFILE) {
 				delay_listen = 1;
@@ -613,9 +612,9 @@ static void ioctl_server_accept_sock(int event_type, ACL_IOCTL *h_ioctl,
 	        /* 如果为 TCP 套接口，则设置 nodelay 选项以避免发送延迟现象 */
 		if (sock_type == AF_INET)
 			acl_tcp_set_nodelay(fd);
-		if (acl_getsockname(fd, local_addr, sizeof(local_addr)) < 0)
-			memset(local_addr, 0, sizeof(local_addr));
-		ioctl_server_wakeup(h_ioctl, fd, remote_addr, local_addr);
+		if (acl_getsockname(fd, local, sizeof(local)) < 0)
+			memset(local, 0, sizeof(local));
+		ioctl_server_wakeup(h_ioctl, fd, remote, local);
 	}
 
 	if (ioctl_server_lock != 0

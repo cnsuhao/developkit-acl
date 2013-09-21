@@ -1,4 +1,12 @@
 
+385) 2013.9.21
+385.1) 优化: ACL_VSTREAM 中将 remote_addr, local_addr 定义为指针，从而大大
+减少了 ACL_VSTREAM 对象创建时的尺寸大小
+385.2) feature: ACL_VSTREAM 中添加了 struct sockaddr_in 类型的两个指针，以便
+于将来 ACL_VSTREAM 很容易支持 UDP 传输
+385.3) feature: ACL_VSTREAM 对象增加了 acl_vstream_set_local,
+acl_vstream_set_remote, acl_vstream_set_path 三个函数
+
 384) 2013.9.13
 384.1) compile: 增加了工程文件 Makefile.db，使用该工程文件编译，则可以使用
 mysql 数据库功能，使用 Makefile 工程文件编译，则可以 lib_acl.a 更为干净
