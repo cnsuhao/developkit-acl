@@ -450,7 +450,7 @@ static void ioctl_server_wakeup(ACL_IOCTL *h_ioctl, int fd,
 			__FILE__, __LINE__, strerror(errno));
 
 	if (remote)
-		acl_vstream_set_remote(stream, remote);
+		acl_vstream_set_peer(stream, remote);
 	if (local)
 		acl_vstream_set_local(stream, local);
 	/* when the stream is closed, the callback will be called

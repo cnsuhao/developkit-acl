@@ -22,23 +22,26 @@
 
 /* acl_write_buf - write buffer or bust */
 
-int acl_write_buf(ACL_SOCKET fd, const char *buf, int len, int timeout)
+int acl_write_buf(ACL_VSTREAM *stream, const char *buf, int len, int timeout)
 {
 	int     count;
 
 	while (len > 0) {
-		if (timeout > 0 && acl_write_wait(fd, timeout) < 0)
-			return (-1);
-		count = acl_socket_write(fd, buf, len, 0, NULL);
+		if (timeout > 0 &&
+			acl_write_wait(ACL_VSTREAM_SOCK(stream), timeout) < 0)
+		{
+			return -1;
+		}
+		count = acl_socket_write(stream, buf, len, 0, NULL);
 		if (count < 0) {
 			if (acl_last_error() == ACL_EAGAIN && timeout > 0)
 				continue;
-			return (-1);
+			return -1;
 		}
 		if (count == 0)
 			acl_msg_fatal("write returned 0");
 		buf += count;
 		len -= count;
 	}
-	return (len);
+	return len;
 }

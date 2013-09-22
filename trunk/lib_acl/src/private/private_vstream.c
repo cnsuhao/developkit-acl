@@ -123,7 +123,7 @@ AGAIN:
 	acl_set_error(0);
 
 	if (stream->type == ACL_VSTREAM_TYPE_FILE) {
-		stream->read_cnt = stream->fread_fn(ACL_VSTREAM_FILE(stream),
+		stream->read_cnt = stream->fread_fn(stream,
 					stream->read_buf,
 					(size_t) stream->read_buf_len,
 					stream->rw_timeout,
@@ -131,7 +131,7 @@ AGAIN:
 		if (stream->read_cnt > 0)
 			stream->sys_offset += stream->read_cnt;
 	} else
-		stream->read_cnt = stream->read_fn(ACL_VSTREAM_SOCK(stream),
+		stream->read_cnt = stream->read_fn(stream,
 					stream->read_buf,
 					(size_t) stream->read_buf_len,
 					stream->rw_timeout,
@@ -401,7 +401,7 @@ TAG_AGAIN:
 			stream->offset = stream->sys_offset;
 		}
 
-		n = stream->fwrite_fn(ACL_VSTREAM_FILE(stream), vptr, dlen,
+		n = stream->fwrite_fn(stream, vptr, dlen,
 				stream->rw_timeout, stream->context);
 		if (n > 0) {
 			stream->sys_offset += n;
@@ -409,7 +409,7 @@ TAG_AGAIN:
 			stream->read_cnt = 0;  /* 防止缓冲区内的数据与实际不一致, 仅对文件IO有效 */
 		}
 	} else
-		n = stream->write_fn(ACL_VSTREAM_SOCK(stream), vptr, dlen,
+		n = stream->write_fn(stream, vptr, dlen,
 				stream->rw_timeout, stream->context);
 	if (n < 0) {
 		if (acl_last_error() == ACL_EINTR) {
@@ -593,9 +593,9 @@ ACL_VSTREAM *private_vstream_fdopen(ACL_SOCKET fd, unsigned int oflags,
 		stream->close_fn = acl_socket_close;
 	}
 
-	stream->remote_addr = calloc(1, MAX_ADDR_SIZE);
-	stream->local_addr = calloc(1, MAX_ADDR_SIZE);
-	stream->path = stream->remote_addr;
+	stream->addr_peer = calloc(1, MAX_ADDR_SIZE);
+	stream->addr_local = calloc(1, MAX_ADDR_SIZE);
+	stream->path = stream->addr_peer;
 
 	stream->close_handle_lnk = private_array_create(5);
 	if (stream->close_handle_lnk == NULL) {
@@ -632,7 +632,7 @@ ACL_VSTREAM *private_vstream_fopen(const char *path, unsigned int oflags, int mo
 		return (NULL);
 
 	fp->fd.h_file = fh;
-	snprintf(fp->remote_addr, MAX_ADDR_SIZE, "%s", path);
+	snprintf(fp->addr_peer, MAX_ADDR_SIZE, "%s", path);
 	return (fp);
 }
 
@@ -656,7 +656,7 @@ void private_vstream_ctl(ACL_VSTREAM *stream, int name,...)
 			break;
 		case ACL_VSTREAM_CTL_PATH:
 			ptr = va_arg(ap, char*);
-			snprintf(stream->remote_addr, MAX_ADDR_SIZE, "%s", ptr);
+			snprintf(stream->addr_peer, MAX_ADDR_SIZE, "%s", ptr);
 			break;
 		case ACL_VSTREAM_CTL_FD:
 			ACL_VSTREAM_SOCK(stream) = va_arg(ap, ACL_SOCKET);
@@ -715,10 +715,10 @@ ACL_VSTREAM *private_vstream_connect_ex(const char *addr, int block_mode,
 			rw_timeout, ACL_VSTREAM_TYPE_SOCK);
 	acl_assert(stream);
 
-	if (acl_getpeername(ACL_VSTREAM_SOCK(stream), stream->remote_addr,
+	if (acl_getpeername(ACL_VSTREAM_SOCK(stream), stream->addr_peer,
 		MAX_ADDR_SIZE) < 0)
 	{
-		snprintf(stream->remote_addr, MAX_ADDR_SIZE, "%s", addr);
+		snprintf(stream->addr_peer, MAX_ADDR_SIZE, "%s", addr);
 	}
 
 	return (stream);
@@ -762,8 +762,8 @@ void private_vstream_free(ACL_VSTREAM *stream)
 
 	ACL_VSTREAM_SOCK(stream) = ACL_SOCKET_INVALID;
 	ACL_VSTREAM_FILE(stream) = ACL_FILE_INVALID;
-	free(stream->remote_addr);
-	free(stream->local_addr);
+	free(stream->addr_peer);
+	free(stream->addr_local);
 	free(stream);
 }
 
@@ -813,8 +813,8 @@ int private_vstream_close(ACL_VSTREAM *stream)
 		free(stream->read_buf);
 	if (stream->wbuf != NULL)
 		free(stream->wbuf);
-	free(stream->remote_addr);
-	free(stream->local_addr);
+	free(stream->addr_peer);
+	free(stream->addr_local);
 	free(stream);
 	return (ret);
 }

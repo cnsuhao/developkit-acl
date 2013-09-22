@@ -65,7 +65,6 @@ static void __service(ACL_SOCKET fd, char *service acl_unused,
 	if (!acl_access_permit(ip)) {
 		acl_msg_warn("%s, %s(%d): addr(%s) be denied",
 			__FILE__, myname, __LINE__, ip);
-		acl_socket_write(fd, __deny_info, strlen(__deny_info), 0, 0);
 		acl_socket_close(fd);
 	} else if (__run_fn != NULL) {
 		ACL_VSTREAM *vstream;
@@ -73,7 +72,7 @@ static void __service(ACL_SOCKET fd, char *service acl_unused,
 
 		vstream = acl_vstream_fdopen(fd, O_RDWR, acl_var_aio_buf_size,
 			0, ACL_VSTREAM_TYPE_SOCK);
-		acl_vstream_set_remote(vstream, addr);
+		acl_vstream_set_peer(vstream, addr);
 		acl_getsockname(fd, addr, sizeof(addr));
 		acl_vstream_set_local(vstream, addr);
 		astream = acl_aio_open(acl_aio_server_handle(), vstream);

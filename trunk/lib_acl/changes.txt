@@ -1,4 +1,11 @@
 
+386) 2013.9.22
+386.1) feature: ACL_VSTREAM 支持 UDP 传输; acl_vstream_net.c 中增加了
+acl_vstream_bind 函数用来绑定 UDP 传输模式
+386.2) feature: ACL_VSTREAM 增加了 acl_vstream_set_local_addr,
+acl_vstream_set_peer_addr
+386.3) acl_vstream.c: acl_vstream_set_remote 重命名为 acl_vstream_set_peer
+
 385) 2013.9.21
 385.1) 优化: ACL_VSTREAM 中将 remote_addr, local_addr 定义为指针，从而大大
 减少了 ACL_VSTREAM 对象创建时的尺寸大小

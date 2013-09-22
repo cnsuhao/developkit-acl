@@ -82,6 +82,15 @@ ACL_API ACL_VSTREAM *acl_vstream_connect_ex(const char *addr, int block_mode,
 ACL_API ACL_VSTREAM *acl_vstream_connect(const char *addr, int block_mode,
 		int connect_timeout, int rw_timeout, int rw_bufsize);
 
+/**
+ * 针对 UDP 通信，该函数用来绑定本地 UDP 地址，如果绑定成功，则创建
+ * ACL_VSTREAM 对象, 用户可以象调用 ACL_VSTREAM 对象的读写接口
+ * @param addr {const char*} 本地 UDP 地址，格式：ip:port
+ * @param rw_timeout {int} 读写超时时间(秒)
+ * @return {ACL_VSTREAM*} 返回 NULL 表示绑定失败
+ */
+ACL_API ACL_VSTREAM *acl_vstream_bind(const char *addr, int rw_timeout);
+
 #ifdef __cplusplus
 }
 #endif

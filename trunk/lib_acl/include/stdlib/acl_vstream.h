@@ -47,12 +47,18 @@ extern "C" {
 
 typedef struct ACL_VSTREAM	ACL_VSTREAM;
 
-typedef int (*ACL_VSTREAM_RD_FN)(ACL_SOCKET fd, void *buf, size_t size, int timeout, void *context);
-typedef int (*ACL_VSTREAM_WR_FN)(ACL_SOCKET fd, const void *buf, size_t size, int timeout, void *context);
-typedef int (*ACL_VSTREAM_WV_FN)(ACL_SOCKET fd, const struct iovec *vector, int count, int timeout, void *context);
-typedef int (*ACL_FSTREAM_RD_FN)(ACL_FILE_HANDLE fh, void *buf, size_t size, int timeout, void *context);
-typedef int (*ACL_FSTREAM_WR_FN)(ACL_FILE_HANDLE fh, const void *buf, size_t size, int timeout, void *context);
-typedef int (*ACL_FSTREAM_WV_FN)(ACL_FILE_HANDLE fh, const struct iovec *vector, int count, int timeout, void *context);
+typedef int (*ACL_VSTREAM_RD_FN)(ACL_VSTREAM *stream, void *buf, size_t size,
+	int timeout, void *context);
+typedef int (*ACL_VSTREAM_WR_FN)(ACL_VSTREAM *stream, const void *buf,
+	size_t size, int timeout, void *context);
+typedef int (*ACL_VSTREAM_WV_FN)(ACL_VSTREAM *stream, const struct iovec *vec,
+	int count, int timeout, void *context);
+typedef int (*ACL_FSTREAM_RD_FN)(ACL_VSTREAM *stream, void *buf, size_t size,
+	int timeout, void *context);
+typedef int (*ACL_FSTREAM_WR_FN)(ACL_VSTREAM *stream, const void *buf,
+	size_t size, int timeout, void *context);
+typedef int (*ACL_FSTREAM_WV_FN)(ACL_VSTREAM *stream, const struct iovec *vec,
+	int count, int timeout, void *context);
 
 /* 当关闭或释放一个数据流时, 需要回调一些释放函数, 此结果定义了该回调
  * 函数的句柄类型 ---add by zsx, 2006.6.20
@@ -125,10 +131,14 @@ struct ACL_VSTREAM {
 	char  errbuf[128];              /**< error info */
 	int   errnum;                   /**< record the system errno here */
 	int   rw_timeout;               /**< read/write timeout */
-	char *local_addr;               /**< the local addr of the stream */
-	char *remote_addr;              /**< the remote addr of the stream */
-	struct sockaddr_in *local_saddr;
-	struct sockaddr_in *remote_saddr;
+	char *addr_local;               /**< the local addr of the stream */
+	char *addr_peer;                /**< the peer addr of the stream */
+	struct sockaddr_in *sa_local;
+	struct sockaddr_in *sa_peer;
+	size_t sa_local_size;
+	size_t sa_peer_size;
+	size_t sa_local_len;
+	size_t sa_peer_len;
 	char *path;                     /**< the path just for file operation */
 	void *context;                  /**< the application's special data */
 
@@ -787,31 +797,47 @@ ACL_API const char *acl_vstream_strerror(ACL_VSTREAM *stream);
  * @param stream {ACL_VSTREAM*} 文件流
  * @param path {const char*} 文件路径
  */
-void acl_vstream_set_path(ACL_VSTREAM *stream, const char *path);
+ACL_API void acl_vstream_set_path(ACL_VSTREAM *stream, const char *path);
 
 /**
  * 当 ACL_VSTREAM 为网络流时，用此宏取得对方的地址
  */
-#define	ACL_VSTREAM_PEER(stream_ptr) ((stream_ptr)->remote_addr)
+#define	ACL_VSTREAM_PEER(stream_ptr) ((stream_ptr)->addr_peer)
 
 /**
  * 当 ACL_VSTREAM 为网络流时，此函数设置远程连接地址
  * @param stream {ACL_VSTREAM*} 网络流，非空
  * @param addr {const char*} 远程连接地址，非空
  */
-void acl_vstream_set_remote(ACL_VSTREAM *stream, const char *addr);
+ACL_API void acl_vstream_set_peer(ACL_VSTREAM *stream, const char *addr);
+
+/**
+ * 当 ACL_VSTREAM 为网络流时，此函数设置远程连接地址
+ * @param stream {ACL_VSTREAM*} 网络流，非空
+ * @param sa {const struct sockaddr_in *} 远程连接地址，非空
+ */
+ACL_API void acl_vstream_set_peer_addr(ACL_VSTREAM *stream,
+	const struct sockaddr_in *sa);
 
 /**
  * 当 ACL_VSTREAM 为网络流时，用此宏取得本地的地址
  */
-#define	ACL_VSTREAM_LOCAL(stream_ptr) ((stream_ptr)->local_addr)
+#define	ACL_VSTREAM_LOCAL(stream_ptr) ((stream_ptr)->addr_local)
 
 /**
  * 当 ACL_VSTREAM 为网络流时，此函数设置本地地址
  * @param stream {ACL_VSTREAM*} 网络流，非空
- * @param addr {const char*} 远程连接地址，非空
+ * @param addr {const char*} 本地地址，非空
  */
-void acl_vstream_set_local(ACL_VSTREAM *stream, const char *addr);
+ACL_API void acl_vstream_set_local(ACL_VSTREAM *stream, const char *addr);
+
+/**
+ * 当 ACL_VSTREAM 为网络流时，此函数设置本地地址
+ * @param stream {ACL_VSTREAM*} 网络流，非空
+ * @param sa {const sockaddr_in*} 本地地址，非空
+ */
+ACL_API void acl_vstream_set_local_addr(ACL_VSTREAM *stream,
+	const struct sockaddr_in *sa);
 
 /**
  * 设定流的读/写套接字

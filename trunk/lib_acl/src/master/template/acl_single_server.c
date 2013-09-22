@@ -165,7 +165,7 @@ static void single_server_wakeup(int fd, const char *remote, const char *local)
 	stream = acl_vstream_fdopen(fd, O_RDWR, acl_var_single_buf_size,
 			acl_var_single_rw_timeout, ACL_VSTREAM_TYPE_SOCK);
 	if (remote)
-		acl_vstream_set_remote(stream, remote);
+		acl_vstream_set_peer(stream, remote);
 	if (local)
 		acl_vstream_set_local(stream, local);
 
