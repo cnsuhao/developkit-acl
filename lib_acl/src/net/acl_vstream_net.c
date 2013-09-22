@@ -26,6 +26,7 @@
 #include "net/acl_sane_socket.h"
 #include "net/acl_connect.h"
 #include "net/acl_listen.h"
+#include "net/acl_host_port.h"
 #include "net/acl_vstream_net.h"
 
 #endif
@@ -174,7 +175,7 @@ ACL_VSTREAM *acl_vstream_accept_ex(ACL_VSTREAM *listen_stream,
 	if (client_stream == NULL)
 		return NULL;
 
-	acl_vstream_set_remote(client_stream, buf);
+	acl_vstream_set_peer(client_stream, buf);
 	return client_stream;
 }
 
@@ -227,19 +228,130 @@ ACL_VSTREAM *acl_vstream_connect_ex(const char *addr,
 	}
 
 	if (acl_getpeername(ACL_VSTREAM_SOCK(client), buf, sizeof(buf)) < 0)
-		acl_vstream_set_remote(client, addr);
+		acl_vstream_set_peer(client, addr);
 	else
-		acl_vstream_set_remote(client, buf);
+		acl_vstream_set_peer(client, buf);
 
 	return client;
 }
 
-ACL_VSTREAM *acl_vstream_connect(const char *addr,
-	int block_mode, int connect_timeout,
-	int rw_timeout,int rw_bufsize)
+ACL_VSTREAM *acl_vstream_connect(const char *addr, int block_mode,
+	int connect_timeout, int rw_timeout, int rw_bufsize)
 {
 	return acl_vstream_connect_ex(addr, block_mode, connect_timeout,
 			rw_timeout, rw_bufsize, NULL);
 }
 
+static int udp_read(ACL_VSTREAM *stream, void *buf, size_t size,
+	int timeout acl_unused, void *arg acl_unused)
+{
+	const char *myname = "udp_read";
+	struct sockaddr_in sa;
+	socklen_t sa_len = sizeof(sa);
+	int   ret;
 
+	if (stream->sa_peer_size == 0)
+		acl_vstream_set_peer(stream, "0.0.0.0:0");
+
+	memset(&sa, 0, sizeof(sa));
+	ret = recvfrom(ACL_VSTREAM_SOCK(stream), buf, size, 0,
+		(struct sockaddr*) &sa, &sa_len);
+	if (ret < 0)
+		acl_msg_warn("%s, %s(%d): recvfrom error %s",
+			myname, __FILE__, __LINE__, acl_last_serror());
+	else if (memcmp(stream->sa_peer, &sa, sizeof(sa)) != 0)
+		acl_vstream_set_peer_addr(stream, &sa);
+	return ret;
+}
+
+static int udp_write(ACL_VSTREAM *stream, const void *buf, size_t size,
+	int timeout acl_unused, void *arg acl_unused)
+{
+	const char *myname = "udp_write";
+	int   ret;
+
+	if (stream->sa_peer_len == 0)
+		acl_msg_fatal("%s, %s(%d): peer addr null",
+			myname, __FILE__, __LINE__);
+
+	ret = sendto(ACL_VSTREAM_SOCK(stream), buf, size, 0,
+		(struct sockaddr*) stream->sa_peer, stream->sa_peer_len);
+	if (ret < 0)
+		acl_msg_warn("%s, %s(%d): sendto %s error %s",
+			myname, __FILE__, __LINE__, ACL_VSTREAM_PEER(stream),
+			acl_last_serror());
+	return ret;
+}
+
+ACL_VSTREAM *acl_vstream_bind(const char *addr, int rw_timeout)
+{
+	const char *myname = "acl_vstream_bind";
+	char *buf = acl_mystrdup(addr), addr_buf[256];
+	char *host = NULL, *sport = NULL;
+	const char *ptr;
+	int   port;
+	struct sockaddr_in sa;
+	ACL_VSTREAM *stream;
+	ACL_SOCKET sock;
+
+	ptr = acl_host_port(buf, &host, "", &sport, (char *) 0);
+	if (ptr != NULL) {
+		acl_msg_error("%s(%d): %s, %s invalid",
+			myname, __LINE__, addr, ptr);
+		acl_myfree(buf);
+		return NULL;
+	}
+
+	if (host && *host == 0)
+		host = 0;
+	if (host == NULL)
+		host = "0.0.0.0";
+
+	if (sport == NULL) {
+		acl_msg_error("%s(%d): no port given from addr(%s)",
+			myname, __LINE__, addr);
+		acl_myfree(buf);
+		return NULL;
+	} else
+		port = atoi(sport);
+
+	memset(&sa, 0, sizeof(sa));
+	sa.sin_family = AF_INET;
+	sa.sin_port = htons(port);
+	sa.sin_addr.s_addr = inet_addr(host);
+
+	sock = socket(AF_INET, SOCK_DGRAM, 0);
+	if (sock == ACL_SOCKET_INVALID) {
+		acl_msg_error("%s: socket %s", myname, acl_last_serror());
+		acl_myfree(buf);
+		return NULL;
+	}
+	if (bind(sock, (struct sockaddr *) &sa, sizeof(struct sockaddr)) < 0) {
+		acl_msg_error("%s: bind %s  %s, %s",
+			myname, addr, acl_last_serror(), strerror(errno));
+		acl_socket_close(sock);
+		acl_myfree(buf);
+		return NULL;
+	}
+
+	stream = acl_vstream_fdopen(sock, O_RDWR, 4096, 0, ACL_VSTREAM_TYPE_SOCK);
+	stream->rw_timeout = rw_timeout;
+
+	if (port == 0)
+		acl_getsockname(sock, addr_buf, sizeof(addr_buf));
+	else
+		snprintf(addr_buf, sizeof(addr_buf), "%s:%d", host, port);
+	acl_myfree(buf);
+
+	/* 设置本地绑定地址 */
+	acl_vstream_set_local(stream, addr_buf);
+
+	/* 注册流读写回调函数 */
+	acl_vstream_ctl(stream,
+		ACL_VSTREAM_CTL_READ_FN, udp_read,
+		ACL_VSTREAM_CTL_WRITE_FN, udp_write,
+		ACL_VSTREAM_CTL_CONTEXT, stream->context,
+		ACL_VSTREAM_CTL_END);
+
+	return stream;
+}

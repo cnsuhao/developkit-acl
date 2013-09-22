@@ -32,6 +32,7 @@
 #include "stdlib/acl_mystring.h"
 #include "stdlib/acl_array.h"
 #include "stdlib/acl_iostuff.h"
+#include "net/acl_sane_inet.h"
 #include "stdlib/acl_vstream.h"
 
 #endif
@@ -80,10 +81,14 @@ ACL_VSTREAM acl_vstream_fstd[] = {
 		"\0",                           /* errbuf */
 		0,                              /* errnum */
 		0,                              /* rw_timeout */
-		"\0",                           /* local_addr */
-		"\0",                           /* remote_addr */
-		NULL,                           /* local_saddr */
-		NULL,                           /* remote_saddr */
+		"\0",                           /* addr_local */
+		"\0",                           /* addr_peer */
+		NULL,                           /* sa_local */
+		NULL,                           /* sa_peer */
+		0,                              /* sa_local_size */
+		0,                              /* sa_peer_size */
+		0,                              /* sa_local_len */
+		0,                              /* sa_peer_len */
 		NULL,                           /* path */
 		NULL,                           /* context */
 		NULL,                           /* close_handle_lnk */
@@ -132,10 +137,14 @@ ACL_VSTREAM acl_vstream_fstd[] = {
 		"\0",                           /* errbuf */
 		0,                              /* errnum */
 		0,                              /* rw_timeout */
-		"\0",                           /* local_addr */
-		"\0",                           /* remote_addr */
-		NULL,                           /* local_saddr */
-		NULL,                           /* remote_saddr */
+		"\0",                           /* addr_local */
+		"\0",                           /* addr_peer */
+		NULL,                           /* sa_local */
+		NULL,                           /* sa_peer */
+		0,                              /* sa_local_size */
+		0,                              /* sa_peer_size */
+		0,                              /* sa_local_len */
+		0,                              /* sa_peer_len */
 		NULL,                           /* path */
 		NULL,                           /* context */
 		NULL,                           /* close_handle_lnk */
@@ -183,10 +192,14 @@ ACL_VSTREAM acl_vstream_fstd[] = {
 		"\0",                           /* errbuf */
 		0,                              /* errnum */
 		0,                              /* rw_timeout */
-		"\0",                           /* local_addr */
-		"\0",                           /* remote_addr */
-		NULL,                           /* local_saddr */
-		NULL,                           /* remote_saddr */
+		"\0",                           /* addr_local */
+		"\0",                           /* addr_peer */
+		NULL,                           /* sa_local */
+		NULL,                           /* sa_peer */
+		0,                              /* sa_local_size */
+		0,                              /* sa_peer_size */
+		0,                              /* sa_local_len */
+		0,                              /* sa_peer_len */
 		NULL,                           /* path */
 		NULL,                           /* context */
 		NULL,                           /* close_handle_lnk */
@@ -263,15 +276,15 @@ AGAIN:
 	acl_set_error(0);
 
 	if (stream->type == ACL_VSTREAM_TYPE_FILE) {
-		stream->read_cnt = stream->fread_fn(ACL_VSTREAM_FILE(stream),
-				stream->read_buf, (size_t) stream->read_buf_len,
-				stream->rw_timeout, stream->context);
+		stream->read_cnt = stream->fread_fn(stream, stream->read_buf,
+			(size_t) stream->read_buf_len, stream->rw_timeout,
+			stream->context);
 		if (stream->read_cnt > 0)
 			stream->sys_offset += stream->read_cnt;
 	} else
-		stream->read_cnt = stream->read_fn(ACL_VSTREAM_SOCK(stream),
-				stream->read_buf, (size_t) stream->read_buf_len,
-				stream->rw_timeout, stream->context);
+		stream->read_cnt = stream->read_fn(stream, stream->read_buf,
+			(size_t) stream->read_buf_len, stream->rw_timeout,
+			stream->context);
 	if (stream->read_cnt < 0) {
 		stream->errnum = acl_last_error();
 		if (stream->errnum == ACL_EINTR) {
@@ -1203,7 +1216,7 @@ TAG_AGAIN:
 			stream->offset = stream->sys_offset;
 		}
 
-		n = stream->fwrite_fn(ACL_VSTREAM_FILE(stream), vptr, dlen,
+		n = stream->fwrite_fn(stream, vptr, dlen,
 			stream->rw_timeout, stream->context);
 		if (n > 0) {
 			stream->sys_offset += n;
@@ -1213,7 +1226,7 @@ TAG_AGAIN:
 			stream->read_cnt = 0;
 		}
 	} else
-		n = stream->write_fn(ACL_VSTREAM_SOCK(stream), vptr, dlen,
+		n = stream->write_fn(stream, vptr, dlen,
 			stream->rw_timeout, stream->context);
 	if (n < 0) {
 		if (acl_last_error() == ACL_EINTR) {
@@ -1237,12 +1250,12 @@ TAG_AGAIN:
 }
 
 static int __vstream_sys_writev(ACL_VSTREAM *stream,
-	const struct iovec *vector, int count)
+	const struct iovec *vec, int count)
 {
 	const char *myname = "__vstream_sys_writev";
 	int   n, neintr = 0;
 
-	if (stream == NULL || vector == NULL || count <= 0) {
+	if (stream == NULL || vec == NULL || count <= 0) {
 		acl_msg_error("%s, %s(%d): input invalid",
 			myname, __FILE__, __LINE__);
 		return ACL_VSTREAM_EOF;
@@ -1285,7 +1298,7 @@ TAG_AGAIN:
 			}
 		}
 
-		n = stream->fwritev_fn(ACL_VSTREAM_FILE(stream), vector, count,
+		n = stream->fwritev_fn(stream, vec, count,
 			stream->rw_timeout, stream->context);
 		if (n > 0) {
 			stream->sys_offset += n;
@@ -1295,7 +1308,7 @@ TAG_AGAIN:
 			stream->read_cnt = 0;
 		}
 	} else
-		n = stream->writev_fn(ACL_VSTREAM_SOCK(stream), vector, count,
+		n = stream->writev_fn(stream, vec, count,
 			stream->rw_timeout, stream->context);
 	if (n < 0) {
 		if (acl_last_error() == ACL_EINTR) {
@@ -1327,24 +1340,22 @@ int acl_vstream_write(ACL_VSTREAM *stream, const void *vptr, int dlen)
 	return __vstream_sys_write(stream, vptr, dlen);
 }
 
-int acl_vstream_writev(ACL_VSTREAM *stream,
-	const struct iovec *vector, int count)
+int acl_vstream_writev(ACL_VSTREAM *stream, const struct iovec *vec, int count)
 {
 	if (stream->wbuf_dlen > 0) {
 		if (acl_vstream_fflush(stream) == ACL_VSTREAM_EOF)
 			return ACL_VSTREAM_EOF;
 	}
-	return __vstream_sys_writev(stream, vector, count);
+	return __vstream_sys_writev(stream, vec, count);
 }
 
-int acl_vstream_writevn(ACL_VSTREAM *stream,
-	const struct iovec *vector, int count)
+int acl_vstream_writevn(ACL_VSTREAM *stream, const struct iovec *vec, int count)
 {
 	const char *myname = "acl_vstream_writevn";
 	int   n, i, dlen, k;
 	struct iovec *vect;
 
-	if (count <= 0 || vector == NULL)
+	if (count <= 0 || vec == NULL)
 		acl_msg_fatal("%s, %s(%d): invalid input",
 			myname, __FILE__, __LINE__);
 
@@ -1354,8 +1365,8 @@ int acl_vstream_writevn(ACL_VSTREAM *stream,
 	}
 	vect = (struct iovec*) acl_mycalloc(count, sizeof(struct iovec));
 	for (i = 0; i < count; i++) {
-		vect[i].iov_base = vector[i].iov_base;
-		vect[i].iov_len = vector[i].iov_len;
+		vect[i].iov_base = vec[i].iov_base;
+		vect[i].iov_len = vec[i].iov_len;
 	}
 
 	dlen = 0;
@@ -1388,7 +1399,7 @@ int acl_vstream_writevn(ACL_VSTREAM *stream,
 			return dlen;
 		}
 		count -= k;
-		vector += k;
+		vec += k;
 	}
 }
 
@@ -1699,7 +1710,7 @@ int acl_vstream_fsync(ACL_VSTREAM *fp)
 		return ACL_VSTREAM_EOF;
 	}
 	
-	if (acl_file_fflush(ACL_VSTREAM_FILE(fp)) < 0) {
+	if (acl_file_fflush(fp, fp->context) < 0) {
 		acl_msg_error("%s(%d): fflush to disk error(%s)",
 			myname, __LINE__, acl_last_serror());
 			return ACL_VSTREAM_EOF;
@@ -1863,8 +1874,8 @@ ACL_VSTREAM *acl_vstream_fdopen(ACL_SOCKET fd, unsigned int oflags,
 		stream->close_fn = acl_socket_close;
 	}
 
-	stream->local_addr = __empty_string;
-	stream->remote_addr = __empty_string;
+	stream->addr_local = __empty_string;
+	stream->addr_peer = __empty_string;
 	stream->path = __empty_string;
 
 	stream->close_handle_lnk = acl_array_create(5);
@@ -1885,26 +1896,26 @@ ACL_VSTREAM *acl_vstream_clone(const ACL_VSTREAM *from)
 	memcpy(to->read_buf, from->read_buf, (size_t) to->read_buf_len);
 	to->read_ptr = to->read_buf + (from->read_ptr - from->read_buf);
 
-	if (from->remote_addr && from->remote_addr != __empty_string)
-		to->remote_addr = acl_mystrdup(from->remote_addr);
+	if (from->addr_peer && from->addr_peer != __empty_string)
+		to->addr_peer = acl_mystrdup(from->addr_peer);
 	else
-		to->remote_addr = __empty_string;
+		to->addr_peer = __empty_string;
 
-	if (from->local_addr && from->local_addr != __empty_string)
-		to->local_addr = acl_mystrdup(from->local_addr);
+	if (from->addr_local && from->addr_local != __empty_string)
+		to->addr_local = acl_mystrdup(from->addr_local);
 	else
-		to->local_addr = __empty_string;
+		to->addr_local = __empty_string;
 
-	if (from->remote_saddr) {
-		to->remote_saddr = (struct sockaddr_in*)
+	if (from->sa_peer) {
+		to->sa_peer = (struct sockaddr_in*)
 			acl_mymalloc(sizeof(struct sockaddr_in));
-		memcpy(to->remote_saddr, from->remote_saddr,
+		memcpy(to->sa_peer, from->sa_peer,
 			sizeof(struct sockaddr_in));
 	}
-	if (from->local_saddr) {
-		to->local_saddr = (struct sockaddr_in*)
+	if (from->sa_local) {
+		to->sa_local = (struct sockaddr_in*)
 			acl_mymalloc(sizeof(struct sockaddr_in));
-		memcpy(to->local_saddr, from->local_saddr,
+		memcpy(to->sa_local, from->sa_local,
 			sizeof(struct sockaddr_in));
 	}
 
@@ -2071,8 +2082,8 @@ void acl_vstream_ctl(ACL_VSTREAM *stream, int name,...)
 			break;
 		case ACL_VSTREAM_CTL_PATH:
 			ptr = va_arg(ap, char*);
-			ACL_SAFE_STRNCPY(stream->remote_addr, ptr,
-				sizeof(stream->remote_addr));
+			ACL_SAFE_STRNCPY(stream->addr_peer, ptr,
+				sizeof(stream->addr_peer));
 			break;
 		case ACL_VSTREAM_CTL_FD:
 			ACL_VSTREAM_SOCK(stream) = va_arg(ap, ACL_SOCKET);
@@ -2377,7 +2388,7 @@ acl_int64 acl_vstream_fsize(ACL_VSTREAM *fp)
 		acl_msg_error("%s(%d): not a file stream", myname, __LINE__);
 		return -1;
 	}
-	return acl_file_fsize(ACL_VSTREAM_FILE(fp)) + fp->wbuf_dlen;
+	return acl_file_fsize(fp, fp->context) + fp->wbuf_dlen;
 }
 
 void acl_vstream_reset(ACL_VSTREAM *stream)
@@ -2441,14 +2452,14 @@ void acl_vstream_free(ACL_VSTREAM *stream)
 	if (stream->wbuf != NULL)
 		acl_myfree(stream->wbuf);
 
-	if (stream->remote_addr && stream->remote_addr != __empty_string)
-		acl_myfree(stream->remote_addr);
-	if (stream->local_addr && stream->local_addr != __empty_string)
-		acl_myfree(stream->local_addr);
-	if (stream->remote_saddr)
-		acl_myfree(stream->remote_saddr);
-	if (stream->local_saddr)
-		acl_myfree(stream->local_saddr);
+	if (stream->addr_peer && stream->addr_peer != __empty_string)
+		acl_myfree(stream->addr_peer);
+	if (stream->addr_local && stream->addr_local != __empty_string)
+		acl_myfree(stream->addr_local);
+	if (stream->sa_peer)
+		acl_myfree(stream->sa_peer);
+	if (stream->sa_local)
+		acl_myfree(stream->sa_local);
 	if (stream->path && stream->path != __empty_string)
 		acl_myfree(stream->path);
 
@@ -2539,14 +2550,14 @@ int acl_vstream_close(ACL_VSTREAM *stream)
 	if (stream->wbuf != NULL)
 		acl_myfree(stream->wbuf);
 
-	if (stream->local_addr && stream->local_addr != __empty_string)
-		acl_myfree(stream->local_addr);
-	if (stream->remote_addr && stream->remote_addr != __empty_string)
-		acl_myfree(stream->remote_addr);
-	if (stream->remote_saddr)
-		acl_myfree(stream->remote_saddr);
-	if (stream->local_saddr)
-		acl_myfree(stream->local_saddr);
+	if (stream->addr_local && stream->addr_local != __empty_string)
+		acl_myfree(stream->addr_local);
+	if (stream->addr_peer && stream->addr_peer != __empty_string)
+		acl_myfree(stream->addr_peer);
+	if (stream->sa_peer)
+		acl_myfree(stream->sa_peer);
+	if (stream->sa_local)
+		acl_myfree(stream->sa_local);
 	if (stream->path && stream->path != __empty_string)
 		acl_myfree(stream->path);
 
@@ -2577,36 +2588,96 @@ static void set_sock_addr(struct sockaddr_in *saddr, const char *addr)
 
 void acl_vstream_set_local(ACL_VSTREAM *stream, const char *addr)
 {
-	if (stream->local_addr == __empty_string || stream->local_addr == NULL)
-		stream->local_addr = acl_mystrdup(addr);
+	if (stream->addr_local == __empty_string || stream->addr_local == NULL)
+		stream->addr_local = acl_mystrdup(addr);
 	else {
-		acl_myfree(stream->local_addr);
-		stream->local_addr = acl_mystrdup(addr);
+		acl_myfree(stream->addr_local);
+		stream->addr_local = acl_mystrdup(addr);
 	}
 
-	if (stream->local_saddr == NULL)
-		stream->local_saddr = (struct sockaddr_in*)
-			acl_mycalloc(1, sizeof(struct sockaddr_in));
-	else
-		memset(stream->local_saddr, 0, sizeof(struct sockaddr_in));
-	set_sock_addr(stream->local_saddr, addr);
+	if (stream->sa_local == NULL) {
+		stream->sa_local_size = sizeof(struct sockaddr_in);
+		stream->sa_local = (struct sockaddr_in*)
+			acl_mycalloc(1, stream->sa_local_size);
+	} else
+		memset(stream->sa_local, 0, stream->sa_local_size);
+
+	set_sock_addr(stream->sa_local, addr);
+	stream->sa_local_len = stream->sa_local_size;
 }
 
-void acl_vstream_set_remote(ACL_VSTREAM *stream, const char *addr)
+void acl_vstream_set_local_addr(ACL_VSTREAM *stream, const struct sockaddr_in *sa)
 {
-	if (stream->remote_addr == __empty_string || stream->remote_addr == NULL)
-		stream->remote_addr = acl_mystrdup(addr);
-	else {
-		acl_myfree(stream->remote_addr);
-		stream->remote_addr = acl_mystrdup(addr);
+	int   port;
+	char  ip[64], addr[64];
+
+	if (stream->sa_local == NULL) {
+		stream->sa_local_size = sizeof(struct sockaddr_in);
+		stream->sa_local = (struct sockaddr_in*)
+			acl_mymalloc(stream->sa_local_size);
 	}
 
-	if (stream->remote_saddr == NULL)
-		stream->remote_saddr = (struct sockaddr_in*)
-			acl_mycalloc(1, sizeof(struct sockaddr_in));
-	else
-		memset(stream->remote_saddr, 0, sizeof(struct sockaddr_in));
-	set_sock_addr(stream->remote_saddr, addr);
+	memcpy(stream->sa_local, sa, stream->sa_local_size);
+	stream->sa_local_len = stream->sa_local_size;
+
+	ip[0] = 0;
+	acl_inet_ntoa(sa->sin_addr, ip, sizeof(ip));
+	port = ntohs(sa->sin_port);
+	snprintf(addr, sizeof(addr), "%s:%d", ip, port);
+
+	if (stream->addr_local == __empty_string || stream->addr_local == NULL)
+		stream->addr_local = acl_mystrdup(addr);
+	else {
+		acl_myfree(stream->addr_local);
+		stream->addr_local = acl_mystrdup(addr);
+	}
+}
+
+void acl_vstream_set_peer(ACL_VSTREAM *stream, const char *addr)
+{
+	if (stream->addr_peer == __empty_string || stream->addr_peer == NULL)
+		stream->addr_peer = acl_mystrdup(addr);
+	else {
+		acl_myfree(stream->addr_peer);
+		stream->addr_peer = acl_mystrdup(addr);
+	}
+
+	if (stream->sa_peer == NULL) {
+		stream->sa_peer_size = sizeof(struct sockaddr_in);
+		stream->sa_peer = (struct sockaddr_in*)
+			acl_mycalloc(1, stream->sa_peer_size);
+	} else
+		memset(stream->sa_peer, 0, stream->sa_peer_size);
+
+	set_sock_addr(stream->sa_peer, addr);
+	stream->sa_peer_len = stream->sa_peer_size;
+}
+
+void acl_vstream_set_peer_addr(ACL_VSTREAM *stream, const struct sockaddr_in *sa)
+{
+	int   port;
+	char  ip[64], addr[64];
+
+	if (stream->sa_peer == NULL) {
+		stream->sa_peer_size = sizeof(struct sockaddr_in);
+		stream->sa_peer = (struct sockaddr_in*)
+			acl_mymalloc(stream->sa_peer_size);
+	}
+
+	memcpy(stream->sa_peer, sa, stream->sa_peer_size);
+	stream->sa_peer_len = stream->sa_peer_size;
+
+	ip[0] = 0;
+	acl_inet_ntoa(sa->sin_addr, ip, sizeof(ip));
+	port = ntohs(sa->sin_port);
+	snprintf(addr, sizeof(addr), "%s:%d", ip, port);
+
+	if (stream->addr_peer == __empty_string || stream->addr_peer == NULL)
+		stream->addr_peer = acl_mystrdup(addr);
+	else {
+		acl_myfree(stream->addr_peer);
+		stream->addr_peer = acl_mystrdup(addr);
+	}
 }
 
 void acl_vstream_set_path(ACL_VSTREAM *stream, const char *path)

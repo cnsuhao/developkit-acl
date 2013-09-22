@@ -70,6 +70,8 @@ all:
 	@(cd smtp_client; make)
 	@(cd vstream_popen3; make)
 	@(cd mkdir; make)
+	@(cd udp_client; make)
+	@(cd udp_server; make)
 clean:
 	@(cd master; make clean)
 	@(cd dlink; make clean)
@@ -141,4 +143,6 @@ clean:
 	@(cd gc; make clean)
 	@(cd smtp_client; make clean)
 	@(cd vstream_popen3; make clean)
-	@(cd mkdir; make clean)
+	@(cd mkdir; make clean clean)
+	@(cd udp_client; make clean)
+	@(cd udp_server; make)

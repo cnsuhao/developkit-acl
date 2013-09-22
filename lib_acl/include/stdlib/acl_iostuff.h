@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include "acl_define.h"
+#include "acl_vstream.h"
 
 #define ACL_CLOSE_ON_EXEC   1  /**< 标志位, 调用 exec 后自动关闭打开的描述字 */
 #define ACL_PASS_ON_EXEC    0
@@ -23,7 +24,7 @@ ACL_API int acl_non_blocking(ACL_SOCKET fd, int on);
 
 /**
  * 写等待操作，直到套接字可写、出错或超时
- * @param fd {ACL_SOCKET} SOCKET 套接字
+ * @param fd {ACL_SOCKET} 描述符
  * @param timeout {int} 超时时间，单位为秒，该值分下面三种情形：
  *  > 0  : 表示最大超时时间的秒数，
  *  == 0 : 表示不等待，检测完后立即返回
@@ -34,7 +35,7 @@ ACL_API int acl_write_wait(ACL_SOCKET fd, int timeout);
 
 /**
  * 读等待操作，直到套接字有数据可读、出错或超时
- * @param fd {ACL_SOCKET} SOCKET 套接字
+ * @param fd {ACL_SOCKET} 描述符
  * @param timeout {int} 超时时间，单位为秒，该值分下面三种情形：
  *  > 0  : 表示最大超时时间的秒数，
  *  == 0 : 表示不等待，检测完后立即返回
@@ -58,7 +59,7 @@ ACL_API int acl_readable(ACL_SOCKET fd);
 
 /**
  * 超时读数据
- * @param fd {ACL_SOCKET} 描述符
+ * @param stream {ACL_VSTREAM*} 网络流
  * @param buf {void*} 存储区，不能为空
  * @param len {unsigned} buf 存储区大小
  * @param timeout {int} 超时时间，单位为秒，该值分下面三种情形：
@@ -67,12 +68,12 @@ ACL_API int acl_readable(ACL_SOCKET fd);
  *  < 0  : 时表示直接该套接字可读或出错为止
  * @return {int} > 0 读的数据; -1: 出错
 */
-ACL_API int acl_timed_read(ACL_SOCKET fd, void *buf, unsigned len,
+ACL_API int acl_timed_read(ACL_VSTREAM *stream, void *buf, unsigned len,
 	int timeout, void *unused_context);
 
 /**
  * 超时写数据
- * @param fd {ACL_SOCKET} 描述符
+ * @param stream {ACL_VSTREAM*} 网络流
  * @param buf {void*} 数据存储区，不能为空
  * @param len {unsigned} 数据长度大小
  * @param timeout {int} 超时时间，单位为秒，该值分下面三种情形：
@@ -81,18 +82,18 @@ ACL_API int acl_timed_read(ACL_SOCKET fd, void *buf, unsigned len,
  *  < 0  : 时表示直接该套接字可读或出错为止
  * @return {int} > 0 成功写入的数据; -1: 出错
  */
-ACL_API int acl_timed_write(ACL_SOCKET fd, void *buf, unsigned len,
+ACL_API int acl_timed_write(ACL_VSTREAM *stream, void *buf, unsigned len,
 	int timeout, void *unused_context);
 
 /**
 * 向文件描述符中循环写入数据，直到写完、出错或超时为止
-* @param fd {ACL_SOCKET} 文件描述符
+ * @param stream {ACL_VSTREAM*} 网络流
 * @param buf {void*} 数据存储区，不能为空
 * @param len {unsigned} 数据长度大小
 * @param timeout {int} 超时时间，单位为秒
 * @param {int} 成功写入的长度
 */
-ACL_API int acl_write_buf(ACL_SOCKET fd, const char *buf, int len, int timeout);
+ACL_API int acl_write_buf(ACL_VSTREAM *stream, const char *buf, int len, int timeout);
 
 /**
 * 探测套接字中系统缓存区的数据长度
