@@ -2,18 +2,18 @@
 #include "icmp_struct.h"
 #include "icmp_private.h"
 
-static int icmp_read(ACL_VSTREAM *stream, void *buf, size_t size,
-	int timeout acl_unused, void *arg)
+static int icmp_read(ACL_SOCKET fd, void *buf, size_t size,
+	int timeout acl_unused, ACL_VSTREAM *stream acl_unused, void *arg)
 {
 	ICMP_STREAM *is = (ICMP_STREAM*) arg;
 	int   ret;
 
 #ifdef ACL_UNIX
-	ret = recvfrom(ACL_VSTREAM_SOCK(stream), buf, size, 0,
-		(struct sockaddr*) &is->from, (socklen_t*) &is->from_len);
+	ret = recvfrom(fd, buf, size, 0, (struct sockaddr*) &is->from,
+			(socklen_t*) &is->from_len);
 #elif defined(WIN32)
-	ret = recvfrom(ACL_VSTREAM_SOCK(stream), (char*) buf, (int) size,
-		0, (struct sockaddr*) &is->from, &is->from_len);
+	ret = recvfrom(fd, (char*) buf, (int) size, 0,
+			(struct sockaddr*) &is->from, &is->from_len);
 #else
 #error "unknown OS"
 #endif
@@ -23,18 +23,17 @@ static int icmp_read(ACL_VSTREAM *stream, void *buf, size_t size,
 	return (ret);
 }
 
-static int icmp_write(ACL_VSTREAM *stream, const void *buf, size_t size,
-	int timeout acl_unused, void *arg)
+static int icmp_write(ACL_SOCKET fd, const void *buf, size_t size,
+	int timeout acl_unused, ACL_VSTREAM *stream acl_unused, void *arg)
 {
 	ICMP_STREAM *is = (ICMP_STREAM*) arg;
 	int   ret;
 
 #ifdef ACL_UNIX
-	ret = sendto(ACL_VSTREAM_SOCK(stream), buf, size, 0,
-		(struct sockaddr*) &is->curr_host->dest,
+	ret = sendto(fd, buf, size, 0, (struct sockaddr*) &is->curr_host->dest,
 		sizeof(is->curr_host->dest));
 #elif defined(WIN32)
-	ret = sendto(ACL_VSTREAM_SOCK(stream), (const char*) buf, (int) size, 0,
+	ret = sendto(fd, (const char*) buf, (int) size, 0,
 		(struct sockaddr*) &is->curr_host->dest,
 		sizeof(is->curr_host->dest));
 #else
