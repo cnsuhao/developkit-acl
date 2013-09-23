@@ -276,15 +276,15 @@ AGAIN:
 	acl_set_error(0);
 
 	if (stream->type == ACL_VSTREAM_TYPE_FILE) {
-		stream->read_cnt = stream->fread_fn(stream, stream->read_buf,
-			(size_t) stream->read_buf_len, stream->rw_timeout,
-			stream->context);
+		stream->read_cnt = stream->fread_fn(ACL_VSTREAM_FILE(stream),
+			stream->read_buf, (size_t) stream->read_buf_len,
+			stream->rw_timeout, stream, stream->context);
 		if (stream->read_cnt > 0)
 			stream->sys_offset += stream->read_cnt;
 	} else
-		stream->read_cnt = stream->read_fn(stream, stream->read_buf,
-			(size_t) stream->read_buf_len, stream->rw_timeout,
-			stream->context);
+		stream->read_cnt = stream->read_fn(ACL_VSTREAM_SOCK(stream),
+			stream->read_buf, (size_t) stream->read_buf_len,
+			stream->rw_timeout, stream, stream->context);
 	if (stream->read_cnt < 0) {
 		stream->errnum = acl_last_error();
 		if (stream->errnum == ACL_EINTR) {
@@ -1216,8 +1216,8 @@ TAG_AGAIN:
 			stream->offset = stream->sys_offset;
 		}
 
-		n = stream->fwrite_fn(stream, vptr, dlen,
-			stream->rw_timeout, stream->context);
+		n = stream->fwrite_fn(ACL_VSTREAM_FILE(stream), vptr, dlen,
+			stream->rw_timeout, stream, stream->context);
 		if (n > 0) {
 			stream->sys_offset += n;
 			stream->offset = stream->sys_offset;
@@ -1226,8 +1226,8 @@ TAG_AGAIN:
 			stream->read_cnt = 0;
 		}
 	} else
-		n = stream->write_fn(stream, vptr, dlen,
-			stream->rw_timeout, stream->context);
+		n = stream->write_fn(ACL_VSTREAM_SOCK(stream), vptr, dlen,
+			stream->rw_timeout, stream, stream->context);
 	if (n < 0) {
 		if (acl_last_error() == ACL_EINTR) {
 			if (++neintr >= 5)
@@ -1298,8 +1298,8 @@ TAG_AGAIN:
 			}
 		}
 
-		n = stream->fwritev_fn(stream, vec, count,
-			stream->rw_timeout, stream->context);
+		n = stream->fwritev_fn(ACL_VSTREAM_FILE(stream), vec, count,
+			stream->rw_timeout, stream, stream->context);
 		if (n > 0) {
 			stream->sys_offset += n;
 			stream->offset = stream->sys_offset;
@@ -1308,8 +1308,8 @@ TAG_AGAIN:
 			stream->read_cnt = 0;
 		}
 	} else
-		n = stream->writev_fn(stream, vec, count,
-			stream->rw_timeout, stream->context);
+		n = stream->writev_fn(ACL_VSTREAM_SOCK(stream), vec, count,
+			stream->rw_timeout, stream, stream->context);
 	if (n < 0) {
 		if (acl_last_error() == ACL_EINTR) {
 			if (++neintr >= 5)
@@ -1710,7 +1710,7 @@ int acl_vstream_fsync(ACL_VSTREAM *fp)
 		return ACL_VSTREAM_EOF;
 	}
 	
-	if (acl_file_fflush(fp, fp->context) < 0) {
+	if (acl_file_fflush(ACL_VSTREAM_FILE(fp), fp, fp->context) < 0) {
 		acl_msg_error("%s(%d): fflush to disk error(%s)",
 			myname, __LINE__, acl_last_serror());
 			return ACL_VSTREAM_EOF;
@@ -2388,7 +2388,8 @@ acl_int64 acl_vstream_fsize(ACL_VSTREAM *fp)
 		acl_msg_error("%s(%d): not a file stream", myname, __LINE__);
 		return -1;
 	}
-	return acl_file_fsize(fp, fp->context) + fp->wbuf_dlen;
+	return acl_file_fsize(ACL_VSTREAM_FILE(fp), fp, fp->context)
+		+ fp->wbuf_dlen;
 }
 
 void acl_vstream_reset(ACL_VSTREAM *stream)

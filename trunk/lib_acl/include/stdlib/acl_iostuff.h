@@ -59,7 +59,7 @@ ACL_API int acl_readable(ACL_SOCKET fd);
 
 /**
  * 超时读数据
- * @param stream {ACL_VSTREAM*} 网络流
+ * @param fd {ACL_SOCKET} 网络套接字
  * @param buf {void*} 存储区，不能为空
  * @param len {unsigned} buf 存储区大小
  * @param timeout {int} 超时时间，单位为秒，该值分下面三种情形：
@@ -68,12 +68,12 @@ ACL_API int acl_readable(ACL_SOCKET fd);
  *  < 0  : 时表示直接该套接字可读或出错为止
  * @return {int} > 0 读的数据; -1: 出错
 */
-ACL_API int acl_timed_read(ACL_VSTREAM *stream, void *buf, unsigned len,
+ACL_API int acl_timed_read(ACL_SOCKET fd, void *buf, unsigned len,
 	int timeout, void *unused_context);
 
 /**
  * 超时写数据
- * @param stream {ACL_VSTREAM*} 网络流
+ * @param fd {ACL_SOCKET} 网络套接字
  * @param buf {void*} 数据存储区，不能为空
  * @param len {unsigned} 数据长度大小
  * @param timeout {int} 超时时间，单位为秒，该值分下面三种情形：
@@ -82,24 +82,24 @@ ACL_API int acl_timed_read(ACL_VSTREAM *stream, void *buf, unsigned len,
  *  < 0  : 时表示直接该套接字可读或出错为止
  * @return {int} > 0 成功写入的数据; -1: 出错
  */
-ACL_API int acl_timed_write(ACL_VSTREAM *stream, void *buf, unsigned len,
+ACL_API int acl_timed_write(ACL_SOCKET fd, void *buf, unsigned len,
 	int timeout, void *unused_context);
 
 /**
-* 向文件描述符中循环写入数据，直到写完、出错或超时为止
- * @param stream {ACL_VSTREAM*} 网络流
-* @param buf {void*} 数据存储区，不能为空
-* @param len {unsigned} 数据长度大小
-* @param timeout {int} 超时时间，单位为秒
-* @param {int} 成功写入的长度
-*/
-ACL_API int acl_write_buf(ACL_VSTREAM *stream, const char *buf, int len, int timeout);
+ * 向描述符中循环写入数据，直到写完、出错或超时为止
+ * @param fd {ACL_SOCKET} 网络套接字
+ * @param buf {void*} 数据存储区，不能为空
+ * @param len {unsigned} 数据长度大小
+ * @param timeout {int} 超时时间，单位为秒
+ * @param {int} 成功写入的长度
+ */
+ACL_API int acl_write_buf(ACL_SOCKET fd, const char *buf, int len, int timeout);
 
 /**
-* 探测套接字中系统缓存区的数据长度
-* @param fd {ACL_SOCKET} 描述符
-* @return {int} 系统缓存区数据长度
-*/
+ * 探测套接字中系统缓存区的数据长度
+ * @param fd {ACL_SOCKET} 描述符
+ * @return {int} 系统缓存区数据长度
+ */
 ACL_API int acl_peekfd(ACL_SOCKET fd);
 
 /**

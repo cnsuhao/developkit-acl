@@ -123,18 +123,20 @@ AGAIN:
 	acl_set_error(0);
 
 	if (stream->type == ACL_VSTREAM_TYPE_FILE) {
-		stream->read_cnt = stream->fread_fn(stream,
+		stream->read_cnt = stream->fread_fn(ACL_VSTREAM_FILE(stream),
 					stream->read_buf,
 					(size_t) stream->read_buf_len,
 					stream->rw_timeout,
+					stream,
 					stream->context);
 		if (stream->read_cnt > 0)
 			stream->sys_offset += stream->read_cnt;
 	} else
-		stream->read_cnt = stream->read_fn(stream,
+		stream->read_cnt = stream->read_fn(ACL_VSTREAM_SOCK(stream),
 					stream->read_buf,
 					(size_t) stream->read_buf_len,
 					stream->rw_timeout,
+					stream,
 					stream->context);
 	if (stream->read_cnt < 0) {
 		stream->errnum = acl_last_error();
@@ -401,16 +403,16 @@ TAG_AGAIN:
 			stream->offset = stream->sys_offset;
 		}
 
-		n = stream->fwrite_fn(stream, vptr, dlen,
-				stream->rw_timeout, stream->context);
+		n = stream->fwrite_fn(ACL_VSTREAM_FILE(stream), vptr, dlen,
+				stream->rw_timeout, stream, stream->context);
 		if (n > 0) {
 			stream->sys_offset += n;
 			stream->offset = stream->sys_offset;
 			stream->read_cnt = 0;  /* 防止缓冲区内的数据与实际不一致, 仅对文件IO有效 */
 		}
 	} else
-		n = stream->write_fn(stream, vptr, dlen,
-				stream->rw_timeout, stream->context);
+		n = stream->write_fn(ACL_VSTREAM_SOCK(stream), vptr, dlen,
+				stream->rw_timeout, stream, stream->context);
 	if (n < 0) {
 		if (acl_last_error() == ACL_EINTR) {
 			if (++neintr >= 5)

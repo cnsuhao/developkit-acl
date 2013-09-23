@@ -69,10 +69,10 @@ private:
 	static int __sock_read(void *ctx, unsigned char *buf, size_t len);
 	static int __sock_send(void *ctx, const unsigned char *buf, size_t len);
 
-	static int __ssl_read(ACL_VSTREAM* stream, void *buf, size_t len,
-		int timeout, void *ctx);
-	static int __ssl_send(ACL_VSTREAM* stream, const void *buf, size_t len,
-		int timeout, void *ctx);
+	static int __ssl_read(ACL_SOCKET fd, void *buf, size_t len,
+		int timeout, ACL_VSTREAM* stream, void *ctx);
+	static int __ssl_send(ACL_SOCKET fd, const void *buf, size_t len,
+		int timeout, ACL_VSTREAM* stream, void *ctx);
 
 	void clear(void);
 };

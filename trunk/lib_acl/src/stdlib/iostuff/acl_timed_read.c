@@ -25,7 +25,7 @@
 
 /* acl_timed_read - read with deadline */
 
-int acl_timed_read(ACL_VSTREAM *stream, void *buf, unsigned len,
+int acl_timed_read(ACL_SOCKET fd, void *buf, unsigned len,
 	int timeout, void *unused_context acl_unused)
 {
 	int     ret;
@@ -39,11 +39,11 @@ int acl_timed_read(ACL_VSTREAM *stream, void *buf, unsigned len,
 	 */
 	for (;;) {
 		if (timeout > 0 &&
-			acl_read_wait(ACL_VSTREAM_SOCK(stream), timeout) < 0)
+			acl_read_wait(fd, timeout) < 0)
 		{
 			return -1;
 		}
-		ret = acl_socket_read(stream, buf, len, 0, NULL);
+		ret = acl_socket_read(fd, buf, len, 0, NULL, NULL);
 		if (ret < 0 && timeout > 0 && acl_last_error() == ACL_EAGAIN) {
 			acl_msg_warn("read() returns EAGAIN on"
 				" a readable file descriptor!");

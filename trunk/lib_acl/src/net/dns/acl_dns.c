@@ -44,8 +44,8 @@ static void dns_stream_open(ACL_DNS *dns);
 
 /* ACL_VSTREAM: 从数据流读取数据的回调函数 */
 
-static int dns_read(ACL_VSTREAM *stream, void *buf, size_t size,
-	int timeout acl_unused, void *arg)
+static int dns_read(ACL_SOCKET fd, void *buf, size_t size,
+	int timeout acl_unused, ACL_VSTREAM *stream acl_unused, void *arg)
 {       
 	const char *myname = "dns_read";
 	ACL_DNS *dns = (ACL_DNS*) arg;
@@ -53,11 +53,11 @@ static int dns_read(ACL_VSTREAM *stream, void *buf, size_t size,
 
 	dns->addr_from.addr_len = sizeof(dns->addr_from.addr);
 #ifdef ACL_UNIX
-	ret = recvfrom(ACL_VSTREAM_SOCK(stream), buf, size, 0,
+	ret = recvfrom(fd, buf, size, 0,
 			(struct sockaddr*) &dns->addr_from.addr,
 			(socklen_t*) &dns->addr_from.addr_len);
 #elif defined(ACL_MS_WINDOWS)
-	ret = recvfrom(ACL_VSTREAM_SOCK(stream), (char*) buf, (int) size, 0,
+	ret = recvfrom(fd, (char*) buf, (int) size, 0,
 			(struct sockaddr*) &dns->addr_from.addr,
 			&dns->addr_from.addr_len);
 #else   
@@ -71,8 +71,8 @@ static int dns_read(ACL_VSTREAM *stream, void *buf, size_t size,
 
 /* ACL_VSTREAM: 向数据流写取数据的回调函数 */
 
-static int dns_write(ACL_VSTREAM *stream, const void *buf, size_t size,
-	int timeout acl_unused, void *arg)
+static int dns_write(ACL_SOCKET fd, const void *buf, size_t size,
+	int timeout acl_unused, ACL_VSTREAM *stream acl_unused, void *arg)
 {       
 	const char *myname = "dns_write";
 	ACL_DNS *dns = (ACL_DNS*) arg;
@@ -92,10 +92,10 @@ static int dns_write(ACL_VSTREAM *stream, const void *buf, size_t size,
 			myname, __LINE__, i);
 
 #ifdef ACL_UNIX 
-	ret = sendto(ACL_VSTREAM_SOCK(stream), buf, size, 0,
+	ret = sendto(fd, buf, size, 0,
 			(struct sockaddr*) &addr->addr, addr->addr_len);
 #elif defined(ACL_MS_WINDOWS)
-	ret = sendto(ACL_VSTREAM_SOCK(stream), (const char*) buf, (int) size,
+	ret = sendto(fd, (const char*) buf, (int) size,
 			0, (struct sockaddr*) &addr->addr, addr->addr_len);
 #else
 #error  "unknown OS"

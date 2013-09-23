@@ -218,7 +218,8 @@ int ssl_aio_stream::__sock_read(void *ctx, unsigned char *buf, size_t len)
 	acl_assert(stream);
 	int   ret, errnum;
 
-	if ((ret = acl_socket_read(stream, buf, len, 0, NULL)) < 0)
+	if ((ret = acl_socket_read(ACL_VSTREAM_SOCK(stream), buf, len,
+		0, stream, NULL)) < 0)
 	{
 		errnum = acl_last_error();
 		if (errnum == ACL_EINTR)
@@ -252,7 +253,8 @@ int ssl_aio_stream::__sock_send(void *ctx, const unsigned char *buf, size_t len)
 	acl_assert(stream);
 	int   ret, errnum;
 
-	if ((ret = acl_socket_write(stream, buf, len, 0, NULL)) < 0)
+	if ((ret = acl_socket_write(ACL_VSTREAM_SOCK(stream), buf, len,
+		0, stream, NULL)) < 0)
 	{
 		errnum = acl_last_error();
 		if (errnum == ACL_EINTR)
@@ -279,8 +281,8 @@ int ssl_aio_stream::__sock_send(void *ctx, const unsigned char *buf, size_t len)
 #endif
 }
 
-int ssl_aio_stream::__ssl_read(ACL_VSTREAM*, void *buf,
-	size_t len, int, void *ctx)
+int ssl_aio_stream::__ssl_read(ACL_SOCKET, void *buf, size_t len,
+	int, ACL_VSTREAM*, void *ctx)
 {
 #ifdef HAS_POLARSSL
 	ssl_aio_stream* cli = (ssl_aio_stream*) ctx;
@@ -305,8 +307,8 @@ int ssl_aio_stream::__ssl_read(ACL_VSTREAM*, void *buf,
 #endif
 }
 
-int ssl_aio_stream::__ssl_send(ACL_VSTREAM*, const void *buf,
-	size_t len, int, void *ctx)
+int ssl_aio_stream::__ssl_send(ACL_SOCKET, const void *buf, size_t len,
+	int, ACL_VSTREAM*, void *ctx)
 {
 #ifdef HAS_POLARSSL
 	ssl_aio_stream* cli = (ssl_aio_stream*) ctx;
