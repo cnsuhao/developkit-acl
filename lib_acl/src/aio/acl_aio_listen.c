@@ -108,7 +108,7 @@ static void __listen_notify_callback(int event_type, void *context)
 
 void acl_aio_listen(ACL_ASTREAM *astream)
 {
-	char  myname[] = "acl_aio_listen";
+	const char *myname = "acl_aio_listen";
 
 	if (astream == NULL)
 		acl_msg_fatal("%s: input invalid", myname);

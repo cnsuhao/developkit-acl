@@ -27,7 +27,6 @@
 #include "stdlib/acl_mystring.h"
 #include "stdlib/acl_sys_patch.h"
 #include "stdlib/acl_loadcfg.h"
-#include "stdlib/acl_vstream.h"
 
 #endif
 
@@ -37,18 +36,18 @@ struct ACL_CFG_PARSER {
 	int    valid_line;
 };
 
-static int _cfg_file_load(ACL_VSTREAM *fp, char *buf, int bsize)
+static int _cfg_file_load(ACL_FILE_HANDLE filefd, char *buf, int bsize)
 {
 	char *ptr;
 	int   n, len;
 
-	if (fp == NULL || buf == NULL || bsize < 1)
+	if (filefd < 0 || buf == NULL || bsize < 1)
 		return (-1);
 	ptr = buf;
 	len = 0;
 	bsize--;  /* make one byte room for '\0' */
 	while (1) {
-		n = acl_file_read(fp, ptr, bsize, 0, NULL);
+		n = acl_file_read(filefd, ptr, bsize, 0, NULL, NULL);
 		if (n < 0)  /* read error */
 			return (-1);
 		else if (n == 0)  /* read over */
@@ -69,7 +68,7 @@ static int _cfg_file_load(ACL_VSTREAM *fp, char *buf, int bsize)
 
 static ACL_CFG_LINE *_backup_junk_line(const char *ptr)
 {
-	const char *myname = "_backup_junk_line";
+	char  myname[] = "_backup_junk_line";
 	ACL_CFG_LINE *cfg_line;
 	char  tbuf[256];
 
@@ -108,8 +107,8 @@ static ACL_CFG_LINE *_create_cfg_line(char *data, const char *delimiter)
 		acl_array_destroy(a, acl_myfree_fn);                         \
 	if (cfg_line) {                                                      \
 		if (cfg_line->value)                                         \
-			acl_myfree(cfg_line);                                \
-		acl_myfree(cfg_line);                                        \
+			acl_myfree(cfg_line);                                    \
+		acl_myfree(cfg_line);                                            \
 	}                                                                    \
 	return (x);                                                          \
 } while (0);
@@ -174,15 +173,15 @@ ACL_CFG_PARSER *acl_cfg_parser_load(const char *pathname, const char *delimiter)
 	int   buf_size;
 	char *content_buf = NULL, *ptr;
 	char *pline_begin;
-	ACL_VSTREAM *fp = NULL;
+	ACL_FILE_HANDLE   filefd = ACL_FILE_INVALID;
 	char  tbuf[256];
 	
 #undef	ERETURN
 #define	ERETURN(x) do { \
 	if (content_buf != NULL) \
 		acl_myfree(content_buf); \
-	if (fp != NULL) \
-		acl_vstream_fclose(fp); \
+	if (filefd != ACL_FILE_INVALID) \
+		acl_file_close(filefd); \
 	if (parser != NULL) { \
 		acl_array_destroy(parser->_cfg_array, NULL); \
 		acl_myfree(parser); \
@@ -194,8 +193,8 @@ ACL_CFG_PARSER *acl_cfg_parser_load(const char *pathname, const char *delimiter)
 #define	RETURN(x) do { \
 	if (content_buf != NULL) \
 		acl_myfree(content_buf); \
-	if (fp != NULL) \
-		acl_vstream_fclose(fp); \
+	if (filefd != ACL_FILE_INVALID) \
+		acl_file_close(filefd); \
 	return (x); \
 } while (0);
 
@@ -234,15 +233,22 @@ ACL_CFG_PARSER *acl_cfg_parser_load(const char *pathname, const char *delimiter)
 		ERETURN (NULL);
 	}
 	
-	fp = acl_vstream_fopen(pathname, O_RDONLY, 0600, 8192);
-	if (fp == NULL) {
+#ifdef ACL_UNIX
+	filefd = acl_file_open(pathname, O_RDWR, S_IREAD | S_IWRITE | S_IRGRP);
+#elif defined(ACL_MS_WINDOWS)
+	filefd = acl_file_open(pathname, O_RDWR, S_IREAD | S_IWRITE);
+#else
+# error "unknown OS"
+#endif
+
+	if (filefd == ACL_FILE_INVALID) {
 		printf("%s: can't open, pathname=%s, errmsg=%s\n",
 			myname, pathname, acl_last_strerror(tbuf, sizeof(tbuf)));
 
 		ERETURN (NULL);
 	}
 
-	if (_cfg_file_load(fp, content_buf, buf_size) < 0) {
+	if (_cfg_file_load(filefd, content_buf, buf_size) < 0) {
 		printf("%s: can't read, pathname=%s, errmsg=%s\n",
 			myname, pathname, acl_last_strerror(tbuf, sizeof(tbuf)));
 		ERETURN (NULL);
@@ -481,9 +487,9 @@ int acl_cfg_parser_size(const ACL_CFG_PARSER *parser)
 	return (parser->total_line);
 }
 
-static int _cfg_line_dump(ACL_VSTREAM *fp, const ACL_CFG_LINE *cfg_line, const char *delimiter)
+static int _cfg_line_dump(ACL_FILE_HANDLE filefd, const ACL_CFG_LINE *cfg_line, const char *delimiter)
 {
-	const char *myname = "_cfg_line_dump";
+	char  myname[] = "_cfg_line_dump";
 	char *pbuf, *ptr;
 	int   dlen = 0, i, j,  n;
 	char  tbuf[256];
@@ -514,7 +520,7 @@ static int _cfg_line_dump(ACL_VSTREAM *fp, const ACL_CFG_LINE *cfg_line, const c
 		}
 		ptr = ptr + strlen(ptr);
 		strcat(ptr, "\n\0");
-		i = acl_file_write(fp, pbuf, strlen(pbuf), 0, NULL);
+		i = acl_file_write(filefd, pbuf, strlen(pbuf), 0, NULL, NULL);
 		if (i <= 0) {
 			printf("%s: can't write pbuf, error=%s\n",
 				myname, acl_last_strerror(tbuf, sizeof(tbuf)));
@@ -527,7 +533,7 @@ static int _cfg_line_dump(ACL_VSTREAM *fp, const ACL_CFG_LINE *cfg_line, const c
 		if (pbuf == NULL)
 			return (-1);
 		sprintf(pbuf, "%s\n", cfg_line->pdata);
-		i = acl_file_write(fp, pbuf, strlen(pbuf), 0, NULL);
+		i = acl_file_write(filefd, pbuf, strlen(pbuf), 0, NULL, NULL);
 		if (i <= 0)
 			return (-1);
 	}
@@ -535,35 +541,37 @@ static int _cfg_line_dump(ACL_VSTREAM *fp, const ACL_CFG_LINE *cfg_line, const c
 	return (0);
 }
 
-int acl_cfg_parser_dump(const ACL_CFG_PARSER *parser, const char *pathname,
-	const char *delimiter)
+int acl_cfg_parser_dump(const ACL_CFG_PARSER *parser,
+			const char *pathname,
+			const char *delimiter)
 {
-	const char *myname = "acl_cfg_parser_dump";
+	char  myname[] = "acl_cfg_parser_dump";
 	ACL_CFG_LINE *cfg_line;
-	ACL_VSTREAM *fp = NULL;
+	ACL_FILE_HANDLE filefd = ACL_FILE_INVALID;
 	int   i, n, ret;
 	char  tbuf[256];
 
 #undef	RETURN
 #define	RETURN(x) do { \
-	if (fp != NULL) \
-		acl_vstream_fclose(fp); \
+	if (filefd != ACL_FILE_INVALID) \
+		acl_file_close(filefd); \
 	return (x); \
 } while (0);
 
 	if (parser == NULL || pathname == NULL || *pathname == 0)
 		return (-1);
-
 #ifdef ACL_UNIX
-	fp = acl_vstream_fopen(pathname, O_CREAT | O_TRUNC | O_APPEND | O_WRONLY,
-		S_IREAD | S_IWRITE | S_IRGRP, 8192);
+	filefd = acl_file_open(pathname,
+			O_CREAT | O_TRUNC | O_APPEND | O_WRONLY,
+			S_IREAD | S_IWRITE | S_IRGRP);
 #elif defined(ACL_MS_WINDOWS)
-	fp = acl_vstream_fopen(pathname, O_CREAT | O_TRUNC | O_APPEND | O_WRONLY,
-		S_IREAD | S_IWRITE, 8192);
+	filefd = acl_file_open(pathname,
+		O_CREAT | O_TRUNC | O_APPEND | O_WRONLY,
+		S_IREAD | S_IWRITE);
 #else
 # error "unknown OS"
 #endif
-	if (fp == NULL) {
+	if (filefd == ACL_FILE_INVALID) {
 		printf("%s: can't open, pathname=%s, errmsg=%s\n",
 			myname, pathname, acl_last_strerror(tbuf, sizeof(tbuf)));
 		RETURN(-1);
@@ -575,7 +583,7 @@ int acl_cfg_parser_dump(const ACL_CFG_PARSER *parser, const char *pathname,
 			acl_array_index(parser->_cfg_array, i);
 		if (cfg_line == NULL)
 			break;
-		ret = _cfg_line_dump(fp, cfg_line, delimiter);
+		ret = _cfg_line_dump(filefd, cfg_line, delimiter);
 		if (ret < 0) {
 			RETURN (-1);
 		}
@@ -589,7 +597,7 @@ int acl_cfg_parser_dump(const ACL_CFG_PARSER *parser, const char *pathname,
 
 int acl_cfg_parser_append(ACL_CFG_PARSER *parser, ACL_CFG_LINE *cfg_line)
 {
-	const char *myname = "acl_cfg_parser_append";
+	char  myname[] = "acl_cfg_parser_append";
 	char  tbuf[256];
 
 	if (parser == NULL || cfg_line == NULL) {
@@ -714,3 +722,4 @@ ACL_CFG_LINE *acl_cfg_line_new(const char **value, int ncount)
 
 	return (cfg_line);
 }
+

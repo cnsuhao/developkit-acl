@@ -36,6 +36,7 @@ int acl_fifo_trigger(ACL_EVENT *eventp_unused, const char *service,
 	const char *myname = "acl_fifo_trigger";
 	static ACL_VSTRING *why;
 	ACL_VSTREAM *fp;
+	int     fd;
 
 	eventp_unused = eventp_unused;
 
@@ -60,13 +61,13 @@ int acl_fifo_trigger(ACL_EVENT *eventp_unused, const char *service,
 				myname, service, acl_vstring_str(why));
 		return (-1);
 	}
+	fd = ACL_VSTREAM_FILE(fp);
 
 	/*
 	 * Write the request...
 	 */
-	acl_non_blocking(ACL_VSTREAM_SOCK(fp), timeout > 0
-		? ACL_NON_BLOCKING : ACL_BLOCKING);
-	if (acl_write_buf(fp, buf, len, timeout) < 0)
+	acl_non_blocking(fd, timeout > 0 ? ACL_NON_BLOCKING : ACL_BLOCKING);
+	if (acl_write_buf(fd, buf, len, timeout) < 0)
 		if (acl_msg_verbose)
 			acl_msg_warn("%s: write %s: %s",
 				myname, service, strerror(errno));

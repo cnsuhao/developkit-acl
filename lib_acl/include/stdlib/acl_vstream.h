@@ -47,18 +47,18 @@ extern "C" {
 
 typedef struct ACL_VSTREAM	ACL_VSTREAM;
 
-typedef int (*ACL_VSTREAM_RD_FN)(ACL_VSTREAM *stream, void *buf, size_t size,
-	int timeout, void *context);
-typedef int (*ACL_VSTREAM_WR_FN)(ACL_VSTREAM *stream, const void *buf,
-	size_t size, int timeout, void *context);
-typedef int (*ACL_VSTREAM_WV_FN)(ACL_VSTREAM *stream, const struct iovec *vec,
-	int count, int timeout, void *context);
-typedef int (*ACL_FSTREAM_RD_FN)(ACL_VSTREAM *stream, void *buf, size_t size,
-	int timeout, void *context);
-typedef int (*ACL_FSTREAM_WR_FN)(ACL_VSTREAM *stream, const void *buf,
-	size_t size, int timeout, void *context);
-typedef int (*ACL_FSTREAM_WV_FN)(ACL_VSTREAM *stream, const struct iovec *vec,
-	int count, int timeout, void *context);
+typedef int (*ACL_VSTREAM_RD_FN)(ACL_SOCKET fd, void *buf, size_t size,
+	int timeout, ACL_VSTREAM *stream, void *context);
+typedef int (*ACL_VSTREAM_WR_FN)(ACL_SOCKET fd, const void *buf,
+	size_t size, int timeout, ACL_VSTREAM *stream, void *context);
+typedef int (*ACL_VSTREAM_WV_FN)(ACL_SOCKET fd, const struct iovec *vec,
+	int count, int timeout, ACL_VSTREAM *stream, void *context);
+typedef int (*ACL_FSTREAM_RD_FN)(ACL_FILE_HANDLE fh, void *buf, size_t size,
+	int timeout, ACL_VSTREAM *stream, void *context);
+typedef int (*ACL_FSTREAM_WR_FN)(ACL_FILE_HANDLE fh, const void *buf,
+	size_t size, int timeout, ACL_VSTREAM *stream, void *context);
+typedef int (*ACL_FSTREAM_WV_FN)(ACL_FILE_HANDLE fh, const struct iovec *vec,
+	int count, int timeout, ACL_VSTREAM *stream, void *context);
 
 /* 当关闭或释放一个数据流时, 需要回调一些释放函数, 此结果定义了该回调
  * 函数的句柄类型 ---add by zsx, 2006.6.20

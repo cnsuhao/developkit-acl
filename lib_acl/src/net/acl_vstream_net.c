@@ -242,8 +242,8 @@ ACL_VSTREAM *acl_vstream_connect(const char *addr, int block_mode,
 			rw_timeout, rw_bufsize, NULL);
 }
 
-static int udp_read(ACL_VSTREAM *stream, void *buf, size_t size,
-	int timeout acl_unused, void *arg acl_unused)
+static int udp_read(ACL_SOCKET fd, void *buf, size_t size,
+	int timeout acl_unused, ACL_VSTREAM *stream, void *arg acl_unused)
 {
 	const char *myname = "udp_read";
 	struct sockaddr_in sa;
@@ -254,8 +254,7 @@ static int udp_read(ACL_VSTREAM *stream, void *buf, size_t size,
 		acl_vstream_set_peer(stream, "0.0.0.0:0");
 
 	memset(&sa, 0, sizeof(sa));
-	ret = recvfrom(ACL_VSTREAM_SOCK(stream), buf, size, 0,
-		(struct sockaddr*) &sa, &sa_len);
+	ret = recvfrom(fd, buf, size, 0, (struct sockaddr*) &sa, &sa_len);
 	if (ret < 0)
 		acl_msg_warn("%s, %s(%d): recvfrom error %s",
 			myname, __FILE__, __LINE__, acl_last_serror());
@@ -264,8 +263,8 @@ static int udp_read(ACL_VSTREAM *stream, void *buf, size_t size,
 	return ret;
 }
 
-static int udp_write(ACL_VSTREAM *stream, const void *buf, size_t size,
-	int timeout acl_unused, void *arg acl_unused)
+static int udp_write(ACL_SOCKET fd, const void *buf, size_t size,
+	int timeout acl_unused, ACL_VSTREAM *stream, void *arg acl_unused)
 {
 	const char *myname = "udp_write";
 	int   ret;
@@ -274,8 +273,8 @@ static int udp_write(ACL_VSTREAM *stream, const void *buf, size_t size,
 		acl_msg_fatal("%s, %s(%d): peer addr null",
 			myname, __FILE__, __LINE__);
 
-	ret = sendto(ACL_VSTREAM_SOCK(stream), buf, size, 0,
-		(struct sockaddr*) stream->sa_peer, stream->sa_peer_len);
+	ret = sendto(fd, buf, size, 0, (struct sockaddr*) stream->sa_peer,
+			stream->sa_peer_len);
 	if (ret < 0)
 		acl_msg_warn("%s, %s(%d): sendto %s error %s",
 			myname, __FILE__, __LINE__, ACL_VSTREAM_PEER(stream),

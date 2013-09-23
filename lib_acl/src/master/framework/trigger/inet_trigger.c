@@ -102,8 +102,8 @@ int acl_inet_trigger(ACL_EVENT *eventp, const char *service,
 	/*
 	 * Write the request...
 	 */
-	if (acl_write_buf(ip->stream, buf, len, timeout) < 0
-		|| acl_write_buf(ip->stream, "", 1, timeout) < 0)
+	if (acl_write_buf(fd, buf, len, timeout) < 0
+		|| acl_write_buf(fd, "", 1, timeout) < 0)
 	{
 		if (acl_msg_verbose)
 			acl_msg_warn("%s: write to %s: %s",
