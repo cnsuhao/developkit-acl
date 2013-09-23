@@ -74,6 +74,8 @@ int main(int argc, char *argv[])
 	char  addr[64];
 	int   ch, can_quit = 0, need_echo = 0, inter = 1000;
 
+	acl_init();
+
 	snprintf(addr, sizeof(addr), "127.0.0.1:8888");
 
 	while ((ch = getopt(argc, argv, "hs:cei:")) > 0) {
@@ -106,5 +108,8 @@ int main(int argc, char *argv[])
 	acl_msg_stdout_enable(1);
 	signal(SIGINT, on_sigint);
 	run(addr, can_quit, need_echo, inter);
+
+	acl_end();
+
 	return 0;
 }

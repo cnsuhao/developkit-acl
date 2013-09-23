@@ -319,7 +319,12 @@ ACL_VSTREAM *acl_vstream_bind(const char *addr, int rw_timeout)
 	sa.sin_port = htons(port);
 	sa.sin_addr.s_addr = inet_addr(host);
 
+#ifdef ACL_MS_WINDOWS
+	sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+#else
 	sock = socket(AF_INET, SOCK_DGRAM, 0);
+#endif
+
 	if (sock == ACL_SOCKET_INVALID) {
 		acl_msg_error("%s: socket %s", myname, acl_last_serror());
 		acl_myfree(buf);

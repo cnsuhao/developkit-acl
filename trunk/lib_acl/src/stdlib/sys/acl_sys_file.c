@@ -147,7 +147,7 @@ int acl_file_write(ACL_FILE_HANDLE fh, const void *buf, size_t size,
 }
 
 int acl_file_writev(ACL_FILE_HANDLE fh, const struct iovec *vector, int count,
-	int timeout acl_unused, ACL_VSTREAM *fp acl_uunused,
+	int timeout acl_unused, ACL_VSTREAM *fp acl_unused,
 	void *arg acl_unused)
 {
 	int   i, n;

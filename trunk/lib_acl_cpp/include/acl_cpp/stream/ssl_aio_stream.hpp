@@ -80,10 +80,18 @@ private:
 	static int __sock_read(void *ctx, unsigned char *buf, size_t len);
 	static int __sock_send(void *ctx, const unsigned char *buf, size_t len);
 
-	static int __ssl_read(ACL_SOCKET fd, void *buf, size_t len,
+#ifdef WIN32
+	static int __ssl_read(SOCKET fd, void *buf, size_t len,
 		int timeout, ACL_VSTREAM* stream, void *ctx);
-	static int __ssl_send(ACL_SOCKET fd, const void *buf, size_t len,
+	static int __ssl_send(SOCKET fd, const void *buf, size_t len,
 		int timeout, ACL_VSTREAM* stream, void *ctx);
+#else
+	static int __ssl_read(int fd, void *buf, size_t len,
+		int timeout, ACL_VSTREAM* stream, void *ctx);
+	static int __ssl_send(int fd, const void *buf, size_t len,
+		int timeout, ACL_VSTREAM* stream, void *ctx);
+#endif
+
 	void clear(void);
 };
 

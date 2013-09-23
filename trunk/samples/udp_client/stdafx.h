@@ -3,4 +3,10 @@
 
 #include "lib_acl.h"
 
+#ifdef	WIN32
+# ifndef snprintf
+#  define snprintf _snprintf
+# endif
+#endif
+
 #endif
