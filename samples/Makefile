@@ -145,4 +145,4 @@ clean:
 	@(cd vstream_popen3; make clean)
 	@(cd mkdir; make clean clean)
 	@(cd udp_client; make clean)
-	@(cd udp_server; make)
+	@(cd udp_server; make clean)
