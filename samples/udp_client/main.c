@@ -121,6 +121,8 @@ int main(int argc, char *argv[])
 	int   ch, count = 1, dlen = 100, inter = 1000, nthreads = 1, quit = 0;
 	int   need_read = 0;
 
+	acl_init();
+
 	snprintf(peer, sizeof(peer), "127.0.0.1:8888");
 	snprintf(local, sizeof(local), "127.0.0.1:0");
 
@@ -186,5 +188,8 @@ int main(int argc, char *argv[])
 
 	printf("\r\nlocal: %s, peer: %s, count: %d, dlen: %d, inter: %d\r\n",
 		local, peer, count, dlen, inter);
+
+	acl_end();
+
 	return 0;
 }

@@ -188,7 +188,7 @@ ACL_ASTREAM *acl_aio_connect(ACL_AIO *aio, const char *addr, int timeout)
 		cstream = acl_vstream_fdopen(connfd, ACL_VSTREAM_FLAG_RW,
 				aio->rbuf_size, timeout, ACL_VSTREAM_TYPE_SOCK);
 		acl_assert(cstream);
-		acl_vstream_set_remote(cstream, addr);
+		acl_vstream_set_peer(cstream, addr);
 	} else
 #endif
 		cstream = acl_vstream_connect(addr, ACL_NON_BLOCKING,
