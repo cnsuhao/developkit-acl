@@ -89,14 +89,16 @@ const char* socket_stream::get_peer(bool full /* = false */) const
 	}
 
 	// xxx: acl_vstream 中没有对此地址赋值
-	if (m_pStream->remote_addr[0] == 0)
+	char* ptr = ACL_VSTREAM_PEER(m_pStream);
+	if (ptr == NULL || *ptr == 0)
 	{
+		char  buf[64];
 		if (acl_getpeername(ACL_VSTREAM_SOCK(m_pStream),
-			m_pStream->remote_addr,
-			sizeof(m_pStream->remote_addr)) == -1)
+			buf, sizeof(buf)) == -1)
 		{
 			return dummy_;
 		}
+		acl_vstream_set_peer(m_pStream, buf);
 	}
 
 	if (full)
@@ -110,18 +112,20 @@ const char* socket_stream::get_peer_ip() const
 	if (peer_ip_[0] != 0)
 		return peer_ip_;
 
-	if (m_pStream->remote_addr[0] == 0)
+	char* ptr = ACL_VSTREAM_PEER(m_pStream);
+	if (ptr == NULL || *ptr == 0)
 	{
+		char  buf[64];
 		if (acl_getpeername(ACL_VSTREAM_SOCK(m_pStream),
-			m_pStream->remote_addr,
-			sizeof(m_pStream->remote_addr)) == -1)
+			buf, sizeof(buf)) == -1)
 		{
 			return dummy_;
 		}
+		acl_vstream_set_peer(m_pStream, buf);
 	}
 
 	return const_cast<socket_stream*> (this)->get_ip(
-		m_pStream->remote_addr,
+		ACL_VSTREAM_PEER(m_pStream),
 		const_cast<socket_stream*> (this)->peer_ip_,
 		sizeof(peer_ip_));
 }
@@ -135,14 +139,16 @@ const char* socket_stream::get_local(bool full /* = false */) const
 	}
 
 	// xxx: acl_vstream 中没有对此地址赋值
-	if (m_pStream->local_addr[0] == 0)
+	char* ptr = ACL_VSTREAM_LOCAL(m_pStream);
+	if (ptr == NULL || *ptr == 0)
 	{
+		char  buf[256];
 		if (acl_getsockname(ACL_VSTREAM_SOCK(m_pStream),
-			m_pStream->local_addr,
-			sizeof(m_pStream->local_addr)) == -1)
+			buf, sizeof(buf)) == -1)
 		{
 			return dummy_;
 		}
+		acl_vstream_set_local(m_pStream, buf);
 	}
 
 	if (full)
@@ -156,14 +162,16 @@ const char* socket_stream::get_local_ip() const
 	if (local_ip_[0] != 0)
 		return local_ip_;
 
-	if (m_pStream->local_addr[0] == 0)
+	char* ptr = ACL_VSTREAM_LOCAL(m_pStream);
+	if (ptr == NULL || *ptr == 0)
 	{
+		char  buf[256];
 		if (acl_getsockname(ACL_VSTREAM_SOCK(m_pStream),
-			m_pStream->local_addr,
-			sizeof(m_pStream->local_addr)) == -1)
+			buf, sizeof(buf)) == -1)
 		{
 			return dummy_;
 		}
+		acl_vstream_set_local(m_pStream, buf);
 	}
 
 	return const_cast<socket_stream*>(this)->get_ip(
