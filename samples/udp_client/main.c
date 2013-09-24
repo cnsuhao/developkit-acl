@@ -172,8 +172,8 @@ int main(int argc, char *argv[])
 		for (i = 0; i < nthreads; i++) {
 			THREAD_CTX *ctx = (THREAD_CTX*)
 				acl_mymalloc(sizeof(THREAD_CTX));
-			snprintf(ctx->local, sizeof(ctx->local), local);
-			snprintf(ctx->peer, sizeof(ctx->peer), peer);
+			snprintf(ctx->local, sizeof(ctx->local), "%s", local);
+			snprintf(ctx->peer, sizeof(ctx->peer), "%s", peer);
 			ctx->count = count;
 			ctx->dlen = dlen;
 			ctx->inter = inter;
