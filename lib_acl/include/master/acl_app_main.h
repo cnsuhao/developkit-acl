@@ -3,6 +3,7 @@
 
 #include "stdlib/acl_define.h"
 #include "stdlib/acl_vstream.h"
+#include "acl_server_api.h"
 
 #ifdef	__cplusplus
 extern "C" {

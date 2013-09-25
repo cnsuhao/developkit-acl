@@ -1,10 +1,18 @@
 #include "StdAfx.h"
 #ifndef ACL_PREPARE_COMPILE
 
+#include "stdlib/acl_define.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+
+#include "net/acl_sane_socket.h"
+#include "net/acl_access.h"
+#include "master/acl_ioctl_params.h"
+#include "master/acl_master_type.h"
+#include "master/acl_master_conf.h"
 
 #endif
 
