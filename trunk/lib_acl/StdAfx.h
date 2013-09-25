@@ -50,15 +50,14 @@ int acl_secure_vsnprintf(char *buf, size_t size, const char *fmt, va_list ap);
 #  include <signal.h>
 #  include <sys/stat.h>
 #  include <sys/socket.h>
+#  include <sys/un.h>
 #  ifdef ACL_FREEBSD
 #   include <netinet/in_systm.h>
 #   include <netinet/in.h>
 #  endif
 # endif  /* ACL_UNIX */
 
-#if 0
 # include "lib_acl.h"
-#endif
 
 #endif /* ACL_PREPARE_COMPILE */
 
