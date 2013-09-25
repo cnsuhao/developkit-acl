@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 #ifndef ACL_PREPARE_COMPILE
 
-#include "lib_acl.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>

@@ -13,7 +13,7 @@ extern "C" {
   * Utility library.
   */
 #include "stdlib/acl_vstream.h"
-#include "ioctl/acl_myioctl.h"
+#include "ioctl/acl_ioctl.h"
 #include "aio/acl_aio.h"
 #include "event/acl_events.h"
 

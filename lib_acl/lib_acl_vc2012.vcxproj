@@ -628,7 +628,6 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include=".\include\event\acl_timer.h" />
     <ClInclude Include=".\include\aio\acl_aio.h" />
     <ClInclude Include=".\include\ioctl\acl_ioctl.h" />
-    <ClInclude Include=".\include\ioctl\acl_myioctl.h" />
     <ClInclude Include=".\include\ioctl\acl_spool.h" />
     <ClInclude Include=".\include\db\acl_db.h" />
     <ClInclude Include=".\include\db\acl_dberr.h" />
