@@ -1392,9 +1392,6 @@
     <ClInclude Include=".\include\ioctl\acl_ioctl.h">
       <Filter>Header Files\ioctl</Filter>
     </ClInclude>
-    <ClInclude Include=".\include\ioctl\acl_myioctl.h">
-      <Filter>Header Files\ioctl</Filter>
-    </ClInclude>
     <ClInclude Include=".\include\ioctl\acl_spool.h">
       <Filter>Header Files\ioctl</Filter>
     </ClInclude>

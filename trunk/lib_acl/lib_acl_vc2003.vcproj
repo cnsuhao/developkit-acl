@@ -1675,9 +1675,6 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 					RelativePath=".\include\ioctl\acl_ioctl.h">
 				</File>
 				<File
-					RelativePath=".\include\ioctl\acl_myioctl.h">
-				</File>
-				<File
 					RelativePath=".\include\ioctl\acl_spool.h">
 				</File>
 			</Filter>
