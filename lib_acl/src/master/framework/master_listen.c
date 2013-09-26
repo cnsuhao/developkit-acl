@@ -151,9 +151,11 @@ static void master_bind_udp(ACL_MASTER_SERV *serv)
 				acl_msg_fatal("%s(%d), %s: bind %s error %s",
 					__FILE__, __LINE__, myname,
 					addr->addr, strerror(errno));
+			break;
 		default:
 			acl_msg_panic("invalid type: %d, addr: %s",
 				addr->type, addr->addr);
+			break;
 		}
 
 		serv->listen_fds[i] = ACL_VSTREAM_SOCK(serv->listen_streams[i]);

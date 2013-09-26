@@ -91,6 +91,12 @@ ACL_API ACL_VSTREAM *acl_vstream_connect(const char *addr, int block_mode,
  */
 ACL_API ACL_VSTREAM *acl_vstream_bind(const char *addr, int rw_timeout);
 
+/**
+ * 将网络流对象设置为 UDP IO 模式
+ * @param stream {ACL_VSTREAM*}
+ */
+ACL_API void acl_vstream_set_udp(ACL_VSTREAM *stream);
+
 #ifdef __cplusplus
 }
 #endif

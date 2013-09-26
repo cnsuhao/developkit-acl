@@ -38,6 +38,8 @@
 #include "stdlib/acl_stringops.h"
 #include "stdlib/acl_myflock.h"
 #include "stdlib/unix/acl_watchdog.h"
+#include "net/acl_sane_socket.h"
+#include "net/acl_vstream_net.h"
 #include "event/acl_events.h"
 
 /* Global library. */
@@ -223,8 +225,8 @@ static void udp_server_read(int event_type, void *context)
 	}
 
 	if (event_type != ACL_EVENT_READ)
-		acl_msg_fatal("%s, %s(%d): unknown event_type(%d)",
-			__FILE__, myname, __LINE__, event_type);
+		acl_msg_fatal("%s, %s(%d): unknown event_type(%d, %d)",
+			__FILE__, myname, __LINE__, event_type, ACL_EVENT_XCPT);
 
 	if (acl_var_udp_idle_limit > 0)
 		time_left = (int) ((acl_event_cancel_timer(__event,
@@ -574,12 +576,17 @@ void acl_udp_server_main(int argc, char **argv, ACL_UDP_SERVER_FN service, ...)
 	i = 0;
 	fd = ACL_MASTER_LISTEN_FD;
 	for (; fd < ACL_MASTER_LISTEN_FD + __socket_count; fd++) {
+		char  addr[64];
+
 		stream = acl_vstream_fdopen(fd, O_RDWR, acl_var_udp_buf_size,
 			acl_var_udp_rw_timeout, fdtype);
 		if (stream == NULL)
 			acl_msg_fatal("%s(%d)->%s: stream null, fd = %d",
 				__FILE__, __LINE__, myname, fd);
 
+		acl_getsockname(fd, addr, sizeof(addr));
+		acl_vstream_set_local(stream, addr);
+		acl_vstream_set_udp(stream);
 		acl_non_blocking(fd, ACL_NON_BLOCKING);
 		acl_event_enable_read(__event, stream, 0,
 			udp_server_read, stream);
@@ -611,7 +618,7 @@ void acl_udp_server_main(int argc, char **argv, ACL_UDP_SERVER_FN service, ...)
 			}
 		}
 		acl_watchdog_start(watchdog);
-		sleep(1);
+		acl_event_loop(__event);
 	}
 
 	/* not reached here */
