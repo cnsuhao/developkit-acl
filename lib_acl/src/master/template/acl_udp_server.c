@@ -202,7 +202,11 @@ static void udp_server_execute(ACL_EVENT *event, ACL_VSTREAM *stream)
 		udp_server_abort(ACL_EVENT_NULL_TYPE, event);
 	}
 
+	/* 回调用户注册的处理过程 */
 	udp_server_service_fn(stream, udp_server_name, udp_server_argv);
+
+	/* 清除发生在 UDP 套接字上的临时性错误，以免事件引擎报错 */
+	stream->flag = 0;
 
 	if (acl_var_udp_master_maxproc > 1
 	    && acl_master_notify(acl_var_udp_pid, udp_server_generation,

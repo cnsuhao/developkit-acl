@@ -27,7 +27,7 @@ static void timer_retry(ACL_AIO *aio, PROBE_SERVER *server)
 		server->hdr_res = NULL;
 	}
 	
-	(void) acl_aio_request_timer(aio, timer_fn, (void *) server, server->probe_inter);
+	(void) acl_aio_request_timer(aio, timer_fn, (void *) server, server->probe_inter, 0);
 }
 
 static void msg_info(PROBE_SERVER *server, const char *fmt, ...)
@@ -53,14 +53,14 @@ static void msg_info(PROBE_SERVER *server, const char *fmt, ...)
 
 		acl_logtime_fmt(fmtstr, sizeof(fmtstr));
 		acl_vstream_fprintf(server->logfp,
-			"%s: <%s> addr(%s), url(%s), time(%ld), content_length(%d), reply_status(%d), %s\n",
+			"%s: <%s> addr(%s), url(%s), time(%ld), content_length(%lld), reply_status(%d), %s\n",
 			fmtstr,
 			(server->warn_time > 0 && server->time_total_cost >= server->warn_time) ? "WARN" : "INFO",
 			server->addr, server->url, server->time_total_cost,
 			server->hdr_res->hdr.chunked ? -1 : server->hdr_res->hdr.content_length,
 			server->hdr_res->reply_status, buf);
 	} else
-		acl_msg_info("<%s> addr(%s), url(%s), time(%ld), content_length(%d), reply_status(%d), %s",
+		acl_msg_info("<%s> addr(%s), url(%s), time(%ld), content_length(%lld), reply_status(%d), %s",
 			(server->warn_time > 0 && server->time_total_cost >= server->warn_time) ? "WARN" : "INFO",
 			server->addr, server->url, server->time_total_cost,
 			server->hdr_res->hdr.chunked ? -1 : server->hdr_res->hdr.content_length,
@@ -170,7 +170,7 @@ static void get_header_ready(int status, void *arg)
 			http_hdr_fprint(var_probe_debug_fp, &server->hdr_res->hdr, myname);
 
 		server->respond = http_res_new(server->hdr_res);
-		http_res_body_get_ready(server->respond,
+		http_res_body_get_async(server->respond,
 				aio,
 				server->stream,
 				server->rw_timeout,

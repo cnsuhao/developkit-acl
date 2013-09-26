@@ -1,4 +1,8 @@
 
+387) 2013.9.26
+387.1) feature: master 服务器框架增加了专门针对 UDP 的服务器模板
+acl_udp_server.c/acl_udp_params.h
+
 386) 2013.9.22
 386.1) feature: ACL_VSTREAM 支持 UDP 传输; acl_vstream_net.c 中增加了
 acl_vstream_bind 函数用来绑定 UDP 传输模式
