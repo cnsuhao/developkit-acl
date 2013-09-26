@@ -247,7 +247,7 @@ static int udp_read(ACL_SOCKET fd, void *buf, size_t size,
 {
 	const char *myname = "udp_read";
 	struct sockaddr_in sa;
-	socklen_t sa_len = sizeof(sa);
+	socklen_t sa_len = sizeof(struct sockaddr_in);
 	int   ret;
 
 	if (stream->sa_peer_size == 0)
@@ -358,4 +358,13 @@ ACL_VSTREAM *acl_vstream_bind(const char *addr, int rw_timeout)
 		ACL_VSTREAM_CTL_END);
 
 	return stream;
+}
+
+void acl_vstream_set_udp(ACL_VSTREAM *stream)
+{
+	acl_vstream_ctl(stream,
+		ACL_VSTREAM_CTL_READ_FN, udp_read,
+		ACL_VSTREAM_CTL_WRITE_FN, udp_write,
+		ACL_VSTREAM_CTL_CONTEXT, stream->context,
+		ACL_VSTREAM_CTL_END);
 }

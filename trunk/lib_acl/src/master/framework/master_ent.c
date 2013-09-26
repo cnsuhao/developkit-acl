@@ -352,6 +352,9 @@ static void service_udp(ACL_XINETD_CFG_PARSER *xcp, ACL_MASTER_SERV *serv)
 
 			addr->type = ACL_MASTER_SERV_TYPE_UDP;
 			addr->addr = acl_mystrdup(ptr);
+
+			acl_array_append(serv->addrs, addr);
+			serv->listen_fd_count++;
 		}
 	}
 }
