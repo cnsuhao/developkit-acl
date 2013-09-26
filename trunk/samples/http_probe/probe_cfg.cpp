@@ -215,7 +215,7 @@ static PROBE_SERVER *__cfg_server_new(char *data)
 						O_WRONLY | O_CREAT | O_APPEND,
 						0600, 4096);
 		if (server->logfp == NULL)
-			acl_msg_fatal("%s: can't open logfile(%s)",
+			acl_msg_fatal("%s: open logfile(%s) error %s ",
 					myname, server->logfile, strerror(errno));
 	} else
 		server->logfp = NULL;

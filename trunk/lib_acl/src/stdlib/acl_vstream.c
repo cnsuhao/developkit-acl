@@ -285,6 +285,7 @@ AGAIN:
 		stream->read_cnt = stream->read_fn(ACL_VSTREAM_SOCK(stream),
 			stream->read_buf, (size_t) stream->read_buf_len,
 			stream->rw_timeout, stream, stream->context);
+
 	if (stream->read_cnt < 0) {
 		stream->errnum = acl_last_error();
 		if (stream->errnum == ACL_EINTR) {
@@ -1831,14 +1832,17 @@ ACL_VSTREAM *acl_vstream_fdopen(ACL_SOCKET fd, unsigned int oflags,
 		buflen = ACL_VSTREAM_DEF_MAXLEN;
 
 	/* XXX: 只有非监听流才需要有读缓冲区 */
+	/* XXX: 目前 UDP 服务端口号在 MASTER 框架中暂时当监听套接口用，所以
+	   需要给其分配读缓冲区
+	 */
 
 	if ((fdtype & ACL_VSTREAM_TYPE_LISTEN_INET)
 	    || (fdtype & ACL_VSTREAM_TYPE_LISTEN_UNIX))
 	{
 		fdtype |= ACL_VSTREAM_TYPE_LISTEN;
-		stream->read_buf = NULL;
-	} else
-		stream->read_buf = (unsigned char *) acl_mymalloc(buflen + 1);
+	}
+
+	stream->read_buf = (unsigned char *) acl_mymalloc(buflen + 1);
 
 	if (fdtype == 0) {
 		fdtype = ACL_VSTREAM_TYPE_SOCK;
