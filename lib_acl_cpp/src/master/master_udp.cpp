@@ -1,5 +1,6 @@
 #include "acl_stdafx.hpp"
 #include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/util.hpp"
 #include "acl_cpp/stream/socket_stream.hpp"
 #include "acl_cpp/master/master_udp.hpp"
 
@@ -115,6 +116,8 @@ bool master_udp::run_alone(const char* addrs, const char* path /* = NULL */,
 void master_udp::service_main(ACL_VSTREAM *stream, char*, char**)
 {
 	socket_stream* ss = NEW socket_stream();
+	if (ss->open(stream) == false)
+		logger_fatal("open stream error!");
 
 	acl_assert(__mu != NULL);
 #ifndef	WIN32
