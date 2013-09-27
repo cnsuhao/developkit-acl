@@ -49,15 +49,22 @@ extern "C" {
  */
 typedef struct ACL_EVENT_TIMER ACL_EVENT_TIMER;
 
- /*
-  * External interface.
-  */
+typedef	struct	ACL_EVENT		ACL_EVENT;
+typedef	struct	ACL_EVENT_FDTABLE	ACL_EVENT_FDTABLE;
+
+/*
+ * External interface.
+ */
+#if 0
 typedef void (*ACL_EVENT_NOTIFY_FN) (int event_type, void *context);
 typedef	ACL_EVENT_NOTIFY_FN	ACL_EVENT_NOTIFY_RDWR;
 typedef	ACL_EVENT_NOTIFY_FN	ACL_EVENT_NOTIFY_TIME;
-
-typedef	struct	ACL_EVENT		ACL_EVENT;
-typedef	struct	ACL_EVENT_FDTABLE	ACL_EVENT_FDTABLE;
+#else
+typedef void (*ACL_EVENT_NOTIFY_RDWR)(int event_type, ACL_EVENT *event,
+		ACL_VSTREAM *stream, void *context);
+typedef void (*ACL_EVENT_NOTIFY_TIME)(int event_type, ACL_EVENT *event,
+		void *context);
+#endif
 
 /*----------------------------------------------------------------------------*/
 

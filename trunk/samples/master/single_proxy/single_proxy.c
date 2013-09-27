@@ -49,10 +49,10 @@ static ACL_IPLINK *__host_allow_link = NULL;
 /* forward define */
 static int __if_host_allow(const char *client_ip);
 
-static void __proxy_handle_fn(int unused_event, void *context)
+static void __proxy_handle_fn(int type acl_unused, ACL_EVENT *event acl_unused,
+	ACL_VSTREAM *stream, void *context)
 {
-	char  myname[] = "__proxy_handle_fn";
-	ACL_VSTREAM *stream;
+	const char *myname = "__proxy_handle_fn";
 	char  buf[8192];
 	int   n, ret;
 
@@ -69,9 +69,6 @@ static void __proxy_handle_fn(int unused_event, void *context)
 				__FILE__, __LINE__, myname);
 		return;
 	}
-
-	unused_event = unused_event;
-	stream = (ACL_VSTREAM *) context;
 
 	if (stream == __front_stream) {
 		n = acl_vstream_read(stream, buf, sizeof(buf) - 1);

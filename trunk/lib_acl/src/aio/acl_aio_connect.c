@@ -35,7 +35,8 @@
 } while (0)
 
 #ifdef ACL_MS_WINDOWS
-static void __connect_notify_callback(int event_type, void *context);
+static void __connect_notify_callback(int event_type, ACL_EVENT *event,
+	ACL_VSTREAM *stream, void *context);
 
 static void ConnectTimer(int event_type acl_unused, void *ctx)
 {
@@ -48,7 +49,8 @@ static void ConnectTimer(int event_type acl_unused, void *ctx)
 }
 #endif
 
-static void __connect_notify_callback(int event_type, void *context)
+static void __connect_notify_callback(int event_type, ACL_EVENT *event,
+	ACL_VSTREAM *stream acl_unused, void *context)
 {
 	const char *myname = "__connect_notify_callback";
 	ACL_ASTREAM *astream = (ACL_ASTREAM *) context;
@@ -74,9 +76,9 @@ static void __connect_notify_callback(int event_type, void *context)
 			 */
 			acl_aio_iocp_close(astream);
 		} else {
-			acl_event_enable_write(astream->aio->event,
-				astream->stream, astream->timeout,
-				__connect_notify_callback, astream);
+			acl_event_enable_write(event, astream->stream,
+				astream->timeout, __connect_notify_callback,
+				astream);
 		}
 		return;
 	}

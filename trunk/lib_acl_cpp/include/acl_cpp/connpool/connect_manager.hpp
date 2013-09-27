@@ -3,6 +3,8 @@
 #include "acl_cpp/stdlib/string.hpp"
 #include <vector>
 
+struct ACL_EVENT;
+
 namespace acl
 {
 
@@ -113,7 +115,7 @@ protected:
 	virtual connect_pool* create_pool(const char* addr,
 		int count, size_t idx) = 0;
 private:
-	static void statistics_record(int, void* ctx);
+	static void statistics_record(int, ACL_EVENT*, void* ctx);
 	void statistics_timer();
 private:
 	string default_addr_;			// 缺省的服务地址

@@ -104,7 +104,7 @@ static ACL_VSTREAM **__stream_array;
 static void (*single_server_service) (ACL_VSTREAM *, char *, char **);
 static char *single_server_name;
 static char **single_server_argv;
-static void (*single_server_accept) (int, void *);
+static void (*single_server_accept) (int, ACL_EVENT *, ACL_VSTREAM *, void *);
 static void (*single_server_onexit) (char *, char **);
 static void (*single_server_pre_accept) (char *, char **);
 static ACL_VSTREAM *single_server_lock;
@@ -127,7 +127,9 @@ static void single_server_exit(void)
 
 /* single_server_abort - terminate after abnormal master exit */
 
-static void single_server_abort(int event acl_unused, void *context acl_unused)
+static void single_server_abort(int type acl_unused,
+	ACL_EVENT *event acl_unused, ACL_VSTREAM *stream acl_unused,
+	void *context acl_unused)
 {
 	if (acl_msg_verbose)
 		acl_msg_info("master disconnect -- exiting");
@@ -136,7 +138,8 @@ static void single_server_abort(int event acl_unused, void *context acl_unused)
 
 /* single_server_timeout - idle time exceeded */
 
-static void single_server_timeout(int event acl_unused, void *context acl_unused)
+static void single_server_timeout(int type acl_unused,
+	ACL_EVENT *event acl_unused, void *context acl_unused)
 {
 	if (acl_msg_verbose)
 		acl_msg_info("idle timeout -- exiting");
@@ -145,7 +148,8 @@ static void single_server_timeout(int event acl_unused, void *context acl_unused
 
 /* single_server_wakeup - wake up application */
 
-static void single_server_wakeup(int fd, const char *remote, const char *local)
+static void single_server_wakeup(ACL_EVENT *event, int fd,
+	const char *remote, const char *local)
 {
 	const char *myname = "single_server_wakeup";
 	ACL_VSTREAM *stream;
@@ -172,7 +176,8 @@ static void single_server_wakeup(int fd, const char *remote, const char *local)
 	if (acl_master_notify(acl_var_single_pid, single_server_generation,
 		ACL_MASTER_STAT_TAKEN) < 0)
 	{
-		single_server_abort(ACL_EVENT_NULL_TYPE, ACL_EVENT_NULL_CONTEXT);
+		single_server_abort(ACL_EVENT_NULL_TYPE, event,
+			stream, ACL_EVENT_NULL_CONTEXT);
 	}
 	if (single_server_in_flow_delay && acl_master_flow_get(1) < 0)
 		acl_doze(acl_var_single_in_flow_delay * 1000);
@@ -181,14 +186,15 @@ static void single_server_wakeup(int fd, const char *remote, const char *local)
 	if (acl_master_notify(acl_var_single_pid, single_server_generation,
 		ACL_MASTER_STAT_AVAIL) < 0)
 	{
-		single_server_abort(ACL_EVENT_NULL_TYPE, ACL_EVENT_NULL_CONTEXT);
+		single_server_abort(ACL_EVENT_NULL_TYPE, event,
+			stream, ACL_EVENT_NULL_CONTEXT);
 	}
 	if (acl_msg_verbose)
 		acl_msg_info("%s(%d), %s: connection closed, fd = %d",
 			__FILE__, __LINE__, myname, fd);
 	use_count++;
 	if (acl_var_single_idle_limit > 0)
-		acl_event_request_timer(__eventp, single_server_timeout, NULL,
+		acl_event_request_timer(event, single_server_timeout, NULL,
 			(acl_int64) acl_var_single_idle_limit * 1000000, 0);
 }
 
@@ -196,7 +202,8 @@ static void single_server_wakeup(int fd, const char *remote, const char *local)
 
 /* single_server_accept_pass - accept descriptor */
 
-static void single_server_accept_pass(int event acl_unused, void *context)
+static void single_server_accept_pass(int type acl_unused, ACL_EVENT *event,
+	ACL_VSTREAM *stream, void *context acl_unused)
 {
 	ACL_VSTREAM *stream = (ACL_VSTREAM *) context;
 	int     listen_fd = ACL_VSTREAM_SOCK(stream);
@@ -210,7 +217,7 @@ static void single_server_accept_pass(int event acl_unused, void *context)
 	 * master process has gone away unexpectedly.
 	 */
 	if (acl_var_single_idle_limit > 0)
-		time_left = (int) ((acl_event_cancel_timer(__eventp,
+		time_left = (int) ((acl_event_cancel_timer(event,
 			single_server_timeout, NULL) + 999999) / 1000000);
 
 	if (single_server_pre_accept)
@@ -226,19 +233,19 @@ static void single_server_accept_pass(int event acl_unused, void *context)
 		if (errno != EAGAIN)
 			acl_msg_fatal("accept connection: %s", strerror(errno));
 		if (time_left >= 0)
-			acl_event_request_timer(__eventp, single_server_timeout,
+			acl_event_request_timer(event, single_server_timeout,
 				NULL, (acl_int64) time_left * 1000000, 0);
 	} else
-		single_server_wakeup(fd, NULL, NULL);
+		single_server_wakeup(event, fd, NULL, NULL);
 }
 
 #endif
 
 /* single_server_accept_sock - accept client connection request */
 
-static void single_server_accept_sock(int event acl_unused, void *context)
+static void single_server_accept_sock(int type acl_unused, ACL_EVENT *event,
+	ACL_VSTREAM *stream, void *context acl_unused)
 {
-	ACL_VSTREAM *stream = (ACL_VSTREAM *) context;
 	int     listen_fd = ACL_VSTREAM_SOCK(stream);
 	int     time_left = -1, fd, sock_type;
 	char    remote[64], local[64];
@@ -250,7 +257,7 @@ static void single_server_accept_sock(int event acl_unused, void *context)
 	 * master process has gone away unexpectedly.
 	 */
 	if (acl_var_single_idle_limit > 0)
-		time_left = (int) ((acl_event_cancel_timer(__eventp,
+		time_left = (int) ((acl_event_cancel_timer(event,
 			single_server_timeout, NULL) + 999999) / 1000000);
 
 	if (single_server_pre_accept)
@@ -267,7 +274,7 @@ static void single_server_accept_sock(int event acl_unused, void *context)
 		if (errno != EAGAIN)
 			acl_msg_fatal("accept connection: %s", strerror(errno));
 		if (time_left > 0)
-			acl_event_request_timer(__eventp, single_server_timeout,
+			acl_event_request_timer(event, single_server_timeout,
 				NULL, (acl_int64) time_left * 1000000, 0);
 		return;
 	}
@@ -278,7 +285,7 @@ static void single_server_accept_sock(int event acl_unused, void *context)
 	if (acl_getsockname(fd, local, sizeof(local)) < 0)
 		memset(local, 0, sizeof(local));
 
-	single_server_wakeup(fd, remote, local);
+	single_server_wakeup(event, fd, remote, local);
 }
 
 static void single_server_init(const char *procname)

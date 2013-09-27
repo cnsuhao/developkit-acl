@@ -6,7 +6,8 @@ typedef struct {
 	ACL_EVENT *event;
 } STREAM_IN;
 
-static void trigger_event(int event acl_unused, void *context acl_unused)
+static void trigger_event(int event_type acl_unused,
+	ACL_EVENT *event acl_unused, void *context acl_unused)
 {
 	printf("timer trigger now\r\n");
 }
@@ -30,7 +31,9 @@ static void free_stream(STREAM_IN *in)
 	acl_myfree(in);
 }
 
-static void read_callback(int event_type acl_unused, void *context)
+static void read_callback(int event_type acl_unused,
+	ACL_EVENT *event acl_unused, ACL_VSTREAM *stream acl_unused,
+	void *context)
 {
 	STREAM_IN *in = (STREAM_IN *) context;
 	int   ready;

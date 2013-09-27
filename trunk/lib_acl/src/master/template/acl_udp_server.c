@@ -122,14 +122,15 @@ ACL_EVENT *acl_udp_server_event()
 	return __event;
 }
 
-static void close_listen_timer(int event acl_unused, void *context acl_unused)
+static void close_listen_timer(int type acl_unused,
+	ACL_EVENT *event, void *context acl_unused)
 {
 	int   i;
 
 	if (__servers == NULL)
 		return;
 	for (i = 0; __servers[i] != NULL; i++) {
-		acl_event_disable_readwrite(__event, __servers[i]);
+		acl_event_disable_readwrite(event, __servers[i]);
 		acl_vstream_close(__servers[i]);
 		__servers[i] = NULL;
 		acl_msg_info("All servers closed now!");
@@ -168,8 +169,8 @@ static void udp_server_exit(void)
 
 /* udp_server_timeout - idle time exceeded */
 
-static void udp_server_timeout(int event_type acl_unused,
-	void *context acl_unused)
+static void udp_server_timeout(int type acl_unused,
+	ACL_EVENT *event acl_unused, void *context acl_unused)
 {
 	const char *myname = "udp_server_timeout";
 
@@ -181,10 +182,11 @@ static void udp_server_timeout(int event_type acl_unused,
 
 /* udp_server_abort - terminate after abnormal master exit */
 
-static void udp_server_abort(int event_type acl_unused, void *context)
+static void udp_server_abort(int event_type acl_unused,
+	ACL_EVENT *event, ACL_VSTREAM *stream acl_unused,
+	void *context acl_unused)
 {
 	const char *myname = "udp_server_abort";
-	ACL_EVENT *event = (ACL_EVENT*) context;
 
 	disable_listen(event);
 	acl_msg_info("%s: master disconnect -- exiting", myname);
@@ -199,7 +201,7 @@ static void udp_server_execute(ACL_EVENT *event, ACL_VSTREAM *stream)
 	    && acl_master_notify(acl_var_udp_pid, udp_server_generation,
 		ACL_MASTER_STAT_TAKEN) < 0)
 	{
-		udp_server_abort(ACL_EVENT_NULL_TYPE, event);
+		udp_server_abort(ACL_EVENT_NULL_TYPE, event, stream, event);
 	}
 
 	/* 回调用户注册的处理过程 */
@@ -212,14 +214,14 @@ static void udp_server_execute(ACL_EVENT *event, ACL_VSTREAM *stream)
 	    && acl_master_notify(acl_var_udp_pid, udp_server_generation,
 		ACL_MASTER_STAT_AVAIL) < 0)
 	{
-		udp_server_abort(ACL_EVENT_NULL_TYPE, event);
+		udp_server_abort(ACL_EVENT_NULL_TYPE, event, stream, event);
 	}
 }
 
-static void udp_server_read(int event_type, void *context)
+static void udp_server_read(int event_type, ACL_EVENT *event,
+	ACL_VSTREAM *stream, void *context acl_unused)
 {
 	const char *myname = "udp_server_read";
-	ACL_VSTREAM *stream = (ACL_VSTREAM*) context;
 	int     time_left = -1;
 
 	if (__servers == NULL) {
@@ -233,16 +235,16 @@ static void udp_server_read(int event_type, void *context)
 			__FILE__, myname, __LINE__, event_type, ACL_EVENT_XCPT);
 
 	if (acl_var_udp_idle_limit > 0)
-		time_left = (int) ((acl_event_cancel_timer(__event,
-			udp_server_timeout, __event) + 999999) / 1000000);
+		time_left = (int) ((acl_event_cancel_timer(event,
+			udp_server_timeout, event) + 999999) / 1000000);
 	else
 		time_left = acl_var_udp_idle_limit;
 
 	udp_server_execute(__event, stream);
 
 	if (time_left > 0)
-		acl_event_request_timer(__event, udp_server_timeout,
-			__event, (acl_int64) time_left * 1000000, 0);
+		acl_event_request_timer(event, udp_server_timeout,
+			event, (acl_int64) time_left * 1000000, 0);
 }
 
 static void udp_server_init(const char *procname)

@@ -48,18 +48,18 @@ static void event_dog_close(EVENT_DOG *evdog)
 	evdog->client = NULL;
 }
 
-static void read_fn(int event_type acl_unused, void *context)
+static void read_fn(int event_type acl_unused, ACL_EVENT *event,
+	ACL_VSTREAM *stream, void *context)
 {
 	EVENT_DOG *evdog = (EVENT_DOG*) context;
 	char  buf[2];
 
 	evdog->client->rw_timeout = 1;
 	if (acl_vstream_readn(evdog->client, buf, 1) == ACL_VSTREAM_EOF) {
-	        acl_event_disable_read(evdog->eventp, evdog->client);
+	        acl_event_disable_read(event, stream);
 		event_dog_reopen(evdog);
 	} else
-		acl_event_enable_read(evdog->eventp, evdog->client,
-			0, read_fn, evdog);
+		acl_event_enable_read(event, stream, 0, read_fn, evdog);
 }
 
 static void event_dog_open(EVENT_DOG *evdog)

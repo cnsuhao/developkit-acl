@@ -56,9 +56,8 @@ static void close_all_listener(std::vector<ACL_VSTREAM*>& sstreams)
 		acl_vstream_close(*it);
 }
 
-void master_proc::listen_callback(int, void* context)
+void master_proc::listen_callback(int, ACL_EVENT*, ACL_VSTREAM *sstream, void*)
 {
-	ACL_VSTREAM* sstream = (ACL_VSTREAM*) context;
 	ACL_VSTREAM* client = acl_vstream_accept(sstream, NULL, 0);
 	if (client == NULL)
 	{
