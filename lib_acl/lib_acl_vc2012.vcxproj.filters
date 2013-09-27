@@ -905,6 +905,9 @@
     <ClCompile Include=".\src\code\uni2utf8.c">
       <Filter>Source Files\code</Filter>
     </ClCompile>
+    <ClCompile Include="src\master\template\acl_udp_server.c">
+      <Filter>Source Files\master\template</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="lib_acl.rc">
