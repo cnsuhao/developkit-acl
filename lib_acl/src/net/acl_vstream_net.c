@@ -354,7 +354,7 @@ ACL_VSTREAM *acl_vstream_bind(const char *addr, int rw_timeout)
 	return stream;
 }
 
-void acl_vstream_set_udp(ACL_VSTREAM *stream)
+void acl_vstream_set_udp_io(ACL_VSTREAM *stream)
 {
 	acl_vstream_ctl(stream,
 		ACL_VSTREAM_CTL_READ_FN, udp_read,

@@ -4,6 +4,7 @@
 178.1) lib_acl 库中 ACL_EVENT_NOTIFY_RDWR/ACL_EVENT_NOTIFY_TIME 函数接口定义
 的修改，与之相关的模块进行了修改
 178.2) feature: master 服务器框架增加了 master_udp 服务模板类
+178.3) samples: 增加了针对 UDP 的测试用例 udp_client 
 
 177) 2013.9.22
 177.1) 因为 lib_acl 基础库中的 ACL_VSTREAM 读写回调函数接口变更，调整了与之相关的
