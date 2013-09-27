@@ -38,14 +38,15 @@
 static void __connect_notify_callback(int event_type, ACL_EVENT *event,
 	ACL_VSTREAM *stream, void *context);
 
-static void ConnectTimer(int event_type acl_unused, void *ctx)
+static void ConnectTimer(int event_type acl_unused,
+	ACL_EVENT *event acl_unused, void *ctx)
 {
 	ACL_ASTREAM *astream = (ACL_ASTREAM*) ctx;
 
 	if (astream->aio->event_mode != ACL_EVENT_WMSG)
 		acl_msg_fatal("event_mode(%d) != ACL_EVENT_WMSG(%d)",
 			astream->aio->event_mode, ACL_EVENT_WMSG);
-	__connect_notify_callback(ACL_EVENT_RW_TIMEOUT, ctx);
+	__connect_notify_callback(ACL_EVENT_RW_TIMEOUT, NULL, NULL, ctx);
 }
 #endif
 

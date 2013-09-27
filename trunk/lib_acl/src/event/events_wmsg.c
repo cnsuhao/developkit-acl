@@ -480,9 +480,11 @@ static void handleClose(EVENT_WMSG *ev, ACL_SOCKET sockfd)
 	if (fdp == NULL)
 		return;
 	else if (fdp->r_callback)
-		fdp->r_callback(ACL_EVENT_XCPT, fdp->r_context);
+		fdp->r_callback(ACL_EVENT_XCPT, &ev->event,
+			NULL, fdp->r_context);
 	else if (fdp->w_callback)
-		fdp->w_callback(ACL_EVENT_XCPT, fdp->w_context);
+		fdp->w_callback(ACL_EVENT_XCPT, &ev->event,
+			NULL, fdp->w_context);
 	/*
 	else
 		acl_msg_error("%s(%d): w_callback and r_callback null"
@@ -503,7 +505,8 @@ static void handleConnect(EVENT_WMSG *ev, ACL_SOCKET sockfd)
 			myname, __LINE__, (int) sockfd);
 	else {
 		fdp->stream->flag &= ~ACL_VSTREAM_FLAG_CONNECTING;
-		fdp->w_callback(ACL_EVENT_WRITE, fdp->w_context);
+		fdp->w_callback(ACL_EVENT_WRITE, &ev->event,
+			NULL, fdp->w_context);
 	}
 }
 
@@ -517,7 +520,7 @@ static void handleAccept(EVENT_WMSG *ev, ACL_SOCKET sockfd)
 	else if (fdp->r_callback == NULL)
 		acl_msg_fatal("%s(%d): fdp callback null", myname, __LINE__);
 
-	fdp->r_callback(ACL_EVENT_READ, fdp->r_context);
+	fdp->r_callback(ACL_EVENT_READ, &ev->event, NULL, fdp->r_context);
 }
 
 static void handleRead(EVENT_WMSG *ev, ACL_SOCKET sockfd)
@@ -529,13 +532,15 @@ static void handleRead(EVENT_WMSG *ev, ACL_SOCKET sockfd)
 		acl_msg_error("%s(%d): fdp null for sockfd(%d)",
 			myname, __LINE__, (int) sockfd);
 	else if ((fdp->stream->type & ACL_VSTREAM_TYPE_LISTEN))
-		fdp->r_callback(ACL_EVENT_READ, fdp->r_context);
+		fdp->r_callback(ACL_EVENT_READ, &ev->event, NULL,
+			fdp->r_context);
 	else if (fdp->r_callback != NULL) {
 		/* 该描述字可读则设置 ACL_VSTREAM 的系统可读标志从而触发
 		 * ACL_VSTREAM 流在读时调用系统的 read 函数
 		 */
 		fdp->stream->sys_read_ready = 1;
-		fdp->r_callback(ACL_EVENT_READ, fdp->r_context);
+		fdp->r_callback(ACL_EVENT_READ, &ev->event,
+			NULL, fdp->r_context);
 	}
 	/* else
 		acl_msg_error("%s(%d): fdp->r_callback null for sockfd(%d)",
@@ -554,7 +559,8 @@ static void handleWrite(EVENT_WMSG *ev, ACL_SOCKET sockfd)
 	else if ((fdp->stream->flag & ACL_VSTREAM_FLAG_CONNECTING))
 		handleConnect(ev, sockfd);
 	else if (fdp->w_callback != NULL)
-		fdp->w_callback(ACL_EVENT_WRITE, fdp->w_context);
+		fdp->w_callback(ACL_EVENT_WRITE, &ev->event,
+			NULL, fdp->w_context);
 	/*
 	else
 		acl_msg_error("%s(%d): fdp->w_callback null for sockfd(%d)",
