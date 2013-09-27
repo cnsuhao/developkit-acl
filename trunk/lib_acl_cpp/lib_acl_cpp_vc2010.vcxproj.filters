@@ -64,6 +64,9 @@
     <ClCompile Include="src\master\master_threads.cpp">
       <Filter>src\master</Filter>
     </ClCompile>
+    <ClCompile Include="src\master\master_udp.cpp">
+      <Filter>src\master</Filter>
+    </ClCompile>
     <ClCompile Include="src\ipc\ipc_service.cpp">
       <Filter>src\ipc</Filter>
     </ClCompile>
@@ -487,6 +490,9 @@
       <Filter>include\master</Filter>
     </ClInclude>
     <ClInclude Include="include\acl_cpp\master\master_threads.hpp">
+      <Filter>include\master</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\master\master_udp.hpp">
       <Filter>include\master</Filter>
     </ClInclude>
     <ClInclude Include="include\acl_cpp\mime\rfc2047.hpp">
