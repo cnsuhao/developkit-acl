@@ -550,6 +550,9 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				<File
 					RelativePath=".\src\master\master_trigger.cpp">
 				</File>
+				<File
+					RelativePath=".\src\master\master_udp.cpp">
+				</File>
 			</Filter>
 			<Filter
 				Name="ipc"
@@ -937,6 +940,9 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				</File>
 				<File
 					RelativePath=".\include\acl_cpp\master\master_trigger.hpp">
+				</File>
+				<File
+					RelativePath=".\include\acl_cpp\master\master_udp.hpp">
 				</File>
 			</Filter>
 			<Filter
