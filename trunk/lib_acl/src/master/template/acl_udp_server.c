@@ -592,7 +592,7 @@ void acl_udp_server_main(int argc, char **argv, ACL_UDP_SERVER_FN service, ...)
 
 		acl_getsockname(fd, addr, sizeof(addr));
 		acl_vstream_set_local(stream, addr);
-		acl_vstream_set_udp(stream);
+		acl_vstream_set_udp_io(stream);
 		acl_non_blocking(fd, ACL_NON_BLOCKING);
 		acl_event_enable_read(__event, stream, 0,
 			udp_server_read, stream);
