@@ -1,4 +1,10 @@
 
+388) 2013.9.27
+388.1) events: ACL_EVENT_NOTIFY_RDWR/ACL_EVENT_NOTIFY_TIME 函数接口类型
+重新定义，在回调函数中增加了 ACL_EVENT，ACL_VSTREAM 参数，从而方便用户
+直接使用；因为这两个接口的重新定义，导致了很多功能模块做相应修改，主要
+影响的模块有：event, master, aio, ioctl
+
 387) 2013.9.26
 387.1) feature: master 服务器框架增加了专门针对 UDP 的服务器模板
 acl_udp_server.c/acl_udp_params.h

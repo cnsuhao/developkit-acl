@@ -2,6 +2,7 @@
 #include "acl_cpp/master/master_base.hpp"
 
 struct ACL_VSTREAM;
+struct ACL_EVENT;
 
 namespace acl {
 
@@ -57,7 +58,8 @@ private:
 
 private:
 	// 在单独运行方式下，该函数当监听套接字有新连接到达时被调用
-	static void listen_callback(int event_type, void* context);
+	static void listen_callback(int event_type, ACL_EVENT*,
+		ACL_VSTREAM*, void* context);
 };
 
 }  // namespace acl

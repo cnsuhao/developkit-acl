@@ -141,9 +141,6 @@ static void (*ioctl_server_pre_disconn) (ACL_VSTREAM *, char *, char **);
 static int (*ioctl_server_on_accept)(ACL_VSTREAM *);
 static void (*ioctl_server_rw_timer) (ACL_VSTREAM *);
 
-/* forward declare */
-static void ioctl_server_timeout(int event acl_unused, void *context);
-	
 static void ioctl_init(void)
 {
 	pthread_mutex_init(&__closing_time_mutex, NULL);
@@ -217,7 +214,7 @@ static int get_client_count(void)
 	return (n);
 }
 
-void acl_ioctl_server_request_timer(ACL_IOCTL_TIMER_FN timer_fn,
+void acl_ioctl_server_request_timer(ACL_EVENT_NOTIFY_TIME timer_fn,
 	void *arg, int delay)
 {
 	acl_assert(__h_ioctl);
@@ -225,7 +222,7 @@ void acl_ioctl_server_request_timer(ACL_IOCTL_TIMER_FN timer_fn,
 		(acl_int64) delay * 1000000);
 }
 
-void acl_ioctl_server_cancel_timer(ACL_IOCTL_TIMER_FN timer_fn, void *arg)
+void acl_ioctl_server_cancel_timer(ACL_EVENT_NOTIFY_TIME timer_fn, void *arg)
 {
 	acl_assert(__h_ioctl);
 	acl_ioctl_cancel_timer(__h_ioctl, timer_fn, arg);
@@ -241,7 +238,8 @@ ACL_IOCTL *acl_ioctl_server_handle()
 	return (__h_ioctl);
 }
 
-static void close_listen_timer(int event acl_unused, void *context acl_unused)
+static void close_listen_timer(int type acl_unused, ACL_EVENT *event acl_unused,
+	void *context acl_unused)
 {
 	int   i;
 
@@ -290,6 +288,40 @@ static void ioctl_server_exit(void)
 	exit(0);
 }
 
+/* ioctl_server_timeout - idle time exceeded */
+
+static void ioctl_server_timeout(int type acl_unused,
+	ACL_EVENT *event acl_unused, void *context)
+{
+	const char* myname = "ioctl_server_timeout";
+	ACL_IOCTL *h_ioctl = (ACL_IOCTL *) context;
+	time_t last, inter;
+	int   n;
+
+	n = get_client_count();
+
+	/* if there are some fds not be closed, the timer should be reset again */
+	if (n > 0 && acl_var_ioctl_idle_limit > 0) {
+		acl_ioctl_request_timer(h_ioctl, ioctl_server_timeout, h_ioctl,
+			(acl_int64) acl_var_ioctl_idle_limit * 1000000);
+		return;
+	}
+
+	last  = last_closing_time();
+	inter = time(NULL) - last;
+
+	if (inter >= 0 && inter < acl_var_ioctl_idle_limit) {
+		acl_ioctl_request_timer(h_ioctl, ioctl_server_timeout, h_ioctl,
+			(acl_int64) (acl_var_ioctl_idle_limit - inter) * 1000000);
+		return;
+	}
+
+	if (acl_msg_verbose)
+		acl_msg_info("%s: idle timeout -- exiting", myname);
+
+	ioctl_server_exit();
+}
+
 /* ioctl_server_abort - terminate after abnormal master exit */
 
 static void ioctl_server_abort(int event acl_unused, ACL_IOCTL *h_ioctl,
@@ -329,40 +361,8 @@ static void ioctl_server_abort(int event acl_unused, ACL_IOCTL *h_ioctl,
 	ioctl_server_exit();
 }
 
-/* ioctl_server_timeout - idle time exceeded */
-
-static void ioctl_server_timeout(int event acl_unused, void *context)
-{
-	const char* myname = "ioctl_server_timeout";
-	ACL_IOCTL *h_ioctl = (ACL_IOCTL *) context;
-	time_t last, inter;
-	int   n;
-
-	n = get_client_count();
-
-	/* if there are some fds not be closed, the timer should be reset again */
-	if (n > 0 && acl_var_ioctl_idle_limit > 0) {
-		acl_ioctl_request_timer(h_ioctl, ioctl_server_timeout, h_ioctl,
-			(acl_int64) acl_var_ioctl_idle_limit * 1000000);
-		return;
-	}
-
-	last  = last_closing_time();
-	inter = time(NULL) - last;
-
-	if (inter >= 0 && inter < acl_var_ioctl_idle_limit) {
-		acl_ioctl_request_timer(h_ioctl, ioctl_server_timeout, h_ioctl,
-			(acl_int64) (acl_var_ioctl_idle_limit - inter) * 1000000);
-		return;
-	}
-
-	if (acl_msg_verbose)
-		acl_msg_info("%s: idle timeout -- exiting", myname);
-
-	ioctl_server_exit();
-}
-
-static void ioctl_server_use_timer(int event acl_unused, void *context)
+static void ioctl_server_use_timer(int type acl_unused,
+	ACL_EVENT *event acl_unused, void *context)
 {
 	ACL_IOCTL *h_ioctl = (ACL_IOCTL *) context;
 	int   n;
@@ -463,7 +463,8 @@ static void ioctl_server_wakeup(ACL_IOCTL *h_ioctl, int fd,
 
 /* restart listening */
 
-static void ioctl_restart_listen(int event acl_unused, void *context)
+static void ioctl_restart_listen(int type acl_unused,
+	ACL_EVENT *event acl_unused, void *context)
 {
 	ACL_VSTREAM *stream = (ACL_VSTREAM*) context;
 	acl_assert(__h_ioctl);

@@ -126,9 +126,8 @@ bool master_threads::run_alone(const char* addrs, const char* path /* = NULL */,
 	return true;
 }
 
-void master_threads::listen_callback(int, void *context)
+void master_threads::listen_callback(int, ACL_EVENT*, ACL_VSTREAM* sstream, void*)
 {
-	ACL_VSTREAM* sstream = (ACL_VSTREAM*) context;
 	ACL_VSTREAM* client = acl_vstream_accept(sstream, NULL, 0);
 
 	if (client == NULL)
@@ -214,7 +213,7 @@ void master_threads::run_once(ACL_VSTREAM* client)
 
 //////////////////////////////////////////////////////////////////////////
 
-void master_threads::proc_set_timer(void (*callback)(int, void*),
+void master_threads::proc_set_timer(void (*callback)(int, ACL_EVENT*, void*),
 	void* ctx, int delay)
 {
 #ifdef WIN32
@@ -227,7 +226,8 @@ void master_threads::proc_set_timer(void (*callback)(int, void*),
 #endif
 }
 
-void master_threads::proc_del_timer(void (*callback)(int, void*), void* ctx)
+void master_threads::proc_del_timer(void (*callback)(int, ACL_EVENT*, void*),
+	void* ctx)
 {
 #ifdef WIN32
 	logger_error("can't support on win32");

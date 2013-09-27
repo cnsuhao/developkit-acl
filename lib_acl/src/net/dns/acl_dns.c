@@ -379,7 +379,8 @@ static int dns_lookup_send(ACL_DNS *dns, ACL_DNS_REQ *handle, const char *domain
 
 /* 查询超时的回调函数 */
 
-static void dns_lookup_timeout(int event_type, void *context)
+static void dns_lookup_timeout(int event_type, ACL_EVENT *event acl_unused,
+	void *context)
 {
 	const char *myname = "dns_lookup_timeout";
 	ACL_DNS_REQ *handle = (ACL_DNS_REQ*) context;

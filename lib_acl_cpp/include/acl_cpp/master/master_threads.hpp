@@ -2,6 +2,7 @@
 #include "acl_cpp/master/master_base.hpp"
 
 struct ACL_VSTREAM;
+struct ACL_EVENT;
 
 namespace acl {
 
@@ -94,14 +95,16 @@ public:
 	 * @param ctx {void*} callback 被调用时的第二个参数
 	 * @param delay {int} 定时器被循环触发的时间间隔(秒)
 	 */
-	static void proc_set_timer(void (*callback)(int, void*), void* ctx, int delay);
+	static void proc_set_timer(void (*callback)(int, ACL_EVENT*, void*),
+		void* ctx, int delay);
 
 	/**
 	 * 删除进程级别的定时器
 	 * @param callback {void (*)(int, void*)} 定时器回调函数
 	 * @param ctx {void*} callback 被调用时的第二个参数
 	 */
-	static void proc_del_timer(void (*callback)(int, void*), void* ctx);
+	static void proc_del_timer(void (*callback)(int, ACL_EVENT*, void*),
+		void* ctx);
 
 private:
 	// 线程开始创建后的回调函数
@@ -117,7 +120,8 @@ private:
 	static void run_once(ACL_VSTREAM* client);
 
 	// 监听套被回调的函数
-	static void listen_callback(int event_type, void *context);
+	static void listen_callback(int event_type, ACL_EVENT*,
+		ACL_VSTREAM*, void *context);
 
 	//////////////////////////////////////////////////////////////////
 
