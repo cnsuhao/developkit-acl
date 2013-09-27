@@ -107,6 +107,7 @@
 #include "acl_cpp/master/master_threads.hpp"
 #include "acl_cpp/master/master_aio.hpp"
 #include "acl_cpp/master/master_proc.hpp"
+#include "acl_cpp/master/master_udp.hpp"
 #include "acl_cpp/master/master_trigger.hpp"
 #include "acl_cpp/master/master_conf.hpp"
 

@@ -186,6 +186,26 @@ static bool create_master_trigger()
 	return files_copy(name, tab, src_path_, dst_path_);
 }
 
+static bool create_master_udp()
+{
+	create_common();
+
+	string file(master_name);
+	file << ".cf";
+	if (copy_and_replace("master_udp.cf", file.c_str()) == false)
+		return false;
+
+	const char* name = "master_udp";
+	const FILE_FROM_TO tab[] = {
+		{ "main_udp.cpp", "main.cpp" },
+		{ "master_udp.h", "master_service.h" },
+		{ "master_udp.cpp", "master_service.cpp" },
+		{ NULL, NULL }
+	};
+
+	return files_copy(name, tab, src_path_, dst_path_);
+}
+
 void master_creator()
 {
 	char buf[256];
@@ -209,7 +229,8 @@ void master_creator()
 		printf("choose master_service type:\r\n");
 		printf("t: for master_threads; p: for master_proc; "
 			"a: for master_aio; g: for master_trigger; "
-			"r: for master_rpc; s: skip choose\r\n");
+			"r: for master_rpc; u: for master_udp; "
+			"s: skip choose\r\n");
 		printf(">"); fflush(stdout);
 
 		n = acl_vstream_gets_nonl(ACL_VSTREAM_IN, buf, sizeof(buf));
@@ -238,6 +259,11 @@ void master_creator()
 		else if (strcasecmp(buf, "g") == 0)
 		{
 			create_master_trigger();
+			break;
+		}
+		else if (strcasecmp(buf, "u") == 0)
+		{
+			create_master_udp();
 			break;
 		}
 		else if (strcasecmp(buf, "s") == 0)
