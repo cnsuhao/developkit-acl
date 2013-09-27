@@ -143,6 +143,6 @@ clean:
 	@(cd gc; make clean)
 	@(cd smtp_client; make clean)
 	@(cd vstream_popen3; make clean)
-	@(cd mkdir; make clean clean)
+	@(cd mkdir; make clean)
 	@(cd udp_client; make clean)
 	@(cd udp_server; make clean)
