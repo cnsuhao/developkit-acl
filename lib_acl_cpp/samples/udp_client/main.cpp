@@ -23,6 +23,8 @@ static void run(void)
 	else
 		stream.set_peer(__server_addr);
 
+	stream.set_rw_timeout(0);
+
 	// ·ÖÅäÄÚ´æ
 	buf = (char*) malloc(__dat_length + 1);
 	memset(buf, 'X', __dat_length);
