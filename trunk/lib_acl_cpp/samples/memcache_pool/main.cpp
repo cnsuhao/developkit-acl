@@ -4,6 +4,8 @@ using namespace acl;
 
 static int __loop_count = 10;
 static connect_pool* __conn_pool = NULL;
+static string __action("get");
+static char __value[256];
 static acl_pthread_pool_t* __thr_pool = NULL;
 
 // 初始化过程
@@ -26,26 +28,53 @@ static void end(void)
 	delete __conn_pool;
 }
 
+static const char* __keypre = "test";
+
 // MEMCACHE 请求过程，向服务器发送请求后从服务器读取响应数据
 static bool memcache_get(memcache* conn, const char* key)
 {
-	const char* keypre = "test";
 	string buf;
 
-	conn->set_prefix(keypre);
+	conn->set_prefix(__keypre);
 	if (conn->get(key, buf) == false)
 	{
 		printf("get key: %s error\r\n", key);
 		return false;
 	}
+	else
+		return true;
+}
 
-	return true;
+// 向 MEMCACHE 服务器添加数据
+static bool memcache_set(memcache* conn, const char* key)
+{
+	string buf;
+
+	conn->set_prefix(__keypre);
+	if (conn->set(key, __value, sizeof(__value) - 1) == false)
+	{
+		printf("set key: %s error\r\n", key);
+		return false;
+	}
+	else
+		return true;
 }
 
 // 线程处理过程
 static void thread_main(void* ctx)
 {
 	char* key = (char*) ctx;
+	bool (*action_fn)(memcache* conn, const char* key);
+	string keybuf;
+
+	if (__action == "set")
+	{
+		action_fn = memcache_set;
+		memset(__value, 'X', sizeof(__value));
+		__value[sizeof(__value) - 1] = 0;
+	}
+	else
+		action_fn = memcache_get;
 
 	for (int i = 0; i < __loop_count; i++)
 	{
@@ -57,17 +86,22 @@ static void thread_main(void* ctx)
 			break;
 		}
 
+		keybuf.format("%s_%d", key, i);
+
 		// 开始新的 HTTP 请求过程
-		if (memcache_get(conn, key) == false)
+		if (action_fn(conn, keybuf.c_str()) == false)
 		{
 			printf("one request failed, close connection\r\n");
 			// 错误连接需要关闭
 			__conn_pool->put(conn, false);
+			break;
 		}
 		else
 			__conn_pool->put(conn, true);
 		if (i % 1000 == 0)
-			printf("%lu--%d: read body over\r\n", acl_pthread_self(), i);
+			printf("%lu(%d), key: %s, action(%s) ok\r\n",
+				acl_pthread_self(), i, keybuf.c_str(),
+				__action.c_str());
 	}
 }
 
@@ -84,6 +118,7 @@ static void usage(const char* procname)
 		"	-s memcache_server_addr [127.0.0.1:11211]\r\n"
 		"	-k key\r\n"
 		"	-c cocurrent [default: 10]\r\n"
+		"	-a action [get|set, default: get]\r\n"
 		"	-n loop_count[default: 10]\r\n", procname);
 }
 
@@ -96,7 +131,7 @@ int main(int argc, char* argv[])
 	// 初始化 acl 库
 	acl::acl_cpp_init();
 
-	while ((ch = getopt(argc, argv, "hs:n:c:k:")) > 0)
+	while ((ch = getopt(argc, argv, "hs:n:c:k:a:")) > 0)
 	{
 		switch (ch)
 		{
@@ -114,6 +149,9 @@ int main(int argc, char* argv[])
 			break;
 		case 'k':
 			key = optarg;
+			break;
+		case 'a':
+			__action = optarg;
 			break;
 		default:
 			usage(argv[0]);
