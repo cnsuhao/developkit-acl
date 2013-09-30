@@ -42,6 +42,7 @@ all:
 	@(cd master_aio; make)
 	@(cd master_proc; make)
 	@(cd master_threads; make)
+	@(cd master_udp; make)
 	@(cd benchmark; make)
 	@(cd fs_benchmark; make)
 	@(cd http_request_pool; make)
@@ -97,3 +98,4 @@ clean:
 	@(cd http_request_pool; make clean)
 	@(cd memcache_pool; make clean)
 	@(cd udp_client;make clean)
+	@(cd master_udp; make clean)
