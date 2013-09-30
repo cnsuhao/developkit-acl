@@ -58,7 +58,7 @@ static void service_main(ACL_VSTREAM *client, char *service acl_unused,
 	if (0)
 		acl_msg_info("read: %s", buf);
 
-	ret = acl_vstream_writen(client, buf, strlen(buf));
+	ret = acl_vstream_write(client, buf, strlen(buf));
 	if (ret == ACL_VSTREAM_EOF) {
 		acl_msg_error("read error %s, local: %s, peer: %s",
 			acl_last_serror(), ACL_VSTREAM_LOCAL(client),
