@@ -53,11 +53,18 @@ void master_service::on_read(acl::socket_stream* stream)
 	else if (stream->write(buf, ret) == -1)
 		logger_error("write to %s error %s",
 			stream->get_peer(true), acl::last_serror());
-	logger(">>Peer: %s, Local: %s", stream->get_peer(true), stream->get_local(true));
+	if (0)
+	logger(">>Peer: %s, Local: %s", stream->get_peer(true),
+		stream->get_local(true));
 }
 
 void master_service::proc_on_init()
 {
+	const std::vector<acl::socket_stream*>& sstreams = get_sstreams();
+	std::vector<acl::socket_stream*>::const_iterator cit = sstreams.begin();
+	for (; cit != sstreams.end(); ++cit)
+		logger("local addr: %s, fd: %d", (*cit)->get_local(true),
+			(*cit)->sock_handle());
 }
 
 void master_service::proc_on_exit()

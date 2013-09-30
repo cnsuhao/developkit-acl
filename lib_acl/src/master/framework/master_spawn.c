@@ -206,7 +206,8 @@ void    acl_master_spawn(ACL_MASTER_SERV *serv)
 				acl_msg_fatal("%s: dup2 listen_fd %d: %s",
 					myname, serv->listen_fds[n], strerror(errno));
 			(void) close(serv->listen_fds[n]);
-			acl_msg_info(">>>fd is: %d<<", ACL_MASTER_LISTEN_FD + n);
+			if (acl_msg_verbose)
+				acl_msg_info(">>>fd is: %d<<", ACL_MASTER_LISTEN_FD + n);
 			acl_vstream_free(serv->listen_streams[n]);
 		}
 

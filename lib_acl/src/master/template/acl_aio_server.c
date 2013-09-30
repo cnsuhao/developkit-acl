@@ -130,7 +130,7 @@ static int __socket_count = 1;
 static int __listen_disabled = 0;
 
 static ACL_AIO *__h_aio = NULL;
-static ACL_ASTREAM **__listen_astreams;
+static ACL_ASTREAM **__sstreams = NULL;
 
 static time_t __last_closing_time = 0;
 static pthread_mutex_t __closing_time_mutex;
@@ -205,7 +205,7 @@ static time_t last_closing_time(void)
 	if (acl_var_aio_max_threads > 0)
 		unlock_closing_time();
 
-	return (last);
+	return last;
 }
 
 static void increase_client_counter(void)
@@ -238,24 +238,33 @@ static int get_client_count(void)
 	if (acl_var_aio_max_threads > 0)
 		unlock_counter();
 
-	return (n);
+	return n;
 }
 
 ACL_EVENT *acl_aio_server_event()
 {
-	return (acl_aio_event(__h_aio));
+	return acl_aio_event(__h_aio);
 }
 
 ACL_AIO* acl_aio_server_handle()
 {
-	return (__h_aio);
+	return __h_aio;
 }
 
-void acl_aio_server_request_timer(ACL_EVENT_NOTIFY_TIME timer_fn, void *arg, int delay)
+ACL_ASTREAM **acl_aio_server_streams()
+{
+	if (__sstreams == NULL)
+		acl_msg_warn("listen streams null!");
+	return __sstreams;
+}
+
+void acl_aio_server_request_timer(ACL_EVENT_NOTIFY_TIME timer_fn,
+	void *arg, int delay)
 {
 	const char *myname = "acl_aio_server_request_timer";
 
-	acl_aio_request_timer(__h_aio, timer_fn, arg, (acl_int64) delay * 1000000, 0);
+	acl_aio_request_timer(__h_aio, timer_fn, arg,
+		(acl_int64) delay * 1000000, 0);
 	if (__h_aio == NULL)
 		acl_msg_fatal("%s(%d)->%s: aio has not been inited",
 			__FILE__, __LINE__, myname);
@@ -275,16 +284,16 @@ static void disable_listen(void)
 {
 	int   i;
 
-	if (__listen_astreams == NULL)
+	if (__sstreams == NULL)
 		return;
-	for (i = 0; __listen_astreams[i] != NULL; i++) {
-		acl_aio_disable_read(__listen_astreams[i]);
-		acl_aio_iocp_close(__listen_astreams[i]);
-		__listen_astreams[i] = NULL;
+	for (i = 0; __sstreams[i] != NULL; i++) {
+		acl_aio_disable_read(__sstreams[i]);
+		acl_aio_iocp_close(__sstreams[i]);
+		__sstreams[i] = NULL;
 	}
 
-	acl_myfree(__listen_astreams);
-	__listen_astreams = NULL;
+	acl_myfree(__sstreams);
+	__sstreams = NULL;
 }
 
 /* aio_server_exit - normal termination */
@@ -396,7 +405,7 @@ int acl_aio_server_read(ACL_ASTREAM *astream, int timeout,
 	acl_aio_ctl(astream, ACL_AIO_CTL_READ_HOOK_ADD, notify_fn, context,
 		ACL_AIO_CTL_TIMEOUT, timeout, ACL_AIO_CTL_END);
 	acl_aio_read(astream);
-	return (0);
+	return 0;
 }
 
 int acl_aio_server_readn(ACL_ASTREAM *astream, int count, int timeout,
@@ -410,7 +419,7 @@ int acl_aio_server_readn(ACL_ASTREAM *astream, int count, int timeout,
 	acl_aio_ctl(astream, ACL_AIO_CTL_READ_HOOK_ADD, notify_fn, context,
 		ACL_AIO_CTL_TIMEOUT, timeout, ACL_AIO_CTL_END);
 	acl_aio_readn(astream, count);
-	return (0);
+	return 0;
 }
 
 int acl_aio_server_gets(ACL_ASTREAM *astream, int timeout,
@@ -424,7 +433,7 @@ int acl_aio_server_gets(ACL_ASTREAM *astream, int timeout,
 	acl_aio_ctl(astream, ACL_AIO_CTL_READ_HOOK_ADD, notify_fn, context,
 		ACL_AIO_CTL_TIMEOUT, timeout, ACL_AIO_CTL_END);
 	acl_aio_gets(astream);
-	return (0);
+	return 0;
 }
 
 int acl_aio_server_gets_nonl(ACL_ASTREAM *astream, int timeout,
@@ -438,7 +447,7 @@ int acl_aio_server_gets_nonl(ACL_ASTREAM *astream, int timeout,
 	acl_aio_ctl(astream, ACL_AIO_CTL_READ_HOOK_ADD, notify_fn, context,
 		ACL_AIO_CTL_TIMEOUT, timeout, ACL_AIO_CTL_END);
 	acl_aio_gets_nonl(astream);
-	return (0);
+	return 0;
 }
 
 int acl_aio_server_writen(ACL_ASTREAM *astream, ACL_AIO_WRITE_FN notify_fn,
@@ -452,7 +461,7 @@ int acl_aio_server_writen(ACL_ASTREAM *astream, ACL_AIO_WRITE_FN notify_fn,
 	acl_aio_ctl(astream, ACL_AIO_CTL_WRITE_HOOK_ADD, notify_fn, context,
 		ACL_AIO_CTL_END);
 	acl_aio_writen(astream, data, dlen);
-	return (0);
+	return 0;
 }
 
 int acl_aio_server_vfprintf(ACL_ASTREAM *astream, ACL_AIO_WRITE_FN notify_fn,
@@ -466,7 +475,7 @@ int acl_aio_server_vfprintf(ACL_ASTREAM *astream, ACL_AIO_WRITE_FN notify_fn,
 	acl_aio_ctl(astream, ACL_AIO_CTL_WRITE_HOOK_ADD, notify_fn, context,
 		ACL_AIO_CTL_END);
 	acl_aio_vfprintf(astream, fmt, ap);
-	return (0);
+	return 0;
 }
 
 int acl_aio_server_fprintf(ACL_ASTREAM *astream, ACL_AIO_WRITE_FN notify_fn,
@@ -483,7 +492,7 @@ int acl_aio_server_fprintf(ACL_ASTREAM *astream, ACL_AIO_WRITE_FN notify_fn,
 	ret = acl_aio_server_vfprintf(astream, notify_fn, context, fmt, ap);
 	va_end(ap);
 
-	return (ret);
+	return ret;
 }
 
 int acl_aio_server_connect(const char *saddr, int timeout,
@@ -497,10 +506,10 @@ int acl_aio_server_connect(const char *saddr, int timeout,
 
 	astream = acl_aio_connect(__h_aio, saddr, timeout);
 	if (astream == NULL)
-		return (-1);
+		return -1;
 	acl_aio_ctl(astream, ACL_AIO_CTL_CONNECT_HOOK_ADD, connect_fn, context,
 		ACL_AIO_CTL_TIMEOUT, timeout, ACL_AIO_CTL_END);
-	return (0);
+	return 0;
 }
 
 /*
@@ -874,7 +883,7 @@ static ACL_AIO *create_aio(int *event_mode)
 	acl_aio_set_delay_sec(aio, acl_var_aio_delay_sec);
 	acl_aio_set_delay_usec(aio, acl_var_aio_delay_usec);
 	acl_aio_set_keep_read(aio, 1);
-	return (aio);
+	return aio;
 }
 
 static void log_event_mode(int event_mode)
@@ -954,9 +963,8 @@ static ACL_ASTREAM **create_listener(ACL_AIO *aio, int event_mode acl_unused,
 		aio_server_accept = aio_server_accept_pass;
 		fdtype = ACL_VSTREAM_TYPE_LISTEN;
 #endif
-	} else {
+	} else
 		acl_msg_fatal("unsupported transport type: %s", transport);
-	}
 
 	for (i = 0, fd = ACL_MASTER_LISTEN_FD;
 		fd < ACL_MASTER_LISTEN_FD + socket_count; fd++)
@@ -990,10 +998,11 @@ static ACL_ASTREAM **create_listener(ACL_AIO *aio, int event_mode acl_unused,
 		/* 为了保证 accept 的优先级，可以设置接收定时器 */
 		if (acl_var_aio_accept_timer > 0)
 			acl_aio_request_timer(aio, aio_server_accept_timer,
-				astream, (acl_int64) acl_var_aio_accept_timer * 1000000, 0);
+				astream, (acl_int64)
+				acl_var_aio_accept_timer * 1000000, 0);
 	}
 
-	return (listen_astreams);
+	return listen_astreams;
 }
 
 /* 进程间通信设置 */
@@ -1256,14 +1265,15 @@ void acl_aio_server_main(int argc, char **argv, ACL_AIO_SERVER_FN service,...)
 	aio_server_open_log();  /* 打开日志 */
 	log_event_mode(__event_mode);  /* 将事件模式记入日志中 */
 
+	create_timer(__h_aio, __use_limit_delay);  /* 创建定时器 */
+	__sstreams = create_listener(__h_aio, __event_mode,
+		transport, __socket_count);  /* 创建监听者 */
+	setup_ipc(__h_aio);  /* 安装进程间通信的通道 */
+
 	/* Run post-jail initialization. */
 	if (post_init)
 		post_init(aio_server_name, aio_server_argv);
 
-	create_timer(__h_aio, __use_limit_delay);  /* 创建定时器 */
-	__listen_astreams = create_listener(__h_aio, __event_mode,
-		transport, __socket_count);  /* 创建监听者 */
-	setup_ipc(__h_aio);  /* 安装进程间通信的通道 */
 	run_loop(argv[0]);  /* 进入事件主循环过程 */
 }
 #endif /* ACL_UNIX */
