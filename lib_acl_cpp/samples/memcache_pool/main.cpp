@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "util.h"
 
 using namespace acl;
 
@@ -66,6 +67,7 @@ static void thread_main(void* ctx)
 	char* key = (char*) ctx;
 	bool (*action_fn)(memcache* conn, const char* key);
 	string keybuf;
+	char   buf[256];
 
 	if (__action == "set")
 	{
@@ -76,7 +78,11 @@ static void thread_main(void* ctx)
 	else
 		action_fn = memcache_get;
 
-	for (int i = 0; i < __loop_count; i++)
+	struct timeval begin;
+	gettimeofday(&begin, NULL);
+
+	int   i = 0;
+	for (; i < __loop_count; i++)
 	{
 		// 从连接池中获取一个 HTTP 连接
 		memcache* conn = (memcache*) __conn_pool->peek();
@@ -99,10 +105,19 @@ static void thread_main(void* ctx)
 		else
 			__conn_pool->put(conn, true);
 		if (i % 1000 == 0)
-			printf("%lu(%d), key: %s, action(%s) ok\r\n",
-				acl_pthread_self(), i, keybuf.c_str(),
-				__action.c_str());
+		{
+			snprintf(buf, sizeof(buf), "key: %s, action(%s) ok",
+				keybuf.c_str(), __action.c_str());
+			ACL_METER_TIME(buf);
+		}
 	}
+
+	struct timeval end;
+	gettimeofday(&end, NULL);
+
+	double spent = util::stamp_sub(&end, &begin);
+	printf("total: %d, curr: %d, spent: %.2f, speed: %.2f\r\n",
+		__loop_count, i, spent, (i * 1000) / (spent > 1 ? spent : 1));
 }
 
 static void run(int cocurrent, char* key)
