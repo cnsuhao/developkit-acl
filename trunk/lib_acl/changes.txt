@@ -1,4 +1,8 @@
 
+389) 2013.9.30
+389.1) feature: acl_single_server.c, acl_ioctl_server.c, acl_aio_server.c
+acl_udp_server.c 增加了可以获得本地监听套接口流对象集合的函数
+
 388) 2013.9.27
 388.1) events: ACL_EVENT_NOTIFY_RDWR/ACL_EVENT_NOTIFY_TIME 函数接口类型
 重新定义，在回调函数中增加了 ACL_EVENT，ACL_VSTREAM 参数，从而方便用户
