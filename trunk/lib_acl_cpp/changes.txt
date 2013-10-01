@@ -3,6 +3,9 @@
 179) 2013.9.30
 179.1) feature: master_udp 服务器模板增加了可在 proc_on_init() 虚函数中获得
 本地绑定套接字流对象集合的函数功能: get_sstreams()
+179.2) bugfix: memcache.cpp 中 open 函数在连接 memcached 服务器时，如果连接
+失败，则有非法地址访问，因为在给 ebuf_ 添加错误信息时引用了一个未初始化的变量
+(此问题由 valgrind 发现)
 
 178) 2013.9.27
 178.1) lib_acl 库中 ACL_EVENT_NOTIFY_RDWR/ACL_EVENT_NOTIFY_TIME 函数接口定义
