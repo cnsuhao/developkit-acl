@@ -513,7 +513,7 @@ void acl_udp_server_main(int argc, char **argv, ACL_UDP_SERVER_FN service, ...)
 	/* 在切换用户运行身份前切换程序运行目录 */
 	if (chdir(acl_var_udp_queue_dir) < 0)
 		acl_msg_fatal("chdir(\"%s\"): %s",
-			acl_var_udp_queue_dir, strerror(errno));
+			acl_var_udp_queue_dir, acl_last_serror());
 
 	/* 切换用户运行身份前回调应用设置的回调函数 */
 	if (pre_init)
@@ -613,7 +613,7 @@ void acl_udp_server_main(int argc, char **argv, ACL_UDP_SERVER_FN service, ...)
 			if (acl_myflock(ACL_VSTREAM_FILE(udp_server_lock),
 				ACL_INTERNAL_LOCK, ACL_MYFLOCK_OP_EXCLUSIVE) < 0)
 			{
-				acl_msg_fatal("select lock: %s", strerror(errno));
+				acl_msg_fatal("lock error %s", acl_last_serror());
 			}
 		}
 		acl_watchdog_start(watchdog);

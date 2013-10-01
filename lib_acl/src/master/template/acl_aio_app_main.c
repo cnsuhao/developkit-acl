@@ -64,6 +64,7 @@ static void __service(ACL_SOCKET fd, char *service acl_unused,
 		acl_socket_close(fd);
 		return;
 	}
+
 	ACL_SAFE_STRNCPY(ip, addr, sizeof(ip));
 	ptr = strchr(ip, ':');
 	if (ptr)
@@ -88,10 +89,9 @@ static void __service(ACL_SOCKET fd, char *service acl_unused,
 	} else if (__run2_fn != NULL) {
 		if (__run2_fn(fd, __run_ctx) != 0)
 			acl_socket_close(fd);
-	} else {
+	} else
 		acl_msg_fatal("%s(%d), %s: __run_fn and __run2_fn are null",
 			__FILE__, __LINE__, myname);
-	}
 }
 
 static void __pre_accept(char *name acl_unused, char **argv acl_unused)
@@ -160,9 +160,9 @@ static void app_main_init(void)
 		*ptr++ = 0;
 		if (ptr == 0)
 			continue;
-		if (strcasecmp(pname, "mempool_limit") == 0) {
+		if (strcasecmp(pname, "mempool_limit") == 0)
 			__mempool_limit = atoi(ptr);
-		} else if (strcasecmp(pname, "mempool_use_mutex") == 0) {
+		else if (strcasecmp(pname, "mempool_use_mutex") == 0) {
 			if (strcasecmp(ptr, "true") == 0)
 				__mempool_use_mutex = 1;
 		}
