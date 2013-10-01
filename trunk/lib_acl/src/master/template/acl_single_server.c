@@ -242,11 +242,11 @@ static void single_server_accept_pass(int type acl_unused, ACL_EVENT *event,
 	    && acl_myflock(ACL_VSTREAM_FILE(single_server_lock),
 	    	ACL_INTERNAL_LOCK, ACL_MYFLOCK_OP_NONE) < 0)
 	{
-		acl_msg_fatal("select unlock: %s", strerror(errno));
+		acl_msg_fatal("select unlock: %s", acl_last_serror());
 	}
 	if (fd < 0) {
 		if (errno != EAGAIN)
-			acl_msg_fatal("accept connection: %s", strerror(errno));
+			acl_msg_fatal("accept connection: %s", acl_last_serror());
 		if (time_left >= 0)
 			acl_event_request_timer(event, single_server_timeout,
 				NULL, (acl_int64) time_left * 1000000, 0);
@@ -282,12 +282,12 @@ static void single_server_accept_sock(int type acl_unused, ACL_EVENT *event,
 	    && acl_myflock(ACL_VSTREAM_FILE(single_server_lock),
 	    	ACL_INTERNAL_LOCK, ACL_MYFLOCK_OP_NONE) < 0)
 	{
-		acl_msg_fatal("select unlock: %s", strerror(errno));
+		acl_msg_fatal("select unlock: %s", acl_last_serror());
 	}
 
 	if (fd < 0) {
 		if (errno != EAGAIN)
-			acl_msg_fatal("accept connection: %s", strerror(errno));
+			acl_msg_fatal("accept connection: %s", acl_last_serror());
 		if (time_left > 0)
 			acl_event_request_timer(event, single_server_timeout,
 				NULL, (acl_int64) time_left * 1000000, 0);
@@ -335,8 +335,9 @@ static void single_server_init(const char *procname)
 	acl_var_single_log_file = getenv("SERVICE_LOG");
 	if (acl_var_single_log_file == NULL) {
 		acl_var_single_log_file = acl_mystrdup("acl_master.log");
-		acl_msg_fatal("%s(%d)->%s: can't get MASTER_LOG's env value, use %s log",
-			__FILE__, __LINE__, myname, acl_var_single_log_file);
+		acl_msg_fatal("%s(%d)->%s: can't get MASTER_LOG's env value,"
+			" use %s log", __FILE__, __LINE__, myname,
+			acl_var_single_log_file);
 	}
 
 	acl_get_app_conf_int_table(__conf_int_tab);
@@ -469,10 +470,10 @@ void acl_single_server_main(int argc, char **argv, ACL_SINGLE_SERVER_FN service,
 		acl_var_single_procname, __LINE__, acl_var_single_log_file);
 
 	if (f_flag == 0)
-		acl_msg_fatal("%s(%d)->%s: need \"-f pathname\"",
+		acl_msg_fatal("%s(%d), %s: need \"-f pathname\"",
 			__FILE__, __LINE__, myname);
 	else if (acl_msg_verbose)
-		acl_msg_info("%s(%d)->%s: configure file = %s",
+		acl_msg_info("%s(%d), %s: configure file = %s",
 			__FILE__, __LINE__, myname, conf_file_ptr);
 
 	/* Application-specific initialization. */
@@ -514,18 +515,18 @@ void acl_single_server_main(int argc, char **argv, ACL_SINGLE_SERVER_FN service,
 			break;
 		case ACL_MASTER_SERVER_SOLITARY:
 			if (!alone)
-				acl_msg_fatal("service %s requires a process limit of 1",
-					service_name);
+				acl_msg_fatal("service %s requires a process"
+					" limit of 1", service_name);
 			break;
 		case ACL_MASTER_SERVER_UNLIMITED:
 			if (!zerolimit)
-				acl_msg_fatal("service %s requires a process limit of 0",
-					service_name);
+				acl_msg_fatal("service %s requires a process"
+					" limit of 0", service_name);
 				break;
 		case ACL_MASTER_SERVER_PRIVILEGED:
 			if (user_name)
-				acl_msg_fatal("service %s requires privileged operation",
-					service_name);
+				acl_msg_fatal("service %s requires privileged"
+					" operation", service_name);
 			break;
 		default:
 			acl_msg_panic("%s: unknown argument type: %d", myname, key);
@@ -541,7 +542,7 @@ void acl_single_server_main(int argc, char **argv, ACL_SINGLE_SERVER_FN service,
 
 	/* If not connected to stdin, stdin must not be a terminal */
 	if (stream == 0 && isatty(STDIN_FILENO))
-		acl_msg_fatal("%s(%d)->%s: do not run this command by hand",
+		acl_msg_fatal("%s(%d), %s: do not run this command by hand",
 			__FILE__, __LINE__, myname);
 
 	/* Can options be required? */
@@ -611,8 +612,9 @@ void acl_single_server_main(int argc, char **argv, ACL_SINGLE_SERVER_FN service,
 	/* Run pre-jail initialization. */
 
 	if (chdir(acl_var_single_queue_dir) < 0)
-		acl_msg_fatal("%s(%d)->%s: chdir(\"%s\"): %s", __FILE__,
-			__LINE__, myname, acl_var_single_queue_dir, strerror(errno));
+		acl_msg_fatal("%s(%d), %s: chdir(\"%s\"): %s", __FILE__,
+			__LINE__, myname, acl_var_single_queue_dir,
+			acl_last_serror());
 
 	if (pre_init)
 		pre_init(single_server_name, single_server_argv);
@@ -630,8 +632,8 @@ void acl_single_server_main(int argc, char **argv, ACL_SINGLE_SERVER_FN service,
 
 	/*
 	 * Are we running as a one-shot server with the client connection on
-	 * standard input? If so, make sure the output is written to stdout so as
-	 * to satisfy common expectation.
+	 * standard input? If so, make sure the output is written to stdout
+	 * so as to satisfy common expectation.
 	 */
 	if (stream != 0) {
 		/* Run post-jail initialization. */
@@ -644,9 +646,9 @@ void acl_single_server_main(int argc, char **argv, ACL_SINGLE_SERVER_FN service,
 
 	/*
 	 * Running as a semi-resident server. Service connection requests.
-	 * Terminate when we have serviced a sufficient number of clients, when
-	 * no-one has been talking to us for a configurable amount of time, or
-	 * when the master process terminated abnormally.
+	 * Terminate when we have serviced a sufficient number of clients,
+	 * when no-one has been talking to us for a configurable amount of
+	 * time, or when the master process terminated abnormally.
 	 */
 	if (acl_var_single_idle_limit > 0)
 		acl_event_request_timer(__eventp, single_server_timeout, NULL,
@@ -691,11 +693,12 @@ void acl_single_server_main(int argc, char **argv, ACL_SINGLE_SERVER_FN service,
 			if (acl_myflock(ACL_VSTREAM_FILE(single_server_lock),
 				ACL_INTERNAL_LOCK, ACL_MYFLOCK_OP_EXCLUSIVE) < 0)
 			{
-				acl_msg_fatal("error lock: %s", strerror(errno));
+				acl_msg_fatal("error lock %s", acl_last_serror());
 			}
 		}
 		acl_watchdog_start(watchdog);
-		delay_sec = loop ? loop(single_server_name, single_server_argv) : -1;
+		delay_sec = loop ? loop(single_server_name,
+			single_server_argv) : -1;
 		acl_event_set_delay_sec(__eventp, delay_sec);
 		acl_event_loop(__eventp);
 	}

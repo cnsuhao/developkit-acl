@@ -316,7 +316,7 @@ static void aio_server_timeout(int type acl_unused,
 
 	n = get_client_count();
 
-	/* if there are some fds not be closed, the timer should be reset again */
+	/* if some fds not be closed, the timer should be reset again */
 	if (n > 0 && acl_var_aio_idle_limit > 0) {                                         
 		acl_aio_request_timer(aio, aio_server_timeout, (void *) aio,
 			(acl_int64) acl_var_aio_idle_limit * 1000000, 0);
@@ -352,20 +352,18 @@ static void aio_server_abort(ACL_ASTREAM *astream, void *context acl_unused)
 	if (!__listen_disabled)
 		__listen_disabled = 1;
 
-	if (acl_var_aio_quick_abort == 0) {
-		n = get_client_count();
-		if (n > 0) {
-			/* set idle timeout to 1 second */
-			acl_var_aio_idle_limit = 1;
-			acl_aio_request_timer(__h_aio, aio_server_timeout, (void*) aio,
-				(acl_int64) acl_var_aio_idle_limit * 1000000, 0);
-			return;
-		}
-	}
-
-	if (acl_msg_verbose)
+	if (acl_var_aio_quick_abort) {
 		acl_msg_info("master disconnect -- exiting");
-	aio_server_exit();
+		aio_server_exit();
+	} else if ((n = get_client_count()) > 0) {
+		/* set idle timeout to 1 second */
+		acl_var_aio_idle_limit = 1;
+		acl_aio_request_timer(__h_aio, aio_server_timeout, (void*) aio,
+			(acl_int64) acl_var_aio_idle_limit * 1000000, 0);
+	} else {
+		acl_msg_info("master disconnect -- exiting");
+		aio_server_exit();
+	}
 }
 
 static void aio_server_read_abort(ACL_ASTREAM *astream, void *context,
@@ -383,14 +381,12 @@ static void aio_server_use_timer(int type acl_unused,
 	n = get_client_count();
 
 	if (n > 0 || __use_count < acl_var_aio_use_limit) {
-		acl_aio_request_timer(aio, aio_server_use_timer,
-			(void *) aio, (acl_int64) __use_limit_delay * 1000000, 0);
+		acl_aio_request_timer(aio, aio_server_use_timer, (void *) aio,
+			(acl_int64) __use_limit_delay * 1000000, 0);
 		return;
 	}
 
-	if (acl_msg_verbose)
-		acl_msg_info("use limit -- exiting");
-
+	acl_msg_info("use limit -- exiting");
 	aio_server_exit();
 }
 
@@ -538,7 +534,6 @@ static void server_wakeup(ACL_AIO *aio acl_unused, int fd)
 
 static void dummy(void *ptr acl_unused)
 {
-
 }
 
 static void free_tls(void *ptr)
@@ -566,6 +561,7 @@ static void once_init(void)
 }
 
 static acl_pthread_once_t once_control = ACL_PTHREAD_ONCE_INIT;
+
 static void *tls_alloc(size_t len)
 {
 	void *ptr;
@@ -631,13 +627,14 @@ static void aio_server_accept_pass(ACL_ASTREAM *astream, void *context)
 			fds[i] = fd;
 		else if (errno == EMFILE) {
 			delay_listen = 1;
-			acl_msg_warn("accept connection: %s", acl_last_serror());
+			acl_msg_warn("%s: accept error %s",
+				myname, acl_last_serror());
 			break;
 		} else if (errno == EAGAIN || errno == EINTR)
 			break;
 		else
-			acl_msg_fatal("%s: accept connection: %s",
-				myname, strerror(errno));
+			acl_msg_fatal("%s: accept error %s",
+				myname, acl_last_serror());
 	}
 
 	if (acl_var_aio_master_maxproc > 1 && i >= acl_var_aio_min_notify
@@ -661,7 +658,8 @@ static void aio_server_accept_pass(ACL_ASTREAM *astream, void *context)
 		&& acl_myflock(ACL_VSTREAM_FILE(aio_server_lock),
 			ACL_INTERNAL_LOCK, ACL_MYFLOCK_OP_NONE) < 0)
 	{
-		acl_msg_fatal("%s: select unlock: %s", myname, strerror(errno));
+		acl_msg_fatal("%s: select unlock: %s",
+			myname, acl_last_serror());
 	}
 
 	if (delay_listen) {
@@ -781,7 +779,7 @@ static void aio_server_accept_sock(ACL_ASTREAM *astream, void *context)
 static void aio_server_init(const char *procname)
 {
 	const char *myname = "aio_server_init";
-	static int   inited = 0;
+	static int  inited = 0;
 
 	if (inited)
 		return;
@@ -812,7 +810,7 @@ static void aio_server_init(const char *procname)
 	acl_var_aio_log_file = getenv("SERVICE_LOG");
 	if (acl_var_aio_log_file == NULL) {
 		acl_var_aio_log_file = acl_mystrdup("acl_master.log");
-		acl_msg_warn("%s(%d)->%s: can't get SERVICE_LOG's env value, use %s log",
+		acl_msg_warn("%s(%d), %s: no SERVICE_LOG env, use %s log",
 			__FILE__, __LINE__, myname, acl_var_aio_log_file);
 	}
 
@@ -841,7 +839,8 @@ static void usage(int argc, char *argv[])
 	char *service_name;
 
 	if (argc <= 0)
-		acl_msg_fatal("%s(%d): argc(%d) invalid", __FILE__, __LINE__, argc);
+		acl_msg_fatal("%s(%d): argc(%d) invalid",
+			__FILE__, __LINE__, argc);
 
 	service_name = acl_mystrdup(acl_safe_basename(argv[0]));
 
@@ -870,15 +869,13 @@ static ACL_AIO *create_aio(int *event_mode)
 {
 	ACL_AIO *aio;
 
-	if (strcasecmp(acl_var_aio_event_mode, "select") == 0) {
-		*event_mode = ACL_EVENT_SELECT;
-	} else if (strcasecmp(acl_var_aio_event_mode, "poll") == 0) {
+	if (strcasecmp(acl_var_aio_event_mode, "poll") == 0)
 		*event_mode = ACL_EVENT_POLL;
-	} else if (strcasecmp(acl_var_aio_event_mode, "kernel") == 0) {
+	else if (strcasecmp(acl_var_aio_event_mode, "kernel") == 0)
 		*event_mode = ACL_EVENT_KERNEL;
-	} else {
+	else
 		*event_mode = ACL_EVENT_SELECT;
-	}
+
 	aio = acl_aio_create(*event_mode);
 	acl_aio_set_delay_sec(aio, acl_var_aio_delay_sec);
 	acl_aio_set_delay_usec(aio, acl_var_aio_delay_usec);
@@ -973,7 +970,7 @@ static ACL_ASTREAM **create_listener(ACL_AIO *aio, int event_mode acl_unused,
 		stream = acl_vstream_fdopen(fd, O_RDWR, acl_var_aio_buf_size,
 			acl_var_aio_rw_timeout, fdtype);
 		if (stream == NULL)
-			acl_msg_fatal("%s(%d)->%s: stream null, fd = %d",
+			acl_msg_fatal("%s(%d), %s: stream null, fd = %d",
 				__FILE__, __LINE__, myname, fd);
 
 		acl_non_blocking(ACL_VSTREAM_SOCK(stream), ACL_NON_BLOCKING);
@@ -982,7 +979,7 @@ static ACL_ASTREAM **create_listener(ACL_AIO *aio, int event_mode acl_unused,
 		/* 打开异步数据流 */
 		astream = acl_aio_open(aio_ptr, stream);
 		if (astream == NULL)
-			acl_msg_fatal("%s(%d)->%s: astream null, fd=%d",
+			acl_msg_fatal("%s(%d), %s: astream null, fd=%d",
 				__FILE__, __LINE__, myname, fd);
 
 		/* 如果采用子线程单独 accept 连接，则 aio_server_accept 在子线程
@@ -1055,7 +1052,7 @@ static void run_loop(const char *procname)
 			if (acl_myflock(ACL_VSTREAM_FILE(aio_server_lock),
 				ACL_INTERNAL_LOCK, ACL_MYFLOCK_OP_EXCLUSIVE) < 0)
 			{
-				acl_msg_fatal("select lock: %s", strerror(errno));
+				acl_msg_fatal("lock error %s", acl_last_serror());
 			}
 		}
 
@@ -1145,21 +1142,19 @@ void acl_aio_server_main(int argc, char **argv, ACL_AIO_SERVER_FN service,...)
 
 	/* If not connected to stdin, stdin must not be a terminal. */
 	if (stream == 0 && isatty(STDIN_FILENO))
-		acl_msg_fatal("%s(%d)->%s: do not run this command by hand",
+		acl_msg_fatal("%s(%d), %s: do not run this command by hand",
 			__FILE__, __LINE__, myname);
 	if (stream == 0)
 		aio_server_init(argv[0]);
 
 	if (f_flag == 0)
-		acl_msg_fatal("%s(%d)->%s: need \"-f pathname\"",
+		acl_msg_fatal("%s(%d), %s: need \"-f pathname\"",
 			__FILE__, __LINE__, myname);
 	else if (acl_msg_verbose)
-		acl_msg_info("%s(%d)->%s: configure file = %s", 
+		acl_msg_info("%s(%d), %s: configure file = %s", 
 			__FILE__, __LINE__, myname, conf_file_ptr);
 
-	/*
-	 * Application-specific initialization.
-	 */
+	/* Application-specific initialization. */
 	va_start(ap, service);
 	while ((key = va_arg(ap, int)) != 0) {
 		switch (key) {
@@ -1201,18 +1196,18 @@ void acl_aio_server_main(int argc, char **argv, ACL_AIO_SERVER_FN service,...)
 			break;
 		case ACL_MASTER_SERVER_SOLITARY:
 			if (!alone)
-				acl_msg_fatal("service %s requires a process limit of 1",
-					service_name);
+				acl_msg_fatal("service %s requires a process"
+					" limit of 1", service_name);
 			break;
 		case ACL_MASTER_SERVER_UNLIMITED:
 			if (!zerolimit)
-				acl_msg_fatal("service %s requires a process limit of 0",
-					service_name);
+				acl_msg_fatal("service %s requires a process"
+					" limit of 0", service_name);
 			break;
 		case ACL_MASTER_SERVER_PRIVILEGED:
 			if (user_name)
-				acl_msg_fatal("service %s requires privileged operation",
-					service_name);
+				acl_msg_fatal("service %s requires privileged"
+					" operation", service_name);
 			break;
 		default:
 			acl_msg_panic("%s: unknown argument type: %d", myname, key);
@@ -1250,7 +1245,7 @@ void acl_aio_server_main(int argc, char **argv, ACL_AIO_SERVER_FN service,...)
 	/* change to given directory */
 	if (chdir(acl_var_aio_queue_dir) < 0)
 		acl_msg_fatal("chdir(\"%s\"): %s", acl_var_aio_queue_dir,
-			strerror(errno));
+			acl_last_serror());
 
 	/* Run pre-jail initialization. */
 	if (pre_init)
