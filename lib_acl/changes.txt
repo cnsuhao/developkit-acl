@@ -1,6 +1,8 @@
 
 390) 2013.10.1
 390.1) 将 master 模块下的源文件代码排版整理了一下
+390.2) bugfix: events_select.c/events_select_thr.c 当套接字监听集合为空时
+休眠的时间单位为秒，需要将微秒级的 delay 转为秒级
 
 389) 2013.9.30
 389.1) feature: acl_single_server.c, acl_ioctl_server.c, acl_aio_server.c

@@ -44,27 +44,27 @@ void aio_stream::close()
 
 aio_handle& aio_stream::get_handle() const
 {
-	return (*handle_);
+	return *handle_;
 }
 
 ACL_ASTREAM* aio_stream::get_astream() const
 {
-	return (stream_);
+	return stream_;
 }
 
 ACL_VSTREAM* aio_stream::get_vstream() const
 {
 	if (stream_ == NULL)
-		return (NULL);
-	return (acl_aio_vstream(stream_));
+		return NULL;
+	return acl_aio_vstream(stream_);
 }
 
 ACL_SOCKET aio_stream::get_socket() const
 {
 	ACL_VSTREAM* stream = get_vstream();
 	if (stream == NULL)
-		return (ACL_SOCKET_INVALID);
-	return (ACL_VSTREAM_SOCK(stream));
+		return ACL_SOCKET_INVALID;
+	return ACL_VSTREAM_SOCK(stream);
 }
 
 void aio_stream::add_close_callback(aio_callback* callback)
@@ -174,7 +174,7 @@ int aio_stream::del_close_callback(aio_callback* callback)
 		}
 	}
 
-	return (n);
+	return n;
 }
 
 int aio_stream::del_timeout_callback(aio_callback* callback)
@@ -206,7 +206,7 @@ int aio_stream::del_timeout_callback(aio_callback* callback)
 		}
 	}
 
-	return (n);
+	return n;
 }
 
 int aio_stream::disable_close_callback(aio_callback* callback)
@@ -236,7 +236,7 @@ int aio_stream::disable_close_callback(aio_callback* callback)
 		}
 	}
 
-	return (n);
+	return n;
 }
 
 int aio_stream::disable_timeout_callback(aio_callback* callback)
@@ -266,7 +266,7 @@ int aio_stream::disable_timeout_callback(aio_callback* callback)
 		}
 	}
 
-	return (n);
+	return n;
 }
 
 int aio_stream::enable_close_callback(aio_callback* callback /* = NULL */)
@@ -297,7 +297,7 @@ int aio_stream::enable_close_callback(aio_callback* callback /* = NULL */)
 		}
 	}
 
-	return (n);
+	return n;
 }
 
 int aio_stream::enable_timeout_callback(aio_callback* callback /* = NULL */)
@@ -328,7 +328,7 @@ int aio_stream::enable_timeout_callback(aio_callback* callback /* = NULL */)
 		}
 	}
 
-	return (n);
+	return n;
 }
 
 void aio_stream::hook_error()
@@ -370,7 +370,7 @@ int aio_stream::close_callback(ACL_ASTREAM* stream acl_unused, void* ctx)
 	}
 
 	as->destroy();
-	return (0);
+	return 0;
 }
 
 int aio_stream::timeout_callback(ACL_ASTREAM* stream acl_unused, void* ctx)
@@ -383,10 +383,10 @@ int aio_stream::timeout_callback(ACL_ASTREAM* stream acl_unused, void* ctx)
 			continue;
 
 		if ((*it)->callback->timeout_callback() == false)
-			return (-1);
+			return -1;
 	}
 
-	return (0);
+	return 0;
 }
 
 }  // namespace acl
