@@ -243,6 +243,9 @@ void echo_client_start(int use_slice)
 		acl_myfree(__data);
 	__data = NULL;
 	printf("enter any key to quit now\n");
+
+	acl_aio_free(__aio);
+	__aio = NULL;
 	getchar();
 }
 
