@@ -100,6 +100,8 @@ bool master_udp::run_alone(const char* addrs, const char* path /* = NULL */,
 		{
 			logger_error("bind %s error %s",
 				addr, last_serror());
+			close_sstreams();
+			acl_event_free(eventp);
 			acl_argv_free(tokens);
 			return false;
 		}
@@ -122,11 +124,12 @@ bool master_udp::run_alone(const char* addrs, const char* path /* = NULL */,
 	while (!__stop)
 		acl_event_loop(eventp);
 
+	service_exit(NULL, NULL);
+
 	// 必须在调用 acl_event_free 前调用 close_sstreams，因为在关闭
 	// 网络流对象时依然有对 ACL_EVENT 引擎的使用
 	close_sstreams();
 	acl_event_free(eventp);
-	service_exit(NULL, NULL);
 	return true;
 }
 

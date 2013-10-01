@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #ifndef ACL_PREPARE_COMPILE
 #include "stdlib/acl_define.h"
+#include "stdlib/acl_mymalloc.h"
 
 /* #include <time.h> */
 #include <stdio.h>
@@ -205,6 +206,19 @@ static int reopen_log(ACL_LOG *log)
 			RETURN (-1);
 	} else if (now - log->last_open < log->reopen_inter)
 		RETURN (-1);
+
+	if (log->fp->path) {
+		acl_myfree(log->fp->path);
+		log->fp->path = NULL;
+	}
+	if (log->fp->addr_local) {
+		acl_myfree(log->fp->addr_local);
+		log->fp->addr_local = NULL;
+	}
+	if (log->fp->addr_peer) {
+		acl_myfree(log->fp->addr_peer);
+		log->fp->addr_peer = NULL;
+	}
 
 	private_vstream_close(log->fp);
 	acl_assert(log->path);
@@ -731,8 +745,21 @@ void acl_close_log()
 		if ((log->flag & ACL_LOG_F_FIXED))
 			continue;
 
-		if (log->fp)
+		if (log->fp) {
+			if (log->fp->path) {
+				acl_myfree(log->fp->path);
+				log->fp->path = NULL;
+			}
+			if (log->fp->addr_local) {
+				acl_myfree(log->fp->addr_local);
+				log->fp->addr_local = NULL;
+			}
+			if (log->fp->addr_peer) {
+				acl_myfree(log->fp->addr_peer);
+				log->fp->addr_peer = NULL;
+			}
 			private_vstream_close(log->fp);
+		}
 		if (log->path)
 			free(log->path);
 		if (log->lock)
