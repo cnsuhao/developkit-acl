@@ -6,7 +6,7 @@ using namespace acl;
 static int __loop_count = 10;
 static connect_pool* __conn_pool = NULL;
 static string __action("get");
-static char __value[256];
+static char __data[256];
 static acl_pthread_pool_t* __thr_pool = NULL;
 
 // 初始化过程
@@ -52,7 +52,7 @@ static bool memcache_set(memcache* conn, const char* key)
 	string buf;
 
 	conn->set_prefix(__keypre);
-	if (conn->set(key, __value, sizeof(__value) - 1) == false)
+	if (conn->set(key, __data, sizeof(__data) - 1) == false)
 	{
 		printf("set key: %s error\r\n", key);
 		return false;
@@ -72,8 +72,8 @@ static void thread_main(void* ctx)
 	if (__action == "set")
 	{
 		action_fn = memcache_set;
-		memset(__value, 'X', sizeof(__value));
-		__value[sizeof(__value) - 1] = 0;
+		memset(__data, 'X', sizeof(__data));
+		__data[sizeof(__data) - 1] = 0;
 	}
 	else
 		action_fn = memcache_get;
