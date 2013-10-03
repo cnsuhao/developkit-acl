@@ -1,4 +1,7 @@
 
+4) 2013.10.3
+4.1) samples/http_probe: 重写了该例子并测试通过
+
 3) 2013.9.26
 3.1) samples/master/udp_echo: 该例子用于测试新增加的 master 服务器框架
 专门针对  UDP 通信的服务器通信模板
