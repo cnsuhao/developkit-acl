@@ -72,6 +72,7 @@ all:
 	@(cd mkdir; make)
 	@(cd udp_client; make)
 	@(cd udp_server; make)
+	@(cd http_probe; make)
 clean:
 	@(cd master; make clean)
 	@(cd dlink; make clean)
@@ -146,3 +147,4 @@ clean:
 	@(cd mkdir; make clean)
 	@(cd udp_client; make clean)
 	@(cd udp_server; make clean)
+	@(cd http_probe; make clean)

@@ -1054,8 +1054,11 @@ int acl_vstream_readn_peek(ACL_VSTREAM *stream, ACL_VSTRING *strbuf,
 	int   cnt_saved = cnt;
 
 	if (stream == NULL || strbuf == NULL || cnt <= 0 || ready == NULL)
-		acl_msg_fatal("%s, %s(%d): invalid input",
-			myname, __FILE__, __LINE__);
+		acl_msg_fatal("%s, %s(%d): invalid input, stream: %s, "
+			"strbuf: %s, cnt: %d, ready: %s", myname, __FILE__,
+			__LINE__, stream ? "not null" : "null",
+			strbuf ? "not null" : "null", cnt,
+			ready ? "not null" : "null");
 
 	*ready = 0;
 	if (stream->read_cnt < 0)
