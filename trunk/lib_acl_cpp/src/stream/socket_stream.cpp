@@ -93,10 +93,7 @@ ACL_SOCKET socket_stream::unbind_sock()
 const char* socket_stream::get_peer(bool full /* = false */) const
 {
 	if (stream_ == NULL)
-	{
-		const_cast<socket_stream*> (this)->dummy_[0] = 0;
 		return dummy_;
-	}
 
 	// xxx: acl_vstream 中没有对此地址赋值
 	char* ptr = ACL_VSTREAM_PEER(stream_);
@@ -120,10 +117,7 @@ const char* socket_stream::get_peer(bool full /* = false */) const
 const char* socket_stream::get_peer_ip() const
 {
 	if (stream_ == NULL)
-	{
-		const_cast<socket_stream*> (this)->dummy_[0] = 0;
 		return dummy_;
-	}
 
 	if (peer_ip_[0] != 0)
 		return peer_ip_;
@@ -161,10 +155,7 @@ bool socket_stream::set_peer(const char* addr)
 const char* socket_stream::get_local(bool full /* = false */) const
 {
 	if (stream_ == NULL)
-	{
-		const_cast<socket_stream*> (this)->dummy_[0] = 0;
 		return dummy_;
-	}
 
 	// xxx: acl_vstream 中没有对此地址赋值
 	char* ptr = ACL_VSTREAM_LOCAL(stream_);
@@ -188,10 +179,7 @@ const char* socket_stream::get_local(bool full /* = false */) const
 const char* socket_stream::get_local_ip() const
 {
 	if (stream_ == NULL)
-	{
-		const_cast<socket_stream*> (this)->dummy_[0] = 0;
 		return dummy_;
-	}
 
 	// xxx: acl_vstream 中没有对此地址赋值
 	if (local_ip_[0] != 0)
