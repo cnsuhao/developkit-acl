@@ -833,15 +833,17 @@ int acl_vstream_gets_nonl(ACL_VSTREAM *stream, void *vptr, size_t maxlen)
 int acl_vstream_readn(ACL_VSTREAM *stream, void *buf, size_t size)
 {
 	const char *myname = "acl_vstream_readn";
-	unsigned char *ptr = (unsigned char*) buf;
 	size_t  size_saved = size;
-	int   n = acl_vstream_bfcp_some(stream, ptr, size);
+	unsigned char *ptr;
+	int   n;
 
 	if (stream == NULL || buf == NULL || size == 0)
 		acl_msg_fatal("%s(%d): stream: %s, buf: %s, size: %d",
 			myname, __LINE__, stream ? "not null" : "null",
 			buf ? "not null" : "null", (int) size);
 
+	ptr = (unsigned char*) buf;
+	n = acl_vstream_bfcp_some(stream, ptr, size);
 	ptr += n;
 	size -= n;
 
