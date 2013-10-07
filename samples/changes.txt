@@ -1,4 +1,8 @@
 
+5) 2013.10.7
+5.1) samples: 添加了 vstream_server/vstream_client 两个测试例子，以测试优化后
+的 acl_vstream_readn/acl_vstream_read 的性能
+
 4) 2013.10.3
 4.1) samples/http_probe: 重写了该例子并测试通过
 
