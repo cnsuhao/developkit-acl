@@ -843,9 +843,11 @@ int acl_vstream_readn(ACL_VSTREAM *stream, void *buf, size_t size)
 			buf ? "not null" : "null", (int) size);
 
 	ptr = (unsigned char*) buf;
-	n = acl_vstream_bfcp_some(stream, ptr, size);
-	ptr += n;
-	size -= n;
+	if (stream->read_cnt > 0) {
+		n = acl_vstream_bfcp_some(stream, ptr, size);
+		ptr += n;
+		size -= n;
+	}
 
 	while (size > 0) {
 		n = __sys_read(stream, ptr, size);
