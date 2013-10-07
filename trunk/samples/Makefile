@@ -65,7 +65,6 @@ all:
 #	@(cd jt2ft; make)
 	@(cd acl; make)
 #	@(cd dbpool; make)
-#	@(cd http_probe; make)
 	@(cd thread_pool_client; make)
 	@(cd smtp_client; make)
 	@(cd vstream_popen3; make)
@@ -73,6 +72,8 @@ all:
 	@(cd udp_client; make)
 	@(cd udp_server; make)
 	@(cd http_probe; make)
+	@(cd vstream_server; make)
+	@(cd vstream_client; make)
 clean:
 	@(cd master; make clean)
 	@(cd dlink; make clean)
@@ -148,3 +149,5 @@ clean:
 	@(cd udp_client; make clean)
 	@(cd udp_server; make clean)
 	@(cd http_probe; make clean)
+	@(cd vstream_server; make clean)
+	@(cd vstream_client; make clean)
