@@ -3,8 +3,8 @@
 #include "res_callback.h"
 
 res_callback::res_callback(req_callback* req, acl::ofstream& res_fp)
-: req_(req)
-, conn_(NULL)
+: conn_(NULL)
+, req_(req)
 , res_fp_(res_fp)
 {
 
