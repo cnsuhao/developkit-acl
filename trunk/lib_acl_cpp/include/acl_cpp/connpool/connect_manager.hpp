@@ -144,7 +144,6 @@ private:
 	string default_addr_;			// 缺省的服务地址
 	connect_pool* default_pool_;		// 缺省的服务连接池
 	std::vector<connect_pool*> pools_;	// 所有的服务连接池
-	size_t service_size_;			// 缓存住当前总的服务器集群数量
 	size_t service_idx_;			// 下一个要访问的的下标值
 	locker lock_;				// 访问 pools_ 时的互斥锁
 	int  stat_inter_;			// 统计访问量的定时器间隔

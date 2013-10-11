@@ -126,7 +126,6 @@ connect_pool& connect_manager::set(const char* addr, int count)
 
 	connect_pool* pool = create_pool(key, count, pools_.size() - 1);
 	pools_.push_back(pool);
-	service_size_ = pools_.size();
 
 	lock_.unlock();
 
@@ -194,7 +193,8 @@ connect_pool* connect_manager::peek()
 {
 	connect_pool* pool;
 	lock_.lock();
-	size_t n = service_idx_ % service_size_;
+	size_t service_size = pools_.size();
+	size_t n = service_idx_ % service_size;
 	service_idx_++;
 	lock_.unlock();
 	pool = pools_[n];
@@ -210,7 +210,8 @@ connect_pool* connect_manager::peek(const char* key,
 	unsigned n = acl_hash_crc32(key, strlen(key));
 	if (exclusive)
 		lock_.lock();
-	connect_pool* pool = pools_[n % service_size_];
+	size_t service_size = pools_.size();
+	connect_pool* pool = pools_[n % service_size];
 	if (exclusive)
 		lock_.unlock();
 
