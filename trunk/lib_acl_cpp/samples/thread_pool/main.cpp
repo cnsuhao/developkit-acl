@@ -61,7 +61,7 @@ static void test_thread_pool(void)
 	//threads.execute(&thread2);
 }
 
-int main(int argc, char* argv[])
+int main(void)
 {
 	// ≥ı ºªØ acl ø‚
 	acl::acl_cpp_init();

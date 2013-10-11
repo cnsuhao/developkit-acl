@@ -44,7 +44,7 @@ static void test_thread(void)
 		printf("wait thread ok\r\n");
 }
 
-int main(int argc, char* argv[])
+int main(void)
 {
 	// ≥ı ºªØ acl ø‚
 	acl::acl_cpp_init();
