@@ -52,9 +52,11 @@ public:
 	/**
 	 * 根据服务端地址获得该服务器的连接池
 	 * @param addr {const char*} redis 服务器地址(ip:port)
+	 * @param exclusive {bool} 是否需要互斥访问连接池数组，当需要动态
+	 *  管理连接池集群时，该值应为 true
 	 * @return {connect_pool*} 返回空表示没有此服务
 	 */
-	connect_pool* get(const char* addr);
+	connect_pool* get(const char* addr, bool exclusive = true);
 
 	/**
 	 * 从连接池集群中获得一个连接池，该函数采用轮循方式从连接池集合中获取一个
@@ -68,13 +70,14 @@ public:
 	/**
 	 * 从连接池集群中获得一个连接池，该函数采用哈希定位方式从集合中获取一个
 	 * 后端服务器的连接池；子类可以重载此虚函数，采用自己的集群获取方式
-	 * 该虚函数内部缺省采用 CRC32 的哈希算法；该函数内部会自动对连接池管理
-	 * 队列加锁
+	 * 该虚函数内部缺省采用 CRC32 的哈希算法；
 	 * @param key {const char*} 键值字符串，如果该值为 NULL，则内部
 	 *  自动切换到轮循方式
+	 * @param exclusive {bool} 是否需要互斥访问连接池数组，当需要动态
+	 *  管理连接池集群时，该值应为 true
 	 * @return {connect_pool*} 返回一个可用的连接池，返回指针永远非空
 	 */
-	virtual connect_pool* peek(const char* key);
+	virtual connect_pool* peek(const char* key, bool exclusive = true);
 
 	/**
 	 * 当用户重载了 peek 函数时，可以调用此函数对连接池管理过程加锁

@@ -160,18 +160,29 @@ void connect_manager::remove(const char* addr)
 }
 
 
-connect_pool* connect_manager::get(const char* addr)
+connect_pool* connect_manager::get(const char* addr,
+	bool exclusive /* = true */)
 {
 	char key[256];
 	ACL_SAFE_STRNCPY(key, addr, sizeof(key));
 	acl_lowercase(key);
 
+	if (exclusive)
+		lock_.lock();
+
 	std::vector<connect_pool*>::iterator it = pools_.begin();
 	for (; it != pools_.end(); ++it)
 	{
 		if (strcasecmp(key, (*it)->get_addr()) == 0)
+		{
+			if (exclusive)
+				lock_.unlock();
 			return *it;
+		}
 	}
+
+	if (exclusive)
+		lock_.unlock();
 
 	logger_error("no connect pool for addr %s", addr);
 	return NULL;
@@ -190,15 +201,18 @@ connect_pool* connect_manager::peek()
 	return pool;
 }
 
-connect_pool* connect_manager::peek(const char* key)
+connect_pool* connect_manager::peek(const char* key,
+	bool exclusive /* = true */)
 {
 	if (key == NULL || *key == 0)
 		return peek();
 
 	unsigned n = acl_hash_crc32(key, strlen(key));
-	lock_.lock();
+	if (exclusive)
+		lock_.lock();
 	connect_pool* pool = pools_[n % service_size_];
-	lock_.unlock();
+	if (exclusive)
+		lock_.unlock();
 
 	return pool;
 }
