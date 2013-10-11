@@ -1,4 +1,5 @@
 #include "acl_stdafx.hpp"
+#include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/stdlib/thread.hpp"
 #include "acl_cpp/stdlib/thread_pool.hpp"
 
