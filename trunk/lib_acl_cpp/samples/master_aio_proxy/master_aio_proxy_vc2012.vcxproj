@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{58FE3581-C997-4BD5-9AC6-AEEB54A43D2C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <ProjectName>aio_proxy</ProjectName>
+    <ProjectName>master_aio_proxy</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDll|Win32'" Label="Configuration">
@@ -97,10 +97,10 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>lib_acl_cpp_vc2012d.lib;lib_acl_vc2012d.lib;lib_protocol_vc2012d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)aio_proxy.exe</OutputFile>
+      <OutputFile>$(OutDir)master_aio_proxy.exe</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)aio_proxy.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(OutDir)master_aio_proxy.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
@@ -117,7 +117,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>lib_acl_cpp_vc2012.lib;lib_acl_vc2012.lib;lib_protocol_vc2012.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)aio_proxy.exe</OutputFile>
+      <OutputFile>$(OutDir)master_aio_proxy.exe</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
@@ -137,7 +137,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>lib_acl_cpp_dll.lib;lib_acl.lib;lib_protocol.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)aio_proxy.exe</OutputFile>
+      <OutputFile>$(OutDir)master_aio_proxy.exe</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
@@ -165,10 +165,10 @@ copy ..\..\..\dist\lib\win32\lib_protocol.dll $(OutDir) /Y</Command>
     </ClCompile>
     <Link>
       <AdditionalDependencies>lib_acl_cppd_dll.lib;lib_acl_d.lib;lib_protocol_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)aio_proxy.exe</OutputFile>
+      <OutputFile>$(OutDir)master_aio_proxy.exe</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)aio_proxy.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(OutDir)master_aio_proxy.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>

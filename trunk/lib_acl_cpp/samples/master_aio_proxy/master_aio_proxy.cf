@@ -1,5 +1,5 @@
 
-service aio_proxy {
+service master_aio_proxy {
 #	进程是否禁止运行
 	master_disable = no
 #	服务地址及端口号
@@ -38,7 +38,7 @@ service aio_proxy {
 #	最大进程数
 	master_maxproc = 5
 #	进程程序名
-	master_command = aio_proxy
+	master_command = master_aio_proxy
 #	进程启动参数，只能为: -u [是否允许以某普通用户的身份运行]
 	master_args =
 #	传递给服务子进程的环境变量, 可以通过 getenv("SERVICE_ENV") 获得此值
@@ -46,7 +46,7 @@ service aio_proxy {
 #	master_env = logme:FALSE, priority:E_LOG_INFO, action:E_LOG_PER_DAY, flush:sync_flush, imit_size:512,\
 #			sync_action:E_LOG_SEM, sem_name:/tmp/aio_echo.sem
 #	进程日志记录文件
-	master_log = {install_path}/var/log/aio_proxy
+	master_log = {install_path}/var/log/master_aio_proxy
 
 #	是否允许产生 core 文件
 #	aio_enable_core = 1

@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 8.00
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "aio_proxy", "aio_proxy.vcproj", "{58FE3581-C997-4BD5-9AC6-AEEB54A43D2C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "master_aio_proxy", "master_aio_proxy.vcproj", "{58FE3581-C997-4BD5-9AC6-AEEB54A43D2C}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
