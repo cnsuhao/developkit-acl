@@ -1,7 +1,11 @@
 修改历史列表：
 ------------------------------------------------------------------------
+
 182) 2013.10.11
 182.1) feature: connect_manager/connect_pool 允许动态添加、删除连接池对象
+182.2) feature: 增加了线程类(stdlib/thread)及线程池类(stdlib/thread_pool)
+182.3) samples: 增加了测试用例 thread 用以测试线程类
+182.4) samples: 增加了测试用例 thread_pool 用以测试线程池类
 
 181) 2013.10.10
 181.1) samples: 添加了 master_aio_proxy 用作纯 TCP 非阻塞代理
