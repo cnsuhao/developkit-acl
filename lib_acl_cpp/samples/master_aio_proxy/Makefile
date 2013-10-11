@@ -1,2 +1,2 @@
-include ./Makefile.in
-PROG = aio_proxy
+include ../Makefile.in
+PROG = master_aio_proxy
