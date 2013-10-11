@@ -18,8 +18,9 @@ thread_pool::thread_pool()
 
 thread_pool::~thread_pool()
 {
-	if (thr_pool_)
-		acl_pthread_pool_destroy(thr_pool_);
+	if (thr_pool_ != NULL)
+		logger_warn("thread_pool::stop() not called!");
+
 	acl_myfree(thr_attr_);
 }
 
@@ -57,11 +58,6 @@ void thread_pool::start()
 
 void thread_pool::stop()
 {
-	acl_pthread_pool_stop(thr_pool_);
-}
-
-void thread_pool::destroy()
-{
 	if (thr_pool_)
 	{
 		acl_pthread_pool_destroy(thr_pool_);
@@ -77,9 +73,8 @@ bool thread_pool::execute(thread* thr)
 		return false;
 	}
 
-	printf("thr addr: %p\r\n", thr);
 	return acl_pthread_pool_add(thr_pool_, thread_run, thr)
-		== 0 ? true : false;
+			== 0 ? true : false;
 }
 
 int  thread_pool::curr_threads() const
@@ -92,9 +87,8 @@ int  thread_pool::curr_threads() const
 
 void thread_pool::thread_run(void* arg)
 {
-	printf("arg addr: %p\r\n", arg);
 	thread* thr = (thread*) arg;
-	(void*) thr->run();
+	thr->run();
 }
 
 int  thread_pool::thread_init(void* arg)
