@@ -146,7 +146,8 @@
 				Name="VCPreBuildEventTool"
 				CommandLine="copy ..\..\..\dist\lib\win32\lib_acl.dll $(OutDir)\ /Y
 copy ..\..\..\dist\lib\win32\lib_acl_cpp_dll.dll $(OutDir)\ /Y
-copy ..\..\..\dist\lib\win32\lib_protocol.dll $(OutDir)\ /Y"/>
+copy ..\..\..\dist\lib\win32\lib_protocol.dll $(OutDir)\ /Y
+"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -200,7 +201,8 @@ copy ..\..\..\dist\lib\win32\lib_protocol.dll $(OutDir)\ /Y"/>
 				Name="VCPreBuildEventTool"
 				CommandLine="copy ..\..\..\dist\lib\win32\lib_acl_d.dll $(OutDir)\ /Y
 copy ..\..\..\dist\lib\win32\lib_acl_cppd_dll.dll $(OutDir)\ /Y
-copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y"/>
+copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y
+"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -226,9 +228,6 @@ copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y"/>
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
 				RelativePath=".\main.cpp">
-			</File>
-			<File
-				RelativePath=".\master_service.cpp">
 			</File>
 			<File
 				RelativePath=".\stdafx.cpp">
@@ -262,9 +261,6 @@ copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y"/>
 			Name="Í·ÎÄ¼þ"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
-			<File
-				RelativePath=".\master_service.h">
-			</File>
 			<File
 				RelativePath=".\stdafx.h">
 			</File>
