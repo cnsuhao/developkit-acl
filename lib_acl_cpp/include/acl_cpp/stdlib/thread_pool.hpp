@@ -30,7 +30,24 @@ public:
 	 * 在调用本函数后，如果想重启线程池过程，则必须重新调用 start 过程
 	 */
 	void stop();
-	
+
+	/**
+	 * 将一个任务交给线程池中的一个线程去执行，线程池中的
+	 * 线程会执行该任务中的 run 函数
+	 * @param thr {thread*} 线程任务
+	 * @return {bool} 是否成功
+	 */
+	bool run(thread* thr);
+
+	/**
+	 * 将一个任务交给线程池中的一个线程去执行，线程池中的
+	 * 线程会执行该任务中的 run 函数；该函数功能与 run 功能完全相同，只是为了
+	 * 使 JAVA 程序员看起来更为熟悉才提供了此接口
+	 * @param thr {thread*} 线程任务
+	 * @return {bool} 是否成功
+	 */
+	bool execute(thread* thr);
+
 	/**
 	 * 在调用 start 前调用此函数可以设置所创建线程的堆栈大小
 	 * @param size {size_t} 线程堆栈大小，当该值为 0 或未
@@ -52,23 +69,6 @@ public:
 	 * @return {thread_pool&}
 	 */
 	thread_pool& set_idle(int ttl);
-
-	/**
-	 * 将一个任务交给线程池中的一个线程去执行，线程池中的
-	 * 线程会执行该任务中的 run 函数
-	 * @param thr {thread*} 线程任务
-	 * @return {bool} 是否成功
-	 */
-	bool run(thread* thr);
-
-	/**
-	 * 将一个任务交给线程池中的一个线程去执行，线程池中的
-	 * 线程会执行该任务中的 run 函数；该函数功能与 run 功能完全相同，只是为了
-	 * 使 JAVA 程序员看起来更为熟悉才提供了此接口
-	 * @param thr {thread*} 线程任务
-	 * @return {bool} 是否成功
-	 */
-	bool execute(thread* thr);
 
 	/**
 	 * 获得当前线程池中子线程的数量
