@@ -8,6 +8,11 @@ namespace acl
 
 class thread;
 
+/**
+ * 线程池管理类，该类内管理的线程池中的线程是半驻留的(即当线程空闲一定时间后
+ * 自动退出)，该类有两个非纯虚函数：thread_on_init(线程池中的某个线程第一次
+ * 创建时会首先调用此函数)，thread_on_exit(线程池中的某个线程退出时调用此函数)
+ */
 class thread_pool
 {
 public:
@@ -15,7 +20,7 @@ public:
 	virtual ~thread_pool();
 
 	/**
-	 * 启动线程池
+	 * 启动线程池，在创建线程池对象后，必须首先调用此函数以启动线程池
 	 */
 	void start();
 
@@ -54,6 +59,15 @@ public:
 	 * @param thr {thread*} 线程任务
 	 * @return {bool} 是否成功
 	 */
+	bool run(thread* thr);
+
+	/**
+	 * 将一个任务交给线程池中的一个线程去执行，线程池中的
+	 * 线程会执行该任务中的 run 函数；该函数功能与 run 功能完全相同，只是为了
+	 * 使 JAVA 程序员看起来更为熟悉才提供了此接口
+	 * @param thr {thread*} 线程任务
+	 * @return {bool} 是否成功
+	 */
 	bool execute(thread* thr);
 
 	/**
@@ -61,7 +75,13 @@ public:
 	 * @return {int} 返回线程池中子线程的数量，如果未通过调用 start
 	 *  启动线程池过程，则该函数返回 -1
 	 */
-	int curr_threads() const;
+	int threads_count() const;
+
+	/**
+	 * 获得当前线程池中未被处理的任务数量
+	 * @return {int} 当线程池还未被启动(即未调用 start)或已经销毁则返回 -1
+	 */
+	int task_qlen() const;
 
 protected:
 	/**

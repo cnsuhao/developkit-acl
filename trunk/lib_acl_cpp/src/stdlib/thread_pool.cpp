@@ -19,7 +19,7 @@ thread_pool::thread_pool()
 thread_pool::~thread_pool()
 {
 	if (thr_pool_ != NULL)
-		logger_warn("thread_pool::stop() not called!");
+		stop();
 
 	acl_myfree(thr_attr_);
 }
@@ -65,7 +65,7 @@ void thread_pool::stop()
 	}
 }
 
-bool thread_pool::execute(thread* thr)
+bool thread_pool::run(thread* thr)
 {
 	if (thr == NULL)
 	{
@@ -73,16 +73,40 @@ bool thread_pool::execute(thread* thr)
 		return false;
 	}
 
+	if (thr_pool_ == NULL)
+	{
+		logger_error("start() not called yet!");
+		return -1;
+	}
+
 	return acl_pthread_pool_add(thr_pool_, thread_run, thr)
 			== 0 ? true : false;
 }
 
-int  thread_pool::curr_threads() const
+bool thread_pool::execute(thread* thr)
+{
+	return run(thr);
+}
+
+int  thread_pool::threads_count() const
 {
 	if (thr_pool_ == NULL)
+	{
+		logger_error("start() not called yet!");
 		return -1;
+	}
 
 	return acl_pthread_pool_size(thr_pool_);
+}
+
+int  thread_pool::task_qlen() const
+{
+	if (thr_pool_ == NULL)
+	{
+		logger_error("start() not called yet!");
+		return -1;
+	}
+	return acl_pthread_pool_qlen(thr_pool_);
 }
 
 void thread_pool::thread_run(void* arg)
