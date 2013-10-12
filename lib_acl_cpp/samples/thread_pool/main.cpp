@@ -205,5 +205,9 @@ int main(int argc, char* argv[])
 
 	test_thread_pool(n);
 
+#ifdef WIN32
+	printf("enter any key to exit ...\r\n");
+	getchar();
+#endif
 	return 0;
 }

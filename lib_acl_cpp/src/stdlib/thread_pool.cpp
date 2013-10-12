@@ -76,7 +76,7 @@ bool thread_pool::run(thread* thr)
 	if (thr_pool_ == NULL)
 	{
 		logger_error("start() not called yet!");
-		return -1;
+		return false;
 	}
 
 	return acl_pthread_pool_add(thr_pool_, thread_run, thr)
