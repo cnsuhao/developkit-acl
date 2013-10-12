@@ -41,6 +41,9 @@ static void run(const char *local_addr, const char *peer_addr,
 	acl_vstream_set_peer(stream, peer_addr);
 
 	for (i = 0; i < count; i++) {
+		/* 如果服务端的地址是变化的，则应该在写每次前都需要调用
+		 * acl_vstream_set_peer
+		 */
 		ret = acl_vstream_write(stream, data, dlen);
 		if (ret == ACL_VSTREAM_EOF) {
 			printf("acl_vtream_writen error %s\r\n",
