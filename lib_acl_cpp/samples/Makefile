@@ -49,6 +49,8 @@ all:
 	@(cd http_request_pool; make)
 	@(cd memcache_pool; make)
 	@(cd udp_client;make)
+	@(cd thread; make)
+	@(cd thread_pool; make)
 
 clean:
 	@(cd string; make clean)
@@ -101,3 +103,5 @@ clean:
 	@(cd memcache_pool; make clean)
 	@(cd udp_client;make clean)
 	@(cd master_udp; make clean)
+	@(cd thread; make clean)
+	@(cd thread_pool; make clean)
