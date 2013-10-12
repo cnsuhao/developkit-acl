@@ -22,9 +22,9 @@ int main(int argc, char* argv[])
 		const char* addr = "127.0.0.1:8888";
 		printf("bind on: %s\r\n", addr);
 		if (argc >= 3)
-			ms.run_alone(addr, argv[2], 5);  // 单独运行方式
+			ms.run_alone(addr, argv[2], 0);  // 单独运行方式
 		else
-			ms.run_alone(addr, NULL, 5);  // 单独运行方式
+			ms.run_alone(addr, NULL, 0);  // 单独运行方式
 	}
 	else
 		ms.run_daemon(argc, argv);  // acl_master 控制模式运行
