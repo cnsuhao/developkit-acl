@@ -155,6 +155,7 @@ void master_udp::service_main(ACL_VSTREAM *stream, char*, char**)
 		ss = NEW socket_stream();
 		if (ss->open(stream) == false)
 			logger_fatal("open stream error!");
+		stream->context = ss;
 		acl_vstream_add_close_handle(stream, on_close, ss);
 	}
 
