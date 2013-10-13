@@ -135,21 +135,34 @@ bool master_udp::run_alone(const char* addrs, const char* path /* = NULL */,
 
 //////////////////////////////////////////////////////////////////////////
 
+static void on_close(ACL_VSTREAM* stream, void* ctx)
+{
+	if (ctx && stream->context == ctx)
+	{
+		socket_stream* ss = (socket_stream*) ctx;
+		delete ss;
+	}
+}
+
 void master_udp::service_main(ACL_VSTREAM *stream, char*, char**)
 {
 	acl_assert(__mu != NULL);
 
-	socket_stream* ss = NEW socket_stream();
-	if (ss->open(stream) == false)
-		logger_fatal("open stream error!");
+	socket_stream* ss = (socket_stream*) stream->context;
+	if (ss == NULL)
+	{
+		// 当本函数第一次被调用时，需要打开 socket_stream 流
+		ss = NEW socket_stream();
+		if (ss->open(stream) == false)
+			logger_fatal("open stream error!");
+		acl_vstream_add_close_handle(stream, on_close, ss);
+	}
 
 #ifndef	WIN32
 	if (__mu->daemon_mode_)
 		acl_watchdog_pat();  // 必须通知 acl_master 框架一下
 #endif
 	__mu->on_read(ss);
-	ss->unbind();
-	delete ss;
 }
 
 void master_udp::service_pre_jail(char*, char**)
