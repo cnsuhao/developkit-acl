@@ -1,6 +1,10 @@
 修改历史列表：
 ------------------------------------------------------------------------
 
+393) 2013.10.15
+393.1) feature: acl_aio_app_main.c/acl_ioctl_app_main.c, 增加了配置项
+master_deny_banner 允许用户自定义拒绝连接的内容信息
+
 392) 2013.10.12
 392.1) feature: acl_pthread_pool.c 增加了 acl_pthread_pool_qlen 函数，提供
 当前线程池队列中未被处理的任务数量

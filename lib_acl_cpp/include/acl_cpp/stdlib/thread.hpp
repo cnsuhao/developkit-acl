@@ -3,20 +3,35 @@
 namespace acl
 {
 
-class thread_pool;
+/**
+ * 纯虚函数：线程任务类，该类实例的 run 方法是在子线程中被执行的
+ */
+class thread_job
+{
+public:
+	thread_job() {}
+	virtual ~thread_job() {}
+
+	/**
+	 * 纯虚函数，子类必须实现此函数，该函数在子线程中执行
+	 * @return {void*} 线程退出前返回的参数
+	 */
+	virtual void* run() = 0;
+};
 
 /**
  * 线程纯虚类，该类的接口定义类似于 Java 的接口定义，子类需要实现
  * 基类的纯虚函数，使用者通过调用 thread::start() 启动线程过程
  */
-class thread
+class thread : public thread_job
 {
 public:
 	thread();
 	virtual ~thread();
 
 	/**
-	 * 开始启动线程过程
+	 * 开始启动线程过程，一旦该函数被调用，则会立即启动一个新的
+	 * 子线程，在子线程中执行基类 thread_job::run 过程
 	 * @return {bool} 是否成功创建线程
 	 */
 	bool start();
@@ -59,16 +74,6 @@ public:
 	 * @return {unsigned long}
 	 */
 	static unsigned long thread_self();
-
-protected:
-	friend class thread_pool;
-
-	/**
-	 * 纯虚函数，子类必须实现此函数，当用户调用 start 函数后，
-	 * 该虚函数将被立即调用，用以启动一个子线程
-	 * @return {void*} 线程退出前返回的参数
-	 */
-	virtual void* run() = 0;
 
 private:
 	bool detachable_;
