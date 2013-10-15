@@ -65,9 +65,17 @@ void thread_pool::stop()
 	}
 }
 
-bool thread_pool::run(thread* thr)
+void thread_pool::wait()
 {
-	if (thr == NULL)
+	if (thr_pool_)
+		acl_pthread_pool_stop(thr_pool_);
+	else
+		logger_warn("no thread working, call start first!");
+}
+
+bool thread_pool::run(thread_job* job)
+{
+	if (job == NULL)
 	{
 		logger_error("thr null!");
 		return false;
@@ -79,13 +87,13 @@ bool thread_pool::run(thread* thr)
 		return false;
 	}
 
-	return acl_pthread_pool_add(thr_pool_, thread_run, thr)
+	return acl_pthread_pool_add(thr_pool_, thread_run, job)
 			== 0 ? true : false;
 }
 
-bool thread_pool::execute(thread* thr)
+bool thread_pool::execute(thread_job* job)
 {
-	return run(thr);
+	return run(job);
 }
 
 int  thread_pool::threads_count() const
@@ -111,8 +119,8 @@ int  thread_pool::task_qlen() const
 
 void thread_pool::thread_run(void* arg)
 {
-	thread* thr = (thread*) arg;
-	thr->run();
+	thread_job* job = (thread_job*) arg;
+	job->run();
 }
 
 int  thread_pool::thread_init(void* arg)

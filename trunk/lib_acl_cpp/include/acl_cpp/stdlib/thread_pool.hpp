@@ -6,7 +6,7 @@ struct acl_pthread_pool_attr_t;
 namespace acl
 {
 
-class thread;
+class thread_job;
 
 /**
  * 线程池管理类，该类内管理的线程池中的线程是半驻留的(即当线程空闲一定时间后
@@ -32,21 +32,26 @@ public:
 	void stop();
 
 	/**
+	 * 等待线程池中的所有线程池执行完所有任务
+	 */
+	void wait();
+
+	/**
 	 * 将一个任务交给线程池中的一个线程去执行，线程池中的
 	 * 线程会执行该任务中的 run 函数
-	 * @param thr {thread*} 线程任务
+	 * @param job {thread_job*} 线程任务
 	 * @return {bool} 是否成功
 	 */
-	bool run(thread* thr);
+	bool run(thread_job* job);
 
 	/**
 	 * 将一个任务交给线程池中的一个线程去执行，线程池中的
 	 * 线程会执行该任务中的 run 函数；该函数功能与 run 功能完全相同，只是为了
 	 * 使 JAVA 程序员看起来更为熟悉才提供了此接口
-	 * @param thr {thread*} 线程任务
+	 * @param job {thread_job*} 线程任务
 	 * @return {bool} 是否成功
 	 */
-	bool execute(thread* thr);
+	bool execute(thread_job* job);
 
 	/**
 	 * 在调用 start 前调用此函数可以设置所创建线程的堆栈大小
