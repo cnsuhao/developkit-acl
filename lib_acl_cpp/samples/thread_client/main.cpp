@@ -49,18 +49,18 @@ int main(int argc, char* argv[])
 
 	for (int i = 0; i < cocurrent; i++)
 	{
-		// ´´½¨Ïß³Ì
+		// ´´½¨Ïß³
 		thread_client* thread = new thread_client(server_addr, keep_alive,
 				count, length);
 
-		// ÉèÖÃ´´½¨µÄÏß³ÌÎª·Ç·ÖÀëÄ£Ê½£¬ÒÔ±ãÓÚÏÂÃæ¿ÉÒÔµ÷ÓÃ thread::wait
+		// ÉèÖÃ´´½¨µÄÏß³ÌÎª·Ç·ÖÀëÄ£Ê½£¬ÒÔ±ãÓÚÏÂÃæ¿ÉÒÔµ÷Ó thread::wait
 		// µÈ´ıÏß³Ì½áÊø
 		thread->set_detachable(false);
 
-		// ½«Ïß³Ì·ÅÔÚ¶ÓÁĞÖĞ
+		// ½«Ïß³Ì·ÅÔÚ¶ÓÁĞÖ
 		threads.push_back(thread);
 
-		// Æô¶¯Ïß³Ì
+		// Æô¶¯Ïß³
 		thread->start();
 	}
 
