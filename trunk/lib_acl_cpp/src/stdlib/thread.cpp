@@ -73,7 +73,7 @@ bool thread::start()
 	return true;
 }
 
-bool thread::wait(void** out)
+bool thread::wait(void** out /* = NULL */)
 {
 	if (thread_id_ == 0)
 	{

@@ -44,7 +44,7 @@ public:
 	 *  线程退出前返回的参数
 	 * @return {bool} 是否成功
 	 */
-	bool wait(void** out);
+	bool wait(void** out = NULL);
 
 	/**
 	 * 在调用 start 前调用此函数可以设置所创建线程是否为

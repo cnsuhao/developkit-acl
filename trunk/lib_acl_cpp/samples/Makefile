@@ -52,6 +52,7 @@ all:
 	@(cd udp_client;make)
 	@(cd thread; make)
 	@(cd thread_pool; make)
+	@(cd thread_client; make)
 
 clean:
 	@(cd string; make clean)
@@ -107,3 +108,4 @@ clean:
 	@(cd master_udp_threads; make clean)
 	@(cd thread; make clean)
 	@(cd thread_pool; make clean)
+	@(cd thread_client; make clean)
