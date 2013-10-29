@@ -1,6 +1,10 @@
 修改历史列表：
 ------------------------------------------------------------------------
 
+396) 2013.10.29
+396.1) bugfix: acl_xml_util.c, acl_xml_tag_add() 在调用 acl_token_tree_add
+时，第三个参数应该调用 ACL_TOKEN_F_STOP，原来是 ACL_TOKEN_F_PASS
+
 395) 2013.10.20
 395.1) compile: acl_aio_app_main.c, 其中在调用 write 时，需要判断返回值，否则
 会在高版本 gcc 上报警告
