@@ -1,6 +1,10 @@
 修改历史列表：
 ------------------------------------------------------------------------
 
+189) 2013.10.31
+189.1) bugfix: thread.cpp，当线程为分离方式创建时 thread::thread_run 在调用完
+虚函数 run 后不得再引用线程对象的 return_arg_，否则会造成内存非法访问
+
 188) 2013.10.20
 188.1) feature: HttpServletResponse 类支持 Transfer-Encoding: chunked 传输方式
 
