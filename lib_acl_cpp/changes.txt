@@ -5,6 +5,8 @@
 190.1) feature: 当使用 GCC 进行编译时，针对所有具有变参的函数接口定义添加了
 属性限定---__attribute__((format(printf, n, m)))，这样便于在编译期就能发现
 因参数使用不当而导致的错误
+190.2) bugfix: master_udp.cpp，当以 alone 方式运行时，没有将 socket_stream
+赋给 ACL_VSTREAM::context，导致在 service_main 时又重新打开一次
 
 189) 2013.10.31
 189.1) bugfix: thread.cpp，当线程为分离方式创建时 thread::thread_run 在调用完
