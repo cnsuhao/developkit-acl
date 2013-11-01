@@ -69,7 +69,7 @@ bool thread::start()
 	if (ret != 0)
 	{
 		acl_set_error(ret);
-		logger_error("create thread error", last_serror());
+		logger_error("create thread error %s", last_serror());
 		return false;
 	}
 
