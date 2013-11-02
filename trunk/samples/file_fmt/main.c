@@ -51,6 +51,7 @@ static void fmt_change(const char *filepath, const char *fmt)
 						__total_cpp_line++;
 					else if (strstr(filepath, "mysql") == NULL
 						&& strstr(filepath, "openssl") == NULL
+						&& strstr(filepath, "dist") == NULL
 						&& strstr(filepath, "bdb") == NULL
 						&& strstr(filepath, "tc") == NULL
 						&& strstr(filepath, "google") == NULL
@@ -79,6 +80,7 @@ static void fmt_change(const char *filepath, const char *fmt)
 					__total_cpp_line++;
 				else if (strstr(filepath, "mysql") == NULL
 					&& strstr(filepath, "openssl") == NULL
+					&& strstr(filepath, "dist") == NULL
 					&& strstr(filepath, "bdb") == NULL
 					&& strstr(filepath, "tc") == NULL
 					&& strstr(filepath, "google") == NULL
