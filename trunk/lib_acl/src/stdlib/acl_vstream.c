@@ -2065,7 +2065,7 @@ void acl_vstream_ctl(ACL_VSTREAM *stream, int name,...)
 	const char *myname = "acl_vstream_ctl";
 	va_list ap;
 	int   n;
-	char *ptr;
+	char *ptr = NULL;
 
 	va_start(ap, name);
 	for (; name != ACL_VSTREAM_CTL_END; name = va_arg(ap, int)) {
@@ -2081,9 +2081,14 @@ void acl_vstream_ctl(ACL_VSTREAM *stream, int name,...)
 			break;
 		case ACL_VSTREAM_CTL_PATH:
 			ptr = va_arg(ap, char*);
-			if (stream->addr_peer && stream->addr_peer != __empty_string)
+			if (stream->addr_peer && stream->addr_peer
+				!= __empty_string)
+			{
 				acl_myfree(stream->addr_peer);
-			stream->addr_peer = acl_mystrdup(ptr);
+				stream->addr_peer = NULL;
+			}
+			if (ptr)
+				stream->addr_peer = acl_mystrdup(ptr);
 			break;
 		case ACL_VSTREAM_CTL_FD:
 			ACL_VSTREAM_SOCK(stream) = va_arg(ap, ACL_SOCKET);
