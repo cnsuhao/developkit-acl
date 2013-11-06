@@ -2081,8 +2081,9 @@ void acl_vstream_ctl(ACL_VSTREAM *stream, int name,...)
 			break;
 		case ACL_VSTREAM_CTL_PATH:
 			ptr = va_arg(ap, char*);
-			ACL_SAFE_STRNCPY(stream->addr_peer, ptr,
-				sizeof(stream->addr_peer));
+			if (stream->addr_peer && stream->addr_peer != __empty_string)
+				acl_myfree(stream->addr_peer);
+			stream->addr_peer = acl_mystrdup(ptr);
 			break;
 		case ACL_VSTREAM_CTL_FD:
 			ACL_VSTREAM_SOCK(stream) = va_arg(ap, ACL_SOCKET);
