@@ -1,5 +1,10 @@
 
+244) 2013.11.6
+244.1) compile: http_hdr_res.c/http_hdr_req.c，内部的线程局部变量无法在
+主线程中释放，会导致 valgrind 报警告
+
 ------------------------------------------------------------------------
+
 243) 2013.10.3
 243.1) bugfix: http_chat_async.c 中 http_res_body_get_async/http_req_body_get_async
 两个函数没有对 ctx->read_cnt 置 0
