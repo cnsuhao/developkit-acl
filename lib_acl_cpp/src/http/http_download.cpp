@@ -11,7 +11,7 @@ namespace acl
 http_download::http_download(const char* url, const char* addr /* = NULL */)
 {
 	if (addr)
-		ACL_SAFE_STRNCPY(addr_, addr, sizeof(addr));
+		ACL_SAFE_STRNCPY(addr_, addr, sizeof(addr_));
 	else if (http_utils::get_addr(url, addr_, sizeof(addr_)) == false)
 	{
 		logger_error("url(%s) invalid", url);

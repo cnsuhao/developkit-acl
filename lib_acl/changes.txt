@@ -1,6 +1,11 @@
 修改历史列表：
 ------------------------------------------------------------------------
 
+401) 2013.11.7
+401.1) bugfix: acl_vstream.c，在 acl_vstream_ctl 函数中，当控制参数为
+ACL_VSTREAM_CTL_PATH 时，对 stream->addr_peer 的赋值有问题（此 bug 由高
+版本的 gcc4.8.2 检测出）
+
 400) 2013.11.6
 400.1) compile: acl_msg.c，在函数 acl_last_serror() 中分配的线程局部变量
 在主线程中无法被正常释放，会导致 valgrind 报错
