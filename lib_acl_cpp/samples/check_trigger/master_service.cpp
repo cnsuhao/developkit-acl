@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "http_job.h"
+#include "db_store.h"
 #include "master_service.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -88,6 +89,11 @@ void master_service::proc_on_init()
 	// 创建数据库连接池
 	var_dbpool = new acl::sqlite_pool(var_cfg_dbpath,
 		var_cfg_http_cocurrent * url_list_.size());
+
+	// 创建或打开数据库
+	db_store store;
+	if (store.db_create() == false)
+		logger_fatal("create db failed!");
 
 	// 创建线程池并设置参数
 	var_thrpool = new acl::thread_pool;

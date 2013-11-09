@@ -67,11 +67,12 @@ void* http_job::run()
 		threads.push_back(thr);
 	}
 
+	// 等待所有 HTTP 工作线程执行完毕
 	std::vector<acl::thread*>::iterator it = threads.begin();
 	for (; it != threads.end(); ++it)
 	{
 		acl::thread* thr = (*it);
-		thr->wait();  // 等待线程执行完毕
+		thr->wait();
 		delete thr;
 	}
 
