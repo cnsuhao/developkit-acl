@@ -5,13 +5,10 @@ class http_thread : public acl::thread
 public:
 	http_thread(const char* domain, const char* ip, int port,
 		const char* url, double spent_dns);
+	~http_thread();
 
 protected:
 	virtual void* run();
-
-private:
-	// 要求该类必须是动态创建
-	~http_thread();
 
 private:
 	acl::string domain_;

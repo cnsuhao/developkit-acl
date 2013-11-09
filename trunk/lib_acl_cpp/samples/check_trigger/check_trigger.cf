@@ -57,10 +57,12 @@ service check_trigger
 #	trigger_daemon_timeout = 1800
 
 ##############################################################################
-	http_url = http://www.263.net/
-	dns_ip = 211.100.15.66
+	http_url_list = http://www.263.net/; \
+			http://www.sina.com.cn/; \
+			http://www.sohu.com/
+	dns_ip = 8.8.8.8
 	dns_port = 53
-	dbpath = ./result.db
+	dbpath = ./check.db
 	dbcharset = UTF-8
 	http_cocurrent = 2
 	conn_timeout = 10
