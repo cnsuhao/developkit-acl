@@ -53,6 +53,8 @@ void* http_job::run()
 	// 计算 DNS 的查询耗时
 	double spent = util::stamp_sub(&end, &begin);
 
+	std::vector<acl::thread*> threads;
+
 	// 遍历 IP 地址列表，每一个 IP 创建一个 HTTP 客户端线程
 	std::vector<acl::string>::const_iterator cit = ips.begin();
 	for (; cit != ips.end(); ++cit)
@@ -60,8 +62,17 @@ void* http_job::run()
 		// 创建并启动一个线程对象
 		acl::thread* thr = new http_thread(domain, (*cit).c_str(),
 				port, url_.c_str(), spent);
-		thr->set_detachable(true);  // 设置线程为分离状态
-		thr->start();  // 线程内部自销毁
+		thr->set_detachable(false);  // 设置线程为非分离状态
+		thr->start();
+		threads.push_back(thr);
+	}
+
+	std::vector<acl::thread*>::iterator it = threads.begin();
+	for (; it != threads.end(); ++it)
+	{
+		acl::thread* thr = (*it);
+		thr->wait();  // 等待线程执行完毕
+		delete thr;
 	}
 
 	delete this;  // 自销毁

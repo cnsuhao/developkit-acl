@@ -22,4 +22,7 @@ protected:
 	 * 当进程退出前调用的回调函数
 	 */
 	virtual void proc_on_exit();
+
+protected:
+	std::vector<acl::string> url_list_;
 };

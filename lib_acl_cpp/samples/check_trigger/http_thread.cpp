@@ -15,7 +15,6 @@ http_thread::http_thread(const char* domain, const char* ip, int port,
 , success_(false)
 {
 	snprintf(addr_, sizeof(addr_), "%s:%d", ip, port);
-//	printf(">>>url: %s, addr: %s\r\n", url, addr_);
 }
 
 http_thread::~http_thread()
@@ -75,7 +74,6 @@ void* http_thread::run()
 	spent_total_ = spent_dns_ + util::stamp_sub(&finish, &begin0);
 
 	delete conn;
-	delete this;
 	return NULL;
 }
 
@@ -183,7 +181,8 @@ static const char* CREATE_TBL =
 	"dns_spent float(10, 2) not null,\r\n"
 	"connect_spent float(10, 2) not null,\r\n"
 	"http_spent float(10, 2) not null,\r\n"
-	"success char(64) not null\r\n"
+	"success char(64) not null,\r\n"
+	"currtime timestamp not null\r\n"
 	");"
 	"create index addr_idx on http_tbl(addr);\r\n"
 	"create index url_idx on http_tbl(url);\r\n";
@@ -207,8 +206,8 @@ void http_thread::dbtbl_update(acl::db_handle& db)
 {
 	acl::string sql;
 	sql.format("insert into http_tbl(addr, url, total_spent, "
-		"dns_spent, connect_spent, http_spent, success) "
-		"values('%s', '%s', %.2f, %.2f, %.2f, %.2f, '%s')",
+		"dns_spent, connect_spent, http_spent, success, currtime) "
+		"values('%s', '%s', %.2f, %.2f, %.2f, %.2f, '%s', CURRENT_TIMESTAMP)",
 		addr_, url_.c_str(), spent_total_, spent_dns_,
 		spent_connect_, spent_http_, success_ ? "ok" : "error");
 

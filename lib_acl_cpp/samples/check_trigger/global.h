@@ -19,3 +19,4 @@ extern acl::master_int64_tbl var_conf_int64_tab[];
 // 其它全局项
 
 extern acl::db_pool* var_dbpool;
+extern acl::thread_pool* var_thrpool;
