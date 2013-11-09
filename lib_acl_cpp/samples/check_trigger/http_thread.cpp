@@ -103,7 +103,9 @@ bool http_thread::http_request(acl::socket_stream* conn, const char* host)
 		.set_keep_alive(false)
 		.set_host(host)
 		.set_method(acl::HTTP_METHOD_GET)
-		.accept_gzip(false);
+		.set_content_type("text/plain")
+		.add_entry("Accept-Encoding", "plain")
+		.accept_gzip(true);
 
 	// 发送 HTTP 请求头，同时读取响应头
 	if (req.request(NULL, 0) == false)
@@ -115,13 +117,35 @@ bool http_thread::http_request(acl::socket_stream* conn, const char* host)
 
 	acl::http_client* client = req.get_client();
 	long long int content_length = client->body_length();
+
+#if 1
+	acl::string buf;
+	int   ret, len;
+
+	// 开始读数据体
+	while (true)
+	{
+		ret = req.read_body(buf, true, &len);
+		if (ret == 0)
+			break;
+		if (ret < 0)
+		{
+			logger_error("get body from %s error",
+				conn->get_peer(true));
+			return false;
+		}
+		length_ += len;
+	}
+#else
+	// sohu 的 www.sohu.com 比较弱，虽然客户端发送了只接收 plain 数据
+	// 其依然会发 gzip 响应数据
 	char  buf[8192];
 	int   ret;
 
 	// 开始读数据体
 	while (true)
 	{
-		ret = req.get_body(buf, sizeof(buf));
+		ret = req.get_body(buf, sizeof(buf) - 1);
 		if (ret == 0)
 			break;
 		if (ret < 0)
@@ -132,6 +156,7 @@ bool http_thread::http_request(acl::socket_stream* conn, const char* host)
 		}
 		length_ += ret;
 	}
+#endif
 
 	// 如果读到的数据与 HTTP 响应头中的数据不一致，则报错
 	if (content_length > 0 && length_ != content_length)
