@@ -1,5 +1,9 @@
 修改历史列表：
 ------------------------------------------------------------------------
+195) 2013.11.13
+195.1) bugfix: http_header.cpp, http_header::date_format 在 UNIX 平台下
+gmtime 是线程不安全的，所以需要使用 gmtime_r
+
 194) 2013.11.9
 194.1) feature: HttpServletRequest 类增加了几个获取 HTTP 请求头参数的方法
 
