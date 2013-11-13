@@ -174,7 +174,7 @@ void http_header::date_format(char* out, size_t size, time_t t)
 	struct tm *gmt = gmtime(&t);
 #else
 	struct tm gmt, *pgmt;
-	pgmt = gmtime_r(&t, gmt);
+	pgmt = gmtime_r(&t, &gmt);
 #endif
 	if (pgmt != NULL)
 		strftime(out, size - 1, RFC1123_STRFTIME, gmt);
