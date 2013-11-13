@@ -170,8 +170,19 @@ http_header& http_header::add_cookie(HttpCookie* cookie)
 
 void http_header::date_format(char* out, size_t size, time_t t)
 {
+#ifdef WIN32
 	struct tm *gmt = gmtime(&t);
-	strftime(out, size - 1, RFC1123_STRFTIME, gmt);
+#else
+	struct tm gmt, *pgmt;
+	pgmt = gmtime_r(&t, gmt);
+#endif
+	if (pgmt != NULL)
+		strftime(out, size - 1, RFC1123_STRFTIME, gmt);
+	else
+	{
+		logger_error("gmtime error %s", acl::last_serror());
+		out[0] = 0;
+	}
 }
 
 bool http_header::is_request() const
