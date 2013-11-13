@@ -1,5 +1,6 @@
 #include "acl_stdafx.hpp"
 #include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/util.hpp"
 #include "acl_cpp/stdlib/string.hpp"
 #include "acl_cpp/http/HttpCookie.hpp"
 #include "acl_cpp/http/http_header.hpp"
@@ -177,10 +178,10 @@ void http_header::date_format(char* out, size_t size, time_t t)
 	pgmt = gmtime_r(&t, &gmt);
 #endif
 	if (pgmt != NULL)
-		strftime(out, size - 1, RFC1123_STRFTIME, gmt);
+		strftime(out, size - 1, RFC1123_STRFTIME, &gmt);
 	else
 	{
-		logger_error("gmtime error %s", acl::last_serror());
+		logger_error("gmtime error %s", last_serror());
 		out[0] = 0;
 	}
 }
