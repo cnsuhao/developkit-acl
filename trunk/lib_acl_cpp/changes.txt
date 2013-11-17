@@ -1,5 +1,9 @@
 修改历史列表：
 ------------------------------------------------------------------------
+196) 2013.11.17
+196.1) bugfix: json.cpp, json::getElementsByTags() 内部未对空指针做判断
+196.2) samples: samples/json2, 用于测试级联提取数据的例子
+
 195) 2013.11.13
 195.1) bugfix: http_header.cpp, http_header::date_format 在 UNIX 平台下
 gmtime 是线程不安全的，所以需要使用 gmtime_r
