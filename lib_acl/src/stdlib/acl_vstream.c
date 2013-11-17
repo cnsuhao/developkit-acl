@@ -243,80 +243,84 @@ void acl_vstream_init()
 #endif
 }
 
-static int __sys_read(ACL_VSTREAM *stream, void *buf, size_t size)
+static int __sys_read(ACL_VSTREAM *in, void *buf, size_t size)
 {
 	int   read_cnt;
 
-	/* 清除可读标志位 */
-	stream->sys_read_ready = 0;
-
-	if (stream->type == ACL_VSTREAM_TYPE_FILE) {
-		if (ACL_VSTREAM_FILE(stream) == ACL_FILE_INVALID)
+	if (in->type == ACL_VSTREAM_TYPE_FILE) {
+		if (ACL_VSTREAM_FILE(in) == ACL_FILE_INVALID) {
+			in->sys_read_ready = 0;
 			return -1;
-	} else if (ACL_VSTREAM_SOCK(stream) == ACL_SOCKET_INVALID)
-		return -1;
-
-AGAIN:
-	if (stream->rw_timeout > 0 && acl_read_wait(ACL_VSTREAM_SOCK(stream),
-		stream->rw_timeout) < 0)
-	{
-		stream->errnum = acl_last_error();
-		if (stream->errnum != ACL_ETIMEDOUT) {
-			stream->flag |= ACL_VSTREAM_FLAG_ERR;
-			acl_strerror(stream->errnum, stream->errbuf,
-				sizeof(stream->errbuf));
-		} else {
-			stream->flag |= ACL_VSTREAM_FLAG_TIMEOUT;
-			ACL_SAFE_STRNCPY(stream->errbuf, "read timeout",
-				sizeof(stream->errbuf));
 		}
-
+	} else if (ACL_VSTREAM_SOCK(in) == ACL_SOCKET_INVALID) {
+		in->sys_read_ready = 0;
 		return -1;
 	}
 
-	acl_set_error(0);
+#ifndef	SAFE_COPY
+#define	SAFE_COPY(x, y) ACL_SAFE_STRNCPY((x), (y), sizeof((x)))
+#endif
 
-	if (stream->type == ACL_VSTREAM_TYPE_FILE) {
-		read_cnt = stream->fread_fn(ACL_VSTREAM_FILE(stream), buf,
-			size, stream->rw_timeout, stream, stream->context);
-		if (stream->read_cnt > 0)
-			stream->sys_offset += stream->read_cnt;
-	} else
-		read_cnt = stream->read_fn(ACL_VSTREAM_SOCK(stream), buf,
-			size, stream->rw_timeout, stream, stream->context);
-
-	if (read_cnt < 0) {
-		stream->errnum = acl_last_error();
-		if (stream->errnum == ACL_EINTR)
-			goto AGAIN;
-		else if (stream->errnum == ACL_ETIMEDOUT) {
-			stream->flag |= ACL_VSTREAM_FLAG_TIMEOUT;
-			ACL_SAFE_STRNCPY(stream->errbuf, "read timeout",
-				sizeof(stream->errbuf));
-		} else if (stream->errnum != ACL_EWOULDBLOCK
-			&& stream->errnum != ACL_EAGAIN)
-		{
-			stream->flag |= ACL_VSTREAM_FLAG_ERR;
-			acl_strerror(stream->errnum, stream->errbuf,
-				sizeof(stream->errbuf));
+AGAIN:
+	if (in->sys_read_ready == 0 && in->rw_timeout > 0
+		&& acl_read_wait(ACL_VSTREAM_SOCK(in), in->rw_timeout) < 0)
+	{
+		in->errnum = acl_last_error();
+		if (in->errnum == ACL_ETIMEDOUT) {
+			in->flag |= ACL_VSTREAM_FLAG_TIMEOUT;
+			SAFE_COPY(in->errbuf, "read timeout");
+			return -1;
 		}
 
+		in->flag |= ACL_VSTREAM_FLAG_ERR;
+		acl_strerror(in->errnum, in->errbuf, sizeof(in->errbuf));
 		return -1;
+	}
+
+	/* 清除系统错误号 */
+	acl_set_error(0);
+
+	/* 清除可读标志位 */
+	in->sys_read_ready = 0;
+
+	if (in->type == ACL_VSTREAM_TYPE_FILE) {
+		read_cnt = in->fread_fn(ACL_VSTREAM_FILE(in), buf, size,
+			in->rw_timeout, in, in->context);
+		if (in->read_cnt > 0)
+			in->sys_offset += in->read_cnt;
+	} else
+		read_cnt = in->read_fn(ACL_VSTREAM_SOCK(in), buf, size,
+			in->rw_timeout, in, in->context);
+
+	if (read_cnt > 0) {
+		in->read_ptr = in->read_buf;
+		in->flag &= ~ACL_VSTREAM_FLAG_BAD;
+		in->errnum = 0;
+		in->errbuf[0] = 0;
+		in->total_read_cnt += read_cnt;
+
+		return read_cnt;
 	} else if (read_cnt == 0) {
-		stream->flag = ACL_VSTREAM_FLAG_EOF;
-		stream->errnum = 0;
-		snprintf(stream->errbuf, sizeof(stream->errbuf),
-			"closed by perr(%s)", acl_last_serror());
+		in->flag = ACL_VSTREAM_FLAG_EOF;
+		in->errnum = 0;
+		snprintf(in->errbuf, sizeof(in->errbuf), "closed by perr(%s)",
+			acl_last_serror());
+
 		return 0;
 	}
 
-	stream->read_ptr = stream->read_buf;
-	stream->flag &= ~ACL_VSTREAM_FLAG_BAD;
-	stream->errnum = 0;
-	stream->errbuf[0] = 0;
-	stream->total_read_cnt += read_cnt;
+	in->errnum = acl_last_error();
+	if (in->errnum == ACL_EINTR)
+		goto AGAIN;
+	else if (in->errnum == ACL_ETIMEDOUT) {
+		in->flag |= ACL_VSTREAM_FLAG_TIMEOUT;
+		SAFE_COPY(in->errbuf, "read timeout");
+	} else if (in->errnum != ACL_EWOULDBLOCK && in->errnum != ACL_EAGAIN) {
+		in->flag |= ACL_VSTREAM_FLAG_ERR;
+		acl_strerror(in->errnum, in->errbuf, sizeof(in->errbuf));
+	}
 
-	return read_cnt;
+	return -1;
 }
 
 static int __vstream_read(ACL_VSTREAM *stream)
