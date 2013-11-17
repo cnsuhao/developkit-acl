@@ -78,6 +78,7 @@ int   acl_var_ioctl_enable_dog;
 int   acl_var_ioctl_quick_abort;
 int   acl_var_ioctl_enable_core;
 int   acl_var_ioctl_max_debug;
+int   acl_var_ioctl_status_notify;
 
 static ACL_CONFIG_INT_TABLE __conf_int_tab[] = {
 	{ ACL_VAR_IOCTL_BUF_SIZE, ACL_DEF_IOCTL_BUF_SIZE, &acl_var_ioctl_buf_size, 0, 0 },
@@ -97,6 +98,7 @@ static ACL_CONFIG_INT_TABLE __conf_int_tab[] = {
 	{ ACL_VAR_IOCTL_QUICK_ABORT, ACL_DEF_IOCTL_QUICK_ABORT, &acl_var_ioctl_quick_abort, 0, 0 },
 	{ ACL_VAR_IOCTL_ENABLE_CORE, ACL_DEF_IOCTL_ENABLE_CORE, &acl_var_ioctl_enable_core, 0, 0 },
 	{ ACL_VAR_IOCTL_MAX_DEBUG, ACL_DEF_IOCTL_MAX_DEBUG, &acl_var_ioctl_max_debug, 0, 0 },
+	{ ACL_VAR_IOCTL_STATUS_NOTIFY, ACL_DEF_IOCTL_STATUS_NOTIFY, &acl_var_ioctl_status_notify, 0, 0 },
 
         { 0, 0, 0, 0, 0 },
 };
@@ -277,7 +279,7 @@ static void disable_listen(void)
 	/**
 	 * Ö»ËùÒÔ²ÉÓÃ¶¨Ê±Æ÷¹Ø±Õ¼àÌýÁ÷£¬Ò»·½ÃæÒòÎª¼àÌýÁ÷ÔÚÊÂ¼þ¼¯ºÏÖÐÊÇ¡°³£×¤Áô¡±µÄ£¬
 	 * ÁíÒ»·½Ãæ±¾Ïß³ÌÓëÊÂ¼þÑ­»·Ö÷Ïß³ÌÊÇ²»Í¬µÄÏß³Ì¿Õ¼ä£¬Èç¹ûÔÚ±¾Ïß³ÌÖ±½Ó¹Ø±Õ
-	 * ¼àÌýÁ÷£¬»áÔì³ÉÊÂ¼þÑ­»·Ö÷Ïß³ÌÔÚ select() Ê±±¨ÃèÊö·û·Ç·¨£¬¶øµ±¼ÓÁË¶¨Ê±Æ÷
+	 * ¼àÌýÁ÷£¬»áÔì³ÉÊÂ¼þÑ­»·Ö÷Ïß³ÌÔÚ select() Ê±±¨ÃèÊö·û·Ç·¨£¬¶øµ±¼ÓË¶¨Ê±Æ÷
 	 * ¹Ø±Õ·½·¨ºó£¬¶¨Ê±Æ÷µÄÔËÐÐÏß³Ì¿Õ¼äÓëÊÂ¼þÑ­»·µÄÔËÐÐÏß³Ì¿Õ¼äÊÇÏàÍ¬µÄ£¬ËùÒÔ
 	 * ²»»áÔì³É³åÍ»¡£ÕâÖ÷ÒªÒòÎªÊÂ¼þÑ­»·Ïß³ÌÖÐÏÈÖ´ÐÐ select(), ºóÖ´ÐÐ¶¨Ê±Æ÷£¬Èç¹û
 	 * select() Ö´ÐÐºó¶¨Ê±Æ÷Æô¶¯²¢½«¼àÌýÁ÷´ÓÊÂ¼þ¼¯ºÏÖÐÉ¾³ý£¬Ôò¼´Ê¹¸Ã¼àÌýÁ÷ÒÑ¾­
@@ -412,7 +414,7 @@ void acl_ioctl_server_enable_read(ACL_IOCTL *h_ioctl, ACL_VSTREAM *stream,
 
 static void ioctl_server_execute(ACL_IOCTL *h_ioctl, ACL_VSTREAM *stream)
 {
-	if (acl_var_ioctl_master_maxproc > 1
+	if (acl_var_ioctl_status_notify && acl_var_ioctl_master_maxproc > 1
 	    && acl_master_notify(acl_var_ioctl_pid, ioctl_server_generation,
 		ACL_MASTER_STAT_TAKEN) < 0)
 	{
@@ -422,7 +424,7 @@ static void ioctl_server_execute(ACL_IOCTL *h_ioctl, ACL_VSTREAM *stream)
 
 	ioctl_server_service(h_ioctl, stream, ioctl_server_name, ioctl_server_argv);
 
-	if (acl_var_ioctl_master_maxproc > 1
+	if (acl_var_ioctl_status_notify && acl_var_ioctl_master_maxproc > 1
 	    && acl_master_notify(acl_var_ioctl_pid, ioctl_server_generation,
 		ACL_MASTER_STAT_AVAIL) < 0)
 	{
