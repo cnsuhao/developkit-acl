@@ -213,6 +213,7 @@ const std::vector<json_node*>& json::getElementsByTagName(const char* tag) const
 const std::vector<json_node*>& json::getElementsByTags(const char* tags) const
 {
 	const_cast<json*>(this)->clear();
+
 	ACL_ARRAY* a = acl_json_getElementsByTags(json_, tags);
 	if (a != NULL) {
 		ACL_ITER iter;
@@ -222,8 +223,8 @@ const std::vector<json_node*>& json::getElementsByTags(const char* tags) const
 			json_node* node = NEW json_node(tmp, const_cast<json*>(this));
 			const_cast<json*>(this)->nodes_tmp_.push_back(node);
 		}
+		acl_json_free_array(a);
 	}
-	acl_json_free_array(a);
 	return nodes_tmp_;
 }
 
