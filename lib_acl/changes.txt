@@ -5,6 +5,11 @@
 402.1) performance: acl_vstream.c，__sys_read 函数中当流的 sys_read_ready
 为 1 时，则不会调用系统 API select 判断超时过程，从而减少一次系统调用，
 因为 sys_read_ready 标志位会在事件模块(event_xxx) 中被设置
+402.2) performance: acl_aio_server.c, acl_ioctl_server.c 服务器模块参加了
+控制参数：master_status_notify，当启动多个子进程时，该参数决定是否向
+acl_master 主进程汇报子进程的状态，当 master_prefork 预启动参数打开且该
+值 > 1 时，将 master_status_notify 设置为 0，则子进程不再向 acl_master 主
+进程汇报状态，有助于减少 acl_master 主进程的负载
 
 401) 2013.11.7
 401.1) bugfix: acl_vstream.c，在 acl_vstream_ctl 函数中，当控制参数为
