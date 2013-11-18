@@ -849,18 +849,35 @@ int acl_vstream_readn(ACL_VSTREAM *fp, void *buf, size_t size)
 			buf ? "not null" : "null", (int) size);
 
 	ptr = (unsigned char*) buf;
+
+	/* 如果缓冲区中有上次读残留数据时，则优先将其拷贝至目标缓冲区 */
+
 	if (fp->read_cnt > 0) {
 		n = acl_vstream_bfcp_some(fp, ptr, size);
 		ptr += n;
 		size -= n;
+		if (size == 0)
+			return size_saved;
 	}
 
-	while (size > 0) {
-		n = __sys_read(fp, ptr, size);
-		if (n <= 0)
-			return ACL_VSTREAM_EOF;
-		size -= n;
-		ptr += n;
+	/* 为减少 read 次数，当输入缓冲区较小时，则自动启用双缓冲读方式 */
+
+	if (size_saved  < (size_t) fp->read_buf_len / 4) {
+		while (size > 0) {
+			if (__vstream_read(fp) <= 0)
+				return ACL_VSTREAM_EOF;
+			n = acl_vstream_bfcp_some(fp, ptr, size);
+			ptr += n;
+			size -= n;
+		}
+	} else {
+		while (size > 0) {
+			n = __sys_read(fp, ptr, size);
+			if (n <= 0)
+				return ACL_VSTREAM_EOF;
+			size -= n;
+			ptr += n;
+		}
 	}
 
 	return size_saved;
