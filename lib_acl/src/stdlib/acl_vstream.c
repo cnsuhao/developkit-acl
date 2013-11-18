@@ -698,17 +698,18 @@ int acl_vstream_gets(ACL_VSTREAM *fp, void *vptr, size_t maxlen)
 			/* EOF, nodata read */
 			if (n == 1)
 				return ACL_VSTREAM_EOF;
+
 			/* EOF, some data was read */
 			break;
-		} else {
-			*ptr++ = ch;
-			if (ch == '\n'){
-				/* newline is stored, like fgets() */
+		}
 
-				fp->flag |= ACL_VSTREAM_FLAG_TAGYES;
-				fp->flag &= ~ACL_VSTREAM_FLAG_TAGNO;
-				break;
-			}
+		*ptr++ = ch;
+		if (ch == '\n'){
+			/* newline is stored, like fgets() */
+
+			fp->flag |= ACL_VSTREAM_FLAG_TAGYES;
+			fp->flag &= ~ACL_VSTREAM_FLAG_TAGNO;
+			break;
 		}
 	}
 
@@ -748,43 +749,43 @@ int acl_vstream_readtags(ACL_VSTREAM *fp, void *vptr, size_t maxlen,
 		ch = acl_vstream_getc(fp);
 #endif
 		if (ch == ACL_VSTREAM_EOF) {
+			fp->flag &= ~ACL_VSTREAM_FLAG_TAGYES;
+			fp->flag |= ACL_VSTREAM_FLAG_TAGNO;
+
 			if (n == 1)
 				return ACL_VSTREAM_EOF;  /* EOF, nodata read */
-			else {
-				fp->flag &= ~ACL_VSTREAM_FLAG_TAGYES;
-				fp->flag |= ACL_VSTREAM_FLAG_TAGNO;
-				break;  /* EOF, some data was read */
-			}
-		} else {
-			*ptr = ch;
-			if (ch == *ptr_needle_end) {
-				ptr_haystack = ptr - 1;
-				ptr_needle = ptr_needle_end - 1;
-				flag_match = 0;
-				while(1) {
-					/* “—æ≠≥…π¶±»ΩœÕÍ±œ(∆•≈‰) */
-					if (ptr_needle < (const unsigned char *) tag) {
-						flag_match = 1;
-						break;
-					}
 
-					/* ‘≠◊÷∑˚¥Æ”√ÕÍ∂¯∆•≈‰¥Æªπ√ª”–±»ΩœÕÍ(≤ª∆•≈‰) */
-					if (ptr_haystack < (unsigned char *) vptr)
-						break;
-					/* ≤ªœ‡µ»(≤ª∆•≈‰) */
-					if (*ptr_haystack != *ptr_needle)
-						break;
-					ptr_haystack--;
-					ptr_needle--;
+			break;  /* EOF, some data was read */
+		}
+
+		*ptr = ch;
+		if (ch == *ptr_needle_end) {
+			ptr_haystack = ptr - 1;
+			ptr_needle = ptr_needle_end - 1;
+			flag_match = 0;
+			while(1) {
+				/* “—æ≠≥…π¶±»ΩœÕÍ±œ(∆•≈‰) */
+				if (ptr_needle < (const unsigned char *) tag) {
+					flag_match = 1;
+					break;
 				}
+
+				/* ‘≠◊÷∑˚¥Æ”√ÕÍ∂¯∆•≈‰¥Æªπ√ª”–±»ΩœÕÍ(≤ª∆•≈‰) */
+				if (ptr_haystack < (unsigned char *) vptr)
+					break;
+				/* ≤ªœ‡µ»(≤ª∆•≈‰) */
+				if (*ptr_haystack != *ptr_needle)
+					break;
+				ptr_haystack--;
+				ptr_needle--;
 			}
-			ptr++;
-			if (flag_match) {
-				fp->flag |= ACL_VSTREAM_FLAG_TAGYES;
-				fp->flag &= ~ACL_VSTREAM_FLAG_TAGNO;
-				break;
-			}
-		} 
+		}
+		ptr++;
+		if (flag_match) {
+			fp->flag |= ACL_VSTREAM_FLAG_TAGYES;
+			fp->flag &= ~ACL_VSTREAM_FLAG_TAGNO;
+			break;
+		}
 	}
 	*ptr = 0;	/* null terminate like fgets() */
 	return n;
@@ -808,17 +809,18 @@ int acl_vstream_gets_nonl(ACL_VSTREAM *fp, void *vptr, size_t maxlen)
 		if (ch == ACL_VSTREAM_EOF) {
 			fp->flag &= ~ACL_VSTREAM_FLAG_TAGYES;
 			fp->flag |= ACL_VSTREAM_FLAG_TAGNO;
+
 			if (n == 1)
 				return ACL_VSTREAM_EOF;  /* EOF, nodata read */
-			else
-				break;  /* EOF, some data was read */
-		} else {
-			*ptr++ = ch;
-			if (ch == '\n') {
-				fp->flag |= ACL_VSTREAM_FLAG_TAGYES;
-				fp->flag &= ~ACL_VSTREAM_FLAG_TAGNO;
-				break;  /* newline is stored, like fgets() */
-			}
+
+			break;  /* EOF, some data was read */
+		}
+
+		*ptr++ = ch;
+		if (ch == '\n') {
+			fp->flag |= ACL_VSTREAM_FLAG_TAGYES;
+			fp->flag &= ~ACL_VSTREAM_FLAG_TAGNO;
+			break;  /* newline is stored, like fgets() */
 		}
 	}
 
@@ -958,7 +960,7 @@ static void __bfgets_no_crlf_peek(ACL_VSTREAM *fp,
 		fp->read_cnt--;
 		fp->offset++;
 		if (*(fp->read_ptr) == '\n') {	/* ok, get '\n' */
-			*ready = 1;			/* set to be ready */
+			*ready = 1;		/* set to be ready */
 			fp->read_ptr++;
 			break;
 		}
@@ -2493,7 +2495,7 @@ int acl_vstream_close(ACL_VSTREAM *fp)
 	/* ±ÿ–Î‘⁄µ˜”√∏˜∏ˆπÿ±’ªÿµ˜∫Ø ˝÷Æ«∞Ω´¡¨Ω”πÿ±’£¨∑Ò‘Úª·”∞œÏ iocp µƒ ¬º˛“˝«Ê
 	 * µƒ’˝≥£π§◊˜°£‘⁄ π”√ iocp ◊˜Œ™ ¬º˛“˝«Ê ±£¨µ±¡˜πÿ±’ ±ª·µ˜”√ events_iocp.c
 	 * ÷–µƒ stream_on_close£¨∏√∫Ø ˝ª· Õ∑≈µÙ fdp->event_read/fdp->event_write
-	 * ¡Ω∏ˆ∂‘œÛ£¨µ´µ±Ã◊Ω”ø⁄Œ¥πÿ±’ ±£¨’‚¡Ω∏ˆ∂‘œÛ”–ø…ƒ‹ª·±ª iocp  π”√±£¨÷ª”–
+	 * ¡Ω∏ˆ∂‘œÛ£¨µ´µ±Ã◊Ω”ø⁄Œ¥πÿ±’ ±£¨’‚¡Ω∏ˆ∂‘œÛ”–ø…ƒ‹ª·±ª iocp  π”√±£¨÷ª”?
 	 * µ±Ã◊Ω”ø⁄πÿ±’ ±£¨iocp ≤≈≤ªª· π”√’‚¡Ω∏ˆ∂‘œÛ÷–µƒ IOCP_EVENT->overlapped µ»
 	 * ≥…‘±. ---2011.5.18, zsx
 	 */
