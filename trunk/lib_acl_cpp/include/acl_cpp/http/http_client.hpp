@@ -240,7 +240,7 @@ public:
 	 * @return {const HTTP_HDR_RES*} HTTP 响应头对象，如果为空，则说明
 	 *  未读到响应头数据
 	 */
-	const HTTP_HDR_RES* get_respond_head(string* buf);
+	HTTP_HDR_RES* get_respond_head(string* buf);
 
 	/**
 	 * 取得通过 read_head 读到的 HTTP 请求头对象，且当传入缓冲区
@@ -249,7 +249,7 @@ public:
 	 * @return {const HTTP_HDR_REQ*} HTTP 请求头对象，如果为空，则说明
 	 *  未读到请求头数据
 	 */
-	const HTTP_HDR_REQ* get_request_head(string* buf);
+	HTTP_HDR_REQ* get_request_head(string* buf);
 
 	/**
 	 * 输出服务器返回的 HTTP 响应头信息至标准输出
@@ -264,7 +264,6 @@ public:
 	 */
 	void fprint_header(ostream& out, const char* prompt);
 
-protected:
 private:
 	socket_stream* stream_;     // HTTP 数据流
 	bool stream_fixed_;         // 是否允许释放 stream_ 流对象

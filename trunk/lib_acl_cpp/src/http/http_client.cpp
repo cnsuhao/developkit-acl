@@ -600,7 +600,7 @@ int http_client::read_request_body(string& out, bool clean,
 	return (ret);
 }
 
-const HTTP_HDR_RES* http_client::get_respond_head(string* buf)
+HTTP_HDR_RES* http_client::get_respond_head(string* buf)
 {
 	if (hdr_res_ == NULL)
 		return (NULL);
@@ -612,7 +612,7 @@ const HTTP_HDR_RES* http_client::get_respond_head(string* buf)
 	return (hdr_res_);
 }
 
-const HTTP_HDR_REQ* http_client::get_request_head(string* buf)
+HTTP_HDR_REQ* http_client::get_request_head(string* buf)
 {
 	if (hdr_req_ == NULL)
 		return (NULL);
