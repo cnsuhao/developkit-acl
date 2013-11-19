@@ -9,13 +9,15 @@ static void handle_connection(acl::socket_stream& conn)
 	acl::string wbuf(__len + 1);
 	char* buf = (char*) malloc(__len + 1);
 
-	for (int i = 0; i < __len; i++)
+	int   i;
+
+	for (i = 0; i < __len; i++)
 		wbuf += 'X';
 
 	struct timeval begin;
 	gettimeofday(&begin, NULL);
 
-	for (int i = 0; i < __max; i++)
+	for (i = 0; i < __max; i++)
 	{
 		if (conn.write(wbuf) == -1)
 		{
@@ -29,10 +31,17 @@ static void handle_connection(acl::socket_stream& conn)
 			break;
 		}
 
+		if (i <= 1)
+		{
+			buf[__len] = 0;
+			printf("buf: %s\r\n", buf);
+		}
+
 		if (i % 1000 == 0)
 		{
 			char tmp[64];
-			snprintf(tmp, sizeof(tmp), "total: %d, curr: %d", __max, i);
+			snprintf(tmp, sizeof(tmp), "total: %d, curr: %d, len: %d",
+				__max, i, __len);
 			ACL_METER_TIME(tmp);
 		}
 	}
@@ -44,7 +53,7 @@ static void handle_connection(acl::socket_stream& conn)
 
 	double n = util::stamp_sub(&end, &begin);
 	printf("total get: %d, spent: %0.2f ms, speed: %0.2f\r\n",
-		__max, n, (__max * 1000) /(n > 0 ? n : 1));
+		__max, n, (i * 1000) /(n > 0 ? n : 1));
 }
 
 static void usage(const char* procname)
