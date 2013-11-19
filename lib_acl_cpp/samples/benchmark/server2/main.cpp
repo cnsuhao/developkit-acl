@@ -21,7 +21,7 @@ static void handle_connection(acl::socket_stream* conn, int len, int step)
 		ptr = buf;
 		for (int j = 0; j < len; j += step)
 		{
-			ret = conn->read(buf, step, true);
+			ret = conn->read(ptr, step, true);
 			if (ret == -1)
 			{
 				printf("readline from client over!\r\n");
@@ -31,12 +31,19 @@ static void handle_connection(acl::socket_stream* conn, int len, int step)
 			ptr += ret;
 		}
 
+		if (i <= 1)
+		{
+			*ptr = 0;
+			printf("buf: %s\r\n", buf);
+		}
+
 		if (conn->write(buf, len) == -1)
 		{
 			printf("write to client error\r\n");
 			break;
 		}
 
+		buf[0] = 0;
 		i++;
 	}
 
