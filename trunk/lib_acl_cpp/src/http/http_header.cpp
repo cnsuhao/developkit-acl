@@ -174,11 +174,10 @@ void http_header::date_format(char* out, size_t size, time_t t)
 #ifdef WIN32
 	struct tm *gmt = gmtime(&t);
 #else
-	struct tm gmt, *pgmt;
-	pgmt = gmtime_r(&t, &gmt);
+	struct tm gmt_buf, *gmt = gmtime_r(&t, &gmt_buf);
 #endif
-	if (pgmt != NULL)
-		strftime(out, size - 1, RFC1123_STRFTIME, &gmt);
+	if (gmt != NULL)
+		strftime(out, size - 1, RFC1123_STRFTIME, gmt);
 	else
 	{
 		logger_error("gmtime error %s", last_serror());
