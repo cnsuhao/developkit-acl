@@ -1,5 +1,9 @@
 修改历史列表：
 ------------------------------------------------------------------------
+197) 2013.11.19
+197.1) workaround: 调整类 http_client 中的两个函数 get_respond_head  和
+get_request_head 的返回值限制，去掉 const 限定词
+
 196) 2013.11.17
 196.1) bugfix: json.cpp, json::getElementsByTags() 内部未对空指针做判断
 196.2) samples: samples/json2, 用于测试级联提取数据的例子
