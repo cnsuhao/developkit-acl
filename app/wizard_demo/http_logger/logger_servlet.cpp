@@ -42,6 +42,19 @@ bool logger_servlet::doPost(acl::HttpServletRequest& req,
 
 	acl::string url;
 	url.format("http://%s/%s", host, uri);
+	logger("%s", url.c_str());
+
+	int   n;
+	char  buf[8192];
+	acl::http_client* conn = req.getClient();
+	while (true)
+	{
+		n = conn->read_body(buf, sizeof(buf));
+		if (n < 0)
+			return false;
+		else if (n == 0)
+			break;
+	}
 
 	return true;
 }
