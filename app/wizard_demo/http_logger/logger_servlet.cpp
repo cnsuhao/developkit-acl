@@ -24,7 +24,7 @@ bool logger_servlet::doGet(acl::HttpServletRequest& req,
 }
 
 bool logger_servlet::doPost(acl::HttpServletRequest& req,
-	acl::HttpServletResponse& res)
+	acl::HttpServletResponse&)
 {
 	const char* uri = req.getRequestUri();
 	if (uri == NULL || *uri == 0)
