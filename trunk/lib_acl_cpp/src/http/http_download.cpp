@@ -230,7 +230,7 @@ bool http_download::save(http_request* req)
 	int   ret;
 	while (true)
 	{
-		ret = req->get_body(buf, sizeof(buf));
+		ret = req->read_body(buf, sizeof(buf));
 		if (ret <= 0)
 			break;
 		if (on_save(buf, ret) == false)
