@@ -52,7 +52,7 @@ static bool http_get(http_request* conn, int n)
 	// 接收 HTTP 响应体数据
 	while (true)
 	{
-		ret = conn->get_body(buf, sizeof(buf));
+		ret = conn->read_body(buf, sizeof(buf));
 		if (ret == 0)
 			break;
 		else if (ret < 0)
