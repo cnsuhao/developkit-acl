@@ -1,5 +1,10 @@
 修改历史列表：
 ------------------------------------------------------------------------
+198) 2013.11.21
+198.1) feature: http_client 类增加了 chunked 传输方式；
+198.2) feature: http_request 类增加流式写函数：write_head/write_body；
+198.3) feature: http_response 类增加了流式写数据方式
+
 197) 2013.11.19
 197.1) workaround: 调整类 http_client 中的两个函数 get_respond_head  和
 get_request_head 的返回值限制，去掉 const 限定词

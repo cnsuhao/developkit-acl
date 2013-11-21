@@ -288,7 +288,7 @@ int http_response::read_body(char* buf, size_t size)
 	return client_->read_body(buf, size);
 }
 
-bool http_response::response(const void* data, size_t len, int status)
+bool http_response::response(const void* data, size_t len)
 {
 	if (client_ == NULL)
 	{

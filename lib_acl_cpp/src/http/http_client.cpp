@@ -144,6 +144,8 @@ bool http_client::write_body(const void* data, size_t len)
 		return fp.write(data, len) == -1 ? false : true;
 	}
 
+	// 如果设置了 chunked 传输方式，则按块传输方式写数据
+
 	if (data == NULL || len == 0)
 		return fp.format("0\r\n\r\n") == -1 ? false : true;
 

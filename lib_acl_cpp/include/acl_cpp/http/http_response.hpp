@@ -23,11 +23,12 @@ public:
 	http_response(socket_stream* client);
 	virtual ~http_response(void);
 
-	//////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////
 	// 与读取请求数据相关的方法
 
 	/**
-	 * 读取 HTTP 请求客户端的 HTTP 请求头，在调用本方法后才可以调用 get_body
+	 * 读取 HTTP 请求客户端的 HTTP 请求头，在调用本方法后才可以调用
+	 * get_body/read_body 读取 HTTP 请求体数据
 	 * @return {bool} 是否成功
 	 */
 	bool read_header();
@@ -109,7 +110,7 @@ public:
 	 * @param len {size_t} data 数据长度
 	 * @return {bool} 发送是否成功，如果返回 false 表示连接中断
 	 */
-	bool response(const void* data, size_t len, int status);
+	bool response(const void* data, size_t len);
 
 	//////////////////////////////////////////////////////////////////////////
 
