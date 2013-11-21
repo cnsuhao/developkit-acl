@@ -72,7 +72,7 @@ public:
 	 * 向 HTTP 服务器发送 HTTP 请求头及 HTTP 请求体，同时从
 	 * HTTP 服务器读取 HTTP 响应头，对于长连接，当连接中断时
 	 * 会再重试一次，在调用下面的几个 get_body 函数前必须先
-	 * 调用本函数；
+	 * 调用本函数(或调用 write_head/write_body)；
 	 * 正常情况下，该函数在发送完请求数据后会读 HTTP 响应头，
 	 * 所以用户在本函数返回 true 后可以调用：get_body() 或
 	 * http_request::get_clinet()->read_body(char*, size_t)
@@ -84,7 +84,22 @@ public:
 	 */
 	bool request(const void* data, size_t len);
 
+	/**
+	 * 当采用流式写数据时，需要首先调用本函数发送 HTTP 请求头
+	 * @return {bool} 是否成功，如果成功才可以继续调用 write_body
+	 */
 	bool write_head();
+
+	/**
+	 * 当采用流式写数据时，在调用 write_head 后，可以循环调用本函数
+	 * 发送 HTTP 请求体数据；当输入的两个参数为空值时则表示数据写完；
+	 * 当发送完数据后，该函数内部会自动读取 HTTP 响应头数据，用户可
+	 * 继续调用 get_body/read_body 获取 HTTP 响应体数据
+	 * @param data {const void*} 数据地址指针，当该值为空指针时表示
+	 *  数据发送完毕
+	 * @param len {size_t} data 非空指针时表示数据长度
+	 * @return {bool} 发送数据体是否成功
+	 */
 	bool write_body(const void* data, size_t len);
 
 	/**

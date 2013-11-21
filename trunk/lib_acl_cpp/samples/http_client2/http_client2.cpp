@@ -32,7 +32,7 @@ static void get_url(const char* url, const char* host,
 	printf("--------------------request------------------\r\n");
 	printf("%s\r\n", buf.c_str());
 
-	if (client.write(header) == -1)
+	if (client.write_head(header) == -1)
 	{
 		printf("write request header error\r\n");
 		return;

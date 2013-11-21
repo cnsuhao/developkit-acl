@@ -159,9 +159,7 @@ http_client* http_request::get_client(void) const
 
 bool http_request::write_head()
 {
-	if (!need_retry_)
-		return false;
-
+	acl_assert(client_);  // 必须保证该连接已经打开
 	bool  reuse_conn;
 
 	while (true)
@@ -175,22 +173,18 @@ bool http_request::write_head()
 
 		}
 
+		// 如果是新创建的连接，则不需重试
+		if (!reuse_conn)
+			need_retry_ = false;
+
 		client_->reset();  // 重置状态
 
 		// 发送 HTTP 请求头
-		if (client_->write_head(header_) == -1)
-		{
-			if (!reuse_conn)
-				need_retry_ = false;
+		if (client_->write_head(header_) > 0)
 			return true;
-		}
 
 		close();
-		if (!reuse_conn)
-		{
-			need_retry_ = false;
-			return false;
-		}
+
 		if (!need_retry_)
 			return false;
 
@@ -203,44 +197,37 @@ bool http_request::write_body(const void* data, size_t len)
 {
 	while (true)
 	{
-		if (client_->write_body(data, len) == true)
+		if (client_->write_body(data, len) == false)
 		{
-			if (data != NULL && len > 0)
-			{
-				// 说明至少已经两次写操作了，所以应该
-				// 取消重试标志位
-				need_retry_ = false;
-				return true;
-			}
-
-			// data == NULL || len == 0 时，表示请求数据
-			// 已经发送完毕，开始从服务端读取 HTTP 响应数据
-			// 读 HTTP 响应头
-			if (client_->read_head() == true)
-				break;
-
-			// 如果已经重试过，则返回错误
 			if (!need_retry_)
 				return false;
 
-			// 取消重试标志
-			need_retry_ = false;
-
-			// 再重试一次，从发送请求头开始
-			if (write_head() == false)
-				return false;
-		}
-		else if (!need_retry_)
-			return false;
-		else
-		{
 			// 取消重试标志位
 			need_retry_ = false;
+
+			// 再重试一次
 			if (write_head() == false)
 				return false;
 
 			// 再次写数据体
+			continue;
 		}
+
+		// 说明至少已经两次写操作了，所以应该
+		// 取消重试标志位
+		need_retry_ = false;
+
+		// 如果数据非空，则说明还有数据可写
+		if (data != NULL && len > 0)
+			return true;
+
+		// data == NULL || len == 0 时，表示请求数据
+		// 已经发送完毕，开始从服务端读取 HTTP 响应数据
+		// 读 HTTP 响应头
+		if (client_->read_head() == true)
+			break;
+
+		return false;
 	}
 
 	// 说明所有数据已经发送完毕，并且成功读取了 HTTP 响应头，
@@ -251,6 +238,7 @@ bool http_request::write_body(const void* data, size_t len)
 
 	// 检查返回头中是否有 Content-Range 字段
 	check_range();
+
 	return true;
 }
 
@@ -260,14 +248,11 @@ bool http_request::send_request(const void* data, size_t len)
 	client_->reset();  // 重置状态
 
 	// 写 HTTP 请求头
-	if (client_->write_head(header_) == false)
+	if (client_->write_head(header_) < 0)
 	{
 		close();
 		return false;
 	}
-
-	if (data == NULL || len == 0)
-		return true;
 
 	// 写 HTTP 请求体
 	if (client_->write_body(data, len) == false)
@@ -302,7 +287,6 @@ bool http_request::request(const void* data, size_t len)
 		{
 			logger_error("connect server error");
 			return false;
-
 		}
 
 		// 发送 HTTP 请求至服务器
@@ -344,6 +328,7 @@ bool http_request::request(const void* data, size_t len)
 
 	// 检查返回头中是否有 Content-Range 字段
 	check_range();
+
 	return true;
 }
 
