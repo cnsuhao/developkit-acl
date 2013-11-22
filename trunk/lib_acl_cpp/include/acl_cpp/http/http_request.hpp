@@ -99,6 +99,7 @@ public:
 	 *  数据发送完毕
 	 * @param len {size_t} data 非空指针时表示数据长度
 	 * @return {bool} 发送数据体是否成功
+	 *  注：当应用发送完数据后，必须再调用一次本函数，同时将两个参数都赋空
 	 */
 	bool write_body(const void* data, size_t len);
 
