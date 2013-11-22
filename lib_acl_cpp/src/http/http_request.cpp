@@ -213,8 +213,7 @@ bool http_request::write_body(const void* data, size_t len)
 			continue;
 		}
 
-		// 说明至少已经两次写操作了，所以应该
-		// 取消重试标志位
+		// 说明至少已经两次写操作了，所以应该取消重试标志位
 		need_retry_ = false;
 
 		// 如果数据非空，则说明还有数据可写
