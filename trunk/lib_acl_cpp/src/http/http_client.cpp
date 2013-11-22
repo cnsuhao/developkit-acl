@@ -149,7 +149,7 @@ bool http_client::write_body(const void* data, size_t len)
 	if (data == NULL || len == 0)
 		return fp.format("0\r\n\r\n") == -1 ? false : true;
 
-	if (fp.format("%d\r\n", (int) len) == -1)
+	if (fp.format("%x\r\n", (int) len) == -1)
 		return false;
 	if (fp.write(data, len) == -1)
 		return false;
