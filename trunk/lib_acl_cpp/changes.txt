@@ -1,5 +1,13 @@
 修改历史列表：
 ------------------------------------------------------------------------
+199) 2013.11.23
+199.1) feature: http_header 类丰富了 set_url 及请求构造函数的参数类型，
+允许 URL 参数中含有请求参数，且内部会自动解析 url 中的主机名及参数
+199.2) feature: http_header 类添加了请求参数添加方法：add_int 及 add_format
+199.3) feature: http_header add_param 允许参数值为空指针或空串
+199.3) feature: http_header::set_host 仅是将主机字符串添加至成员变量 host_ 中
+199.4) feature: http_header::set_url 中允许添加类似于 http://www.test.com 的
+url(即末尾可以没有 '/')
 
 198) 2013.11.21
 198.1) feature: http_client 类增加了 chunked 传输方式；
