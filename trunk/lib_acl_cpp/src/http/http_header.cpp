@@ -264,12 +264,12 @@ http_header& http_header::set_url(const char* url)
 	// 当 url 为绝对路径时
 	else if ((slash = strchr(ptr, '/')) != NULL && slash > ptr)
 	{
-		size_t len = slash - ptr + 1;
-		if (len > sizeof(host_))
-			len = sizeof(host_);
+		size_t n = slash - ptr + 1;
+		if (n > sizeof(host_))
+			n = sizeof(host_);
 
 		// 添加主机地址
-		ACL_SAFE_STRNCPY(host_, ptr, len);
+		ACL_SAFE_STRNCPY(host_, ptr, n);
 		params = strchr(slash, '?');
 	}
 
