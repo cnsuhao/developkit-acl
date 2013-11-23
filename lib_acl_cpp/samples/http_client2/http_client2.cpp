@@ -31,8 +31,6 @@ static void get_url(const char* url, const char* host,
 	printf("--------------------request------------------\r\n");
 	printf("%s\r\n", buf.c_str());
 
-	return;
-
 	acl::http_client client;
 	printf("begin connect %s\r\n", addr);
 	if (client.open(addr, 10, 10) == false)
