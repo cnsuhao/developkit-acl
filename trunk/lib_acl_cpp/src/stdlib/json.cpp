@@ -1,16 +1,18 @@
 #include "acl_stdafx.hpp"
+#include "acl_cpp/stdlib/string.hpp"
 #include "acl_cpp/stdlib/json.hpp"
 
 namespace acl
 {
 
 json_node::json_node(ACL_JSON_NODE* node, json* json_ptr)
-	: node_me_(node)
-	, json_(json_ptr)
-	, parent_(NULL)
-	, parent_saved_(NULL)
-	, child_(NULL)
-	, iter_(NULL)
+: node_me_(node)
+, json_(json_ptr)
+, parent_(NULL)
+, parent_saved_(NULL)
+, child_(NULL)
+, iter_(NULL)
+, buf_(NULL)
 {
 	acl_assert(json_ptr);
 }
@@ -23,6 +25,8 @@ json_node::~json_node(void)
 		delete child_;
 	if (iter_)
 		acl_myfree(iter_);
+	if (buf_)
+		delete buf_;
 }
 
 const char* json_node::tag_name(void) const
@@ -39,6 +43,17 @@ const char* json_node::get_text(void) const
 		return acl_vstring_str(node_me_->text);
 	else
 		return NULL;
+}
+
+const string& json_node::to_string(void)
+{
+	if (buf_ == NULL)
+		buf_ = NEW string(256);
+	else
+		buf_->clear();
+	ACL_VSTRING* vbuf = buf_->vstring();
+	(void) acl_json_node_build(node_me_, vbuf);
+	return *buf_;
 }
 
 json_node& json_node::add_child(json_node* child,
@@ -164,6 +179,15 @@ json::json(const char* data /* = NULL */)
 		update(data);
 }
 
+json::json(const json_node& node)
+{
+	json_ = acl_json_create(node.get_json_node());
+	root_ = NEW json_node(json_->root, this);
+	node_tmp_ = NULL;
+	buf_ = NULL;
+	iter_ = NULL;
+}
+
 json::~json(void)
 {
 	clear();
@@ -272,6 +296,24 @@ json_node& json::create_node(const char* tag, json_node& node)
 	return *n;
 }
 
+json_node& json::duplicate_node(json_node* node)
+{
+	ACL_JSON_NODE* tmp = acl_json_node_duplicate(json_,
+		node->get_json_node());
+	json_node* n = NEW json_node(tmp, this);
+	nodes_.push_back(n);
+	return *n;
+}
+
+json_node& json::duplicate_node(json_node& node)
+{
+	ACL_JSON_NODE* tmp = acl_json_node_duplicate(json_,
+		node.get_json_node());
+	json_node* n = NEW json_node(tmp, this);
+	nodes_.push_back(n);
+	return *n;
+}
+
 json_node& json::get_root(void)
 {
 	if (root_)
@@ -303,6 +345,17 @@ json_node* json::next_node(void)
 		return NULL;
 	node_tmp_->set_json_node(node);
 	return node_tmp_;
+}
+
+const string& json::to_string(void)
+{
+	if (buf_ == NULL)
+		buf_ = new string(256);
+	else
+		buf_->clear();
+	ACL_VSTRING* vbuf = buf_->vstring();
+	(void) acl_json_build(json_, vbuf);
+	return *buf_;
 }
 
 void json::build_json(string& out)
