@@ -1,6 +1,13 @@
 修改历史列表：
 ------------------------------------------------------------------------
 
+404) 2013.11.26
+404.1) feature: acl_json.c 增加了 acl_json_node_duplicate 用于复制一个 JSON
+结点对象到一个新的 JSON 结点中；增加了 acl_json_create 用于根据一个 JSON 结点
+创建一个完全的 JSON 对象
+404.2) feature: acl_json_util.c 增加了 acl_json_node_build 用于根据一个 JSON
+结点生成 JSON 字符串
+
 403) 2013.11.25
 403.1) bugfix: acl_json_parse.c，json_val() 函数中没有针对转义内容做特殊处理
 
