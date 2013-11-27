@@ -417,15 +417,8 @@ ACL_JSON *acl_json_alloc1(ACL_SLICE_POOL *slice)
 
 ACL_JSON_NODE *acl_json_node_duplicate(ACL_JSON *json, ACL_JSON_NODE *from)
 {
-	const char *myname = "acl_json_node_duplicate";
 	ACL_JSON_NODE *child_from, *child_to, *to;
 	ACL_RING_ITER iter;
-
-	if (from->json == json) {
-		acl_msg_error("%s(%d): same ACL_JSON in two json_node",
-			myname, __LINE__);
-		return NULL;
-	}
 
 	to = acl_json_node_alloc(json);
 	to->left_ch = from->left_ch;

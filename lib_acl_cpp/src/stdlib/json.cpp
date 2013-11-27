@@ -316,19 +316,21 @@ json_node& json::create_node(const char* tag, json_node& node)
 	return *n;
 }
 
-json_node& json::duplicate_node(json_node* node)
+json_node& json::duplicate_node(const json_node* node)
 {
 	ACL_JSON_NODE* tmp = acl_json_node_duplicate(json_,
 		node->get_json_node());
+	acl_assert(tmp);
 	json_node* n = NEW json_node(tmp, this);
 	nodes_.push_back(n);
 	return *n;
 }
 
-json_node& json::duplicate_node(json_node& node)
+json_node& json::duplicate_node(const json_node& node)
 {
 	ACL_JSON_NODE* tmp = acl_json_node_duplicate(json_,
 		node.get_json_node());
+	acl_assert(tmp);
 	json_node* n = NEW json_node(tmp, this);
 	nodes_.push_back(n);
 	return *n;
