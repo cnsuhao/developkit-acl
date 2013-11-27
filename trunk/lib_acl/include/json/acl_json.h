@@ -114,12 +114,11 @@ ACL_API void acl_json_node_append(ACL_JSON_NODE *node1, ACL_JSON_NODE *node2);
 ACL_API void acl_json_node_add_child(ACL_JSON_NODE *parent, ACL_JSON_NODE *child);
 
 /**
- * 将一个 JSON 对象的 JSON 结点复制至目标 JSON 对象中的一个 JSON 结点中，并返回
+ * 将一个 JSON 对象的 JSON 结点复制至 JSON 对象中的一个 JSON 结点中，并返回
  * 目标新创建的 JSON 结点
  * @param json {ACL_JSON*} 目标 JSON 对象
  * @param from {ACL_JSON_NODE*} 源 JSON 对象的一个 JSON 结点
- * @return {ACL_JSON_NODE*} 目标 JSON 对象复制了源 JSON 结点的新建 JSON 结点；
- *  当源 JSON 对象与目标 JSON 对象相同时则返回空指针
+ * @return {ACL_JSON_NODE*} 返回非空对象指针
  */
 ACL_API ACL_JSON_NODE *acl_json_node_duplicate(ACL_JSON *json, ACL_JSON_NODE *from);
 

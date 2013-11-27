@@ -310,20 +310,20 @@ public:
 	json_node& create_node(const char* tag, json_node& node);
 
 	/**
-	 * 将一个 json 对象中的一个 json 结点复制至当前 json 对象中的一个
-	 * 新 json 结点中；要求源 json 结点所在的 json 对象不能为当前 json 对象
+	 * 将一个 json 对象中的一个 json 结点复制至任一 json 对象中的一个
+	 * 新 json 结点中并返回该新的 json 结点
 	 * @param node {json_node*} 源 json 对象的一个 json 结点
 	 * @return {json_node&} 当前目标 json 对象中新创建的 json 结点
 	 */
-	json_node& duplicate_node(json_node* node);
+	json_node& duplicate_node(const json_node* node);
 
 	/**
-	 * 将一个 json 对象中的一个 json 结点复制至当前 json 对象中的一个
-	 * 新 json 结点中；要求源 json 结点所在的 json 对象不能为当前 json 对象
+	 * 将一个 json 对象中的一个 json 结点复制至任一 json 对象中的一个
+	 * 新 json 结点中并返回该新的 json 结点
 	 * @param node {json_node&} 源 json 对象的一个 json 结点
 	 * @return {json_node&} 当前目标 json 对象中新创建的 json 结点
 	 */
-	json_node& duplicate_node(json_node& node);
+	json_node& duplicate_node(const json_node& node);
 
 	/**
 	 * 获得根结点对象
