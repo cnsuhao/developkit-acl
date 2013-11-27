@@ -9,6 +9,8 @@ b) duplicate_node 根据一个 json 对象的某个 json 结点复制一个新的 json 结点
 c) to_string 新的将 json 对象转换为字符串的函数
 200.1.2) json_node 类增加了以下功能函数：
 a) to_string 根据 json 结点生成 json 字符串的函数
+b) set_tag 用来替换标签名
+c) set_text 当 json 结点为叶结点时用来替换标签值
 200.2) samples: 新增加了 json 测试用例 json3/json4
 
 199) 2013.11.23

@@ -69,7 +69,13 @@ static void test(void)
 	}
 
 	acl::json json2(*nodes[0]);
-	printf("result: %s\r\n", json2.to_string().c_str());
+	printf(">>> result: %s\r\n", json2.to_string().c_str());
+	printf("-------------------------------------------------\r\n");
+	printf(">>> before set node's string: %s\r\n", (*nodes[0]).to_string().c_str());
+	printf("-------------------------------------------------\r\n");
+	nodes[0]->set_tag("popup");
+	nodes[0]->set_text("popup text");
+	printf(">>> after set node's string: %s\r\n", (*nodes[0]).to_string().c_str());
 
 	printf("-------------------------------------------------\r\n");
 

@@ -45,6 +45,26 @@ const char* json_node::get_text(void) const
 		return NULL;
 }
 
+bool json_node::set_tag(const char* name)
+{
+	if (name == NULL || *name == 0)
+		return false;
+	if (node_me_->ltag == NULL || ACL_VSTRING_LEN(node_me_->ltag) == 0)
+		return false;
+	acl_vstring_strcpy(node_me_->ltag, name);
+	return true;
+}
+
+bool json_node::set_text(const char* text)
+{
+	if (text == NULL || *text == 0)
+		return false;
+	if (node_me_->type != ACL_JSON_T_LEAF || node_me_->text == NULL)
+		return false;
+	acl_vstring_strcpy(node_me_->ltag, text);
+	return true;
+}
+
 const string& json_node::to_string(void)
 {
 	if (buf_ == NULL)
