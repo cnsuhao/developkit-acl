@@ -40,6 +40,20 @@ public:
 	const char* get_text(void) const;
 
 	/**
+	 * 当该 json 结点有标签时，本函数用来新的标签值覆盖旧的标签名
+	 * @param name {const char*} 新的标签值，为非空字符串
+	 * @return {bool} 返回 false 表示该结点没有标签或输入空串，没有进行替换
+	 */
+	bool set_tag(const char* name);
+
+	/**
+	 * 当该 json 结点为叶结点时，本函数用来替换结点的文本值
+	 * @param text {const char*} 新的叶结点文本值，为非空字符串
+	 * @return {bool} 返回 false 表示该结点非叶结点或输入非法
+	 */
+	bool set_text(const char* text);
+
+	/**
 	 * 将当前 json 结点转换成 json 字符串(包含本 json 结点及其子结点)
 	 * @return {const char*}
 	 */
