@@ -305,6 +305,8 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClCompile Include="src\stream\aio_ostream.cpp" />
     <ClCompile Include="src\stream\aio_socket_stream.cpp" />
     <ClCompile Include="src\stream\aio_stream.cpp" />
+    <ClCompile Include="src\stream\aio_timer_callback.cpp" />
+    <ClCompile Include="src\stream\aio_timer_delay_free.cpp" />
     <ClCompile Include="src\stream\fstream.cpp" />
     <ClCompile Include="src\stream\ifstream.cpp" />
     <ClCompile Include="src\stream\istream.cpp" />
@@ -420,8 +422,6 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include="include\acl_cpp\stream\aio_socket_stream.hpp" />
     <ClInclude Include="include\acl_cpp\stream\aio_stream.hpp" />
     <ClInclude Include="include\acl_cpp\stream\aio_timer_callback.hpp" />
-    <ClInclude Include="include\acl_cpp\stream\aio_timer_delay_free.cpp" />
-    <ClInclude Include="include\acl_cpp\stream\aio_timer_delay_free.hpp" />
     <ClInclude Include="include\acl_cpp\stream\fstream.hpp" />
     <ClInclude Include="include\acl_cpp\stream\ifstream.hpp" />
     <ClInclude Include="include\acl_cpp\stream\istream.hpp" />
@@ -446,6 +446,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include="src\mime\internal\tok822.hpp" />
     <ClInclude Include="src\mime\internal\trimblanks.hpp" />
     <ClInclude Include="src\stdlib\internal\win_iconv.hpp" />
+    <ClInclude Include="src\stream\aio_timer_delay_free.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="changes.txt" />
