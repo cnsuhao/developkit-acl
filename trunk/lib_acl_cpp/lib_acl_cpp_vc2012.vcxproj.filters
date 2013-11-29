@@ -364,6 +364,9 @@
     <ClCompile Include="src\stream\aio_timer_callback.cpp">
       <Filter>src\stream</Filter>
     </ClCompile>
+    <ClCompile Include="src\master\master_timer.cpp">
+      <Filter>src\master</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\acl_stdafx.hpp">
@@ -752,6 +755,9 @@
     </ClInclude>
     <ClInclude Include="include\acl_cpp\stream\aio_timer_callback.hpp">
       <Filter>include\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\master\master_timer.hpp">
+      <Filter>include\master</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -37,6 +37,7 @@ public:
 	 * @return {bool}
 	 */
 	bool daemon_mode(void) const;
+
 protected:
 	bool daemon_mode_;
 	bool proc_inited_;

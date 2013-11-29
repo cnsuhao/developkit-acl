@@ -31,14 +31,7 @@ master_timer::master_timer(bool keep /* = false */)
 
 master_timer::~master_timer(void)
 {
-	// 如果正在触发定时器的回调过程中析构过程被调用则会发生严重问题
-	if (locked())
-	{
-		logger_error("In trigger proccess, you delete me now!");
-		acl_assert(0);
-	}
-
-	clear();
+	(void) clear();
 }
 
 int master_timer::clear()
@@ -202,29 +195,14 @@ acl_int64 master_timer::trigger(void)
 		return delay < 0 ? 0 : delay;
 	}
 
-	// 将到达的定时任务重新放回至定时器的任务列表中，
-	// 并开始触发所有的到达的定时任务
-
-	// 必须先设置触发器的忙状态，以防止子类在回调过程
-	// 中调用了该类对象的析构过程
-	set_locked();
-
-	// 设置解锁后销毁标志为 false，因为当前该定时器处于
-	// 锁定状态，所以其它类对象不能直接在锁定时销毁本类
-	// 对象，当解锁后，如果该标识被置为 true，则本类对象
-	// 应该自动销毁
-	destroy_on_unlock_ = false;
-
 	for (it = tasks.begin(); it != tasks.end(); ++it)
 	{
 		set_task(*it);
+		// 调用子类虚函数，触发定时器任务过程
 		timer_callback((*it)->id);
 	}
 
 	tasks.clear();
-
-	// 允许之后的操作中被子类调用析构过程
-	unset_locked();
 
 	// 子类有可能会在 timer_callback 中删除了所有的定时任务
 	if (tasks_.empty())
@@ -233,9 +211,6 @@ acl_int64 master_timer::trigger(void)
 	master_timer_task* first = tasks_.front();
 	acl_int64 delay = first->when - present_;
 
-	// 如果在加锁期间外部程序要求释放该对象，则在此处释放
-	if (destroy_on_unlock_)
-		destroy();
 	return delay < 0 ? 0 : delay;
 }
 
