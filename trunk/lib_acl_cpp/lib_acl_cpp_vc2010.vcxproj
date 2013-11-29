@@ -244,6 +244,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClCompile Include="src\master\master_conf.cpp" />
     <ClCompile Include="src\master\master_proc.cpp" />
     <ClCompile Include="src\master\master_threads.cpp" />
+    <ClCompile Include="src\master\master_timer.cpp" />
     <ClCompile Include="src\master\master_trigger.cpp" />
     <ClCompile Include="src\master\master_udp.cpp" />
     <ClCompile Include="src\memcache\memcache.cpp" />
@@ -296,6 +297,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClCompile Include="src\stdlib\util.cpp" />
     <ClCompile Include="src\stdlib\xml.cpp" />
     <ClCompile Include="src\stdlib\zlib_stream.cpp" />
+    <ClCompile Include="src\stream\aio_delay_free.cpp" />
     <ClCompile Include="src\stream\aio_fstream.cpp" />
     <ClCompile Include="src\stream\aio_handle.cpp" />
     <ClCompile Include="src\stream\aio_istream.cpp" />
@@ -364,6 +366,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include="include\acl_cpp\master\master_conf.hpp" />
     <ClInclude Include="include\acl_cpp\master\master_proc.hpp" />
     <ClInclude Include="include\acl_cpp\master\master_threads.hpp" />
+    <ClInclude Include="include\acl_cpp\master\master_timer.hpp" />
     <ClInclude Include="include\acl_cpp\master\master_trigger.hpp" />
     <ClInclude Include="include\acl_cpp\master\master_udp.hpp" />
     <ClInclude Include="include\acl_cpp\memcache\memcache.hpp" />
@@ -408,6 +411,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include="include\acl_cpp\stdlib\vld.h" />
     <ClInclude Include="include\acl_cpp\stdlib\xml.hpp" />
     <ClInclude Include="include\acl_cpp\stdlib\zlib_stream.hpp" />
+    <ClInclude Include="include\acl_cpp\stream\aio_delay_free.hpp" />
     <ClInclude Include="include\acl_cpp\stream\aio_fstream.hpp" />
     <ClInclude Include="include\acl_cpp\stream\aio_handle.hpp" />
     <ClInclude Include="include\acl_cpp\stream\aio_istream.hpp" />
@@ -415,6 +419,9 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include="include\acl_cpp\stream\aio_ostream.hpp" />
     <ClInclude Include="include\acl_cpp\stream\aio_socket_stream.hpp" />
     <ClInclude Include="include\acl_cpp\stream\aio_stream.hpp" />
+    <ClInclude Include="include\acl_cpp\stream\aio_timer_callback.hpp" />
+    <ClInclude Include="include\acl_cpp\stream\aio_timer_delay_free.cpp" />
+    <ClInclude Include="include\acl_cpp\stream\aio_timer_delay_free.hpp" />
     <ClInclude Include="include\acl_cpp\stream\fstream.hpp" />
     <ClInclude Include="include\acl_cpp\stream\ifstream.hpp" />
     <ClInclude Include="include\acl_cpp\stream\istream.hpp" />
