@@ -88,14 +88,8 @@ protected:
 	virtual void thread_on_exit() {}
 
 public:
-#ifdef WIN32
-	static void proc_set_timer(master_timer* timer,
-		__int64 delay, int id = 100);
-#else
-	static void proc_set_timer(master_timer* timer,
-		long long int delay, int id = 100);
-#endif
-	void proc_del_timer(master_timer* timer);
+	static void proc_set_timer(master_timer* timer);
+	static void proc_del_timer(master_timer* timer);
 
 	/**
 	 * 设置进程级别的定时器，该定时器只有当 proc_on_init 回调过程中
