@@ -64,6 +64,9 @@
     <ClCompile Include="src\master\master_threads.cpp">
       <Filter>src\master</Filter>
     </ClCompile>
+    <ClCompile Include="src\master\master_timer.cpp">
+      <Filter>src\master</Filter>
+    </ClCompile>
     <ClCompile Include="src\master\master_udp.cpp">
       <Filter>src\master</Filter>
     </ClCompile>
@@ -167,6 +170,15 @@
       <Filter>src\stream</Filter>
     </ClCompile>
     <ClCompile Include="src\stream\aio_stream.cpp">
+      <Filter>src\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stream\aio_timer_callback.cpp">
+      <Filter>src\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stream\aio_timer_delay_free.cpp">
+      <Filter>src\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stream\aio_timer_delay_free.hpp">
       <Filter>src\stream</Filter>
     </ClCompile>
     <ClCompile Include="src\stream\fstream.cpp">
@@ -317,6 +329,9 @@
       <Filter>src\beanstalk</Filter>
     </ClCompile>
     <ClCompile Include="src\stream\server_socket.cpp">
+      <Filter>src\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stream\aio_delay_free.cpp">
       <Filter>src\stream</Filter>
     </ClCompile>
     <ClCompile Include="src\stream\aio_fstream.cpp">
@@ -498,6 +513,9 @@
     <ClInclude Include="include\acl_cpp\master\master_threads.hpp">
       <Filter>include\master</Filter>
     </ClInclude>
+    <ClInclude Include="include\acl_cpp\master\master_timer.hpp">
+      <Filter>include\master</Filter>
+    </ClInclude>
     <ClInclude Include="include\acl_cpp\master\master_udp.hpp">
       <Filter>include\master</Filter>
     </ClInclude>
@@ -624,6 +642,9 @@
     <ClInclude Include="include\acl_cpp\stream\aio_stream.hpp">
       <Filter>include\stream</Filter>
     </ClInclude>
+    <ClInclude Include="include\acl_cpp\stream\aio_timer_callback.hpp">
+      <Filter>include\stream</Filter>
+    </ClInclude>
     <ClInclude Include="include\acl_cpp\stream\fstream.hpp">
       <Filter>include\stream</Filter>
     </ClInclude>
@@ -682,6 +703,9 @@
       <Filter>include\beanstalk</Filter>
     </ClInclude>
     <ClInclude Include="include\acl_cpp\stream\server_socket.hpp">
+      <Filter>include\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\stream\aio_delay_free.hpp">
       <Filter>include\stream</Filter>
     </ClInclude>
     <ClInclude Include="include\acl_cpp\stream\aio_fstream.hpp">

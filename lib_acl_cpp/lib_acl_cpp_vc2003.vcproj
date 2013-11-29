@@ -276,6 +276,9 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				Name="stream"
 				Filter="">
 				<File
+					RelativePath=".\src\stream\aio_delay_free.cpp">
+				</File>
+				<File
 					RelativePath=".\src\stream\aio_fstream.cpp">
 				</File>
 				<File
@@ -295,6 +298,15 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				</File>
 				<File
 					RelativePath=".\src\stream\aio_stream.cpp">
+				</File>
+				<File
+					RelativePath=".\src\stream\aio_timer_callback.cpp">
+				</File>
+				<File
+					RelativePath=".\src\stream\aio_timer_delay_free.cpp">
+				</File>
+				<File
+					RelativePath=".\src\stream\aio_timer_delay_free.hpp">
 				</File>
 				<File
 					RelativePath=".\src\stream\fstream.cpp">
@@ -554,6 +566,9 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 					RelativePath=".\src\master\master_threads.cpp">
 				</File>
 				<File
+					RelativePath=".\src\master\master_timer.cpp">
+				</File>
+				<File
 					RelativePath=".\src\master\master_trigger.cpp">
 				</File>
 				<File
@@ -768,6 +783,9 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				Name="stream"
 				Filter="">
 				<File
+					RelativePath=".\include\acl_cpp\stream\aio_delay_free.hpp">
+				</File>
+				<File
 					RelativePath=".\include\acl_cpp\stream\aio_fstream.hpp">
 				</File>
 				<File
@@ -949,6 +967,9 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				</File>
 				<File
 					RelativePath=".\include\acl_cpp\master\master_threads.hpp">
+				</File>
+				<File
+					RelativePath=".\include\acl_cpp\master\master_timer.hpp">
 				</File>
 				<File
 					RelativePath=".\include\acl_cpp\master\master_trigger.hpp">
