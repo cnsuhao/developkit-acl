@@ -89,9 +89,11 @@ protected:
 
 public:
 #ifdef WIN32
-	static void proc_set_timer(master_timer* timer, __int64 delay);
+	static void proc_set_timer(master_timer* timer,
+		__int64 delay, int id = 100);
 #else
-	static void proc_set_timer(master_timer* timer, long lont int delay);
+	static void proc_set_timer(master_timer* timer,
+		long long int delay, int id = 100);
 #endif
 	void proc_del_timer(master_timer* timer);
 

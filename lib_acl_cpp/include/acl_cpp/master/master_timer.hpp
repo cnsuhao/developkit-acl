@@ -1,5 +1,6 @@
 #pragma once
 #include "acl_cpp/acl_cpp_define.hpp"
+#include <list>
 
 namespace acl
 {
@@ -67,7 +68,6 @@ public:
 	long long int trigger(void);
 #endif
 
-protected:
 	/**
 	 * 子类必须实现此回调函数，注：子类或调用者禁止在
 	 * timer_callback 内部调用 master_timer 的析构
@@ -77,11 +77,9 @@ protected:
 	virtual void timer_callback(unsigned int id) = 0;
 
 	/****************************************************************/
-	/*        子类可以调用如下函数添加一些新的定时器任务 ID 号              */
+	/*        子类可以调用如下函数添加一些新的定时器任务 ID 号      */
 	/****************************************************************/
 #ifdef WIN32
-	__int64 present_;
-
 	/**
 	 * 针对本定时器增加新的任务ID号，这样便可以通过一个定时器启动
 	 * 多个定时任务
@@ -99,9 +97,15 @@ protected:
 	 */
 	__int64 del_task(unsigned int id);
 #else
-	long long int present_;
 	long long int set_task(unsigned int id, long long int delay);
 	long long int del_task(unsigned int id);
+#endif
+
+protected:
+#ifdef WIN32
+	__int64 present_;
+#else
+	long long int present_;
 #endif
 
 private:
