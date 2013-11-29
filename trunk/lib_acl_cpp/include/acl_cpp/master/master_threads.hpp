@@ -88,7 +88,18 @@ protected:
 	virtual void thread_on_exit() {}
 
 public:
+	/**
+	 * 设置进程级别的定时器，该函数只可在主线程的运行空间 (如在函数
+	 * proc_on_init) 中被设置，当该定时器任务都执行完毕后会自动被
+	 * 销毁(即内部会自动调用 master_timer::destroy 方法)
+	 * @param timer {master_timer*} 定时任务
+	 */
 	static void proc_set_timer(master_timer* timer);
+
+	/**
+	 * 删除进程级别定时器
+	 * @param timer {master_timer*} 由 proc_set_timer 设置的定时任务
+	 */
 	static void proc_del_timer(master_timer* timer);
 
 	/**
@@ -98,6 +109,7 @@ public:
 	 * @param callback {void (*)(int, void*)} 定时器回调函数
 	 * @param ctx {void*} callback 被调用时的第二个参数
 	 * @param delay {int} 定时器被循环触发的时间间隔(秒)
+	 * @deprecated
 	 */
 	static void proc_set_timer(void (*callback)(int, ACL_EVENT*, void*),
 		void* ctx, int delay);
@@ -106,6 +118,7 @@ public:
 	 * 删除进程级别的定时器
 	 * @param callback {void (*)(int, void*)} 定时器回调函数
 	 * @param ctx {void*} callback 被调用时的第二个参数
+	 * @deprecated
 	 */
 	static void proc_del_timer(void (*callback)(int, ACL_EVENT*, void*),
 		void* ctx);
