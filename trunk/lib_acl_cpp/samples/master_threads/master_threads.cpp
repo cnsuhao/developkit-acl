@@ -5,6 +5,7 @@
 #include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/stdlib/util.hpp"
 #include "acl_cpp/master/master_threads.hpp"
+#include "acl_cpp/master/master_timer.hpp"
 #include "acl_cpp/stream/socket_stream.hpp"
 
 static char *var_cfg_debug_msg;
@@ -36,6 +37,34 @@ static acl::master_int_tbl var_conf_int_tab[] = {
 };
 
 static void (*format)(const char*, ...) = acl::log::msg1;
+
+//////////////////////////////////////////////////////////////////////////
+
+class master_timer_test : public acl::master_timer
+{
+public:
+	master_timer_test() : count_(0) {}
+
+protected:
+	// »ùÀàÐéº¯Êý
+	virtual void timer_callback(unsigned int id)
+	{
+		printf("timer callback, id: %u\r\n", id);
+		if (count_++ >= 5)
+		{
+			printf("clear all timer task now\r\n");
+			clear();
+		}
+	}
+
+private:
+	int  count_;
+
+	~master_timer_test()
+	{
+		printf("timer destroy now!\r\n");
+	}
+};
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -81,6 +110,16 @@ protected:
 		{
 			stream->puts("bye!");
 			return false;
+		}
+
+		if (buf == "timer")
+		{
+			master_timer_test* timer = new master_timer_test();
+			timer->set_task(100, 1000000);
+			timer->keep_timer(true);
+			printf("set timer ok\r\n");
+			acl::master_threads::proc_set_timer(timer, 1000000);
+			return true;
 		}
 
 		if (buf.empty())

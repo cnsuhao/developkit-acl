@@ -255,13 +255,17 @@ static void timer_callback(int, ACL_EVENT* event, void* ctx)
 		timer->keep_timer() ? 1 : 0);
 }
 
-void master_threads::proc_set_timer(master_timer* timer, acl_int64 delay)
+void master_threads::proc_set_timer(master_timer* timer,
+	acl_int64 delay, int id /* = 100 */)
 {
 	if (__eventp == NULL)
 		logger_warn("event NULL!");
 	else
+	{
+		timer->set_task(id, delay);
 		acl_event_request_timer(__eventp, timer_callback,
 			timer, delay, timer->keep_timer() ? 1 : 0);
+	}
 }
 
 void master_threads::proc_del_timer(master_timer* timer)
@@ -309,7 +313,7 @@ void master_threads::service_init(void*)
 	acl_assert(__mt != NULL);
 
 #ifndef WIN32
-	(__eventp == NULL && __mt->daemon_mode())
+	if (__eventp == NULL && __mt->daemon_mode())
 		__eventp = acl_ioctl_server_event();
 #endif
 	__mt->proc_inited_ = true;
