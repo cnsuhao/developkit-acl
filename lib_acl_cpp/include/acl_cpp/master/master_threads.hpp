@@ -7,6 +7,7 @@ struct ACL_EVENT;
 namespace acl {
 
 class socket_stream;
+class master_timer;
 
 /**
  * 线程池服务器框架类，该类为纯虚类，子类需要实现其中的纯虚函数，
@@ -87,6 +88,13 @@ protected:
 	virtual void thread_on_exit() {}
 
 public:
+#ifdef WIN32
+	static void proc_set_timer(master_timer* timer, __int64 delay);
+#else
+	static void proc_set_timer(master_timer* timer, long lont int delay);
+#endif
+	void proc_del_timer(master_timer* timer);
+
 	/**
 	 * 设置进程级别的定时器，该定时器只有当 proc_on_init 回调过程中
 	 * 被设置才会生效且该定时器仅被调用一次，如果需要循环定时器，则

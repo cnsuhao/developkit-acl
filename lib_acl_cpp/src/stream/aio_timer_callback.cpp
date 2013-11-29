@@ -236,7 +236,10 @@ acl_int64 aio_timer_callback::trigger(void)
 
 	// 如果在加锁期间外部程序要求释放该对象，则在此处释放
 	if (destroy_on_unlock_)
+	{
 		destroy();
+		return -1;
+	}
 	return delay < 0 ? 0 : delay;
 }
 

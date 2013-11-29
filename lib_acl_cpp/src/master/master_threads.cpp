@@ -1,6 +1,7 @@
 #include "acl_stdafx.hpp"
 #include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/stream/socket_stream.hpp"
+#include "acl_cpp/master/master_timer.hpp"
 #include "acl_cpp/master/master_threads.hpp"
 
 namespace acl
@@ -55,6 +56,7 @@ static bool __stop = false;
 static int  __count_limit = 1;
 static int  __count = 0;
 static acl_pthread_pool_t* __thread_pool = NULL;
+static ACL_EVENT* __eventp = NULL;
 
 static void close_sstreams(ACL_EVENT* event, std::vector<ACL_VSTREAM*>& streams)
 {
@@ -84,7 +86,7 @@ bool master_threads::run_alone(const char* addrs, const char* path /* = NULL */,
 #endif
 
 	std::vector<ACL_VSTREAM*> sstreams;
-	ACL_EVENT* eventp = acl_event_new_select_thr(1, 0);
+	__eventp = acl_event_new_select_thr(1, 0);
 	ACL_ARGV*  tokens = acl_argv_split(addrs, ";,| \t");
 	ACL_ITER   iter;
 
@@ -97,11 +99,11 @@ bool master_threads::run_alone(const char* addrs, const char* path /* = NULL */,
 			logger_error("listen %s error(%s)",
 				addr, acl_last_serror());
 			acl_argv_free(tokens);
-			close_sstreams(eventp, sstreams);
-			acl_event_free(eventp);
+			close_sstreams(__eventp, sstreams);
+			acl_event_free(__eventp);
 			return false;
 		}
-		acl_event_enable_listen(eventp, sstream, 0,
+		acl_event_enable_listen(__eventp, sstream, 0,
 			listen_callback, sstream);
 		sstreams.push_back(sstream);
 	}
@@ -124,7 +126,7 @@ bool master_threads::run_alone(const char* addrs, const char* path /* = NULL */,
 		thread_init(NULL);
 
 	while (!__stop)
-		acl_event_loop(eventp);
+		acl_event_loop(__eventp);
 
 	if (__thread_pool)
 		acl_pthread_pool_destroy(__thread_pool);
@@ -135,8 +137,9 @@ bool master_threads::run_alone(const char* addrs, const char* path /* = NULL */,
 
 	// 必须在调用 acl_event_free 前调用 close_sstreams，因为在关闭
 	// 网络流对象时依然有对 ACL_EVENT 引擎的使用
-	close_sstreams(eventp, sstreams);
-	acl_event_free(eventp);
+	close_sstreams(__eventp, sstreams);
+	acl_event_free(__eventp);
+	__eventp = NULL;
 
 	return true;
 }
@@ -228,6 +231,47 @@ void master_threads::run_once(ACL_VSTREAM* client)
 
 //////////////////////////////////////////////////////////////////////////
 
+static void timer_callback(int, ACL_EVENT* event, void* ctx)
+{
+	master_timer* timer = (master_timer*) ctx;
+
+	// 触发定时器中的所有定时任务
+	acl_int64 next_delay = timer->trigger();
+
+	// 如果定时器中的任务为空或未设置定时器的重复使用，则删除定时器
+	if (timer->empty() || !timer->keep_timer())
+	{
+		// 删除定时器
+		acl_event_cancel_timer(event, timer_callback, timer);
+		timer->destroy();
+		return;
+	}
+
+	// 如果允许重复使用定时器且定时器中的任务非空，则再次设置该定时器
+
+	//  需要重置定时器的到达时间截
+	acl_event_request_timer(event, timer_callback, timer,
+		next_delay < 0 ? 0 : next_delay,
+		timer->keep_timer() ? 1 : 0);
+}
+
+void master_threads::proc_set_timer(master_timer* timer, acl_int64 delay)
+{
+	if (__eventp == NULL)
+		logger_warn("event NULL!");
+	else
+		acl_event_request_timer(__eventp, timer_callback,
+			timer, delay, timer->keep_timer() ? 1 : 0);
+}
+
+void master_threads::proc_del_timer(master_timer* timer)
+{
+	if (__eventp == NULL)
+		logger_warn("event NULL!");
+	else
+		acl_event_cancel_timer(__eventp, timer_callback, timer);
+}
+
 void master_threads::proc_set_timer(void (*callback)(int, ACL_EVENT*, void*),
 	void* ctx, int delay)
 {
@@ -263,6 +307,11 @@ void master_threads::service_pre_jail(void*)
 void master_threads::service_init(void*)
 {
 	acl_assert(__mt != NULL);
+
+#ifndef WIN32
+	(__eventp == NULL && __mt->daemon_mode())
+		__eventp = acl_ioctl_server_event();
+#endif
 	__mt->proc_inited_ = true;
 	__mt->proc_on_init();
 }

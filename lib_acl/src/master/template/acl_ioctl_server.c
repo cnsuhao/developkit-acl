@@ -279,7 +279,7 @@ static void disable_listen(void)
 	/**
 	 * Ö»ËùÒÔ²ÉÓÃ¶¨Ê±Æ÷¹Ø±Õ¼àÌýÁ÷£¬Ò»·½ÃæÒòÎª¼àÌýÁ÷ÔÚÊÂ¼þ¼¯ºÏÖÐÊÇ¡°³£×¤Áô¡±µÄ£¬
 	 * ÁíÒ»·½Ãæ±¾Ïß³ÌÓëÊÂ¼þÑ­»·Ö÷Ïß³ÌÊÇ²»Í¬µÄÏß³Ì¿Õ¼ä£¬Èç¹ûÔÚ±¾Ïß³ÌÖ±½Ó¹Ø±Õ
-	 * ¼àÌýÁ÷£¬»áÔì³ÉÊÂ¼þÑ­»·Ö÷Ïß³ÌÔÚ select() Ê±±¨ÃèÊö·û·Ç·¨£¬¶øµ±¼ÓË¶¨Ê±Æ÷
+	 * ¼àÌýÁ÷£¬»áÔì³ÉÊÂ¼þÑ­»·Ö÷Ïß³ÌÔÚ select() Ê±±¨ÃèÊö·û·Ç·¨£¬¶øµ±¼ÓË¶¨Ê±Æ?
 	 * ¹Ø±Õ·½·¨ºó£¬¶¨Ê±Æ÷µÄÔËÐÐÏß³Ì¿Õ¼äÓëÊÂ¼þÑ­»·µÄÔËÐÐÏß³Ì¿Õ¼äÊÇÏàÍ¬µÄ£¬ËùÒÔ
 	 * ²»»áÔì³É³åÍ»¡£ÕâÖ÷ÒªÒòÎªÊÂ¼þÑ­»·Ïß³ÌÖÐÏÈÖ´ÐÐ select(), ºóÖ´ÐÐ¶¨Ê±Æ÷£¬Èç¹û
 	 * select() Ö´ÐÐºó¶¨Ê±Æ÷Æô¶¯²¢½«¼àÌýÁ÷´ÓÊÂ¼þ¼¯ºÏÖÐÉ¾³ý£¬Ôò¼´Ê¹¸Ã¼àÌýÁ÷ÒÑ¾­
