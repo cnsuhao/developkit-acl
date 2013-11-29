@@ -27,6 +27,7 @@ master_timer::master_timer(bool keep /* = false */)
 {
 	keep_ = keep;
 	length_ = 0;
+	min_delay_ = 2147483647;
 }
 
 master_timer::~master_timer(void)
@@ -108,6 +109,12 @@ acl_int64 master_timer::del_task(unsigned int id)
 
 acl_int64 master_timer::set_task(unsigned int id, acl_int64 delay)
 {
+	if (delay < 0)
+	{
+		logger_error("invalid task, id: %u, delay: %lld", id, delay);
+		return -1;
+	}
+
 	master_timer_task* task = NULL;
 	std::list<master_timer_task*>::iterator it = tasks_.begin();
 	for (; it != tasks_.end(); ++it)
@@ -137,6 +144,9 @@ acl_int64 master_timer::set_task(master_timer_task* task)
 {
 	set_time();
 	task->when = present_ + task->delay;
+
+	if (task->delay < min_delay_)
+		min_delay_ = task->delay;
 
 	std::list<master_timer_task*>::iterator it = tasks_.begin();
 	for (; it != tasks_.end(); ++it)

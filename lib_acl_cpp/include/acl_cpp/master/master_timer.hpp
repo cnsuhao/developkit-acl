@@ -59,16 +59,6 @@ public:
 	int clear(void);
 
 	/**
-	 * 触发所有到时的定时任务
-	 * @return {long lont int} 下一个将要到时的任务
-	 */
-#ifdef WIN32
-	__int64 trigger(void);
-#else
-	long long int trigger(void);
-#endif
-
-	/**
 	 * 子类必须实现此回调函数，注：子类或调用者禁止在
 	 * timer_callback 内部调用 master_timer 的析构
 	 * 函数，否则将会酿成大祸
@@ -101,10 +91,32 @@ public:
 	long long int del_task(unsigned int id);
 #endif
 
+	//////////////////////////////////////////////////////////////////////
+
+	/**
+	 * 触发所有到时的定时任务
+	 * @return {long lont int} 下一个将要到时的任务
+	 */
+#ifdef WIN32
+	__int64 trigger(void);
+	__int64 min_delay(void) const
+	{
+		return min_delay_;
+	}
+#else
+	long long int trigger(void);
+	long long int min_delay(void) const
+	{
+		return min_delay_;
+	}
+#endif
+
 protected:
 #ifdef WIN32
+	__int64 min_delay_;
 	__int64 present_;
 #else
+	long long int min_delay_;
 	long long int present_;
 #endif
 

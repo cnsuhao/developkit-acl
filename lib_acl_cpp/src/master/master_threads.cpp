@@ -157,17 +157,12 @@ void master_threads::listen_callback(int, ACL_EVENT*, ACL_VSTREAM* sstream, void
 	{
 		acl_pthread_pool_add(__thread_pool, thread_run, client);
 		__count++;
-		if (__count_limit > 0 && __count >= __count_limit)
-			__stop = true;
 	}
 	else
 	{
 		// 单线程方式串行处理
 		run_once(client);
-
 		__count++;
-		if (__count_limit > 0 && __count >= __count_limit)
-			__stop = true;
 	}
 }
 
@@ -227,6 +222,9 @@ void master_threads::run_once(ACL_VSTREAM* client)
 		if (service_main(client, NULL) == 1)
 			break;
 	}
+
+	if (__count_limit > 0 && __count >= __count_limit)
+		__stop = true;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -255,17 +253,13 @@ static void timer_callback(int, ACL_EVENT* event, void* ctx)
 		timer->keep_timer() ? 1 : 0);
 }
 
-void master_threads::proc_set_timer(master_timer* timer,
-	acl_int64 delay, int id /* = 100 */)
+void master_threads::proc_set_timer(master_timer* timer)
 {
 	if (__eventp == NULL)
 		logger_warn("event NULL!");
 	else
-	{
-		timer->set_task(id, delay);
-		acl_event_request_timer(__eventp, timer_callback,
-			timer, delay, timer->keep_timer() ? 1 : 0);
-	}
+		acl_event_request_timer(__eventp, timer_callback, timer,
+			timer->min_delay(), timer->keep_timer() ? 1 : 0);
 }
 
 void master_threads::proc_del_timer(master_timer* timer)
