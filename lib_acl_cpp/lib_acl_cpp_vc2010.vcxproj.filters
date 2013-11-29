@@ -172,15 +172,6 @@
     <ClCompile Include="src\stream\aio_stream.cpp">
       <Filter>src\stream</Filter>
     </ClCompile>
-    <ClCompile Include="src\stream\aio_timer_callback.cpp">
-      <Filter>src\stream</Filter>
-    </ClCompile>
-    <ClCompile Include="src\stream\aio_timer_delay_free.cpp">
-      <Filter>src\stream</Filter>
-    </ClCompile>
-    <ClCompile Include="src\stream\aio_timer_delay_free.hpp">
-      <Filter>src\stream</Filter>
-    </ClCompile>
     <ClCompile Include="src\stream\fstream.cpp">
       <Filter>src\stream</Filter>
     </ClCompile>
@@ -357,6 +348,12 @@
     </ClCompile>
     <ClCompile Include="src\stdlib\thread_pool.cpp">
       <Filter>src\stdlib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stream\aio_timer_callback.cpp">
+      <Filter>src\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stream\aio_timer_delay_free.cpp">
+      <Filter>src\stream</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -740,6 +737,9 @@
     </ClInclude>
     <ClInclude Include="include\acl_cpp\stdlib\thread_pool.hpp">
       <Filter>include\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stream\aio_timer_delay_free.hpp">
+      <Filter>src\stream</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
