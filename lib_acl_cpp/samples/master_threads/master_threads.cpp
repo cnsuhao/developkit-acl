@@ -5,7 +5,7 @@
 #include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/stdlib/util.hpp"
 #include "acl_cpp/master/master_threads.hpp"
-#include "acl_cpp/master/master_timer.hpp"
+#include "acl_cpp/event/event_timer.hpp"
 #include "acl_cpp/stream/socket_stream.hpp"
 
 static char *var_cfg_debug_msg;
@@ -40,7 +40,7 @@ static void (*format)(const char*, ...) = acl::log::msg1;
 
 //////////////////////////////////////////////////////////////////////////
 
-class master_timer_test : public acl::master_timer
+class master_timer_test : public acl::event_timer
 {
 public:
 	master_timer_test(acl::socket_stream* stream)

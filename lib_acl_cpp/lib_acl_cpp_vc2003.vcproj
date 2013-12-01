@@ -566,9 +566,6 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 					RelativePath=".\src\master\master_threads.cpp">
 				</File>
 				<File
-					RelativePath=".\src\master\master_timer.cpp">
-				</File>
-				<File
 					RelativePath=".\src\master\master_trigger.cpp">
 				</File>
 				<File
@@ -757,6 +754,13 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				</File>
 				<File
 					RelativePath=".\src\connpool\connect_pool.cpp">
+				</File>
+			</Filter>
+			<Filter
+				Name="event"
+				Filter="">
+				<File
+					RelativePath=".\src\event\event_timer.cpp">
 				</File>
 			</Filter>
 		</Filter>
@@ -969,9 +973,6 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 					RelativePath=".\include\acl_cpp\master\master_threads.hpp">
 				</File>
 				<File
-					RelativePath=".\include\acl_cpp\master\master_timer.hpp">
-				</File>
-				<File
 					RelativePath=".\include\acl_cpp\master\master_trigger.hpp">
 				</File>
 				<File
@@ -1172,6 +1173,13 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 				</File>
 				<File
 					RelativePath=".\include\acl_cpp\connpool\connect_pool.hpp">
+				</File>
+			</Filter>
+			<Filter
+				Name="event"
+				Filter="">
+				<File
+					RelativePath=".\include\acl_cpp\event\event_timer.hpp">
 				</File>
 			</Filter>
 		</Filter>

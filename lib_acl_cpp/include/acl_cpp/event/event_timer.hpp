@@ -5,16 +5,17 @@
 namespace acl
 {
 
-class master_timer_task;
-class ACL_CPP_API master_timer
+class event_task;
+
+class ACL_CPP_API event_timer
 {
 public:
 	/**
 	 * 构造函数
 	 * @param keep {bool} 该定时器是否允许自动重启
 	 */
-	master_timer(bool keep = false);
-	virtual ~master_timer();
+	event_timer(bool keep = false);
+	virtual ~event_timer();
 
 	/**
 	 * 当定时器里的任务数为空时的回调函数，
@@ -24,7 +25,7 @@ public:
 	 * 该函数被触发的条件有三个：
 	 * 1) 定时器所有的任务数为 0 时
 	 * 2) 当没有设置重复定时器且该定时器中有一个定时任务被触发后
-	 * 3) 当 del_timer(master_timer*) 被调用后
+	 * 3) 当 del_timer(event_timer*) 被调用后
 	 */
 	virtual void destroy(void) {}
 
@@ -32,13 +33,19 @@ public:
 	 * 定时器里的任务是否为空
 	 * @return {bool}
 	 */
-	bool empty(void) const;
+	bool empty(void) const
+	{
+		return tasks_.empty();
+	}
 
 	/**
 	 * 定时器里的任务个数
 	 * @return {size_t}
 	 */
-	size_t length(void) const;
+	size_t length(void) const
+	{
+		return length_;
+	}
 
 	/**
 	 * 该定时器是否是自动重启的
@@ -50,7 +57,10 @@ public:
 	 * 判断该定时器是否是自动重启的
 	 * @return {bool}
 	 */
-	bool keep_timer(void) const;
+	bool keep_timer(void) const
+	{
+		return keep_;
+	}
 
 	/**
 	 * 清空定时器里的定时任务
@@ -60,7 +70,7 @@ public:
 
 	/**
 	 * 子类必须实现此回调函数，注：子类或调用者禁止在
-	 * timer_callback 内部调用 master_timer 的析构
+	 * timer_callback 内部调用 event_timer 的析构
 	 * 函数，否则将会酿成大祸
 	 * @param id {unsigned int} 对应某个任务的 ID 号
 	 */
@@ -122,12 +132,12 @@ protected:
 
 private:
 	size_t length_;
-	std::list<master_timer_task*> tasks_;
+	std::list<event_task*> tasks_;
 	bool keep_;  // 该定时器是否允许自动重启
 #ifdef WIN32
-	__int64 set_task(master_timer_task* task);
+	__int64 set_task(event_task* task);
 #else
-	long long int set_task(master_timer_task* task);
+	long long int set_task(event_task* task);
 #endif
 
 	/**

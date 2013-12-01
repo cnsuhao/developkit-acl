@@ -1,20 +1,20 @@
 #include "acl_stdafx.hpp"
 #include "acl_cpp/stdlib/log.hpp"
-#include "acl_cpp/master/master_timer.hpp"
+#include "acl_cpp/event/event_timer.hpp"
 
 namespace acl
 {
 
 //////////////////////////////////////////////////////////////////////////
 
-class master_timer_task
+class event_task
 {
 public:
-	master_timer_task() {}
-	~master_timer_task() {}
+	event_task() {}
+	~event_task() {}
 
 private:
-	friend class master_timer;
+	friend class event_timer;
 
 	unsigned int id;
 	acl_int64 delay;
@@ -23,22 +23,22 @@ private:
 
 //////////////////////////////////////////////////////////////////////////
 
-master_timer::master_timer(bool keep /* = false */)
+event_timer::event_timer(bool keep /* = false */)
 {
 	keep_ = keep;
 	length_ = 0;
 	min_delay_ = 2147483647;
 }
 
-master_timer::~master_timer(void)
+event_timer::~event_timer(void)
 {
 	(void) clear();
 }
 
-int master_timer::clear()
+int event_timer::clear()
 {
 	int  n = 0;
-	std::list<master_timer_task*>::iterator it = tasks_.begin();
+	std::list<event_task*>::iterator it = tasks_.begin();
 	for (; it != tasks_.end(); ++it)
 	{
 		delete (*it);
@@ -49,27 +49,12 @@ int master_timer::clear()
 	return n;
 }
 
-bool master_timer::empty() const
-{
-	return tasks_.empty();
-}
-
-size_t master_timer::length() const
-{
-	return length_;
-}
-
-void master_timer::keep_timer(bool on)
+void event_timer::keep_timer(bool on)
 {
 	keep_ = on;
 }
 
-bool master_timer::keep_timer(void) const
-{
-	return keep_;
-}
-
-void master_timer::set_time(void)
+void event_timer::set_time(void)
 {
 	struct timeval now;
 	gettimeofday(&now, NULL);
@@ -79,10 +64,10 @@ void master_timer::set_time(void)
 
 #define TIMER_EMPTY		-1
 
-acl_int64 master_timer::del_task(unsigned int id)
+acl_int64 event_timer::del_task(unsigned int id)
 {
 	bool ok = false;
-	std::list<master_timer_task*>::iterator it = tasks_.begin();
+	std::list<event_task*>::iterator it = tasks_.begin();
 	for (; it != tasks_.end(); ++it)
 	{
 		if ((*it)->id == id)
@@ -107,7 +92,7 @@ acl_int64 master_timer::del_task(unsigned int id)
 	return delay < 0 ? 0 : delay;
 }
 
-acl_int64 master_timer::set_task(unsigned int id, acl_int64 delay)
+acl_int64 event_timer::set_task(unsigned int id, acl_int64 delay)
 {
 	if (delay < 0)
 	{
@@ -115,8 +100,8 @@ acl_int64 master_timer::set_task(unsigned int id, acl_int64 delay)
 		return -1;
 	}
 
-	master_timer_task* task = NULL;
-	std::list<master_timer_task*>::iterator it = tasks_.begin();
+	event_task* task = NULL;
+	std::list<event_task*>::iterator it = tasks_.begin();
 	for (; it != tasks_.end(); ++it)
 	{
 		if ((*it)->id == id)
@@ -130,7 +115,7 @@ acl_int64 master_timer::set_task(unsigned int id, acl_int64 delay)
 
 	if (task == NULL)
 	{
-		task = NEW master_timer_task();
+		task = NEW event_task();
 		task->delay = delay;
 		task->id = id;
 	}
@@ -140,7 +125,7 @@ acl_int64 master_timer::set_task(unsigned int id, acl_int64 delay)
 	return set_task(task);
 }
 
-acl_int64 master_timer::set_task(master_timer_task* task)
+acl_int64 event_timer::set_task(event_task* task)
 {
 	set_time();
 	task->when = present_ + task->delay;
@@ -148,7 +133,7 @@ acl_int64 master_timer::set_task(master_timer_task* task)
 	if (task->delay < min_delay_)
 		min_delay_ = task->delay;
 
-	std::list<master_timer_task*>::iterator it = tasks_.begin();
+	std::list<event_task*>::iterator it = tasks_.begin();
 	for (; it != tasks_.end(); ++it)
 	{
 		if (task->when < (*it)->when)
@@ -163,12 +148,12 @@ acl_int64 master_timer::set_task(master_timer_task* task)
 
 	length_++;
 
-	master_timer_task* first = tasks_.front();
+	event_task* first = tasks_.front();
 	acl_int64 delay = first->when - present_;
 	return delay < 0 ? 0 : delay;
 }
 
-acl_int64 master_timer::trigger(void)
+acl_int64 event_timer::trigger(void)
 {
 	// sanity check
 	if (tasks_.empty())
@@ -178,9 +163,9 @@ acl_int64 master_timer::trigger(void)
 
 	set_time();
 
-	std::list<master_timer_task*>::iterator it, next;
-	std::list<master_timer_task*> tasks;
-	master_timer_task* task;
+	std::list<event_task*>::iterator it, next;
+	std::list<event_task*> tasks;
+	event_task* task;
 
 	// 从定时器中取出到达的定时任务
 	for (it = tasks_.begin(); it != tasks_.end(); it = next)
@@ -200,7 +185,7 @@ acl_int64 master_timer::trigger(void)
 	{
 		acl_assert(!tasks_.empty());
 
-		master_timer_task* first = tasks_.front();
+		event_task* first = tasks_.front();
 		acl_int64 delay = first->when - present_;
 		return delay < 0 ? 0 : delay;
 	}
@@ -218,7 +203,7 @@ acl_int64 master_timer::trigger(void)
 	if (tasks_.empty())
 		return TIMER_EMPTY;
 
-	master_timer_task* first = tasks_.front();
+	event_task* first = tasks_.front();
 	acl_int64 delay = first->when - present_;
 
 	return delay < 0 ? 0 : delay;
