@@ -213,6 +213,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClCompile Include="src\db\db_service_mysql.cpp" />
     <ClCompile Include="src\db\db_service_sqlite.cpp" />
     <ClCompile Include="src\db\db_sqlite.cpp" />
+    <ClCompile Include="src\event\event_timer.cpp" />
     <ClCompile Include="src\hsocket\hsclient.cpp" />
     <ClCompile Include="src\hsocket\hserror.cpp" />
     <ClCompile Include="src\hsocket\hspool.cpp" />
@@ -244,7 +245,6 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClCompile Include="src\master\master_conf.cpp" />
     <ClCompile Include="src\master\master_proc.cpp" />
     <ClCompile Include="src\master\master_threads.cpp" />
-    <ClCompile Include="src\master\master_timer.cpp" />
     <ClCompile Include="src\master\master_trigger.cpp" />
     <ClCompile Include="src\master\master_udp.cpp" />
     <ClCompile Include="src\memcache\memcache.cpp" />
@@ -334,6 +334,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include="include\acl_cpp\db\db_service_mysql.hpp" />
     <ClInclude Include="include\acl_cpp\db\db_service_sqlite.hpp" />
     <ClInclude Include="include\acl_cpp\db\db_sqlite.hpp" />
+    <ClInclude Include="include\acl_cpp\event\event_timer.hpp" />
     <ClInclude Include="include\acl_cpp\hsocket\hsclient.hpp" />
     <ClInclude Include="include\acl_cpp\hsocket\hserror.hpp" />
     <ClInclude Include="include\acl_cpp\hsocket\hspool.hpp" />
@@ -368,7 +369,6 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include="include\acl_cpp\master\master_conf.hpp" />
     <ClInclude Include="include\acl_cpp\master\master_proc.hpp" />
     <ClInclude Include="include\acl_cpp\master\master_threads.hpp" />
-    <ClInclude Include="include\acl_cpp\master\master_timer.hpp" />
     <ClInclude Include="include\acl_cpp\master\master_trigger.hpp" />
     <ClInclude Include="include\acl_cpp\master\master_udp.hpp" />
     <ClInclude Include="include\acl_cpp\memcache\memcache.hpp" />

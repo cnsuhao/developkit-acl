@@ -7,7 +7,7 @@ struct ACL_EVENT;
 namespace acl {
 
 class socket_stream;
-class master_timer;
+class event_timer;
 
 /**
  * 线程池服务器框架类，该类为纯虚类，子类需要实现其中的纯虚函数，
@@ -59,15 +59,24 @@ protected:
 	 *  必将该连接再传递至 thread_main 过程
 	 *  注：当本函数返回 false 流关闭时并不调用 thread_on_close 过程
 	 */
-	virtual bool thread_on_accept(socket_stream* stream) { (void) stream; return true; }
+	virtual bool thread_on_accept(socket_stream* stream)
+	{
+		(void) stream;
+		return true;
+	}
 
 	/**
-	 * 当某个网络连接的 IO 读写超时时的回调函数，如果该函数返回 true 则表示继续等待下一次
-	 * 读写，否则则希望关闭该连接
+	 * 当某个网络连接的 IO 读写超时时的回调函数，如果该函数返回 true 则
+	 * 表示继续等待下一次读写，否则则希望关闭该连接
 	 * @param stream {socket_stream*}
-	 * @return {bool} 如果返回 false 则表示子类要求关闭连接，否则则要求继续监听该连接
+	 * @return {bool} 如果返回 false 则表示子类要求关闭连接，否则则要求
+	 *  继续监听该连接
 	 */
-	virtual bool thread_on_timeout(socket_stream* stream) { (void) stream; return false; }
+	virtual bool thread_on_timeout(socket_stream* stream)
+	{
+		(void) stream;
+		return false;
+	}
 
 	/**
 	 * 当与某个线程绑定的连接关闭时的回调函数
@@ -92,15 +101,15 @@ public:
 	 * 设置进程级别的定时器，该函数只可在主线程的运行空间 (如在函数
 	 * proc_on_init) 中被设置，当该定时器任务都执行完毕后会自动被
 	 * 销毁(即内部会自动调用 master_timer::destroy 方法)
-	 * @param timer {master_timer*} 定时任务
+	 * @param timer {event_timer*} 定时任务
 	 */
-	static void proc_set_timer(master_timer* timer);
+	static void proc_set_timer(event_timer* timer);
 
 	/**
 	 * 删除进程级别定时器
-	 * @param timer {master_timer*} 由 proc_set_timer 设置的定时任务
+	 * @param timer {event_timer*} 由 proc_set_timer 设置的定时任务
 	 */
-	static void proc_del_timer(master_timer* timer);
+	static void proc_del_timer(event_timer* timer);
 
 	/**
 	 * 设置进程级别的定时器，该定时器只有当 proc_on_init 回调过程中

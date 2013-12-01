@@ -108,8 +108,9 @@
 #include "acl_cpp/mime/rfc2047.hpp"
 #include "acl_cpp/mime/rfc822.hpp"
 
+#include "acl_cpp/event/event_timer.hpp"
+
 #include "acl_cpp/master/master_base.hpp"
-#include "acl_cpp/master/master_timer.hpp"
 #include "acl_cpp/master/master_threads.hpp"
 #include "acl_cpp/master/master_aio.hpp"
 #include "acl_cpp/master/master_proc.hpp"

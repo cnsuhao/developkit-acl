@@ -1,7 +1,7 @@
 #include "acl_stdafx.hpp"
 #include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/stream/socket_stream.hpp"
-#include "acl_cpp/master/master_timer.hpp"
+#include "acl_cpp/event/event_timer.hpp"
 #include "acl_cpp/master/master_threads.hpp"
 
 namespace acl
@@ -231,7 +231,7 @@ void master_threads::run_once(ACL_VSTREAM* client)
 
 static void timer_callback(int, ACL_EVENT* event, void* ctx)
 {
-	master_timer* timer = (master_timer*) ctx;
+	event_timer* timer = (event_timer*) ctx;
 
 	// 触发定时器中的所有定时任务
 	acl_int64 next_delay = timer->trigger();
@@ -253,7 +253,7 @@ static void timer_callback(int, ACL_EVENT* event, void* ctx)
 		timer->keep_timer() ? 1 : 0);
 }
 
-void master_threads::proc_set_timer(master_timer* timer)
+void master_threads::proc_set_timer(event_timer* timer)
 {
 	if (__eventp == NULL)
 		logger_warn("event NULL!");
@@ -262,7 +262,7 @@ void master_threads::proc_set_timer(master_timer* timer)
 			timer->min_delay(), timer->keep_timer() ? 1 : 0);
 }
 
-void master_threads::proc_del_timer(master_timer* timer)
+void master_threads::proc_del_timer(event_timer* timer)
 {
 	if (__eventp == NULL)
 		logger_warn("event NULL!");
