@@ -3,6 +3,10 @@
 202) 2013.12.1
 202.1) feature: 新增加 event 模块，将 master_timer 定时器类改名为 event_timer
 类放于 event 模块中
+202.2) feature: 在基类 master_base 中添加了方法 proc_set_timer 用于添加进程
+级别的定时器，(同时移除了 master_threads 子类中的 proc_set_timer 方法)，这样
+master_base 的所有子类 (master_threads, master_aio, master_proc, master_udp,
+master_trigger) 都可以添加进程级别的定时器
 
 201) 2013.11.29
 201.1) feature: master 模块增加了定时器类 master_timer

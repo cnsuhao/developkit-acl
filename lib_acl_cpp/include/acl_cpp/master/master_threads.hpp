@@ -7,7 +7,6 @@ struct ACL_EVENT;
 namespace acl {
 
 class socket_stream;
-class event_timer;
 
 /**
  * 线程池服务器框架类，该类为纯虚类，子类需要实现其中的纯虚函数，
@@ -95,42 +94,6 @@ protected:
 	 * 当线程池中一个线程退出时的回调函数
 	 */
 	virtual void thread_on_exit() {}
-
-public:
-	/**
-	 * 设置进程级别的定时器，该函数只可在主线程的运行空间 (如在函数
-	 * proc_on_init) 中被设置，当该定时器任务都执行完毕后会自动被
-	 * 销毁(即内部会自动调用 master_timer::destroy 方法)
-	 * @param timer {event_timer*} 定时任务
-	 */
-	static void proc_set_timer(event_timer* timer);
-
-	/**
-	 * 删除进程级别定时器
-	 * @param timer {event_timer*} 由 proc_set_timer 设置的定时任务
-	 */
-	static void proc_del_timer(event_timer* timer);
-
-	/**
-	 * 设置进程级别的定时器，该定时器只有当 proc_on_init 回调过程中
-	 * 被设置才会生效且该定时器仅被调用一次，如果需要循环定时器，则
-	 * 需要在定时器内再次设置
-	 * @param callback {void (*)(int, void*)} 定时器回调函数
-	 * @param ctx {void*} callback 被调用时的第二个参数
-	 * @param delay {int} 定时器被循环触发的时间间隔(秒)
-	 * @deprecated
-	 */
-	static void proc_set_timer(void (*callback)(int, ACL_EVENT*, void*),
-		void* ctx, int delay);
-
-	/**
-	 * 删除进程级别的定时器
-	 * @param callback {void (*)(int, void*)} 定时器回调函数
-	 * @param ctx {void*} callback 被调用时的第二个参数
-	 * @deprecated
-	 */
-	static void proc_del_timer(void (*callback)(int, ACL_EVENT*, void*),
-		void* ctx);
 
 private:
 	// 线程开始创建后的回调函数
