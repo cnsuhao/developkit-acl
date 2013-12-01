@@ -59,7 +59,7 @@ protected:
 	// »ùÀàÐéº¯Êý
 	virtual void timer_callback(unsigned int id)
 	{
-		printf("timer callback, id: %u\r\n", id);
+		format("timer callback, id: %u\r\n", id);
 		if (count_++ >= max_)
 		{
 			printf("clear all timer task now\r\n");
@@ -71,7 +71,7 @@ protected:
 
 	virtual void destroy()
 	{
-		printf("destroy called\r\n");
+		format("destroy called\r\n");
 		delete this;
 	}
 
@@ -82,7 +82,7 @@ private:
 
 	~master_timer_test()
 	{
-		printf("timer destroy now!\r\n");
+		format("timer destroy now!\r\n");
 	}
 };
 

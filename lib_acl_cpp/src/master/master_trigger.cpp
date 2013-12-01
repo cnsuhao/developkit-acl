@@ -93,7 +93,7 @@ void master_trigger::service_pre_jail(char*, char**)
 	if (__mt->daemon_mode())
 	{
 		ACL_EVENT* eventp = acl_trigger_server_event();
-		set_event(eventp);  // 设置基类的事件引擎句柄
+		__mt->set_event(eventp);  // 设置基类的事件引擎句柄
 	}
 #endif
 
