@@ -1,4 +1,5 @@
 #include "acl_stdafx.hpp"
+#include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/event/event_timer.hpp"
 #include "acl_cpp/master/master_base.hpp"
 
