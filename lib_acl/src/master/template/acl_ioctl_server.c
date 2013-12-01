@@ -715,6 +715,26 @@ static void ioctl_server_open_log(void)
 	}
 }
 
+static void log_event_mode(int event_mode)
+{
+	const char *myname = "log_event_mode";
+
+	switch (event_mode) {
+	case ACL_EVENT_SELECT:
+		acl_msg_info("%s(%d): use select event", myname, __LINE__);
+		break;
+	case ACL_EVENT_POLL:
+		acl_msg_info("%s(%d): use poll event", myname, __LINE__);
+		break;
+	case ACL_EVENT_KERNEL:
+		acl_msg_info("%s(%d): use kernel_event", myname, __LINE__);
+		break;
+	default:
+		acl_msg_info("%s(%d): use select event", myname, __LINE__);
+		break;
+	}
+}
+
 static void usage(int argc, char *argv[])
 {
 	int   i;
@@ -914,9 +934,11 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service, .
 		user_name = acl_var_ioctl_owner;
 
 	/* If not connected to stdin, stdin must not be a terminal. */
-	if (stream == 0 && isatty(STDIN_FILENO))
-		acl_msg_fatal("%s(%d), %s: do not run this command by hand",
+	if (stream == 0 && isatty(STDIN_FILENO)) {
+		printf("%s(%d), %s: do not run this command by hand\r\n",
 			__FILE__, __LINE__, myname);
+		exit (1);
+	}
 
 	/* Can options be required? */
 	if (stream == 0) {
@@ -940,6 +962,8 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service, .
 			acl_msg_fatal("unsupported transport type: %s", transport);
 	}
 
+	/*******************************************************************/
+
 	/* Retrieve process generation from environment. */
 	if ((generation = getenv(ACL_MASTER_GEN_NAME)) != 0) {
 		if (!acl_alldig(generation))
@@ -951,10 +975,10 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service, .
 	}
 
 	/*
-	 * Traditionally, BSD select() can't handle ioctlple processes selecting
-	 * on the same socket, and wakes up every process in select(). See TCP/IP
-	 * Illustrated volume 2 page 532. We avoid select() collisions with an
-	 * external lock file.
+	 * Traditionally, BSD select() can't handle ioctlple processes
+	 * selecting on the same socket, and wakes up every process in
+	 * select(). See TCP/IP Illustrated volume 2 page 532. We avoid
+	 * select() collisions with an external lock file.
 	 */
 
 	/* Set up call-back info. */
@@ -964,33 +988,15 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service, .
 
 	ioctl_init();
 
-	/* Run pre-jail initialization. */
-	if (chdir(acl_var_ioctl_queue_dir) < 0)
-		acl_msg_fatal("chdir(\"%s\"): %s",
-			acl_var_ioctl_queue_dir, acl_last_serror());
-
-	if (pre_init)
-		pre_init(ioctl_server_name, ioctl_server_argv);
-
-	acl_chroot_uid(root_dir, user_name);
-	/* 设置子进程运行环境，允许产生 core 文件 */
-	if (acl_var_ioctl_enable_core)
-		set_core_limit();
-	ioctl_server_open_log();
-
-	/********************************************************************/
+	/*******************************************************************/
 
 	/* create event and call user's thread callback */
-	if (strcasecmp(acl_var_ioctl_event_mode, "poll") == 0) {
+	if (strcasecmp(acl_var_ioctl_event_mode, "poll") == 0)
 		event_mode = ACL_EVENT_POLL;
-		acl_msg_info("%s(%d): use poll event", myname, __LINE__);
-	} else if (strcasecmp(acl_var_ioctl_event_mode, "kernel") == 0) {
+	else if (strcasecmp(acl_var_ioctl_event_mode, "kernel") == 0)
 		event_mode = ACL_EVENT_KERNEL;
-		acl_msg_info("%s(%d): use kernel_event", myname, __LINE__);
-	} else {
+	else
 		event_mode = ACL_EVENT_SELECT;
-		acl_msg_info("%s(%d): use select event", myname, __LINE__);
-	}
 
 	__h_ioctl = acl_ioctl_create_ex(event_mode, acl_var_ioctl_max_threads,
 		acl_var_ioctl_thread_idle_limit, acl_var_ioctl_delay_sec,
@@ -1009,12 +1015,29 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service, .
 	if (acl_var_ioctl_enable_dog)
 		acl_ioctl_add_dog(__h_ioctl);
 
-	/* The event loop, at last. */
+	/* 该函数内部创建事件引擎 */
 	if (acl_ioctl_start(__h_ioctl) < 0)
 		acl_msg_fatal("%s(%d): acl_ioctl_start error(%s)",
 			myname, __LINE__, acl_last_serror());
 
-	/********************************************************************/
+	/*******************************************************************/
+
+	/* Run pre-jail initialization. */
+	if (chdir(acl_var_ioctl_queue_dir) < 0)
+		acl_msg_fatal("chdir(\"%s\"): %s", acl_var_ioctl_queue_dir,
+			acl_last_serror());
+
+	if (pre_init)
+		pre_init(ioctl_server_name, ioctl_server_argv);
+
+	acl_chroot_uid(root_dir, user_name);
+	/* 设置子进程运行环境，允许产生 core 文件 */
+	if (acl_var_ioctl_enable_core)
+		set_core_limit();
+	ioctl_server_open_log();
+	log_event_mode(event_mode);
+
+	/*******************************************************************/
 
 	/*
 	 * Are we running as a one-shot server with the client connection on
@@ -1028,7 +1051,7 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service, .
 		ioctl_server_exit();
 	}
 
-	/********************************************************************/
+	/*******************************************************************/
 
 	/*
 	 * Running as a semi-resident server. Service connection requests.
@@ -1036,6 +1059,7 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service, .
 	 * no-one has been talking to us for a configurable amount of time, or
 	 * when the master process terminated abnormally.
 	 */
+
 	if (acl_var_ioctl_idle_limit > 0)
 		acl_ioctl_request_timer(__h_ioctl, ioctl_server_timeout,
 			__h_ioctl, (acl_int64) acl_var_ioctl_idle_limit * 1000000);
@@ -1043,6 +1067,8 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service, .
 	if (acl_var_ioctl_use_limit > 0)
 		acl_ioctl_request_timer(__h_ioctl, ioctl_server_use_timer,
 			__h_ioctl, (acl_int64) __use_limit_delay * 1000000);
+
+	/*******************************************************************/
 
 	/* socket count is as same listen_fd_count in parent process */
 
@@ -1075,7 +1101,7 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service, .
 	watchdog = acl_watchdog_create(acl_var_ioctl_daemon_timeout,
 		(ACL_WATCHDOG_FN) 0, (char *) 0);
 
-	/********************************************************************/
+	/*******************************************************************/
 
 	/* Run post-jail initialization. */
 	if (post_init)
@@ -1083,6 +1109,8 @@ void acl_ioctl_server_main(int argc, char **argv, ACL_IOCTL_SERVER_FN service, .
 
 	acl_msg_info("%s(%d), %s daemon started, log: %s",
 		myname, __LINE__, argv[0], acl_var_ioctl_log_file);
+
+	/*******************************************************************/
 
 	while (1) {
 		if (ioctl_server_lock != 0) {
