@@ -148,7 +148,8 @@ protected:
 			max += 2;
 			timer->set_max(max);
 
-			acl::master_threads::proc_set_timer(timer);
+			// 调用基类方法设置定时器任务
+			proc_set_timer(timer);
 			stream->format("set timer ok\r\n");
 			return true;
 		}
