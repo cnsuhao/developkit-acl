@@ -235,7 +235,7 @@ public:
 protected:
 	/**
 	 * 基类 connect_client 的纯虚函数，显式地调用本函数用来打开与服务端的连接
-	 * @reutrn {bool} 连接是否成功
+	 * @return {bool} 连接是否成功
 	 */
 	virtual bool open();
 
