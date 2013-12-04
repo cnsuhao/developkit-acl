@@ -192,9 +192,17 @@ connect_pool* connect_manager::get(const char* addr,
 connect_pool* connect_manager::peek()
 {
 	connect_pool* pool;
+	size_t service_size, n;
+
 	lock_.lock();
-	size_t service_size = pools_.size();
-	size_t n = service_idx_ % service_size;
+	service_size = pools_.size();
+	if (service_size == 0)
+	{
+		lock_.unlock();
+		logger_warn("pools's size is 0!");
+		return NULL;
+	}
+	n = service_idx_ % service_size;
 	service_idx_++;
 	lock_.unlock();
 	pool = pools_[n];
@@ -207,11 +215,21 @@ connect_pool* connect_manager::peek(const char* key,
 	if (key == NULL || *key == 0)
 		return peek();
 
+	size_t service_size;
+	connect_pool* pool;
 	unsigned n = acl_hash_crc32(key, strlen(key));
+
 	if (exclusive)
 		lock_.lock();
-	size_t service_size = pools_.size();
-	connect_pool* pool = pools_[n % service_size];
+	service_size = pools_.size();
+	if (service_size == 0)
+	{
+		if (exclusive)
+			lock_.unlock();
+		logger_warn("pools's size is 0!");
+		return NULL;
+	}
+	pool = pools_[n % service_size];
 	if (exclusive)
 		lock_.unlock();
 
