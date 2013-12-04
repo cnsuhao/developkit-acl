@@ -25,7 +25,10 @@ aio_handle::aio_handle(aio_handle_type engine_type /* = ENGINE_SELECT */,
 		event_type = ACL_EVENT_WMSG;
 #endif
 	else
+	{
+		event_type = ENGINE_SELECT;  // xxx: just avoid gcc warning
 		acl_assert(0);
+	}
 
 	aio_ = acl_aio_create2(event_type, nMsg);
 	inner_alloc_ = true;
