@@ -21,6 +21,7 @@ CFLAGS = -c -g -W -Wall -Wcast-align \
 SYSLIB =
 CHECKSYSRES = @echo "Unknow system type!";exit 1
 UNIXNAME = $(shell uname -sm)
+UNIXTYPE = LINUX
 
 ifeq ($(CC),)
         CC = g++
@@ -32,6 +33,7 @@ ifeq ($(findstring FreeBSD, $(UNIXNAME)), FreeBSD)
 		CFLAGS += -Wstrict-prototypes
 	endif
 	CFLAGS += -DFREEBSD -D_REENTRANT
+	UNIXTYPE = FREEBSD
 endif
 
 # For Linux
@@ -40,6 +42,7 @@ ifeq ($(findstring Linux, $(UNIXNAME)), Linux)
 		CFLAGS += -Wstrict-prototypes
 	endif
 	CFLAGS += -DLINUX2 -D_REENTRANT
+	UNIXTYPE = LINUX
 endif
 
 # For SunOS
@@ -54,6 +57,7 @@ ifeq ($(findstring SunOS, $(UNIXNAME)), SunOS)
 		CFLAGS += -Wstrict-prototypes
 	endif
 	CFLAGS += -DSUNOS5 -D_REENTRANT
+	UNIXTYPE = SUNOS5
 endif
 
 # For HP-UX
@@ -63,6 +67,7 @@ ifeq ($(findstring HP-UX, $(UNIXNAME)), HP-UX)
 	endif
 	CFLAGS += -DHP_UX -DHPUX11
 	PLAT_NAME=hp-ux
+	UNIXTYPE = HPUX
 endif
 
 #Find system type.
@@ -132,27 +137,35 @@ CREATE_DEF = @(echo 'creating $@'; rm -f $@; \
 	sed 's,.*.o\( \)*:,$(patsubst %.inc,%.o,$@) $@ :,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$)
 
+STATIC_LIBNAME = lib_acl_cpp.a
+SHARED_LIBNAME = lib_acl_cpp.so
+
 ###########################################################
 
 sample: static
 	@(cd samples; make)
 
 static: depends $(OBJS_DST)
-	@echo 'creating $(LIB_PATH_DST)/lib_acl_cpp.a'
-	@$(AR) $(ARFL) $(LIB_PATH_DST)/lib_acl_cpp.a $(OBJS_DST)
-	@$(RANLIB) $(LIB_PATH_DST)/lib_acl_cpp.a
-	@echo 'create $(LIB_PATH_DST)/lib_acl_cpp.a ok!'
+	@echo 'creating $(LIB_PATH_DST)/$(STATIC_LIBNAME)'
+	@$(AR) $(ARFL) $(LIB_PATH_DST)/$(STATIC_LIBNAME) $(OBJS_DST)
+	@$(RANLIB) $(LIB_PATH_DST)/$(STATIC_LIBNAME)
+	@echo 'create $(LIB_PATH_DST)/$(STATIC_LIBNAME) ok!'
 
 shared_ldflags = -l_protocol -l_acl \
 	-lrt -lpthread -lz -ldl
 shared: depends $(OBJS_DST)
-	@echo 'creating $(LIB_PATH_DST)/lib_acl_cpp.so'
-	@if test -n "$(rpath)"; then \
-		$(CC) -shared -o $(LIB_PATH_DST)/lib_acl_cpp.so $(OBJS_DST) \
+	@echo 'creating $(SHARED_LIBNAME)'
+	@if test -n "$(rpath)" && test "$(UNIXTYPE)" = "LINUX"; then \
+		echo "building for linux"; \
+		$(CC) -shared -o $(rpath)/$(SHARED_LIBNAME) $(OBJS_DST) \
 			-L$(rpath) $(shared_ldflags) -Wl,-rpath,$(rpath); \
-		echo 'build $(LIB_PATH_DST)/lib_acl_cpp.so ok!'; \
+		echo 'build $(rpath)/$(SHARED_LIBNAME) ok!'; \
+	elif test -n "$(rpath)" && test "(UNIXTYPE)" = "SUNOS5"; then \
+		echo "building for sunos5"; \
+		$(CC) -shared -o $(rpath)/$(SHARED_LIBNAME) $(OBJS_DST) \
+			-L$(rpath) $(shared_ldflags); \
 	else \
-		echo 'skip build $(LIB_PATH_DST)/lib_acl_cpp.so; usage: make rpath=xxx'; \
+		echo 'skip build $(SHARED_LIBNAME); usage: make rpath=xxx'; \
 	fi
 
 depends: $(OBJS_DEF)
