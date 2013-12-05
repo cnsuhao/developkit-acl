@@ -67,7 +67,7 @@ endif
 # For HP-UX
 ifeq ($(findstring HP-UX, $(UNIXNAME)), HP-UX)
 	CFLAGS += -DHP_UX -DHPUX11
-	PLAT_NAME=hp-ux
+	UNIXTYPE = HPUX
 endif
 
 #Find system type.
@@ -124,6 +124,7 @@ static: $(OBJS_DST)
 
 SHARED_FDFLAGS = -l_acl -lrt -lpthread
 shared: $(OBJS_DST)
+	@echo ''
 	@echo 'creating $(SHARED_LIBNAME)'
 	@if test -n "$(rpath)" && test "$(UNIXTYPE)" = "LINUX"; then \
 		echo "building for linux"; \

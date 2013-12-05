@@ -77,7 +77,6 @@ endif
 # For HP-UX
 ifeq ($(findstring HP-UX, $(UNIXNAME)), HP-UX)
 	CFLAGS += -DHP_UX -DHPUX11
-	PLAT_NAME=hp-ux
 	UNIXTYPE = HPUX
 endif
 
@@ -245,6 +244,7 @@ static: depends $(OBJS_DST)
 #shared_ldflags = -lmysqlclient -lrt -lpthread -ldl
 shared_ldflags = -lrt -lpthread -ldl
 shared: depends $(OBJS_DST)
+	@echo '''
 	@echo 'creating $(SHARED_LIBNAME)'
 	@if test -n "$(rpath)" && test "$(UNIXTYPE)" = "LINUX"; then \
 		echo "building for linux"; \
@@ -258,7 +258,6 @@ shared: depends $(OBJS_DST)
 	else \
 		echo 'skip build $(SHARED_LIBNAME); usage: make rpath=xxx'; \
 	fi
-
 
 depends: $(OBJS_DEF)
 
