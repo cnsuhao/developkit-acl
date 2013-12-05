@@ -131,10 +131,11 @@ shared: $(OBJS_DST)
 		$(CC) -shared -o $(rpath)/$(SHARED_LIBNAME) $(OBJS_DST) \
 			-L$(rpath) $(shared_ldflags) -Wl,-rpath,$(rpath); \
 		echo 'build $(rpath)/$(SHARED_LIBNAME) ok!'; \
-	elif test -n "$(rpath)" && test "(UNIXTYPE)" = "SUNOS5"; then \
+	elif test -n "$(rpath)" && test "$(UNIXTYPE)" = "SUNOS5"; then \
 		echo "building for sunos5"; \
 		$(CC) -shared -o $(rpath)/$(SHARED_LIBNAME) $(OBJS_DST) \
 			-L$(rpath) $(shared_ldflags); \
+		echo 'build $(rpath)/$(SHARED_LIBNAME) ok!'; \
 	else \
 		echo 'skip build $(SHARED_LIBNAME); usage: make rpath=xxx'; \
 	fi
