@@ -150,8 +150,7 @@ static: depends $(OBJS_DST)
 	@$(RANLIB) $(LIB_PATH_DST)/$(STATIC_LIBNAME)
 	@echo 'create $(LIB_PATH_DST)/$(STATIC_LIBNAME) ok!'
 
-shared_ldflags = -l_protocol -l_acl \
-	-lrt -lpthread -lz -ldl
+shared_ldflags = -l_protocol -l_acl -lrt -lpthread -lz -ldl
 shared: depends $(OBJS_DST)
 	@echo 'creating $(SHARED_LIBNAME)'
 	@if test -n "$(rpath)" && test "$(UNIXTYPE)" = "LINUX"; then \
