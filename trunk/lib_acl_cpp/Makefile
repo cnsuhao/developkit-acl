@@ -161,7 +161,7 @@ shared: depends $(OBJS_DST)
 	elif test -n "$(rpath)" && test "$(UNIXTYPE)" = "SUNOS5"; then \
 		echo "building for sunos5"; \
 		$(CC) -shared -o $(rpath)/$(SHARED_LIBNAME) $(OBJS_DST) \
-			-L$(rpath) $(shared_ldflags); \
+			-R$(rpath) -L$(rpath) $(shared_ldflags); \
 		echo 'build $(rpath)/$(SHARED_LIBNAME) ok!'; \
 	else \
 		echo 'skip build $(SHARED_LIBNAME); usage: make rpath=xxx'; \
