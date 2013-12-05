@@ -66,7 +66,6 @@ ifeq ($(findstring HP-UX, $(UNIXNAME)), HP-UX)
 		CFLAGS += -Wstrict-prototypes
 	endif
 	CFLAGS += -DHP_UX -DHPUX11
-	PLAT_NAME=hp-ux
 	UNIXTYPE = HPUX
 endif
 
@@ -123,6 +122,9 @@ OBJS_DEF = $(patsubst %.cpp, $(DEF_PATH_DST)/%.inc, $(notdir $(wildcard src/*.cp
 VERSION = 1.1.1.2
 DATE_NOW = 20`date +%y`.`date +%m`.`date +%d`
 
+STATIC_LIBNAME = lib_acl_cpp.a
+SHARED_LIBNAME = lib_acl_cpp.so
+
 all: static shared sample
 
 $(shell mkdir -p $(DEF_PATH_DST))
@@ -136,9 +138,6 @@ CREATE_DEF = @(echo 'creating $@'; rm -f $@; \
 	$(COMPILE) -MM $< > $@.$$$$; \
 	sed 's,.*.o\( \)*:,$(patsubst %.inc,%.o,$@) $@ :,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$)
-
-STATIC_LIBNAME = lib_acl_cpp.a
-SHARED_LIBNAME = lib_acl_cpp.so
 
 ###########################################################
 

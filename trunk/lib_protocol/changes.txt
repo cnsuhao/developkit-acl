@@ -1,6 +1,9 @@
 修改历史列表：
 ------------------------------------------------------------------------
 
+246) 2013.12.5
+246.1) feature: Makefile 支持 solaris 编译
+
 245) 2013.11.22
 245.1) bugfix: http_chat_sync.c，在函数 http_res_body_get_sync 中，当为
 chunked 传输方式时，需要设置 ctx->chunk.chunk_oper = CHUNK_OPER_HEAD
