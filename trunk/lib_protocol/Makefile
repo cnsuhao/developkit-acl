@@ -122,7 +122,7 @@ static: $(OBJS_DST)
 	$(RANLIB) $(LIB_PATH_DST)/$(STATIC_LIBNAME)
 	@echo 'build $(LIB_PATH_DST)/$(STATIC_LIBNAME) ok!'
 
-SHARED_FDFLAGS = -l_acl -lrt -lpthread
+shared_ldflags = -l_acl -lrt -lpthread
 shared: $(OBJS_DST)
 	@echo ''
 	@echo 'creating $(SHARED_LIBNAME)'
