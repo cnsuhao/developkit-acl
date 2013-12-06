@@ -3,6 +3,8 @@
 
 205) 2013.12.6
 205.1) comment: 修正 connect_manager::init 原来错误的参数格式描述
+205.2) bugfix: connect_pool::put 在归还连接给连接池时，为了让过期连接尽快回收，
+需要调用 push_front，原来调用了 push_back
 
 204) 2013.12.5
 204.1) feature: Makefile 支持 solaris(x86) 编译
