@@ -87,8 +87,8 @@ void connect_manager::set_service_list(const char* addr_list, int count)
 
 	// 创建连接池服务集群
 	char* buf = acl_mystrdup(addr_list);
-	char* ptr = acl_mystr_trim(buf);
-	ACL_ARGV* tokens = acl_argv_split(ptr, ";,");
+	char* addrs = acl_mystr_trim(buf);
+	ACL_ARGV* tokens = acl_argv_split(addrs, ";,");
 	ACL_ITER iter;
 	acl::string addr;
 	acl_foreach(iter, tokens)
