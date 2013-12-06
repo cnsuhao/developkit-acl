@@ -120,7 +120,7 @@ void connect_pool::put(connect_client* conn, bool keep /* = true */)
 	if (keep && alive_)
 	{
 		conn->set_when(now);
-		pool_.push_from(conn);
+		pool_.push_front(conn);
 	}
 	else
 	{
