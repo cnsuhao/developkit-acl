@@ -57,4 +57,30 @@ char* lowercase(const char* src, char* buf, size_t size)
 	return buf;
 }
 
+char *strtrim(char *str)
+{
+	size_t len;
+	char *ptr = str;
+
+	len = strlen(str);
+
+	while (*ptr) {
+		if (*ptr == ' ' || *ptr == '\t')
+			memmove(ptr, ptr + 1, len--);
+		else if (((*ptr) & 0xff) == 0xa1 && ((*(ptr + 1)) & 0xff) == 0xa1)
+		{
+			/* 对于全角的空格为: '　', 即 0xa10xa1 */
+			len--;
+			memmove(ptr, ptr + 2, len--);
+		}
+		else
+		{
+			ptr++;
+			len--;
+		}
+	}
+
+	return (str);
+}
+
 } // namespace acl_min
