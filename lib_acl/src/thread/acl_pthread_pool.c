@@ -246,6 +246,7 @@ static void *__work_thread(void* arg)
 				RETURN (NULL);
 			}
 		}  /* end while */
+
 		job = thr_pool->first;
 		if (job != NULL) {
 			if (job->worker_fn == NULL)
