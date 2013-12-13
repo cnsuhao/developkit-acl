@@ -163,8 +163,8 @@ void event_fire(ACL_EVENT *ev)
 		}
 	}
 
-	if (ev->fire_finish)
-		ev->fire_finish(ev, ev->fire_ctx);
+	if (ev->fire_end)
+		ev->fire_end(ev, ev->fire_ctx);
 }
 
 int event_thr_prepare(ACL_EVENT *ev)
@@ -290,6 +290,6 @@ void event_thr_fire(ACL_EVENT *ev)
 		}
 	}
 
-	if (ev->fire_finish)
-		ev->fire_finish(ev, ev->fire_ctx);
+	if (ev->fire_end)
+		ev->fire_end(ev, ev->fire_ctx);
 }

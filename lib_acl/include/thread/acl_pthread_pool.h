@@ -13,6 +13,12 @@
 extern "C" {
 #endif
 
+typedef struct acl_pthread_job_t acl_pthread_job_t;
+
+ACL_API acl_pthread_job_t *acl_pthread_pool_alloc_job(void (*run_fn)(void*),
+		void *run_arg, int fixed);
+ACL_API void acl_pthread_pool_free_job(acl_pthread_job_t *job);
+
 /**
  * 线程池对象结构类型定义
  */
@@ -113,6 +119,9 @@ ACL_API void acl_pthread_pool_add_begin(acl_pthread_pool_t *thr_pool);
  */
 ACL_API void acl_pthread_pool_add_one(acl_pthread_pool_t *thr_pool,
 		void (*run_fn)(void *), void *run_arg);
+ACL_API void acl_pthread_pool_add_job(acl_pthread_pool_t *thr_pool,
+		acl_pthread_job_t *job);
+
 /**
  * 批处理添加结束, 实际是解锁
  * @param thr_pool {acl_pthread_pool_t*} 线程池对象，不能为空

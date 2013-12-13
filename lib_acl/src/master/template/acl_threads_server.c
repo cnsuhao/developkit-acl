@@ -369,6 +369,7 @@ static void server_use_timer(int type acl_unused,
 typedef struct {
 	ACL_VSTREAM *stream;
 	acl_pthread_pool_t *threads;
+	acl_pthread_job_t *job;
 	ACL_EVENT *event;
 	int   event_type;
 	int  (*callback)(ACL_VSTREAM*, void*);
@@ -424,7 +425,11 @@ static void read_callback(int event_type, ACL_EVENT *event acl_unused,
 {
 	READ_CTX *ctx = (READ_CTX*) context;
 	ctx->event_type = event_type;
+#if 1
+	acl_pthread_pool_add_job(ctx->threads, ctx->job);
+#else
 	acl_pthread_pool_add_one(ctx->threads, thread_callback, ctx);
+#endif
 }
 
 static void event_fire_begin(ACL_EVENT *event acl_unused, void *ctx)
@@ -433,14 +438,16 @@ static void event_fire_begin(ACL_EVENT *event acl_unused, void *ctx)
 	acl_pthread_pool_add_begin(threads);
 }
 
-static void event_fire_finish(ACL_EVENT *event acl_unused, void *ctx)
+static void event_fire_end(ACL_EVENT *event acl_unused, void *ctx)
 {
 	acl_pthread_pool_t *threads = (acl_pthread_pool_t*) ctx;
 	acl_pthread_pool_add_end(threads);
 }
 
-static void free_ctx(ACL_VSTREAM *stream acl_unused, void *ctx)
+static void free_ctx(ACL_VSTREAM *stream acl_unused, void *context)
 {
+	READ_CTX *ctx = (READ_CTX*) context;
+	acl_pthread_pool_free_job(ctx->job);
 	acl_myfree(ctx);
 }
 
@@ -458,6 +465,7 @@ static void server_execute(ACL_EVENT *event, acl_pthread_pool_t *threads,
 	if (stream->ioctl_read_ctx == NULL) {
 		READ_CTX *ctx = (READ_CTX*) acl_mymalloc(sizeof(READ_CTX));
 
+		ctx->job = acl_pthread_pool_alloc_job(thread_callback, ctx, 1);
 		ctx->stream = stream;
 		ctx->threads = threads;
 		ctx->event = event;
@@ -721,7 +729,7 @@ static ACL_EVENT *event_open(int event_mode, acl_pthread_pool_t *threads)
 			acl_var_threads_delay_usec);
 
 	/* set the event fire begin and fire end callback */
-	acl_event_fire_hook(event, event_fire_begin, event_fire_finish, threads);
+	acl_event_fire_hook(event, event_fire_begin, event_fire_end, threads);
 
 	/*
 	 * Running as a semi-resident server. Service connection requests.

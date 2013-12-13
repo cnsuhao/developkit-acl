@@ -154,7 +154,7 @@ struct	ACL_EVENT {
 	/* 每次调用事件回调函数前若该函数指针非空则先调用此函数 */
 	void (*fire_begin)(ACL_EVENT *, void *);
 	/* 每次调用事件回调函数后若该函数指针非空则调用此函数 */
-	void (*fire_finish)(ACL_EVENT *, void *);
+	void (*fire_end)(ACL_EVENT *, void *);
 	/* fire_begin/fire_finish 的第二个参数 */
 	void *fire_ctx;
 };
