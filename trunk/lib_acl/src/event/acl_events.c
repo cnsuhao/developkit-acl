@@ -265,10 +265,10 @@ ACL_EVENT *acl_event_new(int event_mode, int use_thr, int delay_sec, int delay_u
 }
 
 void acl_event_fire_hook(ACL_EVENT *eventp, void (*fire_begin)(ACL_EVENT*, void*),
-	void (*fire_finish)(ACL_EVENT*, void*), void* ctx)
+	void (*fire_end)(ACL_EVENT*, void*), void* ctx)
 {
 	eventp->fire_begin = fire_begin;
-	eventp->fire_finish = fire_finish;
+	eventp->fire_end = fire_end;
 	eventp->fire_ctx = ctx;
 }
 

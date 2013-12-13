@@ -34,11 +34,12 @@
 
 #define	ACL_PTHREAD_POOL_VALID		0x0decca62
 
-typedef struct ACL_TASK {
-	struct ACL_TASK *next;
+struct acl_pthread_job_t {
+	struct acl_pthread_job_t *next;
 	void (*worker_fn)(void *arg);       /* user function */
-	void  *worker_arg;
-} ACL_TASK;
+	void *worker_arg;
+	int   fixed;
+};
 
 #undef	USE_SLICE
 
@@ -48,7 +49,7 @@ struct acl_pthread_pool_t {
 	acl_pthread_mutex_t	poller_mutex;   /* just for wait poller exit */
 	acl_pthread_cond_t	poller_cond;    /* just for wait poller exit */
 	acl_pthread_attr_t	attr;           /* create detached */
-	ACL_TASK *first, *last;                 /* work queue */
+	acl_pthread_job_t *first, *last;                 /* work queue */
 #ifdef	USE_SLICE
 	ACL_SLICE *slice;
 #endif
@@ -176,12 +177,12 @@ static void *__poller_thread(void *arg)
 	return NULL;
 }
 
-static void *__worker_thread(void* arg)
+static void *__work_thread(void* arg)
 {
-	const char *myname = "__worker_thread";
+	const char *myname = "__work_thread";
 	acl_pthread_pool_t *thr_pool = (acl_pthread_pool_t*) arg;
-	int  status;
-	ACL_TASK *we;
+	int  status, fixed;
+	acl_pthread_job_t *job;
 	struct	timespec  timeout;
 	struct  timeval   tv;
 	int     timedout;
@@ -245,15 +246,15 @@ static void *__worker_thread(void* arg)
 				RETURN (NULL);
 			}
 		}  /* end while */
-		we = thr_pool->first;
-		if (we != NULL) {
-			if (we->worker_fn == NULL)
+		job = thr_pool->first;
+		if (job != NULL) {
+			if (job->worker_fn == NULL)
 				acl_msg_fatal("%s(%d)->%s: worker_fn null",
 					__FILE__, __LINE__, myname);
 
-			thr_pool->first = we->next;
+			thr_pool->first = job->next;
 			thr_pool->qlen--;
-			if (thr_pool->last == we)
+			if (thr_pool->last == job)
 				thr_pool->last = NULL;
 			/* the lock shuld be unlocked before enter working processs */
 			status = acl_pthread_mutex_unlock(&thr_pool->worker_mutex);
@@ -264,9 +265,11 @@ static void *__worker_thread(void* arg)
 					(unsigned long) acl_pthread_self());
 				RETURN (NULL);
 			}
-			we->worker_fn(we->worker_arg);
+			fixed = job->fixed;
+			job->worker_fn(job->worker_arg);
 #ifndef	USE_SLICE
-			acl_myfree(we);
+			if (!fixed)
+				acl_myfree(job);
 #endif
 
 			/* lock again */
@@ -279,7 +282,8 @@ static void *__worker_thread(void* arg)
 				RETURN (NULL);
 			}
 #ifdef	USE_SLICE
-			acl_slice_free2(thr_pool->slice, we);
+			if (!fixed)
+				acl_slice_free2(thr_pool->slice, job);
 #endif
 		}
 		if (thr_pool->first == NULL && thr_pool->worker_quit) {
@@ -308,7 +312,7 @@ static void *__worker_thread(void* arg)
 	RETURN (NULL);
 }
 
-static void __init_workq(acl_pthread_pool_t *thr_pool)
+static void __init_thread_pool(acl_pthread_pool_t *thr_pool)
 {
 	thr_pool->worker_quit = 0;
 	thr_pool->poller_quit = 0;
@@ -424,11 +428,12 @@ acl_pthread_pool_t *acl_pthread_pool_create(const acl_pthread_pool_attr_t *attr)
 		return NULL;
 	}
 
-	__init_workq(thr_pool);
+	__init_thread_pool(thr_pool);
 
 #ifdef	USE_SLICE
-	thr_pool->slice = acl_slice_create("thread_pool", 10240 * sizeof(ACL_TASK),
-			sizeof(ACL_TASK), ACL_SLICE_FLAG_GC2);
+	thr_pool->slice = acl_slice_create("thread_pool",
+			10240 * sizeof(acl_pthread_job_t),
+			sizeof(acl_pthread_job_t), ACL_SLICE_FLAG_GC2);
 #endif
 	thr_pool->parallelism = (attr && attr->threads_limit > 0) ?
 		attr->threads_limit : ACL_PTHREAD_POOL_DEF_THREADS;
@@ -725,17 +730,17 @@ int acl_pthread_pool_stop(acl_pthread_pool_t *thr_pool)
 	return 0;
 }
 
-static void __workq_addone(acl_pthread_pool_t *thr_pool,
-	ACL_TASK *item, int notify_idle)
+static void __job_add(acl_pthread_pool_t *thr_pool,
+	acl_pthread_job_t *job, int notify_idle)
 {
-	const char *myname = "__workq_addone";
+	const char *myname = "__job_add";
 	int   status;
 
 	if (thr_pool->first == NULL)
-		thr_pool->first = item;
+		thr_pool->first = job;
 	else
-		thr_pool->last->next = item;
-	thr_pool->last = item;
+		thr_pool->last->next = job;
+	thr_pool->last = job;
 
 	thr_pool->qlen++;
 
@@ -758,7 +763,7 @@ static void __workq_addone(acl_pthread_pool_t *thr_pool,
 		acl_pthread_t id;
 
 		status = acl_pthread_create(&id, &thr_pool->attr,
-				__worker_thread, (void*) thr_pool);
+				__work_thread, (void*) thr_pool);
 		if (status != 0) {
 			__SET_ERRNO(status);
 			acl_msg_fatal("%s(%d)->%s: pthread_create worker: %s",
@@ -789,45 +794,40 @@ int acl_pthread_pool_add(acl_pthread_pool_t *thr_pool,
 	void (*run_fn)(void *), void *run_arg)
 {
 	const char *myname = "acl_pthread_pool_add";
-	ACL_TASK *item;
+	acl_pthread_job_t *job;
 	int   status;
 
 	if (thr_pool->valid != ACL_PTHREAD_POOL_VALID || run_fn == NULL)
 		return ACL_EINVAL;
 
 #ifndef	USE_SLICE
-	item = (ACL_TASK*) acl_mymalloc(sizeof(ACL_TASK));
-	if (item == NULL)
-		return ACL_ENOMEM;
-
-	item->worker_fn  = run_fn;
-	item->worker_arg = run_arg;
-	item->next       = NULL;
+	job = acl_pthread_pool_alloc_job(run_fn, run_arg, 0);
 #endif
 
 	status = acl_pthread_mutex_lock(&thr_pool->worker_mutex);
 	if (status != 0) {
 		__SET_ERRNO(status);
 #ifndef	USE_SLICE
-		acl_myfree(item);
+		acl_myfree(job);
 #endif
 		acl_msg_fatal("%s(%d)->%s: pthread_mutex_lock, serr = %s",
 			__FILE__, __LINE__, myname, acl_last_serror());
 	}
 
 #ifdef	USE_SLICE
-	item = (ACL_TASK*) acl_slice_alloc(thr_pool->slice);
-	if (item == NULL) {
+	job = (acl_pthread_job_t*) acl_slice_alloc(thr_pool->slice);
+	if (job == NULL) {
 		acl_pthread_mutex_unlock(&thr_pool->worker_mutex);
 		return ACL_ENOMEM;
 	}
 
-	item->worker_fn  = run_fn;
-	item->worker_arg = run_arg;
-	item->next       = NULL;
+	job->worker_fn  = run_fn;
+	job->worker_arg = run_arg;
+	job->next       = NULL;
+	job->fixed      = 0;
 #endif
 
-	__workq_addone(thr_pool, item, 1);
+	__job_add(thr_pool, job, 1);
 
 	status = acl_pthread_mutex_unlock(&thr_pool->worker_mutex);
 	if (status != 0) {
@@ -864,7 +864,7 @@ void acl_pthread_pool_add_one(acl_pthread_pool_t *thr_pool,
 	void (*run_fn)(void *), void *run_arg)
 {
 	const char *myname = "acl_pthread_pool_add_one";
-	ACL_TASK *item;
+	acl_pthread_job_t *job;
 
 	if (thr_pool == NULL)
 		acl_msg_fatal("%s(%d)->%s: invalid input",
@@ -874,19 +874,38 @@ void acl_pthread_pool_add_one(acl_pthread_pool_t *thr_pool,
 		acl_msg_fatal("%s(%d)->%s: invalid thr_pool->valid or run_fn",
 			__FILE__, __LINE__, myname);
 
-	item = (ACL_TASK*) acl_mymalloc(sizeof(ACL_TASK));
-	if (item == NULL)
-		acl_msg_fatal("%s(%d)->%s: can't malloc, error=%s",
-			__FILE__, __LINE__, myname, acl_last_serror());
+	job = (acl_pthread_job_t*) acl_mymalloc(sizeof(acl_pthread_job_t));
 
-	item->worker_fn  = run_fn;
-	item->worker_arg = run_arg;
-	item->next       = NULL;
+	job->worker_fn  = run_fn;
+	job->worker_arg = run_arg;
+	job->next       = NULL;
 
 #ifdef	ACL_MS_WINDOWS 
-	__workq_addone(thr_pool, item, 1);
+	__job_add(thr_pool, job, 1);
 #else
-	__workq_addone(thr_pool, item, 0);
+	__job_add(thr_pool, job, 0);
+#endif
+}
+
+void acl_pthread_pool_add_job(acl_pthread_pool_t *thr_pool,
+	acl_pthread_job_t *job)
+{
+	const char *myname = "acl_pthread_pool_add_job";
+
+	if (thr_pool == NULL)
+		acl_msg_fatal("%s(%d)->%s: invalid input",
+			__FILE__, __LINE__, myname);
+
+	if (thr_pool->valid != ACL_PTHREAD_POOL_VALID)
+		acl_msg_fatal("%s(%d)->%s: invalid thr_pool->valid",
+			__FILE__, __LINE__, myname);
+
+	job->next = NULL;
+
+#ifdef	ACL_MS_WINDOWS 
+	__job_add(thr_pool, job, 1);
+#else
+	__job_add(thr_pool, job, 0);
 #endif
 }
 
@@ -983,7 +1002,7 @@ int acl_pthread_pool_start_poller(acl_pthread_pool_t *thr_pool)
 		return -1;
 	}
 
-	__init_workq(thr_pool);
+	__init_thread_pool(thr_pool);
 
 	status = acl_pthread_create(&id, &thr_pool->attr,
 				__poller_thread, (void*) thr_pool);
@@ -1000,7 +1019,7 @@ int acl_pthread_pool_start_poller(acl_pthread_pool_t *thr_pool)
 int acl_pthread_pool_add_dispatch(void *dispatch_arg,
 	void (*run_fn)(void *), void *run_arg)
 {
-	const char *myname = "acl_workq_batadd_dispatch";
+	const char *myname = "acl_pthread_pool_add_dispatch";
 	acl_pthread_pool_t *thr_pool;
 
 	if (dispatch_arg == NULL || run_fn == NULL)
@@ -1087,4 +1106,21 @@ void acl_pthread_pool_attr_set_idle_timeout(
 {
 	if (attr && idle_timeout > 0)
 		attr->idle_timeout = idle_timeout;
+}
+
+acl_pthread_job_t *acl_pthread_pool_alloc_job(void (*run_fn)(void*),
+	void *run_arg, int fixed)
+{
+	acl_pthread_job_t *job = (acl_pthread_job_t*)
+		acl_mymalloc(sizeof(acl_pthread_job_t));
+	job->worker_fn  = run_fn;
+	job->worker_arg = run_arg;
+	job->next       = NULL;
+	job->fixed      = fixed;
+	return job;
+}
+
+void acl_pthread_pool_free_job(acl_pthread_job_t *job)
+{
+	acl_myfree(job);
 }

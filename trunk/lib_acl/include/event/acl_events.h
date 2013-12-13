@@ -149,7 +149,7 @@ ACL_API void acl_event_add_dog(ACL_EVENT *eventp);
 
 ACL_API void acl_event_fire_hook(ACL_EVENT *eventp,
 		void (*fire_begin)(ACL_EVENT*, void*),
-		void (*fire_finish)(ACL_EVENT*, void*),
+		void (*fire_end)(ACL_EVENT*, void*),
 		void* ctx);
 
 /**
