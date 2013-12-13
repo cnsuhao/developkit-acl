@@ -30,6 +30,8 @@ service master_http_threads {
 	master_wakeup = -
 #	最大进程数
 	master_maxproc = 1
+#	预启动进程数
+#	master_prefork = 0
 #	进程程序名
 	master_command = master_http_threads2
 #	进程日志记录文件
@@ -40,47 +42,47 @@ service master_http_threads {
 #	master_env = mempool_limit:512000000
 
 #	是否允许产生 core 文件
-#	threads_enable_core = 1
+#	ioctl_enable_core = 1
 #	每个进程实例处理连接数的最大次数，超过此值后进程实例主动退出
-	threads_use_limit = 100
+	ioctl_use_limit = 100
 #	每个进程实例的空闲超时时间，超过此值后进程实例主动退出
-	threads_idle_limit = 120
+	ioctl_idle_limit = 120
 #	记录进程PID的位置(对于多进程实例来说没有意义)
-	threads_pid_dir =  {install_path}/var/pid
+	ioctl_pid_dir =  {install_path}/var/pid
 #	进程运行时所在的路径
-	threads_queue_dir = {install_path}/var
+	ioctl_queue_dir = {install_path}/var
 #	读写超时时间, 单位为秒
-	threads_rw_timeout = 120
+	ioctl_rw_timeout = 120
 #	读缓冲区的缓冲区大小
-	threads_buf_size = 8192
+	ioctl_buf_size = 8192
 #	每次 accept 时的循环接收的最大次数
-	threads_max_accept = 25
+	ioctl_max_accept = 25
 #	在并发访问量非常低的情况下，如访问量在 10 次/秒 以下时，可以找开此值(即赋为1)，
 #	以加速事件循环过程, 从而防止服务进程阻塞在 select 上的时间过长而影响访问速度
-#	threads_enable_dog = 1
+#	ioctl_enable_dog = 1
 #	进程运行时的用户身份
-	threads_owner = root
+	ioctl_owner = root
 
 #	用 select 进行循环时的时间间隔
 #	单位为秒
-	threads_delay_sec = 0
+	ioctl_delay_sec = 0
 #	单位为微秒
-	threads_delay_usec = 500
+	ioctl_delay_usec = 500
 
 #       采用事件循环的方式: select(default), poll, kernel(epoll/devpoll/kqueue)
-	threads_event_mode = kernel
+	ioctl_event_mode = kernel
 
 #	线程池的最大线程数
-	threads_pool_limit = 250
+	ioctl_max_threads = 250
 #	线程的堆栈空间大小，单位为字节，0表示使用系统缺省值
-	threads_thread_stacksize = 0
+	ioctl_stacksize = 0
 #	线程池中每个线程的空闲超时时间，超过此值后线程主动退出
-	threads_thread_idle = 120
+	ioctl_thread_idle_limit = 120
 
 #	允许访问 udserver 的客户端IP地址范围
-	threads_access_allow = 127.0.0.1:255.255.255.255, 127.0.0.1:127.0.0.1
+	ioctl_access_allow = 127.0.0.1:255.255.255.255, 127.0.0.1:127.0.0.1
 #	当 acl_master 退出时，如果该值置1则该程序不等所有连接处理完毕便立即退出
-	threads_quick_abort = 1
+	ioctl_quick_abort = 1
 
 ############################################################################
 #	应用自己的配置选项
