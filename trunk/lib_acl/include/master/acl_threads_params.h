@@ -104,6 +104,10 @@ extern char *acl_var_threads_deny_banner;
 #define	ACL_DEF_THREADS_ACCESS_ALLOW		"all"
 extern char *acl_var_threads_access_allow;
 
+#define	ACL_VAR_THREADS_BATADD			"ioctl_batadd"
+#define	ACL_DEF_THREADS_BATADD			1
+extern int   acl_var_threads_batadd;
+
 #endif /* ACL_UNIX */
 
 #ifdef	__cplusplus

@@ -78,6 +78,7 @@ int   acl_var_threads_quick_abort;
 int   acl_var_threads_enable_core;
 int   acl_var_threads_max_debug;
 int   acl_var_threads_status_notify;
+int   acl_var_threads_batadd;
 
 static ACL_CONFIG_INT_TABLE __conf_int_tab[] = {
 	{ ACL_VAR_THREADS_BUF_SIZE, ACL_DEF_THREADS_BUF_SIZE, &acl_var_threads_buf_size, 0, 0 },
@@ -97,6 +98,7 @@ static ACL_CONFIG_INT_TABLE __conf_int_tab[] = {
 	{ ACL_VAR_THREADS_ENABLE_CORE, ACL_DEF_THREADS_ENABLE_CORE, &acl_var_threads_enable_core, 0, 0 },
 	{ ACL_VAR_THREADS_MAX_DEBUG, ACL_DEF_THREADS_MAX_DEBUG, &acl_var_threads_max_debug, 0, 0 },
 	{ ACL_VAR_THREADS_STATUS_NOTIFY, ACL_DEF_THREADS_STATUS_NOTIFY, &acl_var_threads_status_notify, 0, 0 },
+	{ ACL_VAR_THREADS_BATADD, ACL_DEF_THREADS_BATADD, &acl_var_threads_batadd, 0, 0 },
 
         { 0, 0, 0, 0, 0 },
 };
@@ -372,55 +374,55 @@ typedef struct {
 	acl_pthread_job_t *job;
 	ACL_EVENT *event;
 	int   event_type;
-	int  (*callback)(ACL_VSTREAM*, void*);
-	void *arg;
+	void  (*read_callback)(int, ACL_EVENT*, ACL_VSTREAM*, void*);
+	int   (*serv_callback)(ACL_VSTREAM*, void*);
+	void *serv_arg;
 } READ_CTX;
-
-static void read_callback(int, ACL_EVENT*, ACL_VSTREAM*, void*);
 
 static void thread_callback(void *arg)
 {
-	const char *myname = "thread_callback";
 	READ_CTX *ctx = (READ_CTX*) arg;
 	int   ret;
 
 	switch (ctx->event_type) {
 	case ACL_EVENT_READ:
-		ret = ctx->callback(ctx->stream, ctx->arg);
+		ret = ctx->serv_callback(ctx->stream, ctx->serv_arg);
 		if (ret < 0) {
 			if (__server_on_close != NULL)
-				__server_on_close(ctx->stream, ctx->arg);
+				__server_on_close(ctx->stream, ctx->serv_arg);
 			acl_vstream_close(ctx->stream);
 		} else if (ret == 0)
 			acl_event_enable_read(ctx->event, ctx->stream,
-				ctx->stream->rw_timeout, read_callback, ctx);
+				ctx->stream->rw_timeout,
+				ctx->read_callback, ctx);
 		break;
 	case ACL_EVENT_RW_TIMEOUT:
 		if (__server_on_timeout == NULL) {
 			if (__server_on_close != NULL)
-				__server_on_close(ctx->stream, ctx->arg);
+				__server_on_close(ctx->stream, ctx->serv_arg);
 			acl_vstream_close(ctx->stream);
-		} else if (__server_on_timeout(ctx->stream, ctx->arg) < 0) {
+		} else if (__server_on_timeout(ctx->stream, ctx->serv_arg) < 0) {
 			if (__server_on_close != NULL)
-				__server_on_close(ctx->stream, ctx->arg);
+				__server_on_close(ctx->stream, ctx->serv_arg);
 			acl_vstream_close(ctx->stream);
 		} else
 			acl_event_enable_read(ctx->event, ctx->stream,
-				ctx->stream->rw_timeout, read_callback, ctx);
+				ctx->stream->rw_timeout,
+				ctx->read_callback, ctx);
 		break;
 	case ACL_EVENT_XCPT:
 		if (__server_on_close != NULL)
-			__server_on_close(ctx->stream, ctx->arg);
+			__server_on_close(ctx->stream, ctx->serv_arg);
 		acl_vstream_close(ctx->stream);
 		break;
 	default:
 		acl_msg_fatal("%s, %s(%d): unknown event type(%d)",
-			__FILE__, myname, __LINE__, ctx->event_type);
+			__FILE__, __FUNCTION__, __LINE__, ctx->event_type);
 		break;
 	}
 }
 
-static void read_callback(int event_type, ACL_EVENT *event acl_unused,
+static void read_callback1(int event_type, ACL_EVENT *event acl_unused,
 	ACL_VSTREAM *stream acl_unused, void *context)
 {
 	READ_CTX *ctx = (READ_CTX*) context;
@@ -430,6 +432,15 @@ static void read_callback(int event_type, ACL_EVENT *event acl_unused,
 #else
 	acl_pthread_pool_add_one(ctx->threads, thread_callback, ctx);
 #endif
+}
+
+static void read_callback2(int event_type, ACL_EVENT *event acl_unused,
+	ACL_VSTREAM *stream acl_unused, void *context)
+{
+	READ_CTX *ctx = (READ_CTX*) context;
+	ctx->event_type = event_type;
+
+	acl_pthread_pool_add(ctx->threads, thread_callback, ctx);
 }
 
 static void event_fire_begin(ACL_EVENT *event acl_unused, void *ctx)
@@ -447,13 +458,16 @@ static void event_fire_end(ACL_EVENT *event acl_unused, void *ctx)
 static void free_ctx(ACL_VSTREAM *stream acl_unused, void *context)
 {
 	READ_CTX *ctx = (READ_CTX*) context;
-	acl_pthread_pool_free_job(ctx->job);
+	if (ctx->job)
+		acl_pthread_pool_free_job(ctx->job);
 	acl_myfree(ctx);
 }
 
 static void server_execute(ACL_EVENT *event, acl_pthread_pool_t *threads,
 	ACL_VSTREAM *stream)
 {
+	READ_CTX *ctx;
+
 	if (acl_var_threads_status_notify && acl_var_threads_master_maxproc > 1
 	    && acl_master_notify(acl_var_threads_pid, __server_generation,
 		ACL_MASTER_STAT_TAKEN) < 0)
@@ -463,22 +477,30 @@ static void server_execute(ACL_EVENT *event, acl_pthread_pool_t *threads,
 	}
 
 	if (stream->ioctl_read_ctx == NULL) {
-		READ_CTX *ctx = (READ_CTX*) acl_mymalloc(sizeof(READ_CTX));
+		ctx = (READ_CTX*) acl_mymalloc(sizeof(READ_CTX));
+		ctx->stream        = stream;
+		ctx->threads       = threads;
+		ctx->event         = event;
+		ctx->event_type    = -1;
+		ctx->serv_callback = __service_main;
+		ctx->serv_arg      = __service_ctx;
 
-		ctx->job = acl_pthread_pool_alloc_job(thread_callback, ctx, 1);
-		ctx->stream = stream;
-		ctx->threads = threads;
-		ctx->event = event;
-		ctx->event_type = -1;
-		ctx->callback = __service_main;
-		ctx->arg = __service_ctx;
+		if (acl_var_threads_batadd) {
+			ctx->job = acl_pthread_pool_alloc_job(thread_callback,
+					ctx, 1);
+			ctx->read_callback = read_callback1;
+		} else {
+			ctx->job = NULL;
+			ctx->read_callback = read_callback2;
+		}
 
 		stream->ioctl_read_ctx = ctx;
 		acl_vstream_add_close_handle(stream, free_ctx, ctx);
-	}
+	} else
+		ctx = (READ_CTX*) stream->ioctl_read_ctx;
 
 	acl_event_enable_read(event, stream, stream->rw_timeout,
-		read_callback, stream->ioctl_read_ctx);
+		ctx->read_callback, ctx);
 
 	if (acl_var_threads_status_notify && acl_var_threads_master_maxproc > 1
 	    && acl_master_notify(acl_var_threads_pid, __server_generation,
@@ -729,7 +751,9 @@ static ACL_EVENT *event_open(int event_mode, acl_pthread_pool_t *threads)
 			acl_var_threads_delay_usec);
 
 	/* set the event fire begin and fire end callback */
-	acl_event_fire_hook(event, event_fire_begin, event_fire_end, threads);
+	if (acl_var_threads_batadd)
+		acl_event_fire_hook(event, event_fire_begin,
+			event_fire_end, threads);
 
 	/*
 	 * Running as a semi-resident server. Service connection requests.
