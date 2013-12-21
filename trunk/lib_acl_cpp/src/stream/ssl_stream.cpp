@@ -136,10 +136,12 @@ bool ssl_stream::ssl_client_init()
 	ssn_ = (ssl_session*) acl_mycalloc(1, sizeof(ssl_session));
 	hs_ = (havege_state*) acl_mymalloc(sizeof(havege_state));
 
-	// 0. Initialize the RNG and the session data
-	havege_init((havege_state*) hs_);
+	// Initialize the RNG and the session data
+	::havege_init((havege_state*) hs_);
 
 	int   ret;
+
+	// Setup stuff
 	if ((ret = ssl_init(ssl_)) != 0)
 	{
 		logger_error("failed, ssl_init returned %d", ret);
@@ -169,6 +171,17 @@ bool ssl_stream::ssl_client_init()
 		ACL_VSTREAM_CTL_CTX, this,
 		ACL_VSTREAM_CTL_END);
 	acl_tcp_set_nodelay(ACL_VSTREAM_SOCK(stream_));
+
+	// Handshake
+	while((ret = ssl_handshake(ssl_)) != 0)
+	{
+		if (ret != POLARSSL_ERR_NET_WANT_READ
+			&& ret != POLARSSL_ERR_NET_WANT_WRITE)
+		{
+			logger_error("ssl_handshake failed: 0x%x\n\n", ret);
+			return false;
+		}
+	}
 #endif
 	return true;
 }
