@@ -42,15 +42,15 @@ static void test0(int i)
 
 static void test1(void)
 {
-	acl::string url("https://mail.51iker.com/");
+	acl::string url("https://www.google.com.hk/");
 	acl::http_header header;
 	header.set_url(url.c_str());
-	header.set_host("mail.51iker.com");
+	header.set_host("www.google.com.hk");
 	acl::string request;
 
 	header.build_request(request);
 
-	acl::string addr("mail.51iker.com:443");
+	acl::string addr("www.google.com.hk:443");
 	acl::ssl_stream client;
 
 	if (client.open_ssl(addr.c_str(), 60, 60) == false)
@@ -90,17 +90,16 @@ static void test1(void)
 static void test2(void)
 {
 	acl::http_client client;
-	acl::string url("https://mail.51iker.com/");
+	acl::string url("https://www.google.com.hk/");
 	acl::http_header header;
 
 	header.set_url(url.c_str());
-	header.set_host("mail.51iker.com");
+	header.set_host("www.google.com.hk");
 	acl::string request;
 
 	header.build_request(request);
 
-	// acl::string addr("mail.51iker.com:443");
-	acl::string addr("122.49.0.202:443");
+	acl::string addr("www.google.com.hk:443");
 
 	if (client.open(addr.c_str(), true) == false)
 	{
@@ -151,7 +150,7 @@ int main(int argc, char* argv[])
 	(void) argc; (void) argv;
 	acl::acl_cpp_init();
 
-	int   n = 100;
+	int   n = 1;
 	if (argc >= 2)
 		n = atoi(argv[1]);
 	if (n <= 0)
