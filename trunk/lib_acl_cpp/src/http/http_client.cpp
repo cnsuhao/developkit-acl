@@ -2,6 +2,7 @@
 #include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/stdlib/zlib_stream.hpp"
 #include "acl_cpp/stream/ostream.hpp"
+#include "acl_cpp/stream/socket_stream.hpp"
 #include "acl_cpp/http/http_header.hpp"
 #include "acl_cpp/http/http_client.hpp"
 

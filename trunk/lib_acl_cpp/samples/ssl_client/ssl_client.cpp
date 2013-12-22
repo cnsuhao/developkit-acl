@@ -178,13 +178,13 @@ int main(int argc, char* argv[])
 
 	test1();
 
-	//ACL_METER_TIME("---------- begin ----------");
-	//for (int i = 0; i < 1; i++)
-	//{
-	//	printf(">>>i: %d\n", i);
-	//	test2();
-	//}
-	//ACL_METER_TIME("---------- end ----------");
+	ACL_METER_TIME("---------- begin ----------");
+	for (int i = 0; i < 1; i++)
+	{
+		printf(">>>i: %d\n", i);
+		test2();
+	}
+	ACL_METER_TIME("---------- end ----------");
 
 	printf("Over, enter any key to exit!\n");
 	getchar();
