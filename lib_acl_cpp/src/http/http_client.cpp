@@ -1,7 +1,6 @@
 #include "acl_stdafx.hpp"
 #include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/stdlib/zlib_stream.hpp"
-#include "acl_cpp/stream/ssl_stream.hpp"
 #include "acl_cpp/stream/ostream.hpp"
 #include "acl_cpp/http/http_header.hpp"
 #include "acl_cpp/http/http_client.hpp"
