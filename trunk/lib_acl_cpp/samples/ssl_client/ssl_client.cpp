@@ -7,16 +7,21 @@
 #include "acl_cpp/acl_cpp_init.hpp"
 #include "acl_cpp/http/http_header.hpp"
 #include "acl_cpp/stdlib/string.hpp"
-#include "acl_cpp/stream/ssl_stream.hpp"
+#include "acl_cpp/stream/socket_stream.hpp"
 #include "acl_cpp/http/http_client.hpp"
 
 static void test0(int i)
 {
-	acl::ssl_stream client;
+	acl::socket_stream client;
 	acl::string addr("127.0.0.1:441");
-	if (client.open_ssl(addr.c_str(), 60, 60) == false)
+	if (client.open(addr.c_str(), 60, 60) == false)
 	{
 		std::cout << "connect " << addr.c_str() << " error!" << std::endl;
+		return;
+	}
+	if (client.open_ssl_client() == false)
+	{
+		std::cout << "open ssl " << addr.c_str() << " error!" << std::endl;
 		return;
 	}
 
@@ -51,22 +56,31 @@ static void test1(void)
 	header.build_request(request);
 
 	acl::string addr("www.google.com.hk:443");
-	acl::ssl_stream client;
+	acl::socket_stream client;
 
-	if (client.open_ssl(addr.c_str(), 60, 60) == false)
+	if (client.open(addr.c_str(), 60, 60) == false)
 	{
-		std::cout << "connect " << addr.c_str() << " error!" << std::endl;
+		std::cout << "connect " << addr.c_str()
+			<< " error!" << std::endl;
+		return;
+	}
+
+	if (client.open_ssl_client() == false)
+	{
+		std::cout << "open ssl client " << addr.c_str()
+			<< " error!" << std::endl;
 		return;
 	}
 
 	std::cout << "request:" << std::endl;
-	std::cout << "----------------------------------------------" << std::endl;
+	std::cout << "----------------------------------------" << std::endl;
 	std::cout << request.c_str();
-	std::cout << "----------------------------------------------" << std::endl;
+	std::cout << "----------------------------------------" << std::endl;
 
 	if (client.write(request) == false)
 	{
-		std::cout << "write to " << addr.c_str() << " error!" << std::endl;
+		std::cout << "write to " << addr.c_str() <<
+			" error!" << std::endl;
 		return;
 	}
 
@@ -101,20 +115,22 @@ static void test2(void)
 
 	acl::string addr("www.google.com.hk:443");
 
-	if (client.open(addr.c_str(), true) == false)
+	if (client.open(addr.c_str(), 60, 60, true, true) == false)
 	{
-		std::cout << "connect " << addr.c_str() << " error!" << std::endl;
+		std::cout << "connect " << addr.c_str()
+			<< " error!" << std::endl;
 		return;
 	}
 
 	std::cout << "request:" << std::endl;
-	std::cout << "----------------------------------------------" << std::endl;
+	std::cout << "----------------------------------------" << std::endl;
 	std::cout << request.c_str();
-	std::cout << "----------------------------------------------" << std::endl;
+	std::cout << "----------------------------------------" << std::endl;
 
 	if (client.get_ostream().write(request) == false)
 	{
-		std::cout << "write to " << addr.c_str() << " error!" << std::endl;
+		std::cout << "write to " << addr.c_str()
+			<< " error!" << std::endl;
 		return;
 	}
 
@@ -162,13 +178,13 @@ int main(int argc, char* argv[])
 
 	test1();
 
-	ACL_METER_TIME("---------- begin ----------");
-	for (int i = 0; i < 1; i++)
-	{
-		printf(">>>i: %d\n", i);
-		test2();
-	}
-	ACL_METER_TIME("---------- end ----------");
+	//ACL_METER_TIME("---------- begin ----------");
+	//for (int i = 0; i < 1; i++)
+	//{
+	//	printf(">>>i: %d\n", i);
+	//	test2();
+	//}
+	//ACL_METER_TIME("---------- end ----------");
 
 	printf("Over, enter any key to exit!\n");
 	getchar();
