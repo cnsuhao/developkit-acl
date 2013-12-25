@@ -61,7 +61,7 @@ bool json_node::set_text(const char* text)
 		return false;
 	if (node_me_->type != ACL_JSON_T_LEAF || node_me_->text == NULL)
 		return false;
-	acl_vstring_strcpy(node_me_->ltag, text);
+	acl_vstring_strcpy(node_me_->text, text);
 	return true;
 }
 
