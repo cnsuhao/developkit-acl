@@ -78,8 +78,8 @@ struct ACL_JSON {
 
 	int   status;               /**< 状态机当前解析状态 */
 #define ACL_JSON_S_OBJ      0       /**< 标签对象值 */
-#define	ACL_JSON_S_MEM      1
-#define	ACL_JSON_S_PAR      2
+#define	ACL_JSON_S_MEM      1       /**< member */
+#define	ACL_JSON_S_PAR      2       /**< pair */
 #define ACL_JSON_S_NXT      3       /**< 下一个结点 */
 #define ACL_JSON_S_TAG      4       /**< 标签名 */
 #define ACL_JSON_S_VAL      5       /**< 子结点处理过程 */
