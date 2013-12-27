@@ -9,17 +9,10 @@
 
 using namespace std;
 
-#if 0
-static const char* default_data = \
-    "{ DataValue: { menuitem2: [\r\n"
-    "    {'value': 'New', 'onclick': 'CreateNewDoc()'},\r\n"
-    "    {'value': 'Open', 'onclick': 'OpenDoc()'},\r\n"
-    "    {'value': 'Close', 'onclick': 'CloseDoc()'},\r\n"
-    "    [{'value': 'Save', 'onclick': 'SaveDoc()'}]"
-    "  ]}\r\n"
-    "}\r\n";
+#if 1
+static const char* default_data = "{\"DataValue\": {\"RemoteLoginRemind\": [{\"value\": \"New\", \"onclick\": \"CreateNewDoc()\"}, {\"value\": \"Open\", \"onclick\": \"OpenDoc()\"}, {\"value\": \"Close\", \"onclick\": \"CloseDoc()\"}, [{\"value\": \"Save\", \"onclick\": \"SaveDoc()\"}]]}}";
 #else
-static const char* default_data = "{'DataValue': {'RemoteLoginRemind': 'true1', 'ModifyPasswdRemind': 'true2', 'MailForwardRemind': 'true3', 'SecureLoginVerification': 'remote'}}";
+static const char* default_data = "{\"DataValue\": {\"RemoteLoginRemind\": \"true1\", \"ModifyPasswdRemind\": \"true2\", \"MailForwardRemind\": \"true3\", \"SecureLoginVerification\": \"remote\"}}";
 #endif
 
 static void test(void)
@@ -27,15 +20,20 @@ static void test(void)
 	acl::json json(default_data);
 
 	printf("-------------------------------------------------\r\n");
-	printf("build json: %s\r\n", json.to_string().c_str());
-
-	const char* tags;
-
-	tags = "DataValue";
-	printf("-------------------------------------------------\r\n");
 	printf("source data: %s\r\n", default_data);
 	printf("-------------------------------------------------\r\n");
-	printf(">>>tags: %s\r\n", tags);
+	printf("build  json: %s\r\n", json.to_string().c_str());
+	printf("-------------------------------------------------\r\n");
+	if (json.to_string() == default_data)
+		printf("OK!\r\n");
+	else
+		printf("ERROR!\r\n");
+	printf("-------------------------------------------------\r\n");
+
+	const char* tags;
+	tags = "DataValue/RemoteLoginRemind";
+	//tags = "DataValue";
+	printf(">>tags: %s\r\n", tags);
 
 	const std::vector<acl::json_node*>& nodes = json.getElementsByTags(tags);
 	if (nodes.empty())
@@ -48,39 +46,63 @@ static void test(void)
 	if (first == NULL)
 		return;
 
-	printf(">>first node string: %s\r\n", first->to_string().c_str());
+	printf(">>node(tags: %s, tag: %s, text: %s, left: %d) to string:\r\n%s\r\n",
+		tags, first->tag_name() ? first->tag_name() : "null",
+		first->get_text() ? first->get_text() : "null",
+		first->get_json_node()->left_ch, first->to_string().c_str());
+	printf("-------------------------------------------------\r\n");
+
 	ACL_VSTRING *bf = acl_vstring_alloc(1);
 	ACL_JSON_NODE* node = nodes[0]->get_json_node()->tag_node;
 	if (node)
 	{
 		acl_json_node_build(node, bf);
-		printf("--- the node string>>>>>%s\r\n", acl_vstring_str(bf));
+		printf(">>tag: %s, tag_node's string:\r\n%s\r\n",
+			first->tag_name(), acl_vstring_str(bf));
+		printf("-------------------------------------------------\r\n");
+
 		if (node->parent == nodes[0]->get_json_node())
-			printf("-==============\r\n");
+			printf("parent ok\r\n");
 		else
-			printf("---------------\r\n");
+			printf("not parent\r\n");
 	}
 	else
-		printf("%s: null, txt: %s\r\n", first->tag_name(), first->get_text() ? first->get_text():"null");
+		printf(">>>tag_node(%s) for tags(%s), tag: %s, txt: %s\r\n",
+			first->get_json_node()->tag_node ? "not null" : "null",
+			tags, first->tag_name() ? first->tag_name() : "null",
+			first->get_text() ? first->get_text() : "null");
 
-//	printf("first json node: %s\r\n", first->to_string().c_str());
 	acl_vstring_free(bf);
 
-	/*
 	/////////////////////////////////////////////////////////////////////
-	acl::json_node* iter = json.first_node();
 	printf("\r\n");
+	printf("-------------------------------------------------\r\n");
+
+	acl::json_node* iter = json.first_node();
 	while (iter)
 	{
-//		printf("iter: %s, %s\r\n", iter->tag_name(), iter->to_string().c_str());
-		ACL_VSTRING *bf = acl_vstring_alloc(1024);
-		acl_json_node_build(iter->get_json_node()->tag_node, bf);
-		printf(">>>>>>>>%s\r\n", acl_vstring_str(bf));
-		acl_vstring_free(bf);
-		break;
+		const char* tag = iter->tag_name();
+		const char* txt = iter->get_text();
+
+		node = iter->get_json_node();
+		if (node->left_ch)
+		{
+			printf("%c", node->left_ch);
+			fflush(stdout);
+		}
+		if (tag)
+			printf("tag: %s, txt: %s\r\n",
+				tag, txt ? txt : "null");
+		if (node->right_ch)
+		{
+			printf("%c->", node->right_ch);
+			fflush(stdout);
+		}
 		iter = json.next_node();
 	}
-	*/
+
+	printf("\r\n");
+	printf("-------------------------------------------------\r\n");
 }
 
 int main(void)

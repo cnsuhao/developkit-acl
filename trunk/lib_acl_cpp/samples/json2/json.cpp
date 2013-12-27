@@ -79,12 +79,13 @@ static void list_print(const vector<acl::json_node*>& nodes)
 
 static void test(void)
 {
-	static const char* data = "{'Action' : 'set' , 'Object' : 'user' , 'UpdateTime' : '<updatetime_value>' , 'Key' : '<xmuserid>',\r\n"
-		"  'DataList' : [\r\n"
-		"    {'DataKey' : 'BindInfo' , 'DataValue' : {'BindList' : [{'BindName' : 'BindText'}, {'BindType' : '<bindtype_value>' , 'BindId' : '<bindid_value>'}]}},\r\n"
-		"    {'DataKey' : 'BindRule' , 'DataValue' : [{'name1':'value1'}, {'name2': 'value2'}]},\r\n"
-		"    {'DataKey' : 'UserTap' , 'DataValue' : {'RemoteLoginRemind' : 'true' , 'ModifyPasswdRemind' : 'true' , 'MailForwardRemind' : 'true' , 'SecureLoginVerification' : 'remote'}} \r\n"
-		"]}\r\n";
+	static const char* data = \
+"{'Action' : 'set' , 'Object' : 'user' , 'UpdateTime' : '<updatetime_value>' , 'Key' : '<xmuserid>',\r\n"
+"  'DataList' : [\r\n"
+"    {'DataKey' : 'BindInfo' , 'DataValue' : {'BindList' : [{'BindName' : 'BindText'}, {'BindType' : '<bindtype_value>' , 'BindId' : '<bindid_value>'}]}},\r\n"
+"    {'DataKey' : 'BindRule' , 'DataValue' : [{'name1':'value1'}, {'name2': 'value2'}]},\r\n"
+"    {'DataKey' : 'UserTap' , 'DataValue' : {'RemoteLoginRemind' : 'true' , 'ModifyPasswdRemind' : 'true' , 'MailForwardRemind' : 'true' , 'SecureLoginVerification' : 'remote'}} \r\n"
+"]}\r\n";
 	acl::json json;
 
 	json.update(data);
@@ -95,12 +96,12 @@ static void test(void)
 
 	printf("-------------------------------------------------------\r\n");
 
-	const char* tags_list[] = { "DataList/*/DataKey",
-		"DataList/*/DataValue",
-		"DataList/*/DataValue/*/*/BindName",
-		"DataList/*/DataValue/*/name1",
+	const char* tags_list[] = { "DataList/*/*/DataKey",
+		"DataList/*/*/DataValue",
+		"DataList/*/*/DataValue/*/*/*/BindName",
+		"DataList/*/*/DataValue/*/*/*/name1",
 		"DataList/*/*/*/name1",
-		"DataList/*/DataValue/MailForwardRemind",
+		"DataList/*/*/DataValue/MailForwardRemind",
 		NULL
 	};
 
