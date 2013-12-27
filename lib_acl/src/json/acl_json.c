@@ -443,7 +443,13 @@ ACL_JSON *acl_json_create(ACL_JSON_NODE *node)
 	ACL_JSON *json = acl_json_alloc();
 	ACL_JSON_NODE *first = acl_json_node_duplicate(json, node);
 
-	acl_json_node_add_child(json->root, first);
+	/* 如果 json 结点没有 {，则需要再创建一个空 {} 对象 */
+	if (first->left_ch != '{') {
+		ACL_JSON_NODE *obj = acl_json_create_obj(json);
+		acl_json_node_add_child(json->root, obj);
+		acl_json_node_add_child(obj, first);
+	} else
+		acl_json_node_add_child(json->root, first);
 	return json;
 }
 
