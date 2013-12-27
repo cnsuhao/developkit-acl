@@ -20,9 +20,9 @@ static void test(void)
 	acl::json json(default_data);
 
 	printf("-------------------------------------------------\r\n");
-	printf("source data: %s\r\n", default_data);
+	printf(">>>source data: %s\r\n", default_data);
 	printf("-------------------------------------------------\r\n");
-	printf("build  json: %s\r\n", json.to_string().c_str());
+	printf(">>>build  json: %s\r\n", json.to_string().c_str());
 	printf("-------------------------------------------------\r\n");
 	if (json.to_string() == default_data)
 		printf("OK!\r\n");
@@ -33,7 +33,7 @@ static void test(void)
 	const char* tags;
 	tags = "DataValue/RemoteLoginRemind";
 	//tags = "DataValue";
-	printf(">>tags: %s\r\n", tags);
+	printf(">>>tags: %s\r\n", tags);
 
 	const std::vector<acl::json_node*>& nodes = json.getElementsByTags(tags);
 	if (nodes.empty())
@@ -43,13 +43,17 @@ static void test(void)
 	}
 
 	acl::json_node* first = nodes[0];
-	if (first == NULL)
-		return;
+	acl_assert(first);
 
-	printf(">>node(tags: %s, tag: %s, text: %s, left: %d) to string:\r\n%s\r\n",
+	printf(">>>node(tags: %s, tag: %s, text: %s, left: %d) to string:\r\n%s\r\n",
 		tags, first->tag_name() ? first->tag_name() : "null",
 		first->get_text() ? first->get_text() : "null",
 		first->get_json_node()->left_ch, first->to_string().c_str());
+	printf("-------------------------------------------------\r\n");
+
+	acl::json json1(*first);
+	printf(">>>convert first json node to json: %s\r\n", json1.to_string().c_str());
+
 	printf("-------------------------------------------------\r\n");
 
 	ACL_VSTRING *bf = acl_vstring_alloc(1);
@@ -57,14 +61,14 @@ static void test(void)
 	if (node)
 	{
 		acl_json_node_build(node, bf);
-		printf(">>tag: %s, tag_node's string:\r\n%s\r\n",
+		printf(">>>tag: %s, tag_node's string:\r\n%s\r\n",
 			first->tag_name(), acl_vstring_str(bf));
 		printf("-------------------------------------------------\r\n");
 
 		if (node->parent == nodes[0]->get_json_node())
-			printf("parent ok\r\n");
+			printf(">>>OK parent ok\r\n");
 		else
-			printf("not parent\r\n");
+			printf(">>>ERROR not parent\r\n");
 	}
 	else
 		printf(">>>tag_node(%s) for tags(%s), tag: %s, txt: %s\r\n",
@@ -75,7 +79,7 @@ static void test(void)
 	acl_vstring_free(bf);
 
 	/////////////////////////////////////////////////////////////////////
-	printf("\r\n");
+
 	printf("-------------------------------------------------\r\n");
 
 	acl::json_node* iter = json.first_node();

@@ -50,13 +50,15 @@ static void test(void)
 		for (; cit != elements.end(); ++cit)
 		{
 			acl::json_node *node = *cit;
-			printf("tagname: %s, text: %s\n", node->tag_name() ? node->tag_name() : "",
+			printf("tagname: %s, text: %s\n",
+				node->tag_name() ? node->tag_name() : "",
 				node->get_text() ? node->get_text() : "");
 		}
 	}
 
 	//const vector<acl::json_node*>& menuitem1 = json.getElementsByTagName("menuitem1");
-	const vector<acl::json_node*>& menuitem1 = json.getElementsByTags("menu name/popup/menuitem1");
+	const vector<acl::json_node*>& menuitem1 =
+		json.getElementsByTags("menu name/popup/menuitem1");
 	if (!menuitem1.empty())
 	{
 		vector<acl::json_node*>::const_iterator cit = menuitem1.begin();
@@ -211,11 +213,8 @@ static void test(void)
 	printf("%s\r\n", buf.c_str());
 }
 
-int main(int argc, char* argv[])
+int main(void)
 {
-	(void) argc;
-	(void) argv;
-
 	test();
 	printf("enter any key to exit\r\n");
 	getchar();

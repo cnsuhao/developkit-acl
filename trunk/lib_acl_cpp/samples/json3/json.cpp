@@ -17,14 +17,14 @@ int main()
 	root.add_child("name", name);
 
 	// 生成json字符串
+	printf("json to string:%s\r\n", json.to_string().c_str());
+
 	acl::string buf;
 	json.build_json(buf);
-	printf("buf:\r\n%s\r\n%s\r\n", buf.c_str(), json.to_string().c_str());
-
 	// 根据生成的字符串获取键值
 	acl::json json2(buf.c_str());
-	acl::json_node& root2 = json2.get_root();
-	acl::json_node* child = root2.first_child();
+	acl::json_node* root2 = json2.get_root().first_child();
+	acl::json_node* child = root2->first_child();
 
 	const char* tag, *txt;
 	while (child != NULL)
@@ -37,7 +37,7 @@ int main()
 		else
 			printf("no tag name or no txt in json node");
 
-		child = root2.next_child();
+		child = root2->next_child();
 	}
 	printf("\r\n");
 	return 0;
