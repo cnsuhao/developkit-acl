@@ -57,7 +57,7 @@ static void test(void)
 	printf("-------------------------------------------------\r\n");
 
 	ACL_VSTRING *bf = acl_vstring_alloc(1);
-	ACL_JSON_NODE* node = nodes[0]->get_json_node()->tag_node;
+	ACL_JSON_NODE* node = first->get_json_node()->tag_node;
 	if (node)
 	{
 		acl_json_node_build(node, bf);
@@ -65,10 +65,18 @@ static void test(void)
 			first->tag_name(), acl_vstring_str(bf));
 		printf("-------------------------------------------------\r\n");
 
-		if (node->parent == nodes[0]->get_json_node())
+		if (node->parent == first->get_json_node())
 			printf(">>>OK parent ok\r\n");
 		else
 			printf(">>>ERROR not parent\r\n");
+
+		printf("-------------------------------------------------\r\n");
+		acl::json_node* obj = first->get_obj();
+		if (obj)
+			printf(">>>tag: %s, obj: %s\r\n", first->tag_name(),
+				obj->to_string().c_str());
+		else
+			printf(">>>tag: %s, obj null\r\n", first->tag_name());
 	}
 	else
 		printf(">>>tag_node(%s) for tags(%s), tag: %s, txt: %s\r\n",

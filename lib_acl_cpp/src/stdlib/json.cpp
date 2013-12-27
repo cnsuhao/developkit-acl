@@ -13,6 +13,7 @@ json_node::json_node(ACL_JSON_NODE* node, json* json_ptr)
 , child_(NULL)
 , iter_(NULL)
 , buf_(NULL)
+, obj_(NULL)
 {
 	acl_assert(json_ptr);
 }
@@ -27,6 +28,8 @@ json_node::~json_node(void)
 		acl_myfree(iter_);
 	if (buf_)
 		delete buf_;
+	if (obj_)
+		delete obj_;
 }
 
 const char* json_node::tag_name(void) const
@@ -43,6 +46,18 @@ const char* json_node::get_text(void) const
 		return acl_vstring_str(node_me_->text);
 	else
 		return NULL;
+}
+
+json_node* json_node::get_obj(void) const
+{
+	if (obj_ != NULL)
+		return obj_;
+	if (node_me_->tag_node == NULL)
+		return NULL;
+
+	const_cast<json_node*>(this)->obj_ =
+		NEW json_node(node_me_->tag_node, json_);
+	return obj_;
 }
 
 bool json_node::set_tag(const char* name)
