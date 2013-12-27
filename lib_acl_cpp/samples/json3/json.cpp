@@ -19,7 +19,7 @@ int main()
 	// 生成json字符串
 	acl::string buf;
 	json.build_json(buf);
-	printf("buf: %s|%s\n", buf.c_str(), json.to_string().c_str());
+	printf("buf:\r\n%s\r\n%s\r\n", buf.c_str(), json.to_string().c_str());
 
 	// 根据生成的字符串获取键值
 	acl::json json2(buf.c_str());
@@ -39,5 +39,6 @@ int main()
 
 		child = root2.next_child();
 	}
+	printf("\r\n");
 	return 0;
 }

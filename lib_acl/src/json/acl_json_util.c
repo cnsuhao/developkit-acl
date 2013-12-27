@@ -11,6 +11,7 @@
 #endif
 
 #define STR	acl_vstring_str
+#define	LEN	ACL_VSTRING_LEN
 
 void acl_json_free_array(ACL_ARRAY *a)
 {
@@ -42,6 +43,8 @@ ACL_ARRAY *acl_json_getElementsByTags(ACL_JSON *json, const char *tags)
 	ACL_ARGV *tokens = acl_argv_split(tags, "/");
 	ACL_ARRAY *a, *ret;
 	ACL_ITER iter;
+	ACL_JSON_NODE *node_saved, *node;
+	int   i;
 
 	a = acl_json_getElementsByTagName(json, tokens->argv[tokens->argc - 1]);
 	if (a == NULL) {
@@ -52,12 +55,13 @@ ACL_ARRAY *acl_json_getElementsByTags(ACL_JSON *json, const char *tags)
 	ret = acl_array_create(acl_array_size(a));
 
 	acl_foreach(iter, a) {
-		ACL_JSON_NODE *node_saved, *node = (ACL_JSON_NODE*) iter.data;
-		int   i = tokens->argc - 1;
+		node = (ACL_JSON_NODE*) iter.data;
 		node_saved = node;
+		i = tokens->argc - 1;
 		while (i >= 0 && node->parent != NULL) {
-			if (strcasecmp(tokens->argv[i], "*") != 0 &&
-				strcasecmp(tokens->argv[i], STR(node->ltag)) != 0)
+			if (strcasecmp(tokens->argv[i], "*") != 0
+				&& strcasecmp(tokens->argv[i], STR(node->ltag)) != 0
+				&& node->left_ch == 0)
 			{
 				break;
 			}
@@ -119,7 +123,7 @@ ACL_JSON_NODE *acl_json_create_node(ACL_JSON *json,
 
 	acl_vstring_strcpy(node->ltag, name);
 	node->tag_node = value;
-	node->type = ACL_JSON_T_NODE;
+	node->type = ACL_JSON_T_OBJ;
 	acl_json_node_add_child(node, value);
 	return (node);
 }
@@ -143,6 +147,7 @@ static void json_escape_append(ACL_VSTRING *buf, const char *src)
 	const unsigned char *ptr = (const unsigned char*) src;
 
 	ACL_VSTRING_ADDCH(buf, '"');
+
 	while (*ptr) {
 		if (*ptr == '"' || *ptr == '\\' || *ptr == '/') {
 			ACL_VSTRING_ADDCH(buf, '\\');
@@ -170,19 +175,6 @@ static void json_escape_append(ACL_VSTRING *buf, const char *src)
 	ACL_VSTRING_TERMINATE(buf);
 }
 
-ACL_VSTRING *acl_json_node_build(ACL_JSON_NODE *node, ACL_VSTRING *buf)
-{
-	ACL_JSON *json = acl_json_create(node);
-
-	if (buf == NULL)
-		buf = acl_vstring_alloc(256);
-
-	acl_json_build(json, buf);
-	acl_json_free(json);
-
-	return buf;
-}
-
 ACL_VSTRING *acl_json_build(ACL_JSON *json, ACL_VSTRING *buf)
 {
 	ACL_JSON_NODE *node, *prev;
@@ -199,24 +191,23 @@ ACL_VSTRING *acl_json_build(ACL_JSON *json, ACL_VSTRING *buf)
 	acl_foreach(iter, json) {
 		node = (ACL_JSON_NODE*) iter.data;
 		prev = acl_json_node_prev(node);
+		if (prev != NULL)
+			acl_vstring_strcat(buf, ", ");
 
 		/* 只有当标签的对应值为 JSON 对象或数组对象时 tag_node 非空 */
 		if (node->tag_node != NULL) {
-			if (prev != NULL)
-				acl_vstring_strcat(buf, ", ");
-			json_escape_append(buf, STR(node->ltag));
-			ACL_VSTRING_ADDCH(buf, ':');
-			ACL_VSTRING_ADDCH(buf, ' ');
+			if (LEN(node->ltag) > 0) {
+				json_escape_append(buf, STR(node->ltag));
+				ACL_VSTRING_ADDCH(buf, ':');
+				ACL_VSTRING_ADDCH(buf, ' ');
+			}
 			if (node->left_ch != 0) {
-				/* '{' or '[' */
+				/* '{' or '[' */	
 				ACL_VSTRING_ADDCH(buf, node->left_ch);
 			}
-			ACL_VSTRING_TERMINATE(buf);
-			continue;
-		}
 
-		if (prev)
-			acl_vstring_strcat(buf, ", ");
+			continue;
+		} else
 
 		/* 当结点有标签名时 */
 		if (LEN(node->ltag) > 0) {
@@ -229,7 +220,6 @@ ACL_VSTRING *acl_json_build(ACL_JSON *json, ACL_VSTRING *buf)
 		/* 当结点为没有标签名的容器(为 '{}' 或 '[]')时 */
 		else if (node->left_ch != 0) {
 			ACL_VSTRING_ADDCH(buf, node->left_ch);
-			ACL_VSTRING_TERMINATE(buf);
 		}
 
 		/* 当本结点有子结点或虽为叶结点，但该结点的下一个兄弟结点
@@ -243,12 +233,26 @@ ACL_VSTRING *acl_json_build(ACL_JSON *json, ACL_VSTRING *buf)
 		 */
 		while (node != node->json->root && acl_json_node_next(node) == NULL) {
 			if (node->parent->right_ch != 0) {
-				/* node->parent->right_ch: '}' or ']' */
+				/* right_ch: '}' or ']' */
 				ACL_VSTRING_ADDCH(buf, node->parent->right_ch);
-				ACL_VSTRING_TERMINATE(buf);
 			}
 			node = node->parent;
 		}
 	}
-	return (buf);
+
+	ACL_VSTRING_TERMINATE(buf);
+	return buf;
+}
+
+ACL_VSTRING *acl_json_node_build(ACL_JSON_NODE *node, ACL_VSTRING *buf)
+{
+	ACL_JSON *json = acl_json_create(node);
+
+	if (buf == NULL)
+		buf = acl_vstring_alloc(256);
+
+	acl_json_build(json, buf);
+	acl_json_free(json);
+
+	return buf;
 }
