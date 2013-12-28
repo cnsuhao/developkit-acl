@@ -15,9 +15,25 @@ static const char* default_data = "{\"DataValue\": {\"RemoteLoginRemind\": [{\"v
 static const char* default_data = "{\"DataValue\": {\"RemoteLoginRemind\": \"true1\", \"ModifyPasswdRemind\": \"true2\", \"MailForwardRemind\": \"true3\", \"SecureLoginVerification\": \"remote\"}}";
 #endif
 
-static void test(void)
+static void test(bool once)
 {
-	acl::json json(default_data);
+	acl::json json;
+
+	if (once)
+		json.update(default_data);
+	else
+	{
+		const char* s = default_data;
+		char  buf[2];
+
+		while (*s)
+		{
+			buf[0] = *s;
+			buf[1] = 0;
+			json.update(buf);
+			s++;
+		}
+	}
 
 	printf("-------------------------------------------------\r\n");
 	printf(">>>source data: %s\r\n", default_data);
@@ -117,9 +133,35 @@ static void test(void)
 	printf("-------------------------------------------------\r\n");
 }
 
-int main(void)
+static void usage(const char* procname)
 {
-	test();
+	printf("usage: %s -h [help]\r\n"
+		"-o [if parse the whole json once, default: false]\r\n",
+		procname);
+}
+
+int main(int argc, char* argv[])
+{
+	int   ch;
+	bool  once = false;
+
+	while ((ch = getopt(argc, argv, "ho")) > 0)
+	{
+		switch (ch)
+		{
+		case 'h':
+			usage(argv[0]);
+			return 0;
+		case 'o':
+			once = true;
+			break;
+		default:
+			break;
+		}
+	}
+
+	test(once);
+
 	printf("enter any key to exit\r\n");
 	getchar();
 	return 0;
