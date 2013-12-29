@@ -210,8 +210,11 @@ static const char *json_tag(ACL_JSON *json, const char *data)
 				ACL_JSON_NODE *parent;
 
 				parent = acl_json_node_parent(node);
+
+				/* 数组对象的子结点允许为单独的字符串或对象 */
 				if (parent->left_ch == '[')
 					json->status = ACL_JSON_S_NXT;
+
 				/* 标签值分析结束，下一步需要找到冒号 */
 				else
 					json->status = ACL_JSON_S_COL;
@@ -219,17 +222,19 @@ static const char *json_tag(ACL_JSON *json, const char *data)
 				node->part_word = 0;
 				data++;
 				break;
-			} else {
+			}
+
+			/* 是否兼容后半个汉字为转义符 '\' 的情况 */
+			else if ((json->flag & ACL_JSON_FLAG_PART_WORD)) {
 				ADDCH(node->ltag, ch);
 
-				/* 是否兼容后半个汉字为转义符 '\' 的情况 */
-				if ((json->flag & ACL_JSON_FLAG_PART_WORD)) {
-					/* 处理半个汉字的情形 */
-					if (node->part_word)
-						node->part_word = 0;
-					else if (ch < 0)
-						node->part_word = 1;
-				}
+				/* 处理半个汉字的情形 */
+				if (node->part_word)
+					node->part_word = 0;
+				else if (ch < 0)
+					node->part_word = 1;
+			} else {
+				ADDCH(node->ltag, ch);
 			}
 		}
 
@@ -255,17 +260,19 @@ static const char *json_tag(ACL_JSON *json, const char *data)
 			json->status = ACL_JSON_S_COL;
 			node->part_word = 0;
 			break;
-		} else {
+		}
+
+		/* 是否兼容后半个汉字为转义符 '\' 的情况 */
+		else if ((json->flag & ACL_JSON_FLAG_PART_WORD)) {
 			ADDCH(node->ltag, ch);
 
-			/* 是否兼容后半个汉字为转义符 '\' 的情况 */
-			if ((json->flag & ACL_JSON_FLAG_PART_WORD)) {
-				/* 处理半个汉字的情形 */
-				if (node->part_word)
-					node->part_word = 0;
-				else if (ch < 0)
-					node->part_word = 1;
-			}
+			/* 处理半个汉字的情形 */
+			if (node->part_word)
+				node->part_word = 0;
+			else if (ch < 0)
+				node->part_word = 1;
+		} else {
+			ADDCH(node->ltag, ch);
 		}
 		data++;
 	}
@@ -362,8 +369,8 @@ static const char *json_val(ACL_JSON *json, const char *data)
 			 * 第二个字节有可能为 92，正好与转义字符相同
 			 */
 			else if (ch == '\\') {
-				/* 处理半个汉字的情况，如果前一个字节是前半个汉字，
-				 * 则当前的转义符当作后半个汉字
+				/* 处理半个汉字的情况，如果前一个字节是前
+				 * 半个汉字，则当前的转义符当作后半个汉字
 				 */
 				if (node->part_word) {
 					ADDCH(node->text, ch);
@@ -378,23 +385,25 @@ static const char *json_val(ACL_JSON *json, const char *data)
 				node->part_word = 0;
 				data++;
 				break;
-			} else {
+			}
+
+			/* 是否兼容后半个汉字为转义符 '\' 的情况 */
+			else if ((json->flag & ACL_JSON_FLAG_PART_WORD)) {
 				ADDCH(node->text, ch);
 
-				/* 是否兼容后半个汉字为转义符 '\' 的情况 */
-				if ((json->flag & ACL_JSON_FLAG_PART_WORD)) {
-					/* 若前一个字节为前半个汉字，则当前字节
-					 * 为后半个汉字，正好为一个完整的汉字
-					 */
-					if (node->part_word)
-						node->part_word = 0;
+				/* 若前一个字节为前半个汉字，则当前字节
+				 * 为后半个汉字，正好为一个完整的汉字
+				 */
+				if (node->part_word)
+					node->part_word = 0;
 
-					/* 前一个字节非前半个汉字且当前字节高位为 1，
-					 * 则表明当前字节为前半个汉字
-					 */
-					else if (ch < 0)
-						node->part_word = 1;
-				}
+				/* 前一个字节非前半个汉字且当前字节高位
+				 * 为 1，则表明当前字节为前半个汉字
+				 */
+				else if (ch < 0)
+					node->part_word = 1;
+			} else {
+				ADDCH(node->text, ch);
 			}
 		} else if (node->backslash) {
 			ADDCH(node->text, ch);
@@ -411,17 +420,19 @@ static const char *json_val(ACL_JSON *json, const char *data)
 			/* 切换至查询该结点的兄弟结点的过程 */
 			json->status = ACL_JSON_S_NXT;
 			break;
-		} else {
+		}
+
+		/* 是否兼容后半个汉字为转义符 '\' 的情况 */
+		else if ((json->flag & ACL_JSON_FLAG_PART_WORD)) {
 			ADDCH(node->text, ch);
 
-			/* 是否兼容后半个汉字为转义符 '\' 的情况 */
-			if ((json->flag & ACL_JSON_FLAG_PART_WORD)) {
-				/* 处理半个汉字的情形 */
-				if (node->part_word)
-					node->part_word = 0;
-				else if (ch < 0)
-					node->part_word = 1;
-			}
+			/* 处理半个汉字的情形 */
+			if (node->part_word)
+				node->part_word = 0;
+			else if (ch < 0)
+				node->part_word = 1;
+		} else {
+			ADDCH(node->text, ch);
 		}
 		data++;
 	}
