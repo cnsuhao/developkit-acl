@@ -19,57 +19,78 @@
 
 static const char *json_obj(ACL_JSON *json, const char *data)
 {
-	ACL_JSON_NODE *node;
+	ACL_JSON_NODE *obj, *member;
 
 	SKIP_SPACE(data);
 
 	/* 必须找到子结点的开始字符 */
-	SKIP_WHILE(*data != '{' && *data != '[', data);
+	SKIP_WHILE(*data != '{', data);
 
 	if (*data == 0)
 		return NULL;
 
-	/* 创建子结点，并将子结点设为当前结点 */
+	/* 创建对象 '{}' 子结点 */
 
-	node = acl_json_node_alloc(json);
-	acl_json_node_add_child(json->curr_node, node);
-	node->depth = json->curr_node->depth + 1;
-	if (node->depth > json->depth)
-		json->depth = node->depth;
+	obj = acl_json_node_alloc(json);
+	acl_json_node_add_child(json->curr_node, obj);
+	obj->depth = json->curr_node->depth + 1;
 
 	/* 根据 json 结点对象前缀的不同，记录不同的对象后缀 */
-	node->left_ch = *data;
-	if (*data == '{') {
-		node->right_ch = '}';
-		node->type = ACL_JSON_T_OBJ;
-	} else {
-		node->right_ch = ']';
-		node->type = ACL_JSON_T_ARRAY;
-	}
+	obj->left_ch = *data;
+	obj->right_ch = '}';
+	obj->type = ACL_JSON_T_OBJ;
 
 	/* 去掉前导符 '{' 或 '[' */
 	data++;
 
-	json->curr_node->tag_node = node;
+	json->curr_node->tag_node = obj;
 
-	/* 设置新的结点为当前处理结点 */
-	json->curr_node = node;
-	json->status = ACL_JSON_S_MEM;
+	/* 创建上面所建对象结点的成员对象 */
+	member = acl_json_node_alloc(json);
+
+	acl_json_node_add_child(obj, member);
+	member->type = ACL_JSON_T_MEMBER;
+	member->depth = obj->depth + 1;
+	if (member->depth > json->depth)
+		json->depth = member->depth;
+
+	/* 将该成员对象置为当前 JSON 分析结点 */
+	json->curr_node = member;
+	json->status = ACL_JSON_S_PAR;
 
 	return data;
 }
 
-static const char *json_member(ACL_JSON *json, const char *data)
+static const char *json_array(ACL_JSON *json, const char *data)
 {
-	ACL_JSON_NODE *node = acl_json_node_alloc(json);
+	ACL_JSON_NODE *array, *element;
 
-	acl_json_node_add_child(json->curr_node, node);
-	node->depth = json->curr_node->depth + 1;
-	if (node->depth > json->depth)
-		json->depth = node->depth;
-	node->type = ACL_JSON_T_MEMBER;
-	json->curr_node = node;
-	json->status = ACL_JSON_S_PAR;
+	SKIP_SPACE(data);
+	SKIP_WHILE(*data != '[', data);
+	if (*data == 0)
+		return NULL;
+
+	/* 创建数组对象 */
+	array = acl_json_node_alloc(json);
+	acl_json_node_add_child(json->curr_node, array);
+	array->left_ch = *data;
+	array->right_ch = ']';
+	array->type = ACL_JSON_T_ARRAY;
+	data++;
+
+	json->curr_node->tag_node = array;
+
+	/* 创建数组成员对象 */
+	element = acl_json_node_alloc(json);
+	acl_json_node_add_child(array, element);
+	element->type = ACL_JSON_T_ELEMENT;
+	element->depth = array->depth + 1;
+	if (element->depth > json->depth)
+		json->depth = element->depth;
+
+	/* 将该数组成员对象置为当前 JSON 分析结点 */
+	json->curr_node = element;
+	json->status = ACL_JSON_S_VAL;
 
 	return data;
 }
@@ -101,10 +122,13 @@ static const char *json_pair(ACL_JSON *json, const char *data)
 		return data;
 	}
 
-	if (*data == '{' || *data == '[') {
-		/* 为 '{' 或 '[' 时说明遇到了当前结点的子结点 */
-
+	/* 为 '{' 或 '[' 时说明遇到了当前结点的子结点 */
+	if (*data == '{') {
 		json->status = ACL_JSON_S_OBJ;
+		return data;
+	}
+	else if (*data == '[') {
+		json->status = ACL_JSON_S_ARR;
 		return data;
 	}
 
@@ -122,7 +146,7 @@ static const char *json_pair(ACL_JSON *json, const char *data)
 
 static const char *json_next(ACL_JSON *json, const char *data)
 {
-	ACL_JSON_NODE *node;
+	ACL_JSON_NODE *parent, *brother;
 
 	if (json->curr_node == json->root) {
 		json->finish = 1;
@@ -134,17 +158,17 @@ static const char *json_next(ACL_JSON *json, const char *data)
 		return NULL;
 
 	/* 如果到达根结点的结束符，则 json 解析过程完毕 */
-	node = acl_json_node_parent(json->curr_node);
-	if (*data == node->right_ch) {
+	parent = acl_json_node_parent(json->curr_node);
+	if (*data == parent->right_ch) {
 		data++;
-		if (node == json->root) {
+		if (parent == json->root) {
 			json->finish = 1;
 			return NULL;
 		}
 
 		/* 弹出爷爷结点 */
-		node = acl_json_node_parent(node);
-		json->curr_node = node;
+		parent = acl_json_node_parent(parent);
+		json->curr_node = parent;
 		/* 查询父结点的下一个兄弟结点 */
 		json->status = ACL_JSON_S_NXT;
 		return data;
@@ -160,13 +184,23 @@ static const char *json_next(ACL_JSON *json, const char *data)
 
 	/* 创建新结点，并将其作为当前结点的兄弟结点 */
 
-	node = acl_json_node_alloc(json);
-	acl_json_node_append(json->curr_node, node);
-	node->depth = json->curr_node->depth;
-	json->curr_node = node;
+	brother = acl_json_node_alloc(json);
+	acl_json_node_add_child(parent, brother);
+	brother->depth = parent->depth;
 
-	/* 下一步需要分析标签名 */
-	json->status = ACL_JSON_S_PAR;
+	/* 如果父结点为数组对象，则将解析器转向值解析过程 */
+	if (parent->left_ch == '[')
+		json->status = ACL_JSON_S_VAL;
+
+	/* 如果父结点为对象，则将解析器转向 NAME:VALUE 对解析过程 */
+	else if (parent->left_ch == '{')
+		json->status = ACL_JSON_S_PAR;
+
+	/* xxx: 否则，则有可能数据是问题的 */
+	else
+		json->status = ACL_JSON_S_VAL;
+
+	json->curr_node = brother;
 	return data;
 }
 
@@ -323,10 +357,12 @@ static const char *json_val(ACL_JSON *json, const char *data)
 		if (*data == 0)
 			return NULL;
 
-		if (*data == '{' || *data == '[') {
-			/* 为 '{' 或 '[' 时说明遇到了当前结点的子结点 */
-
+		/* 为 '{' 或 '[' 时说明遇到了当前结点的子结点 */
+		if (*data == '{') {
 			json->status = ACL_JSON_S_OBJ;
+			return data;
+		} else if (*data == '[') {
+			json->status = ACL_JSON_S_ARR;
 			return data;
 		}
 
@@ -404,6 +440,7 @@ static const char *json_val(ACL_JSON *json, const char *data)
 					node->part_word = 1;
 			} else {
 				ADDCH(node->text, ch);
+				ACL_VSTRING_TERMINATE(node->text);
 			}
 		} else if (node->backslash) {
 			ADDCH(node->text, ch);
@@ -454,13 +491,13 @@ struct JSON_STATUS_MACHINE {
 };
 
 static struct JSON_STATUS_MACHINE status_tab[] = {
-	{ ACL_JSON_S_OBJ,  json_obj },                   /* begin json node */
-	{ ACL_JSON_S_MEM,  json_member },                /* begin json node */
-	{ ACL_JSON_S_PAR,  json_pair },                  /* for tag name */
-	{ ACL_JSON_S_NXT,  json_next },                  /* parse brother node */
-	{ ACL_JSON_S_TAG,  json_tag },                   /* for tag name */
-	{ ACL_JSON_S_VAL,  json_val },                   /* for tag value */
-	{ ACL_JSON_S_COL,  json_colon },                 /* for ':' */
+	{ ACL_JSON_S_OBJ,  json_obj },          /* json obj node */
+	{ ACL_JSON_S_ARR,  json_array },        /* json array node */
+	{ ACL_JSON_S_PAR,  json_pair },         /* json pair node */
+	{ ACL_JSON_S_NXT,  json_next },         /* json brother node */
+	{ ACL_JSON_S_TAG,  json_tag },          /* json tag name */
+	{ ACL_JSON_S_VAL,  json_val },          /* json node's value */
+	{ ACL_JSON_S_COL,  json_colon },        /* json tag's ':' */
 };
 
 void acl_json_update(ACL_JSON *json, const char *data)
