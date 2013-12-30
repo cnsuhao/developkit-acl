@@ -76,14 +76,15 @@ struct ACL_JSON {
 
 	/* private */
 
-	int   status;               /**< 状态机当前解析状态 */
-#define ACL_JSON_S_OBJ      0       /**< 标签对象值 */
-#define	ACL_JSON_S_ARR      1       /**< json 结点 array */
-#define	ACL_JSON_S_PAR      2       /**< name:value pair */
-#define ACL_JSON_S_NXT      3       /**< 下一个结点 */
-#define ACL_JSON_S_TAG      4       /**< 对象标签名 */
-#define ACL_JSON_S_VAL      5       /**< 结点值处理过程 */
-#define ACL_JSON_S_COL      6       /**< 冒号 : */
+	int   status;                   /**< 状态机当前解析状态 */
+#define	ACL_JSON_S_ROOT         0       /**< 根结点 */
+#define ACL_JSON_S_OBJ          1       /**< 标签对象值 */
+#define	ACL_JSON_S_ARRAY        2       /**< json 结点 array */
+#define	ACL_JSON_S_PAIR         3       /**< name:value pair */
+#define ACL_JSON_S_NEXT         4       /**< 下一个结点 */
+#define ACL_JSON_S_TAG          5       /**< 对象标签名 */
+#define ACL_JSON_S_VALUE        6       /**< 结点值处理过程 */
+#define ACL_JSON_S_COLON        7       /**< 冒号 : */
 
 	ACL_ARRAY *node_cache;      /**< json 结点缓存池 */
 	int   max_cache;            /**< json 结点缓存池的最大容量 */
