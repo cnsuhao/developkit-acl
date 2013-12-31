@@ -149,7 +149,7 @@ static void test(void)
 	printf("-------------------------------------------------\r\n");
 
 	if (json1.to_string() == json3.to_string())
-		printf(">>%s(%d): OK!\r\n", __FUNCTION__, __LINE__);
+		printf(">>%s(%d): json1=json3, OK!\r\n", __FUNCTION__, __LINE__);
 	else
 	{
 		printf("%s(%d): ERROR! json1 != json3\r\n", __FUNCTION__, __LINE__);
