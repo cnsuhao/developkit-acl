@@ -62,7 +62,8 @@ int main(int argc, char* argv[])
 		NULL
 	};
 
-	for (int i = 0; datas[i] != NULL; i++)
+	size_t  nok = 0, i;
+	for (i = 0; datas[i] != NULL; i++)
 	{
 #if 0
 		if (i != 1)
@@ -100,10 +101,21 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
+			nok++;
 			printf("OK\r\n");
 			print(json);
 		}
 	}
 
+	printf("====================================================================\r\n");
+
+	if (nok == i)
+		printf("All ok\r\n");
+	else
+		printf("Some Error(%d, %d)\r\n", nok, i);
+#ifdef WIN32
+	printf("enter any key to exit!\r\n");
+	getchar();
+#endif
 	return 0;
 }
