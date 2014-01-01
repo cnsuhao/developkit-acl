@@ -56,6 +56,7 @@ int main(int argc, char* argv[])
 		"{\"menuitem2\": [{\"value1\": \"Open1\", \"onclick\": \"Open1()\"}, {\"value2\": \"Open2\", \"onclick\": \"Open2()\"}, [{\"value3\": \"Open3\", \"onclick\": \"Open3()\"}], [\"value4\", \"Open4\", \"onclick\", \"Open4()\"], [{\"value5\": \"Open5\"}, \"onclick\", \"Open5()\"], {\"value6\": \"Open6\", \"onclick\": \"Open6()\"}]}",
 		"{\"help\": \"hello world!\", \"menuitem2\": [{\"value1\": \"Open1\", \"onclick\": \"Open1()\"}, [{\"value3\": \"Open3\", \"onclick\": \"Open3()\"}], {\"value6\": \"Open6\"}]}",
 		"{\"menu\": {\"item\": {\"value\": \"open\"}}, \"help\": \"hello\"}",
+		"{\"menu\": {\"item\": {\"value\": \"open\", \"value\": \"close\", \"value\": \"save\"}}, \"help\": \"hello\"}",
 		"{\"menu\": [{\"value\": \"open\", \"value\": \"close\"}, \"open\", \"close\", \"new\", [\"open\", \"close\", \"new\"], [{\"value\": \"open\", \"value\": \"close\"}]]}",
 		"{\"menu\": {\"item\": {\"entry\": {\"value\": \"open\", \"value\": \"close\"}, \"entry\": {\"value\": \"new\"}}}, \"help\": \"hello\"}",
 		"{\"menu name\": {\"id:file\": \"file\", \"value{\": \"File\", \"popup{}\": {\"menuitem1}\": [{\"value\": \"New\", \"onclick\": \"CreateNewDoc()\"}, {\"value\": \"Open\", \"onclick\": \"OpenDoc()\"}, {\"value\": \"Close\", \"onclick\": \"CloseDoc()\"}], \"menuname[]\": \"hello world\", \"inner\": {\"value\": \"new \", \"value\": \"open\"}, \"menuitem2\": [{\"value\": \"New\", \"onclick\": \"CreateNewDoc()\"}, {\"value\": \"Open\", \"onclick\": \"OpenDoc()\"}, {\"value\": \"Close\", \"onclick\": \"CloseDoc()\"}, {{\"value\": \"Help\", \"onclick\": \"Help()\"}}]}}, \"help\": \"hello world!\", \"menuitem2\": [{\"value1\": \"Open1\", \"onclick\": \"Open1()\"}, {\"value2\": \"Open2\", \"onclick\": \"Open2()\"}, [{\"value3\": \"Open3\", \"onclick\": \"Open3()\"}], [{\"value4\": \"Open4\"}, \"onclick\", \"Open4()\"], [\"value5\", \"Open5\", \"onclick\", \"Open5()\"], {\"value6\": \"Open6\", \"onclick\": \"Open6()\"}]}",
@@ -66,7 +67,7 @@ int main(int argc, char* argv[])
 	for (i = 0; datas[i] != NULL; i++)
 	{
 #if 0
-		if (i != 1)
+		if (i != 16)
 			continue;
 #endif
 
@@ -95,7 +96,7 @@ int main(int argc, char* argv[])
 		if (json.to_string() != datas[i])
 		{
 			printf("====================================================================\r\n");
-			printf("ERROR, not equal, item: %d\r\n", i);
+			printf("ERROR, not equal, item: %d\r\n", (int) i);
 			print(json);
 			return 0;
 		}
@@ -112,7 +113,7 @@ int main(int argc, char* argv[])
 	if (nok == i)
 		printf("All ok\r\n");
 	else
-		printf("Some Error(%d, %d)\r\n", nok, i);
+		printf("Some Error(%d, %d)\r\n", (int) nok, (int) i);
 #ifdef WIN32
 	printf("enter any key to exit!\r\n");
 	getchar();
