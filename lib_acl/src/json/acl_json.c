@@ -561,6 +561,7 @@ void acl_json_reset(ACL_JSON *json)
 
 	json->root->left_ch = '{';
 	json->root->right_ch = '}';
+	json->root->type = ACL_JSON_T_OBJ;
 	json->curr_node = json->root;
 	json->status = ACL_JSON_S_ROOT;
 	json->finish = 0;
