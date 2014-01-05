@@ -34,9 +34,9 @@ class ACL_CPP_API ipc_client : private aio_open_callback
 {
 public:
 #ifdef WIN32
-	ipc_client(__int64 magic);
+	ipc_client(__int64 magic = -1);
 #else
-	ipc_client(long long int magic);
+	ipc_client(long long int magic = -1);
 #endif
 	virtual ~ipc_client();
 

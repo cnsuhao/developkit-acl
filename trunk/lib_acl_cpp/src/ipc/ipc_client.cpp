@@ -9,7 +9,7 @@
 namespace acl
 {
 
-ipc_client::ipc_client(acl_int64 magic)
+ipc_client::ipc_client(acl_int64 magic /* = -1 */)
 : magic_(magic)
 , addr_(NULL)
 , async_stream_(NULL)
@@ -273,7 +273,7 @@ bool ipc_client::read_callback(char* data, int len)
 		// 先检查 IPC 消息数据的有效性
 		if (hdr->magic != magic_)
 		{
-			logger_error("unknown ipc magic: %d", hdr->magic);
+			logger_error("unknown ipc magic: %lld", hdr->magic);
 			return false;
 		}
 		//logger(">>>ok, magic: %d", magic_);
