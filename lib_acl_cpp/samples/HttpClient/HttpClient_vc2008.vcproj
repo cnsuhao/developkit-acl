@@ -26,7 +26,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="copy ..\..\lib\lib_acl_cpp_vc2003d_dll.dll $(OutDir)\ /Y&#x0D;&#x0A;copy ..\..\..\dist\lib\win32\lib_acl_d.dll $(OutDir)\ /Y&#x0D;&#x0A;copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y&#x0D;&#x0A;&#x0D;&#x0A;"
+				CommandLine="copy ..\..\lib\lib_acl_cpp_vc2008d_dll.dll $(OutDir)\ /Y&#x0D;&#x0A;copy ..\..\..\dist\lib\win32\lib_acl_d.dll $(OutDir)\ /Y&#x0D;&#x0A;copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y&#x0D;&#x0A;&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -112,7 +112,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="copy ..\..\lib\lib_acl_cpp_vc2008_dll.dll $(OutDir)\ /Y&#x0D;&#x0A;copy ..\..\..\dist\lib\win32\lib_acl.dll $(OutDir)\ /Y&#x0D;&#x0A;copy ..\..\..\dist\lib\win32\lib_protocol.dll $(OutDir)\ /Y&#x0D;&#x0A;"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -131,7 +131,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\..\..\lib_acl\include;..\..\..\lib_protocol\include;..\..\include"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="false"
 				RuntimeLibrary="2"
 				TreatWChar_tAsBuiltInType="true"
@@ -198,7 +198,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="copy ..\..\..\dist\lib\win32\lib_acl_cpp_vc2003d_dll.dll $(OutDir)\ /Y&#x0D;&#x0A;copy ..\..\..\dist\lib\win32\lib_acl_d.dll $(OutDir)\ /Y&#x0D;&#x0A;copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y&#x0D;&#x0A;"
+				CommandLine="copy ..\..\..\dist\lib\win32\lib_acl_cpp_vc2008d_dll.dll $(OutDir)\ /Y&#x0D;&#x0A;copy ..\..\..\dist\lib\win32\lib_acl_d.dll $(OutDir)\ /Y&#x0D;&#x0A;copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -218,14 +218,14 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\lib_acl\include;..\..\..\lib_protocol\include;..\..\include"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;VC2003;ACL_CPP_DLL"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_CRT_SECURE_NO_WARNINGS;ACL_CPP_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				TreatWChar_tAsBuiltInType="true"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -302,13 +302,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\..\..\lib_acl\include;..\..\..\lib_protocol\include;..\..\include"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;VC2003;ACL_CPP_DLL"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;ACL_CPP_DLL"
 				MinimalRebuild="false"
 				RuntimeLibrary="2"
 				TreatWChar_tAsBuiltInType="true"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool

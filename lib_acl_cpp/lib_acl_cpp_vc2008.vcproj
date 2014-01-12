@@ -48,6 +48,7 @@
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="acl_stdafx.hpp"
+				ProgramDataBaseFileName="$(OutDir)\$(ProjectName)_vc2008d.pdb"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -62,6 +63,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)\$(ProjectName)_vc2008d.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -77,6 +79,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy $(TargetDir)\$(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y&#x0D;&#x0A;copy $(TargetDir)\$(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y"
 			/>
 		</Configuration>
 		<Configuration
@@ -113,6 +116,7 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="acl_stdafx.hpp"
+				ProgramDataBaseFileName="$(OutDir)\$(ProjectName)_vc2008.pdb"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -127,6 +131,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)\$(ProjectName)_vc2008.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -142,6 +147,158 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy $(TargetDir)\$(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y&#x0D;&#x0A;copy $(TargetDir)\$(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y"
+			/>
+		</Configuration>
+		<Configuration
+			Name="DebugDll|Win32"
+			OutputDirectory="."
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories=".\include;..\lib_acl\include;..\lib_protocol\include;..\include\sqlite;..\include\zlib;..\include\mysql;..\include;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;ACL_DLL;ACL_CPP_DLL;ACL_CPP_EXPORTS;USE_WIN_ICONV;HAS_SQLITE;HAS_MYSQL"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="acl_stdafx.hpp"
+				ProgramDataBaseFileName="$(OutDir)\$(ProjectName)_d.pdb"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="lib_protocol_d.lib lib_acl_d.lib polarssl.lib"
+				OutputFile="$(OutDir)\$(ProjectName)_d.dll"
+				AdditionalLibraryDirectories="..\lib\win32;..\dist\lib\win32;"
+				GenerateDebugInformation="true"
+				ImportLibrary="$(OutDir)\$(ProjectName)_d.lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="copy $(TargetDir)\$(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y&#x0D;&#x0A;copy $(TargetDir)\$(TargetName).dll ..\dist\lib\win32\$(TargetName).dll /Y&#x0D;&#x0A;copy $(TargetDir)\$(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y&#x0D;&#x0A;"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseDll|Win32"
+			OutputDirectory="."
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				EnableIntrinsicFunctions="true"
+				WholeProgramOptimization="false"
+				AdditionalIncludeDirectories=".\include;..\lib_acl\include;..\lib_protocol\include;..\include\sqlite;..\include\zlib;..\include\mysql;..\include;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;USE_WIN_ICONV;ACL_DLL;ACL_CPP_DLL;ACL_CPP_EXPORTS;HAS_SQLITE;HAS_MYSQL"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="acl_stdafx.hpp"
+				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="lib_protocol.lib lib_acl.lib polarssl.lib"
+				AdditionalLibraryDirectories="..\lib\win32;..\dist\lib\win32;"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="copy $(TargetDir)\$(TargetName).lib ..\dist\lib\win32\$(TargetName).lib /Y&#x0D;&#x0A;copy $(TargetDir)\$(TargetName).dll ..\dist\lib\win32\$(TargetName).dll /Y&#x0D;&#x0A;copy $(TargetDir)\$(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
@@ -174,6 +331,22 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DebugDll|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleaseDll|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"

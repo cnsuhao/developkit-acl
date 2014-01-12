@@ -198,11 +198,11 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\..\..\lib_acl_cpp\include;..\..\..\lib_acl\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;VC2003;ACL_CPP_DLL"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;ACL_DLL;ACL_CPP_DLL"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -216,7 +216,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl_cpp_dll.lib lib_acl.lib lib_protocol.lib"
 				OutputFile="$(OutDir)/master_udp_threads.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\dist\lib\win32"
@@ -278,13 +277,13 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\lib_acl_cpp\include;..\..\..\lib_acl\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;VC2003;ACL_CPP_DLL"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;ACL_DLL;ACL_CPP_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="4"
 			/>
 			<Tool
@@ -298,7 +297,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl_cppd_dll.lib lib_acl_d.lib lib_protocol_d.lib"
 				OutputFile="$(OutDir)/master_udp_threads.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\..\dist\lib\win32"
