@@ -155,7 +155,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl.lib lib_protocol.lib lib_acl_cpp.lib sqlite3.lib"
+				AdditionalDependencies="sqlite3.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\lib\win32;..\..\..\dist\lib\win32"
 				IgnoreDefaultLibraryNames="libcmt"
@@ -220,14 +220,14 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;VC2003"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				TreatWChar_tAsBuiltInType="true"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -244,7 +244,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl_d.lib lib_protocol_d.lib lib_acl_cpp_d.lib sqlite3.lib"
+				AdditionalDependencies="sqlite3.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\..\lib\win32;..\..\..\dist\lib\win32"
 				IgnoreDefaultLibraryNames="libcmtd"
@@ -306,13 +306,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\..\include"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;VC2003"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="false"
 				RuntimeLibrary="2"
 				TreatWChar_tAsBuiltInType="true"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -329,7 +329,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib_acl.lib lib_protocol.lib lib_acl_cpp.lib sqlite3.lib"
+				AdditionalDependencies="sqlite3.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\lib\win32;..\..\..\dist\lib\win32"
 				GenerateDebugInformation="true"
