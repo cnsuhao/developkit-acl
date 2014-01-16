@@ -41,9 +41,9 @@ typedef struct acl_pthread_pool_t acl_pthread_pool_t;
 typedef struct acl_pthread_pool_attr_t {
 	int   threads_limit;	/**< 线程池最大线程数限制 */
 #define ACL_PTHREAD_POOL_DEF_THREADS   100  /**< 缺省最大值为 100 个线程 */
-	int   idle_timeout;     /**< 工作线程空闲超时时间(秒) */
-#define ACL_PTHREAD_POOL_DEF_IDLE      60   /**< 缺省空间超时时间为 60 秒 */
-	size_t stack_size;      /**< 工作线程的堆栈大小(字节) */
+	int   idle_timeout;                 /**< 工作线程空闲超时时间(秒) */
+#define ACL_PTHREAD_POOL_DEF_IDLE      0    /**< 缺省空间超时时间为 0 秒 */
+	size_t stack_size;                  /**< 工作线程的堆栈大小(字节) */
 } acl_pthread_pool_attr_t;
 
 /**
