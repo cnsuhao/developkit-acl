@@ -791,15 +791,14 @@ static void __job_add(acl_pthread_pool_t *thr_pool,
 	}
 }
 
-int acl_pthread_pool_add(acl_pthread_pool_t *thr_pool,
+void acl_pthread_pool_add_one(acl_pthread_pool_t *thr_pool,
 	void (*run_fn)(void *), void *run_arg)
 {
-	const char *myname = "acl_pthread_pool_add";
+	const char *myname = "acl_pthread_pool_add_one";
 	acl_pthread_job_t *job;
 	int   status;
 
-	if (thr_pool->valid != ACL_PTHREAD_POOL_VALID || run_fn == NULL)
-		return ACL_EINVAL;
+	acl_assert(thr_pool->valid == ACL_PTHREAD_POOL_VALID && run_fn != NULL);
 
 #ifndef	USE_SLICE
 	job = acl_pthread_pool_alloc_job(run_fn, run_arg, 0);
@@ -817,10 +816,7 @@ int acl_pthread_pool_add(acl_pthread_pool_t *thr_pool,
 
 #ifdef	USE_SLICE
 	job = (acl_pthread_job_t*) acl_slice_alloc(thr_pool->slice);
-	if (job == NULL) {
-		acl_pthread_mutex_unlock(&thr_pool->worker_mutex);
-		return ACL_ENOMEM;
-	}
+	acl_assert(job != NULL);
 
 	job->worker_fn  = run_fn;
 	job->worker_arg = run_arg;
@@ -836,13 +832,11 @@ int acl_pthread_pool_add(acl_pthread_pool_t *thr_pool,
 		acl_msg_fatal("%s(%d)->%s: pthread_mutex_unlock error=%s",
 			__FILE__, __LINE__, myname, acl_last_serror());
 	}
-
-	return 0;
 }
 
-void acl_pthread_pool_add_begin(acl_pthread_pool_t *thr_pool)
+void acl_pthread_pool_bat_add_begin(acl_pthread_pool_t *thr_pool)
 {
-	const char *myname = "acl_pthread_pool_add_begin";
+	const char *myname = "acl_pthread_pool_bat_add_begin";
 	int   status;
 
 	if (thr_pool == NULL)
@@ -861,10 +855,10 @@ void acl_pthread_pool_add_begin(acl_pthread_pool_t *thr_pool)
 	}
 }
 
-void acl_pthread_pool_add_one(acl_pthread_pool_t *thr_pool,
+void acl_pthread_pool_bat_add_one(acl_pthread_pool_t *thr_pool,
 	void (*run_fn)(void *), void *run_arg)
 {
-	const char *myname = "acl_pthread_pool_add_one";
+	const char *myname = "acl_pthread_pool_bat_add_one";
 	acl_pthread_job_t *job;
 
 	if (thr_pool == NULL)
@@ -888,10 +882,10 @@ void acl_pthread_pool_add_one(acl_pthread_pool_t *thr_pool,
 #endif
 }
 
-void acl_pthread_pool_add_job(acl_pthread_pool_t *thr_pool,
+void acl_pthread_pool_bat_add_job(acl_pthread_pool_t *thr_pool,
 	acl_pthread_job_t *job)
 {
-	const char *myname = "acl_pthread_pool_add_job";
+	const char *myname = "acl_pthread_pool_bat_add_job";
 
 	if (thr_pool == NULL)
 		acl_msg_fatal("%s(%d)->%s: invalid input",
@@ -910,9 +904,9 @@ void acl_pthread_pool_add_job(acl_pthread_pool_t *thr_pool,
 #endif
 }
 
-void acl_pthread_pool_add_end(acl_pthread_pool_t *thr_pool)
+void acl_pthread_pool_bat_add_end(acl_pthread_pool_t *thr_pool)
 {
-	const char *myname = "acl_pthread_pool_add_end";
+	const char *myname = "acl_pthread_pool_bat_add_end";
 	int   status, idle, qlen;
 
 	if (thr_pool == NULL)
@@ -1028,7 +1022,7 @@ int acl_pthread_pool_add_dispatch(void *dispatch_arg,
 			__FILE__, __LINE__, myname);
 
 	thr_pool = (acl_pthread_pool_t *) dispatch_arg;
-	acl_pthread_pool_add_one(thr_pool, run_fn, run_arg);
+	acl_pthread_pool_bat_add_one(thr_pool, run_fn, run_arg);
 
 	return 0;
 }
@@ -1045,7 +1039,8 @@ int acl_pthread_pool_dispatch(void *dispatch_arg,
 
 	thr_pool = (acl_pthread_pool_t *) dispatch_arg;
 
-	return acl_pthread_pool_add(thr_pool, run_fn, run_arg);
+	acl_pthread_pool_add(thr_pool, run_fn, run_arg);
+	return 0;
 }
 
 int acl_pthread_pool_size(acl_pthread_pool_t *thr_pool)
