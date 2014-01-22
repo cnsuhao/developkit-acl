@@ -58,6 +58,7 @@ struct acl_pthread_pool_t {
 	thread_worker        *thr_idle;       /* most idle thread            */
 	int   poller_running;                 /* is poller thread running ?  */
 	int   qlen;                           /* the work queue's length     */
+	int   qlen_warn;                      /* the work queue's length     */
 	int   valid;                          /* valid                       */
 	int   quit;                           /* worker should quit          */
 	int   poller_quit;                    /* poller should quit          */
@@ -181,13 +182,8 @@ static void worker_free(thread_worker *thr)
 static void worker_wait(acl_pthread_pool_t *thr_pool, thread_worker *thr)
 {
 	const char *myname = "worker_wait";
-	struct timespec  timeout;
-	struct timeval   tv;
 	int    status;
 
-	gettimeofday(&tv, NULL);
-	timeout.tv_sec = tv.tv_sec + thr->idle_timeout;
-	timeout.tv_nsec = tv.tv_usec * 1000;
 	thr->timedout = 0;
 
 	while (!thr->job_first && !thr_pool->job_first && !thr_pool->quit) {
@@ -207,23 +203,29 @@ static void worker_wait(acl_pthread_pool_t *thr_pool, thread_worker *thr)
 		thr_pool->idle++;
 		thr_pool->thr_idle = thr;
 
-		if (thr->idle_timeout > 0)
+		if (thr->idle_timeout > 0) {
+			struct timespec  timeout;
+			struct timeval   tv;
+
+			gettimeofday(&tv, NULL);
+			timeout.tv_sec = tv.tv_sec + thr->idle_timeout;
+			timeout.tv_nsec = tv.tv_usec * 1000;
+
 			status = acl_pthread_cond_timedwait(&thr->cond,
 					thr->mutex, &timeout);
-		else
+		} else
 			status = acl_pthread_cond_wait(&thr->cond, thr->mutex);
 
 		/* remove the thread from thread pool */
 
 		if (thr_pool->thr_first == thr) {
+			if (thr->next)
+				thr->next->prev = NULL;
 			thr_pool->thr_first = thr->next;
-			if (thr_pool->thr_first)
-				thr_pool->thr_first->prev = NULL;
 		} else {
 			if (thr->next)
 				thr->next->prev = thr->prev;
-			if (thr->prev)
-				thr->prev->next = thr->next;
+			thr->prev->next = thr->next;
 		}
 
 		thr_pool->thr_idle = NULL;
@@ -326,16 +328,9 @@ static void *worker_thread(void* arg)
 	}
 
 	for (;;) {
-
-		/* idle thread wait for job and unlock mutex, lock again
-		 * if it wait wakeup when signaled by main thread or wait
-		 * for job timeout
-		 */
-
-		worker_wait(thr_pool, thr);
-
-		/* handle thread self's job */
-		if ((job = thr->job_first) != NULL) {
+		/* handle thread self's job first */
+		if (thr->job_first != NULL) {
+			job = thr->job_first;
 			thr->job_first = job->next;
 			if (thr->job_last == job)
 				thr->job_last = NULL;
@@ -345,7 +340,8 @@ static void *worker_thread(void* arg)
 		}
 
 		/* then handle thread pool's job */
-		else if ((job = thr_pool->job_first) != NULL) {
+		else if (thr_pool->job_first != NULL) {
+			job = thr_pool->job_first;
 			thr_pool->job_first = job->next;
 			if (thr_pool->job_last == job)
 				thr_pool->job_last = NULL;
@@ -353,6 +349,13 @@ static void *worker_thread(void* arg)
 
 			worker_run(thr, job);
 		}
+
+		 /* at last, idle thread wait for job and unlock mutex,
+		  * lock again if it wait wakeup when signaled by main
+		  * thread or wait for job timeout
+		  */
+		else
+			worker_wait(thr_pool, thr);
 
 		/* if there some jobs in thead's queue or pool's queue */
 		if (thr->job_first != NULL || thr_pool->job_first != NULL)
@@ -389,25 +392,22 @@ static void *worker_thread(void* arg)
 static void job_add(acl_pthread_pool_t *thr_pool, acl_pthread_job_t *job)
 {
 	const char *myname = "job_add";
-	thread_worker *thr_idle;
 	int   status;
 
 	/* must reset the job's next to NULL */
 	job->next = NULL;
 
-	/* first, select one idle thread which qlen is 0 */
+	/* at first, select one idle thread which qlen is 0 */
 
-	thr_idle = thr_pool->thr_idle;
-	if (thr_idle != NULL && thr_idle->qlen == 0) {
-		if (thr_idle->job_first == NULL)
-			thr_idle->job_first = job;
-		else
-			acl_assert(0);
+	if (thr_pool->thr_idle != NULL && thr_pool->thr_idle->qlen == 0) {
+#if 0
+		acl_assert(thr_pool->thr_idle->job_first == NULL);
+#endif
+		thr_pool->thr_idle->job_first = job;
+		thr_pool->thr_idle->job_last = job;
+		thr_pool->thr_idle->qlen++;
 
-		thr_idle->job_last = job;
-		thr_idle->qlen++;
-
-		status = acl_pthread_cond_signal(&thr_idle->cond);
+		status = acl_pthread_cond_signal(&thr_pool->thr_idle->cond);
 		if (status == 0)
 			return;
 
@@ -418,7 +418,7 @@ static void job_add(acl_pthread_pool_t *thr_pool, acl_pthread_job_t *job)
 		/* not reached */
 	}
 
-	/* second, if not reach the max threads limit, create one thread */
+	/* if not reach the max threads limit, create one thread */
 
 	if (thr_pool->count < thr_pool->parallelism) {
 		acl_pthread_t id;
@@ -434,53 +434,17 @@ static void job_add(acl_pthread_pool_t *thr_pool, acl_pthread_job_t *job)
 
 		status = acl_pthread_create(&id, &thr_pool->attr,
 				worker_thread, (void*) thr_pool);
-		if (status != 0) {
-			SET_ERRNO(status);
-			acl_msg_fatal("%s(%d)->%s: pthread_create: %s",
-				__FILE__, __LINE__, myname, acl_last_serror());
-		} else
+		if (status == 0) {
 			thr_pool->count++;
-		return;
-	}
-
-	/* third, let the idle thread to handle the job */
-
-#if 1
-	if (thr_idle) {
-		thr_idle = thr_idle->next;
-		if (thr_idle == NULL)
-			thr_idle = thr_pool->thr_idle;
-	}
-#endif
-
-	if (thr_idle != NULL)
-	{
-#if 1
-		if (thr_idle->job_first == NULL)
-			thr_idle->job_first = job;
-		else
-			thr_idle->job_last->next = job;
-		thr_idle->job_last = job;
-		thr_idle->qlen++;
-#else
-		if (thr_pool->job_first == NULL)
-			thr_pool->job_first = job;
-		else
-			thr_pool->job_last->next = job;
-		thr_pool->job_last = job;
-		thr_pool->qlen++;
-#endif
-
-		status = acl_pthread_cond_signal(&thr_idle->cond);
-		if (status != 0) {
-			SET_ERRNO(status);
-			acl_msg_fatal("%s(%d)->%s: pthread_cond_signal: %s",
-				__FILE__, __LINE__, myname, acl_last_serror());
+			return;
 		}
-		return;
+
+		SET_ERRNO(status);
+		acl_msg_fatal("%s(%d)->%s: pthread_create: %s",
+			__FILE__, __LINE__, myname, acl_last_serror());
 	}
 
-	/* forth, add job to the pool's queue and anyone can handle it */
+	/* then, add job to the pool's queue and anyone can handle it */
 
 	if (thr_pool->job_first == NULL)
 		thr_pool->job_first = job;
@@ -489,9 +453,9 @@ static void job_add(acl_pthread_pool_t *thr_pool, acl_pthread_job_t *job)
 	thr_pool->job_last = job;
 	thr_pool->qlen++;
 
-	/* fifth, if qlen is too long, should warning, event sleep a while */
+	/* if qlen is too long, should warning, event sleep a while */
 
-	if (thr_pool->qlen > 10 * thr_pool->parallelism) {
+	if (thr_pool->qlen > thr_pool->qlen_warn) {
 		time_t now = time(NULL);
 
 		if (now - thr_pool->last_warn >= 2) {
@@ -620,7 +584,7 @@ static void job_append(acl_pthread_pool_t *thr_pool, acl_pthread_job_t *job)
 			return;
 		}
 		thr_pool->count++;
-	} else if (thr_pool->qlen > 10 * thr_pool->parallelism) {
+	} else if (thr_pool->qlen > thr_pool->qlen_warn) {
 		time_t now = time(NULL);
 
 		if (now - thr_pool->last_warn >= 2) {
@@ -823,6 +787,7 @@ acl_pthread_pool_t *acl_pthread_pool_create(const acl_pthread_pool_attr_t *attr)
 
 	thr_pool->parallelism = (attr && attr->threads_limit > 0) ?
 		attr->threads_limit : ACL_PTHREAD_POOL_DEF_THREADS;
+	thr_pool->qlen_warn = thr_pool->parallelism * 10;
 	thr_pool->idle_timeout = (attr && attr->idle_timeout > 0) ?
 		attr->idle_timeout : ACL_PTHREAD_POOL_DEF_IDLE;
 	thr_pool->poller_fn = NULL;
