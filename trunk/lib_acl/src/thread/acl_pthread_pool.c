@@ -38,6 +38,7 @@ typedef struct thread_worker {
 	struct thread_worker *prev;
 	unsigned long id;
 	int   timedout;                       /* if thread idle timeout ?    */
+	int   failed;                         /* if some error happened ?    */
 	int   idle_timeout;                   /* thread wait timeout         */
 	acl_pthread_job_t    *job_first;      /* thread's work queue first   */
 	acl_pthread_job_t    *job_last;       /* thread's work queue last    */
@@ -243,8 +244,7 @@ static void worker_wait(acl_pthread_pool_t *thr_pool, thread_worker *thr)
 
 		/* xxx */
 		SET_ERRNO(status);
-		thr_pool->count--;
-
+		thr->failed = 1;
 		acl_msg_error("%s(%d), %s: tid: %lu, cond timewait error: %s",
 			__FILE__, __LINE__, myname, (unsigned long)
 			acl_pthread_self(), acl_last_serror());
@@ -369,8 +369,8 @@ static void *worker_thread(void* arg)
 			break;
 		}
 
-		/* when thread wait timeout, it should exit now */
-		if (thr->timedout) {
+		/* when wait timeout or error happened, should exit now */
+		if (thr->timedout || thr->failed) {
 			thr_pool->count--;
 			break;
 		}
