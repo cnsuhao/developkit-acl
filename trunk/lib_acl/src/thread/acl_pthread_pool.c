@@ -46,6 +46,8 @@ typedef struct thread_worker {
 	acl_pthread_mutex_t  *mutex;
 } thread_worker;
 
+#undef	USE_SLOT
+
 struct acl_pthread_pool_t {
 	acl_pthread_mutex_t   worker_mutex;   /* control access to queue     */
 	acl_pthread_cond_t    cond;           /* wait for worker quit        */
@@ -56,7 +58,9 @@ struct acl_pthread_pool_t {
 	acl_pthread_job_t    *job_last;       /* work queue last             */
 	acl_pthread_job_t    *job_slot_first; /* work queue first            */
 	acl_pthread_job_t    *job_slot_last;  /* work queue last             */
+#ifdef	USE_SLOT
 	acl_pthread_mutex_t   slot_mutex;
+#endif
 	thread_worker        *thr_first;      /* first idle thread           */
 	thread_worker        *thr_idle;       /* for single operation        */
 	thread_worker        *thr_iter;       /* for bat operation           */
@@ -263,8 +267,14 @@ static int worker_wait(acl_pthread_pool_t *thr_pool, thread_worker *thr)
 	}
 }
 
+#ifdef	USE_SLOT
 static void worker_run(acl_pthread_pool_t *thr_pool, thread_worker *thr,
 	acl_pthread_job_t *job)
+#else
+static void worker_run(acl_pthread_pool_t *thr_pool acl_unused,
+	thread_worker *thr,
+	acl_pthread_job_t *job)
+#endif
 {
 	const char *myname = "worker_run";
 	void (*worker_fn)(void*) = job->worker_fn;
@@ -281,6 +291,7 @@ static void worker_run(acl_pthread_pool_t *thr_pool, thread_worker *thr,
 			(unsigned long) acl_pthread_self());
 	}
 
+#ifdef	USE_SLOT
 	status = acl_pthread_mutex_trylock(&thr_pool->slot_mutex);
 	if (status == 0) {
 		if (job->fixed)
@@ -310,6 +321,10 @@ static void worker_run(acl_pthread_pool_t *thr_pool, thread_worker *thr,
 
 	if (job && !job->fixed)
 		acl_myfree(job);
+#else
+	if (!job->fixed)
+		acl_myfree(job);
+#endif
 
 	worker_fn(worker_arg);
 
@@ -513,6 +528,7 @@ void acl_pthread_pool_add_one(acl_pthread_pool_t *thr_pool,
 		acl_msg_fatal("%s(%d), %s: run_fn null",
 			__FILE__, __LINE__, myname);
 
+#ifdef	USE_SLOT
 	status = acl_pthread_mutex_trylock(&thr_pool->slot_mutex);
 	if (status == 0) {
 		if (thr_pool->job_slot_first != NULL) {
@@ -538,6 +554,7 @@ void acl_pthread_pool_add_one(acl_pthread_pool_t *thr_pool,
 		if (job == NULL)
 			job = acl_pthread_pool_alloc_job(run_fn, run_arg, 0);
 	} else
+#endif
 		job = acl_pthread_pool_alloc_job(run_fn, run_arg, 0);
 
 	status = acl_pthread_mutex_lock(&thr_pool->worker_mutex);
@@ -696,12 +713,15 @@ void acl_pthread_pool_bat_add_one(acl_pthread_pool_t *thr_pool,
 {
 	const char *myname = "acl_pthread_pool_bat_add_one";
 	acl_pthread_job_t *job;
+#ifdef	USE_SLOT
 	int   status;
+#endif
 
 	if (thr_pool->valid != ACL_PTHREAD_POOL_VALID || run_fn == NULL)
 		acl_msg_fatal("%s(%d), %s: invalid thr_pool or run_fn",
 			__FILE__, __LINE__, myname);
 
+#ifdef	USE_SLOT
 	status = acl_pthread_mutex_trylock(&thr_pool->slot_mutex);
 	if (status == 0) {
 		/* if there are some slot of job, reuse it */
@@ -728,6 +748,7 @@ void acl_pthread_pool_bat_add_one(acl_pthread_pool_t *thr_pool,
 		if (job == NULL)
 			job = acl_pthread_pool_alloc_job(run_fn, run_arg, 0);
 	} else
+#endif
 		job = acl_pthread_pool_alloc_job(run_fn, run_arg, 0);
 
 	job_append(thr_pool, job);
@@ -882,12 +903,14 @@ acl_pthread_pool_t *acl_pthread_pool_create(const acl_pthread_pool_attr_t *attr)
 			__FILE__, __LINE__, myname, acl_last_serror());
 	}
 
+#ifdef	USE_SLOT
 	status = acl_pthread_mutex_init(&thr_pool->slot_mutex, NULL);
 	if (status != 0) {
 		SET_ERRNO(status);
 		acl_msg_fatal("%s(%d), %s: pthread_mutex_init err: %s",
 			__FILE__, __LINE__, myname, acl_last_serror());
 	}
+#endif
 
 	status = acl_pthread_mutex_init(&thr_pool->poller_mutex, NULL);
 	if (status != 0) {
@@ -1106,7 +1129,10 @@ static int wait_worker_exit(acl_pthread_pool_t *thr_pool)
 int acl_pthread_pool_destroy(acl_pthread_pool_t *thr_pool)
 {
 	const char *myname = "acl_pthread_pool_destroy";
-	int   status, s1, s2, s3, s4, s5, s6;
+	int   status, s1, s2, s3, s4, s5;
+#ifdef	USE_SLOT
+	int   s6;
+#endif
 	acl_pthread_job_t *job;
 
 	if (thr_pool == NULL || thr_pool->valid != ACL_PTHREAD_POOL_VALID) {
@@ -1155,11 +1181,17 @@ int acl_pthread_pool_destroy(acl_pthread_pool_t *thr_pool)
 	s3 = acl_pthread_mutex_destroy(&thr_pool->worker_mutex);
 	s4 = acl_pthread_cond_destroy(&thr_pool->cond);
 	s5 = acl_pthread_attr_destroy(&thr_pool->attr);
+#ifdef	USE_SLOT
 	s6 = acl_pthread_mutex_destroy(&thr_pool->slot_mutex);
+#endif
 
 	acl_myfree(thr_pool);
 
+#ifdef	USE_SLOT
 	status = s1 ? s1 : (s2 ? s2 : (s3 ? s3 : (s4 ? s4 : (s5 ? s5 : s6))));
+#else
+	status = s1 ? s1 : (s2 ? s2 : (s3 ? s3 : (s4 ? s4 : s5)));
+#endif
 
 	return status;
 }
