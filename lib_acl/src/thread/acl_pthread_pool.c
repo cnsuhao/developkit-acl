@@ -56,6 +56,7 @@ struct acl_pthread_pool_t {
 	acl_pthread_job_t    *job_last;       /* work queue last             */
 	acl_pthread_job_t    *job_slot_first; /* work queue first            */
 	acl_pthread_job_t    *job_slot_last;  /* work queue last             */
+	acl_pthread_mutex_t   slot_mutex;
 	thread_worker        *thr_first;      /* first idle thread           */
 	thread_worker        *thr_idle;       /* for single operation        */
 	thread_worker        *thr_iter;       /* for bat operation           */
@@ -270,19 +271,6 @@ static void worker_run(acl_pthread_pool_t *thr_pool, thread_worker *thr,
 	void  *worker_arg = job->worker_arg;
 	int   status;
 
-	if (!job->fixed && thr_pool->job_nslot < thr_pool->qlen_warn) {
-		/* must reset the job's next before add it to jobs slot */
-		job->next = NULL;
-
-		if (thr_pool->job_slot_first == NULL)
-			thr_pool->job_slot_first = job;
-		else
-			thr_pool->job_slot_last->next = job;
-		thr_pool->job_slot_last = job;
-		thr_pool->job_nslot++;
-		job = NULL;
-	}
-
 	/* shuld unlock before enter working process */
 
 	status = acl_pthread_mutex_unlock(thr->mutex);
@@ -291,6 +279,33 @@ static void worker_run(acl_pthread_pool_t *thr_pool, thread_worker *thr,
 		acl_msg_fatal("%s(%d), %s: unlock error: %s, tid: %lu",
 			__FILE__, __LINE__, myname, acl_last_serror(),
 			(unsigned long) acl_pthread_self());
+	}
+
+	status = acl_pthread_mutex_trylock(&thr_pool->slot_mutex);
+	if (status == 0) {
+		if (job->fixed)
+			;  /* do nothing */
+		else if (thr_pool->job_nslot < thr_pool->qlen_warn) {
+			/* must reset the job's next before
+			 * add it to jobs slot
+			 */
+			job->next = NULL;
+
+			if (thr_pool->job_slot_first == NULL)
+				thr_pool->job_slot_first = job;
+			else
+				thr_pool->job_slot_last->next = job;
+			thr_pool->job_slot_last = job;
+			thr_pool->job_nslot++;
+			job = NULL;
+		}
+
+		status = acl_pthread_mutex_unlock(&thr_pool->slot_mutex);
+		if (status != 0) {
+			SET_ERRNO(status);
+			acl_msg_fatal("%s(%d), %s: pthread_mutex_unlock: %s",
+				__FILE__, __LINE__, myname, acl_last_serror());
+		}
 	}
 
 	if (job && !job->fixed)
@@ -498,25 +513,39 @@ void acl_pthread_pool_add_one(acl_pthread_pool_t *thr_pool,
 		acl_msg_fatal("%s(%d), %s: run_fn null",
 			__FILE__, __LINE__, myname);
 
+	status = acl_pthread_mutex_trylock(&thr_pool->slot_mutex);
+	if (status == 0) {
+		if (thr_pool->job_slot_first != NULL) {
+			job = thr_pool->job_slot_first;
+			thr_pool->job_slot_first = job->next;
+			if (thr_pool->job_slot_last == job)
+				thr_pool->job_slot_last = NULL;
+			thr_pool->job_nslot--;
+
+			job->worker_fn  = run_fn;
+			job->worker_arg = run_arg;
+			job->fixed      = 0;
+		} else
+			job = NULL;
+
+		status = acl_pthread_mutex_unlock(&thr_pool->slot_mutex);
+		if (status != 0) {
+			SET_ERRNO(status);
+			acl_msg_fatal("%s(%d), %s: pthread_mutex_unlock: %s",
+				__FILE__, __LINE__, myname, acl_last_serror());
+		}
+
+		if (job == NULL)
+			job = acl_pthread_pool_alloc_job(run_fn, run_arg, 0);
+	} else
+		job = acl_pthread_pool_alloc_job(run_fn, run_arg, 0);
+
 	status = acl_pthread_mutex_lock(&thr_pool->worker_mutex);
 	if (status != 0) {
 		SET_ERRNO(status);
 		acl_msg_fatal("%s(%d), %s: pthread_mutex_lock: %s",
 			__FILE__, __LINE__, myname, acl_last_serror());
 	}
-
-	if (thr_pool->job_slot_first != NULL) {
-		job = thr_pool->job_slot_first;
-		thr_pool->job_slot_first = job->next;
-		if (thr_pool->job_slot_last == job)
-			thr_pool->job_slot_last = NULL;
-		thr_pool->job_nslot--;
-
-		job->worker_fn  = run_fn;
-		job->worker_arg = run_arg;
-		job->fixed      = 0;
-	} else
-		job = acl_pthread_pool_alloc_job(run_fn, run_arg, 0);
 
 	job_add(thr_pool, job);
 
@@ -667,22 +696,37 @@ void acl_pthread_pool_bat_add_one(acl_pthread_pool_t *thr_pool,
 {
 	const char *myname = "acl_pthread_pool_bat_add_one";
 	acl_pthread_job_t *job;
+	int   status;
 
 	if (thr_pool->valid != ACL_PTHREAD_POOL_VALID || run_fn == NULL)
 		acl_msg_fatal("%s(%d), %s: invalid thr_pool or run_fn",
 			__FILE__, __LINE__, myname);
 
-	/* if there are some slot of job, reuse it */
-	if (thr_pool->job_slot_first != NULL) {
-		job = thr_pool->job_slot_first;
-		thr_pool->job_slot_first = job->next;
-		if (thr_pool->job_slot_last == job)
-			thr_pool->job_slot_last = NULL;
-		thr_pool->job_nslot--;
+	status = acl_pthread_mutex_trylock(&thr_pool->slot_mutex);
+	if (status == 0) {
+		/* if there are some slot of job, reuse it */
+		if (thr_pool->job_slot_first != NULL) {
+			job = thr_pool->job_slot_first;
+			thr_pool->job_slot_first = job->next;
+			if (thr_pool->job_slot_last == job)
+				thr_pool->job_slot_last = NULL;
+			thr_pool->job_nslot--;
 
-		job->worker_fn  = run_fn;
-		job->worker_arg = run_arg;
-		job->fixed      = 0;
+			job->worker_fn  = run_fn;
+			job->worker_arg = run_arg;
+			job->fixed      = 0;
+		} else
+			job = NULL;
+
+		status = acl_pthread_mutex_unlock(&thr_pool->slot_mutex);
+		if (status != 0) {
+			SET_ERRNO(status);
+			acl_msg_fatal("%s(%d), %s: pthread_mutex_unlock: %s",
+				__FILE__, __LINE__, myname, acl_last_serror());
+		}
+
+		if (job == NULL)
+			job = acl_pthread_pool_alloc_job(run_fn, run_arg, 0);
 	} else
 		job = acl_pthread_pool_alloc_job(run_fn, run_arg, 0);
 
@@ -799,9 +843,8 @@ acl_pthread_pool_t *acl_pthread_pool_create(const acl_pthread_pool_attr_t *attr)
 	status = acl_pthread_attr_init(&thr_pool->attr);
 	if (status != 0) {
 		SET_ERRNO(status);
-		acl_msg_error("%s(%d), %s: pthread_attr_init, serr = %s",
+		acl_msg_fatal("%s(%d), %s: pthread_attr_init, serr: %s",
 			__FILE__, __LINE__, myname, acl_last_serror());
-		return NULL;
 	}
 
 	if (attr && attr->stack_size > 0)
@@ -811,22 +854,16 @@ acl_pthread_pool_t *acl_pthread_pool_create(const acl_pthread_pool_attr_t *attr)
 	status = pthread_attr_setdetachstate(&thr_pool->attr,
 			PTHREAD_CREATE_DETACHED);
 	if (status != 0) {
-		acl_set_error(status);
-		pthread_attr_destroy(&thr_pool->attr);
-		acl_myfree(thr_pool);
-		acl_msg_error("%s(%d), %s: pthread_attr_setdetachstate err: %s",
+		SET_ERRNO(status);
+		acl_msg_fatal("%s(%d), %s: pthread_attr_setdetachstate err: %s",
 			__FILE__, __LINE__, myname, acl_last_serror());
-		return NULL;
 	}
 # if     !defined(__FreeBSD__)
 	status = pthread_attr_setscope(&thr_pool->attr, PTHREAD_SCOPE_SYSTEM);
 	if (status != 0) {
-		pthread_attr_destroy(&thr_pool->attr);
-		acl_myfree(thr_pool);
-		acl_set_error(status);
-		acl_msg_error("%s(%d), %s: pthread_attr_setscope err: %s",
+		SET_ERRNO(status);
+		acl_msg_fatal("%s(%d), %s: pthread_attr_setscope err: %s",
 			__FILE__, __LINE__, myname, acl_last_serror());
-		return NULL;
 	}
 # endif
 #elif defined(WIN32)
@@ -835,45 +872,34 @@ acl_pthread_pool_t *acl_pthread_pool_create(const acl_pthread_pool_attr_t *attr)
 	status = acl_pthread_mutex_init(&thr_pool->worker_mutex, NULL);
 	if (status != 0) {
 		SET_ERRNO(status);
-		acl_pthread_attr_destroy(&thr_pool->attr);
-		acl_myfree(thr_pool);
-		acl_msg_error("%s(%d), %s: pthread_mutex_init err: %s",
+		acl_msg_fatal("%s(%d), %s: pthread_mutex_init err: %s",
 			__FILE__, __LINE__, myname, acl_last_serror());
-		return NULL;
 	}
 	status = acl_pthread_cond_init(&thr_pool->cond, NULL);
 	if (status != 0) {
-		acl_pthread_attr_destroy(&thr_pool->attr);
-		acl_pthread_mutex_destroy(&thr_pool->worker_mutex);
-		acl_myfree(thr_pool);
 		SET_ERRNO(status);
-		acl_msg_error("%s(%d), %s: pthread_cond_init err: %s",
+		acl_msg_fatal("%s(%d), %s: pthread_cond_init err: %s",
 			__FILE__, __LINE__, myname, acl_last_serror());
-		return NULL;
+	}
+
+	status = acl_pthread_mutex_init(&thr_pool->slot_mutex, NULL);
+	if (status != 0) {
+		SET_ERRNO(status);
+		acl_msg_fatal("%s(%d), %s: pthread_mutex_init err: %s",
+			__FILE__, __LINE__, myname, acl_last_serror());
 	}
 
 	status = acl_pthread_mutex_init(&thr_pool->poller_mutex, NULL);
 	if (status != 0) {
 		SET_ERRNO(status);
-		acl_pthread_attr_destroy(&thr_pool->attr);
-		acl_pthread_mutex_destroy(&thr_pool->worker_mutex);
-		acl_pthread_cond_destroy(&thr_pool->cond);
-		acl_myfree(thr_pool);
-		acl_msg_error("%s(%d), %s: pthread_mutex_init err: %s",
+		acl_msg_fatal("%s(%d), %s: pthread_mutex_init err: %s",
 			__FILE__, __LINE__, myname, acl_last_serror());
-		return NULL;
 	}
 	status = acl_pthread_cond_init(&thr_pool->poller_cond, NULL);
 	if (status != 0) {
-		acl_pthread_attr_destroy(&thr_pool->attr);
-		acl_pthread_mutex_destroy(&thr_pool->worker_mutex);
-		acl_pthread_cond_destroy(&thr_pool->cond);
-		acl_pthread_mutex_destroy(&thr_pool->poller_mutex);
-		acl_myfree(thr_pool);
 		SET_ERRNO(status);
-		acl_msg_error("%s(%d), %s: pthread_cond_init err: %s",
+		acl_msg_fatal("%s(%d), %s: pthread_cond_init err: %s",
 			__FILE__, __LINE__, myname, acl_last_serror());
-		return NULL;
 	}
 
 	init_thread_pool(thr_pool);
@@ -1080,7 +1106,7 @@ static int wait_worker_exit(acl_pthread_pool_t *thr_pool)
 int acl_pthread_pool_destroy(acl_pthread_pool_t *thr_pool)
 {
 	const char *myname = "acl_pthread_pool_destroy";
-	int   status, s1, s2, s3, s4, s5;
+	int   status, s1, s2, s3, s4, s5, s6;
 	acl_pthread_job_t *job;
 
 	if (thr_pool == NULL || thr_pool->valid != ACL_PTHREAD_POOL_VALID) {
@@ -1129,10 +1155,11 @@ int acl_pthread_pool_destroy(acl_pthread_pool_t *thr_pool)
 	s3 = acl_pthread_mutex_destroy(&thr_pool->worker_mutex);
 	s4 = acl_pthread_cond_destroy(&thr_pool->cond);
 	s5 = acl_pthread_attr_destroy(&thr_pool->attr);
+	s6 = acl_pthread_mutex_destroy(&thr_pool->slot_mutex);
 
 	acl_myfree(thr_pool);
 
-	status = s1 ? s1 : (s2 ? s2 : (s3 ? s3 : (s4 ? s4 : s5)));
+	status = s1 ? s1 : (s2 ? s2 : (s3 ? s3 : (s4 ? s4 : (s5 ? s5 : s6))));
 
 	return status;
 }
