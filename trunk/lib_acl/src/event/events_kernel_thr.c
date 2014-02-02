@@ -402,22 +402,26 @@ static void event_loop(ACL_EVENT *eventp)
 
 	THREAD_UNLOCK(&event_thr->event.tm_mutex);
 
-	THREAD_LOCK(&event_thr->event.tb_mutex);
+	if (eventp->event_present - eventp->last_check >= 100000) {
+		eventp->last_check = eventp->event_present;
 
-	if (event_thr_prepare(eventp) == 0) {
+		THREAD_LOCK(&event_thr->event.tb_mutex);
+
+		if (event_thr_prepare(eventp) == 0) {
+			THREAD_UNLOCK(&event_thr->event.tb_mutex);
+
+			if (eventp->fdcnt_ready == 0)
+				sleep(1);
+
+			nready = 0;
+			goto TAG_DONE;
+		}
+
+		if (eventp->fdcnt_ready > 0)
+			delay = 0;
+
 		THREAD_UNLOCK(&event_thr->event.tb_mutex);
-
-		if (eventp->fdcnt_ready == 0)
-			sleep(1);
-
-		nready = 0;
-		goto TAG_DONE;
 	}
-
-	if (eventp->fdcnt_ready > 0)
-		delay = 0;
-
-	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 
 	event_thr->event.blocked = 1;
 	EVENT_BUFFER_READ(nready, event_thr->event_fd, event_thr->event_buf,

@@ -78,6 +78,7 @@ struct	ACL_EVENT {
 	int	nested;
 	/* 当前时间截(微秒级) */
 	acl_int64 event_present;
+	acl_int64 last_check;
 	acl_int64 event_last_debug;
 	/* 事件引擎的最大等待时间(秒) */
 	int	delay_sec;
