@@ -28,6 +28,7 @@
 
 #include "events_define.h"
 
+#ifdef	ACL_EVENTS_KERNEL_STYLE
 #if (ACL_EVENTS_KERNEL_STYLE == ACL_EVENTS_STYLE_EPOLL)
 
 #include <sys/epoll.h>
@@ -503,4 +504,5 @@ ACL_EVENT *event_epoll_alloc_r(int fdsize acl_unused)
 	return ((ACL_EVENT *) event_thr);
 }
 
-#endif	/* ACL_EVENTS_KERNEL_STYLE */
+#endif	/* ACL_EVENTS_KERNEL_STYLE == ACL_EVENTS_STYLE_EPOLL */
+#endif  /* ACL_EVENTS_KERNEL_STYLE */
