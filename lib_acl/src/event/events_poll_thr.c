@@ -349,6 +349,8 @@ static void event_loop(ACL_EVENT *eventp)
 
 	THREAD_LOCK(&event_thr->event.tb_mutex);
 
+	eventp->fdcnt_ready = 0;
+
 	if (event_thr_prepare(eventp) == 0) {
 		if (eventp->fdcnt_ready == 0)
 			sleep(1);

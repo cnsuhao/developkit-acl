@@ -229,6 +229,10 @@ ACL_EVENT *event_new_kernel(int fdsize);
 /* in events_kernel_thr.c */
 ACL_EVENT *event_new_kernel_thr(int fdsize);
 
+#if (ACL_EVENTS_KERNEL_STYLE == ACL_EVENTS_STYLE_EPOLL)
+ACL_EVENT *event_epoll_alloc_r(int fdsize);
+#endif
+
 struct ACL_EVENT_TIMER {
 	acl_int64  when;                /* when event is wanted */
 	acl_int64  delay;               /* timer deley */
