@@ -227,7 +227,9 @@ ACL_EVENT *event_new_poll_thr(int fdsize);
 ACL_EVENT *event_new_kernel(int fdsize);
 
 /* in events_kernel_thr.c */
+#ifdef	ACL_EVENTS_KERNEL_STYLE
 ACL_EVENT *event_new_kernel_thr(int fdsize);
+#endif
 
 #if (ACL_EVENTS_KERNEL_STYLE == ACL_EVENTS_STYLE_EPOLL)
 ACL_EVENT *event_epoll_alloc_r(int fdsize);
