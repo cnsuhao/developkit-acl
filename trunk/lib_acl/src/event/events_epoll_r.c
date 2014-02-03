@@ -88,7 +88,7 @@ static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 	fdp->flag = EVENT_FDTABLE_FLAG_READ | EVENT_FDTABLE_FLAG_EXPT;
 
 	memset(&ev, 0, sizeof(ev));
-	ev.events = EPOLLIN | EPOLLHUP | EPOLLERR;
+	ev.events = EPOLLIN | EPOLLHUP | EPOLLERR | EPOLLET;
 	ev.data.ptr = fdp;
 
 	THREAD_LOCK(&event_thr->event.tb_mutex);
@@ -97,11 +97,11 @@ static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 	eventp->fdtabs[eventp->fdcnt] = fdp;
 	eventp->fdcnt++;
 
+	THREAD_UNLOCK(&event_thr->event.tb_mutex);
+
 	if (epoll_ctl(event_thr->event_fd, EPOLL_CTL_ADD, sockfd, &ev) < 0)
 		acl_msg_fatal("%s: epoll_ctl: %s, fd: %d",
 			myname, acl_last_serror(), sockfd);
-
-	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 }
 
 static void event_enable_listen(ACL_EVENT *eventp, ACL_VSTREAM *stream,
@@ -160,11 +160,11 @@ static void event_enable_listen(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 	eventp->fdtabs[eventp->fdcnt] = fdp;
 	eventp->fdcnt++;
 
+	THREAD_UNLOCK(&event_thr->event.tb_mutex);
+
 	if (epoll_ctl(event_thr->event_fd, EPOLL_CTL_ADD, sockfd, &ev) < 0)
 		acl_msg_fatal("%s: epool_ctl: %s, fd: %d",
 			myname, acl_last_serror(), sockfd);
-
-	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 }
 
 static void event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
@@ -222,11 +222,11 @@ static void event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 	eventp->fdtabs[eventp->fdcnt] = fdp;
 	eventp->fdcnt++;
 
+	THREAD_UNLOCK(&event_thr->event.tb_mutex);
+
 	if (epoll_ctl(event_thr->event_fd, EPOLL_CTL_ADD, sockfd, &ev) < 0)
 		acl_msg_fatal("%s: epoll_ctl: %s, fd: %d",
 			myname, acl_last_serror(), sockfd);
-
-	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 }
 
 /* event_disable_readwrite - disable request for read or write events */
@@ -266,9 +266,6 @@ static void event_disable_readwrite(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 		eventp->fdtabs[fdp->fdidx]->fdidx = fdp->fdidx;
 	}
 
-	if (epoll_ctl(event_thr->event_fd, EPOLL_CTL_DEL, sockfd, NULL) < 0)
-		acl_msg_fatal("%s: epoll_ctl: %s", myname, acl_last_serror());
-
 	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 
 	if (fdp->flag & EVENT_FDTABLE_FLAG_READ)
@@ -277,6 +274,9 @@ static void event_disable_readwrite(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 		stream->nrefer--;
 
 	event_fdtable_reset(fdp);
+
+	if (epoll_ctl(event_thr->event_fd, EPOLL_CTL_DEL, sockfd, NULL) < 0)
+		acl_msg_fatal("%s: epoll_ctl: %s", myname, acl_last_serror());
 }
 
 static int event_isrset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
