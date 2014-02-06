@@ -16,7 +16,7 @@
 #include <errno.h>
 #include <string.h>
 
-#ifdef	WIN32
+#ifdef	_MSC_VER
 # pragma warning(disable:4251)
 //# if !defined(VC2003) && !defined(VC6)
 //extern "C" { FILE _iob[3] = {__iob_func()[0], __iob_func()[1], __iob_func()[2]}; }
@@ -29,6 +29,7 @@
 # ifdef HAVE_MEMCACHED
 #  undef	HAVE_MEMCACHED
 # endif
+#endif
 
 #if	__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
 #define	ACL_CPP_PRINTF(format_idx, arg_idx) \
@@ -59,5 +60,3 @@
 #else
 #define	ACL_CPP_DEPRECATED_FOR(f)	ACL_CPP_DEPRECATED
 #endif // __GNUC__
-
-#endif
