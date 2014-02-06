@@ -821,11 +821,7 @@ public:
 	 * @param ... 变参数据
 	 * @return {string&} 当前对象的引用
 	 */
-#ifdef	WIN32
-	string& format(const char* fmt, ...);
-#else
-	string& format(const char* fmt, ...) __attribute__((format(printf, 2, 3)));
-#endif
+	string& format(const char* fmt, ...) ACL_CPP_PRINTF(2, 3);
 
 	/**
 	 * 带格式方式的添加数据（类似于 vsprintf 接口方式）
