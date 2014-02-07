@@ -35,18 +35,18 @@
 #include "events_fdtable.h"
 #include "events.h"
 
-typedef struct EVENT_KERNEL_THR {
+typedef struct EVENT_EPOLL_THR {
 	EVENT_THR event;
-	struct epoll_event *event_buf;
-	int   event_fdslots;
-	int   event_fd;
-} EVENT_KERNEL_THR;
+	struct epoll_event *ebuf;
+	int   fdslots;
+	int   handle;
+} EVENT_EPOLL_THR;
 
 static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 	int timeout, ACL_EVENT_NOTIFY_RDWR callback, void *context)
 {
 	const char *myname = "event_enable_read";
-	EVENT_KERNEL_THR *event_thr = (EVENT_KERNEL_THR *) eventp;
+	EVENT_EPOLL_THR *event_thr = (EVENT_EPOLL_THR *) eventp;
 	ACL_EVENT_FDTABLE *fdp;
 	ACL_SOCKET sockfd;
 	struct epoll_event ev;
@@ -76,7 +76,7 @@ static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 
 	if (timeout > 0) {
 		fdp->r_timeout = timeout * 1000000;
-		fdp->r_ttl = eventp->event_present + fdp->r_timeout;
+		fdp->r_ttl = eventp->present + fdp->r_timeout;
 	} else {
 		fdp->r_ttl = 0;
 		fdp->r_timeout = 0;
@@ -100,7 +100,7 @@ static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 
 	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 
-	if (epoll_ctl(event_thr->event_fd, EPOLL_CTL_ADD, sockfd, &ev) < 0)
+	if (epoll_ctl(event_thr->handle, EPOLL_CTL_ADD, sockfd, &ev) < 0)
 		acl_msg_fatal("%s: epoll_ctl: %s, fd: %d",
 			myname, acl_last_serror(), sockfd);
 }
@@ -109,7 +109,7 @@ static void event_enable_listen(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 	int timeout, ACL_EVENT_NOTIFY_RDWR callback, void *context)
 {
 	const char *myname = "event_enable_listen";
-	EVENT_KERNEL_THR *event_thr = (EVENT_KERNEL_THR *) eventp;
+	EVENT_EPOLL_THR *event_thr = (EVENT_EPOLL_THR *) eventp;
 	ACL_EVENT_FDTABLE *fdp;
 	ACL_SOCKET sockfd;
 	struct epoll_event ev;
@@ -139,7 +139,7 @@ static void event_enable_listen(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 
 	if (timeout > 0) {
 		fdp->r_timeout = timeout * 1000000;
-		fdp->r_ttl = eventp->event_present + fdp->r_timeout;
+		fdp->r_ttl = eventp->present + fdp->r_timeout;
 	} else {
 		fdp->r_ttl = 0;
 		fdp->r_timeout = 0;
@@ -163,7 +163,7 @@ static void event_enable_listen(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 
 	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 
-	if (epoll_ctl(event_thr->event_fd, EPOLL_CTL_ADD, sockfd, &ev) < 0)
+	if (epoll_ctl(event_thr->handle, EPOLL_CTL_ADD, sockfd, &ev) < 0)
 		acl_msg_fatal("%s: epool_ctl: %s, fd: %d",
 			myname, acl_last_serror(), sockfd);
 }
@@ -172,7 +172,7 @@ static void event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 	int timeout, ACL_EVENT_NOTIFY_RDWR callback, void *context)
 {
 	const char *myname = "event_enable_write";
-	EVENT_KERNEL_THR *event_thr = (EVENT_KERNEL_THR *) eventp;
+	EVENT_EPOLL_THR *event_thr = (EVENT_EPOLL_THR *) eventp;
 	ACL_EVENT_FDTABLE *fdp;
 	ACL_SOCKET sockfd;
 	struct epoll_event ev;
@@ -201,7 +201,7 @@ static void event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 
 	if (timeout > 0) {
 		fdp->w_timeout = timeout * 1000000;
-		fdp->w_ttl = eventp->event_present + fdp->w_timeout;
+		fdp->w_ttl = eventp->present + fdp->w_timeout;
 	} else {
 		fdp->w_ttl = 0;
 		fdp->w_timeout = 0;
@@ -225,7 +225,7 @@ static void event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 
 	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 
-	if (epoll_ctl(event_thr->event_fd, EPOLL_CTL_ADD, sockfd, &ev) < 0)
+	if (epoll_ctl(event_thr->handle, EPOLL_CTL_ADD, sockfd, &ev) < 0)
 		acl_msg_fatal("%s: epoll_ctl: %s, fd: %d",
 			myname, acl_last_serror(), sockfd);
 }
@@ -235,7 +235,7 @@ static void event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 static void event_disable_readwrite(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 {
 	const char *myname = "event_disable_readwrite";
-	EVENT_KERNEL_THR *event_thr = (EVENT_KERNEL_THR *) eventp;
+	EVENT_EPOLL_THR *event_thr = (EVENT_EPOLL_THR *) eventp;
 	ACL_EVENT_FDTABLE *fdp;
 	ACL_SOCKET sockfd;
 
@@ -247,7 +247,9 @@ static void event_disable_readwrite(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 		return;
 	}
 
-	if ((fdp->flag & (EVENT_FDTABLE_FLAG_READ | EVENT_FDTABLE_FLAG_WRITE)) == 0) {
+	if ((fdp->flag & (EVENT_FDTABLE_FLAG_READ
+		| EVENT_FDTABLE_FLAG_WRITE)) == 0)
+	{
 		acl_msg_error("%s(%d): sockfd(%d) not be set",
 			myname, __LINE__, sockfd);
 		return;
@@ -276,7 +278,7 @@ static void event_disable_readwrite(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 
 	event_fdtable_reset(fdp);
 
-	if (epoll_ctl(event_thr->event_fd, EPOLL_CTL_DEL, sockfd, NULL) < 0)
+	if (epoll_ctl(event_thr->handle, EPOLL_CTL_DEL, sockfd, NULL) < 0)
 		acl_msg_fatal("%s: epoll_ctl: %s", myname, acl_last_serror());
 }
 
@@ -316,11 +318,11 @@ static int event_isxset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
 static void event_loop(ACL_EVENT *eventp)
 {
 	const char *myname = "event_loop";
-	EVENT_KERNEL_THR *event_thr = (EVENT_KERNEL_THR *) eventp;
+	EVENT_EPOLL_THR *event_thr = (EVENT_EPOLL_THR *) eventp;
 	ACL_EVENT_NOTIFY_TIME timer_fn;
 	void    *timer_arg;
 	ACL_EVENT_TIMER *timer;
-	int   n, delay, nready;
+	int   delay, nready;
 	ACL_EVENT_FDTABLE *fdp;
 	ACL_RING timer_ring, *entry_ptr;
 	EVENT_BUFFER *bp;
@@ -331,7 +333,7 @@ static void event_loop(ACL_EVENT *eventp)
 	if (delay <= 0)
 		delay = 100; /* 100 milliseconds at least */
 
-	SET_TIME(eventp->event_present);
+	SET_TIME(eventp->present);
 
 	THREAD_LOCK(&event_thr->event.tm_mutex);
 
@@ -340,8 +342,8 @@ static void event_loop(ACL_EVENT *eventp)
 	 * If any timer is scheduled, adjust the delay appropriately.
 	 */
 	if ((timer = ACL_FIRST_TIMER(&eventp->timer_head)) != 0) {
-		n = (int) (timer->when
-			- eventp->event_present + 1000000 - 1) / 1000000;
+		int   n = (int) (timer->when
+			- eventp->present + 1000000 - 1) / 1000000;
 		if (n <= 0)
 			delay = 0;
 		else if (n < eventp->delay_sec)
@@ -352,8 +354,8 @@ static void event_loop(ACL_EVENT *eventp)
 
 	eventp->fdcnt_ready = 0;
 
-	if (eventp->event_present - eventp->last_check >= 100000) {
-		eventp->last_check = eventp->event_present;
+	if (eventp->present - eventp->last_check >= 100000) {
+		eventp->last_check = eventp->present;
 
 		THREAD_LOCK(&event_thr->event.tb_mutex);
 
@@ -374,8 +376,8 @@ static void event_loop(ACL_EVENT *eventp)
 	}
 
 	event_thr->event.blocked = 1;
-	nready = epoll_wait(event_thr->event_fd, event_thr->event_buf,
-			event_thr->event_fdslots, delay);
+	nready = epoll_wait(event_thr->handle, event_thr->ebuf,
+			event_thr->fdslots, delay);
 	event_thr->event.blocked = 0;
 
 	if (nready < 0) {
@@ -386,8 +388,7 @@ static void event_loop(ACL_EVENT *eventp)
 	} else if (nready == 0)
 		goto TAG_DONE;
 
-	bp = event_thr->event_buf;
-	for (; bp < event_thr->event_buf + nready; bp++) {
+	for (bp = event_thr->ebuf; bp < event_thr->ebuf + nready; bp++) {
 		fdp = (ACL_EVENT_FDTABLE *) bp->data.ptr;
 		if ((fdp->event_type & (ACL_EVENT_XCPT | ACL_EVENT_RW_TIMEOUT)))
 			continue;
@@ -401,7 +402,8 @@ static void event_loop(ACL_EVENT *eventp)
 			if ((fdp->event_type & ACL_EVENT_READ) == 0) {
 				fdp->event_type |= ACL_EVENT_READ;
 				fdp->fdidx_ready = eventp->fdcnt_ready;
-				eventp->fdtabs_ready[eventp->fdcnt_ready++] = fdp;
+				eventp->fdtabs_ready[eventp->fdcnt_ready] = fdp;
+				eventp->fdcnt_ready++;
 			}
 		} else if ((bp->events & EPOLLOUT) != 0) {
 			fdp->event_type |= ACL_EVENT_WRITE;
@@ -420,12 +422,12 @@ TAG_DONE:
 	 * the application.
 	 */
 
-	SET_TIME(eventp->event_present);
+	SET_TIME(eventp->present);
 
 	THREAD_LOCK(&event_thr->event.tm_mutex);
 
 	while ((timer = ACL_FIRST_TIMER(&eventp->timer_head)) != 0) {
-		if (timer->when > eventp->event_present)
+		if (timer->when > eventp->present)
 			break;
 
 		acl_ring_detach(&timer->ring);  /* first this */
@@ -442,10 +444,9 @@ TAG_DONE:
 		timer     = ACL_RING_TO_TIMER(entry_ptr);
 		timer_fn  = timer->callback;
 		timer_arg = timer->context;
+		acl_myfree(timer);
 
 		timer_fn(ACL_EVENT_TIME, eventp, timer_arg);
-
-		acl_myfree(timer);
 	}
 
 	if (eventp->fdcnt_ready > 0)
@@ -455,7 +456,7 @@ TAG_DONE:
 static void event_free(ACL_EVENT *eventp)
 {
 	const char *myname = "event_free";
-	EVENT_KERNEL_THR *event_thr = (EVENT_KERNEL_THR *) eventp;
+	EVENT_EPOLL_THR *event_thr = (EVENT_EPOLL_THR *) eventp;
 
 	if (eventp == NULL)
 		acl_msg_fatal("%s, %s(%d): eventp null",
@@ -464,17 +465,17 @@ static void event_free(ACL_EVENT *eventp)
 	LOCK_DESTROY(&event_thr->event.tm_mutex);
 	LOCK_DESTROY(&event_thr->event.tb_mutex);
 
-	acl_myfree(event_thr->event_buf);
-	close(event_thr->event_fd);
+	acl_myfree(event_thr->ebuf);
+	close(event_thr->handle);
 	acl_myfree(eventp);
 }
 
 ACL_EVENT *event_epoll_alloc_r(int fdsize acl_unused)
 {
-	EVENT_KERNEL_THR *event_thr;
-	static int __default_max_events = 1024;
+	EVENT_EPOLL_THR *event_thr;
+	static int __default_max_events = 100;
 
-	event_thr = (EVENT_KERNEL_THR*) event_alloc(sizeof(EVENT_KERNEL_THR));
+	event_thr = (EVENT_EPOLL_THR*) event_alloc(sizeof(EVENT_EPOLL_THR));
 
 	snprintf(event_thr->event.event.name, sizeof(event_thr->event.event.name),
 		"thread events - epoll");
@@ -497,10 +498,10 @@ ACL_EVENT *event_epoll_alloc_r(int fdsize acl_unused)
 	LOCK_INIT(&event_thr->event.tm_mutex);
 	LOCK_INIT(&event_thr->event.tb_mutex);
 
-	EVENT_REG_INIT_HANDLE(event_thr->event_fd, fdsize);
-	event_thr->event_fdslots = __default_max_events;
-	event_thr->event_buf = (EVENT_BUFFER *) acl_mycalloc(
-			event_thr->event_fdslots + 1, sizeof(EVENT_BUFFER));
+	EVENT_REG_INIT_HANDLE(event_thr->handle, fdsize);
+	event_thr->fdslots = __default_max_events;
+	event_thr->ebuf = (EVENT_BUFFER *) acl_mycalloc(event_thr->fdslots + 1,
+			sizeof(EVENT_BUFFER));
 	return ((ACL_EVENT *) event_thr);
 }
 
