@@ -470,7 +470,7 @@ static void event_free(ACL_EVENT *eventp)
 	acl_myfree(eventp);
 }
 
-ACL_EVENT *event_epoll_alloc_r(int fdsize acl_unused)
+ACL_EVENT *event_epoll_alloc_thr(int fdsize acl_unused)
 {
 	EVENT_EPOLL_THR *event_thr;
 	static int __default_max_events = 100;
