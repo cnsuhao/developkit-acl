@@ -317,12 +317,12 @@ static void event_loop(ACL_EVENT *eventp)
 {
 	const char *myname = "event_loop";
 	EVENT_POLL_THR *event_thr = (EVENT_POLL_THR *) eventp;
-	ACL_EVENT_NOTIFY_TIME timer_fn;
-	void    *timer_arg;
-	ACL_EVENT_TIMER *timer;
-	int   n, delay, nready, i, revents;
-	ACL_EVENT_FDTABLE *fdp;
 	ACL_RING timer_ring, *entry_ptr;
+	ACL_EVENT_NOTIFY_TIME timer_fn;
+	ACL_EVENT_TIMER *timer;
+	void    *timer_arg;
+	int   delay, nready, i, revents;
+	ACL_EVENT_FDTABLE *fdp;
 
 	acl_ring_init(&timer_ring);
 
@@ -337,7 +337,7 @@ static void event_loop(ACL_EVENT *eventp)
 	 * If any timer is scheduled, adjust the delay appropriately.
 	 */
 	if ((timer = ACL_FIRST_TIMER(&eventp->timer_head)) != 0) {
-		n = (int) (timer->when - eventp->present + 1000000 - 1)
+		int   n = (int) (timer->when - eventp->present + 1000000 - 1)
 			/ 1000000;
 		if (n <= 0)
 			delay = 0;

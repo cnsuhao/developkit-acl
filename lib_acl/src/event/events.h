@@ -223,7 +223,7 @@ ACL_EVENT *event_new_kernel_thr(int fdsize);
 #endif
 
 #if (ACL_EVENTS_KERNEL_STYLE == ACL_EVENTS_STYLE_EPOLL)
-ACL_EVENT *event_epoll_alloc_r(int fdsize);
+ACL_EVENT *event_epoll_alloc_thr(int fdsize);
 #endif
 
 struct ACL_EVENT_TIMER {
