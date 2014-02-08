@@ -46,7 +46,8 @@ typedef struct thread_worker {
 	acl_pthread_mutex_t  *mutex;
 } thread_worker;
 
-#undef	USE_SLOT
+#undef	USE_ONESHOT                           /* it's just for experiment    */
+#undef	USE_SLOT                              /* it's just for experiment    */
 
 struct acl_pthread_pool_t {
 	acl_pthread_mutex_t   worker_mutex;   /* control access to queue     */
@@ -62,8 +63,8 @@ struct acl_pthread_pool_t {
 	acl_pthread_mutex_t   slot_mutex;
 #endif
 	thread_worker        *thr_first;      /* first idle thread           */
-	thread_worker        *thr_idle;       /* for single operation        */
 	thread_worker        *thr_iter;       /* for bat operation           */
+	thread_worker        *thr_idle;
 	int   poller_running;                 /* is poller thread running ?  */
 	int   qlen;                           /* the work queue's length     */
 	int   job_nslot;
@@ -188,92 +189,12 @@ static void worker_free(thread_worker *thr)
 	acl_myfree(thr);
 }
 
-static int worker_wait(acl_pthread_pool_t *thr_pool, thread_worker *thr)
-{
-	const char *myname = "worker_wait";
-	int    status;
-
-	while (1) {
-		/* if there are jobs in thread self' queue or in pool's queue
-		 * just return 1
-		 */
-		if (thr->job_first != NULL || thr_pool->job_first != NULL)
-			return 1;
-
-		/* if there are no jobs and the thread pool want to quit */
-		if (thr_pool->quit)
-			return 0;
-
-		/* add the idle thread to thread pool */
-
-		if (thr_pool->thr_first == NULL) {
-			thr_pool->thr_first = thr;
-			thr->next = NULL;
-			thr->prev = NULL;
-		} else {
-			thr_pool->thr_first->prev = thr;
-			thr->next = thr_pool->thr_first;
-			thr->prev = NULL;
-			thr_pool->thr_first = thr;
-		}
-		thr_pool->thr_idle = thr;
-		thr_pool->idle++;
-
-		if (thr->idle_timeout > 0) {
-			struct timespec  timeout;
-			struct timeval   tv;
-
-			gettimeofday(&tv, NULL);
-			timeout.tv_sec = tv.tv_sec + thr->idle_timeout;
-			timeout.tv_nsec = tv.tv_usec * 1000;
-
-			status = acl_pthread_cond_timedwait(&thr->cond,
-					thr->mutex, &timeout);
-		} else
-			status = acl_pthread_cond_wait(&thr->cond, thr->mutex);
-
-		/* remove the thread from thread pool */
-
-		if (thr_pool->thr_first == thr) {
-			if (thr->next)
-				thr->next->prev = NULL;
-			thr_pool->thr_first = thr->next;
-		} else {
-			if (thr->next)
-				thr->next->prev = thr->prev;
-			thr->prev->next = thr->next;
-		}
-
-		thr_pool->thr_idle = NULL;
-		thr_pool->idle--;
-		thr->next = NULL;
-		thr->prev = NULL;
-
-		if (status == 0)
-			continue;
-
-		if (status == ACL_ETIMEDOUT) {
-			thr->quit = 1;
-			return -1;
-		}
-
-		/* xxx */
-		SET_ERRNO(status);
-		thr->quit = 1;
-		acl_msg_error("%s(%d), %s: tid: %lu, cond timewait error: %s",
-			__FILE__, __LINE__, myname, (unsigned long)
-			acl_pthread_self(), acl_last_serror());
-		return -1;
-	}
-}
-
 #ifdef	USE_SLOT
-static void worker_run(acl_pthread_pool_t *thr_pool, thread_worker *thr,
-	acl_pthread_job_t *job)
+static void worker_run(acl_pthread_pool_t *thr_pool,
+	thread_worker *thr, acl_pthread_job_t *job)
 #else
 static void worker_run(acl_pthread_pool_t *thr_pool acl_unused,
-	thread_worker *thr,
-	acl_pthread_job_t *job)
+	thread_worker *thr, acl_pthread_job_t *job)
 #endif
 {
 	const char *myname = "worker_run";
@@ -339,23 +260,98 @@ static void worker_run(acl_pthread_pool_t *thr_pool acl_unused,
 	}
 }
 
+static int worker_wait(acl_pthread_pool_t *thr_pool, thread_worker *thr)
+{
+	const char *myname = "worker_wait";
+	int   status, idle_count = 0;
+
+	while (1) {
+		/* add the idle thread to thread pool */
+		if (thr_pool->thr_first == NULL) {
+			thr_pool->thr_first = thr;
+			thr->next = NULL;
+			thr->prev = NULL;
+		} else {
+			thr_pool->thr_first->prev = thr;
+			thr->next = thr_pool->thr_first;
+			thr->prev = NULL;
+			thr_pool->thr_first = thr;
+		}
+
+		thr_pool->thr_idle = thr;
+		thr_pool->idle++;
+
+		if (thr->idle_timeout > 0) {
+			struct timespec  timeout;
+			struct timeval   tv;
+
+			gettimeofday(&tv, NULL);
+			timeout.tv_sec = tv.tv_sec + 1;
+			timeout.tv_nsec = tv.tv_usec * 1000;
+
+			status = acl_pthread_cond_timedwait(&thr->cond,
+					thr->mutex, &timeout);
+		} else
+			status = acl_pthread_cond_wait(&thr->cond, thr->mutex);
+
+		/* remove the thread from thread pool */
+
+		thr_pool->thr_idle = NULL;
+		thr_pool->idle--;
+
+#ifdef	USE_ONESHOT
+		if (thr->job_first != NULL)
+			return 1;
+#endif
+
+		if (thr_pool->thr_first == thr) {
+			if (thr->next)
+				thr->next->prev = NULL;
+			thr_pool->thr_first = thr->next;
+		} else {
+			if (thr->next)
+				thr->next->prev = thr->prev;
+			thr->prev->next = thr->next;
+		}
+
+		if (thr->job_first != NULL || thr_pool->job_first != NULL) {
+			idle_count = 0;
+			return 1;
+		}
+
+		if (thr_pool->quit)
+			break;
+
+		if (status == ACL_ETIMEDOUT) {
+			idle_count++;
+			if (idle_count < thr->idle_timeout)
+				continue;
+			break;
+		} else if (status == 0) {
+			idle_count = 0;
+			continue;
+		}
+
+		/* xxx */
+		SET_ERRNO(status);
+		acl_msg_warn("%s(%d), %s: tid: %lu, cond timewait error: %s",
+			__FILE__, __LINE__, myname, (unsigned long)
+			acl_pthread_self(), acl_last_serror());
+		break;
+	}
+
+	thr->quit = 1;
+	return 0;
+}
+
 static void *worker_thread(void* arg)
 {
 	const char *myname = "worker_thread";
 	acl_pthread_pool_t *thr_pool = (acl_pthread_pool_t*) arg;
 	acl_pthread_job_t *job;
-	thread_worker *thr = NULL;
+	thread_worker *thr;
 	int   status;
 
-#undef	RETURN
-#define	RETURN(_x_) {  \
-	if (thr_pool->worker_free_fn != NULL)  \
-		thr_pool->worker_free_fn(thr_pool->worker_free_arg);  \
-	if (thr != NULL)  \
-		worker_free(thr);  \
-	return (_x_);  \
-}
-	
 	if (thr_pool->worker_init_fn != NULL) {
 		if (thr_pool->worker_init_fn(thr_pool->worker_init_arg) < 0) {
 			acl_msg_error("%s(%d), %s: tid: %lu, thread init error",
@@ -403,31 +399,18 @@ static void *worker_thread(void* arg)
 			worker_run(thr_pool, thr, job);
 		}
 
-		 /* at last, idle thread wait for job and unlock mutex,
-		  * lock again if it wakeup when signaled by main thread
-		  * or wait for job timeout; return below:
-		  * 1 : got one job to handle
-		  * 0 : have no job and thread pool want to quit
-		  * -1: have no job and thread wait timeout or error happened
-		  */
-		if (worker_wait(thr_pool, thr) > 0)
+		if (thr->job_first != NULL || thr_pool->job_first != NULL)
 			continue;
 
-		/* when thread pool need to quit, idle thread should exit */
-		if (thr_pool->quit) {
-			thr_pool->count--;
-			if (thr_pool->count == 0)
-				acl_pthread_cond_signal(&thr_pool->cond);
-			break;
-		}
+		else if (worker_wait(thr_pool, thr) > 0)
+			continue;
 
-		/* when wait timeout or error happened, should exit now */
-		if (thr->quit) {
-			thr_pool->count--;
+		/* when wait timeout, wait error or thread pool is quiting */
+		if (thr->quit)
 			break;
-		}
 	}
 
+	thr_pool->count--;
 	status = acl_pthread_mutex_unlock(thr->mutex);
 	if (status != 0) {
 		SET_ERRNO(status);
@@ -438,34 +421,72 @@ static void *worker_thread(void* arg)
 	acl_debug(ACL_DEBUG_THR_POOL, 2) ("%s(%d): thread(%lu) exit now",
 		myname, __LINE__, (unsigned long) acl_pthread_self());
 
-	RETURN (NULL);
+	if (thr_pool->worker_free_fn != NULL)
+		thr_pool->worker_free_fn(thr_pool->worker_free_arg);
+
+	worker_free(thr);
+
+	if (thr_pool->quit) /* && thr_pool->count == 0) */
+		acl_pthread_cond_signal(&thr_pool->cond);
+
+	return NULL;
 }
 
 static void job_add(acl_pthread_pool_t *thr_pool, acl_pthread_job_t *job)
 {
-	const char *myname = "job_add";
+	static const char *myname = "job_add";
 	int   status;
 
 	/* must reset the job's next to NULL */
 	job->next = NULL;
 
+	status = acl_pthread_mutex_lock(&thr_pool->worker_mutex);
+	if (status != 0) {
+		SET_ERRNO(status);
+		acl_msg_fatal("%s(%d), %s: pthread_mutex_lock: %s",
+			__FILE__, __LINE__, myname, acl_last_serror());
+	}
+
 	/* at first, select one idle thread which qlen is 0 */
 
-	if (thr_pool->thr_idle != NULL && thr_pool->thr_idle->qlen == 0) {
+#ifndef	USE_ONESHOT
+	if (thr_pool->thr_idle && thr_pool->thr_idle->qlen == 0) {
 		thr_pool->thr_idle->job_first = job;
 		thr_pool->thr_idle->job_last = job;
 		thr_pool->thr_idle->qlen++;
 
 		status = acl_pthread_cond_signal(&thr_pool->thr_idle->cond);
-		if (status == 0)
-			return;
+		if (status != 0) {
+			SET_ERRNO(status);
+			acl_msg_fatal("%s(%d), %s: pthread_cond_signal: %s",
+				__FILE__, __LINE__, myname, acl_last_serror());
+		}
 
-		SET_ERRNO(status);
-		acl_msg_fatal("%s(%d),> %s: pthread_cond_signal: %s",
-			__FILE__, __LINE__, myname, acl_last_serror());
-
-		/* not reached */
+		(void) acl_pthread_mutex_unlock(&thr_pool->worker_mutex);
+		return;
 	}
+#else
+	if (thr_pool->thr_first && thr_pool->thr_first->qlen == 0) {
+		status = acl_pthread_cond_signal(&thr_pool->thr_first->cond);
+		if (status != 0) {
+			SET_ERRNO(status);
+			acl_msg_fatal("%s(%d), %s: pthread_cond_signal: %s",
+				__FILE__, __LINE__, myname, acl_last_serror());
+		}
+
+		thr_pool->thr_first->job_first = job;
+		thr_pool->thr_first->job_last = job;
+		thr_pool->thr_first->qlen++;
+
+		if (thr_pool->thr_first->next)
+			thr_pool->thr_first->prev = NULL;
+		thr_pool->thr_first = thr_pool->thr_first->next;
+
+		(void) acl_pthread_mutex_unlock(&thr_pool->worker_mutex);
+		return;
+	}
+
+#endif
 
 	/* then, add job to the pool's queue and anyone can handle it */
 
@@ -483,14 +504,15 @@ static void job_add(acl_pthread_pool_t *thr_pool, acl_pthread_job_t *job)
 
 		status = acl_pthread_create(&id, &thr_pool->attr,
 				worker_thread, (void*) thr_pool);
-		if (status == 0) {
+		if (status == 0)
 			thr_pool->count++;
-			return;
+		else {
+			SET_ERRNO(status);
+			acl_msg_error("%s(%d), %s: pthread_create: %s",
+				__FILE__, __LINE__, myname, acl_last_serror());
 		}
 
-		SET_ERRNO(status);
-		acl_msg_error("%s(%d), %s: pthread_create: %s",
-			__FILE__, __LINE__, myname, acl_last_serror());
+		(void) acl_pthread_mutex_unlock(&thr_pool->worker_mutex);
 		return;
 	}
 
@@ -512,6 +534,8 @@ static void job_add(acl_pthread_pool_t *thr_pool, acl_pthread_job_t *job)
 			sleep(thr_pool->overload_timewait);
 		}
 	}
+
+	(void) acl_pthread_mutex_unlock(&thr_pool->worker_mutex);
 }
 
 void acl_pthread_pool_add_one(acl_pthread_pool_t *thr_pool,
@@ -519,7 +543,6 @@ void acl_pthread_pool_add_one(acl_pthread_pool_t *thr_pool,
 {
 	const char *myname = "acl_pthread_pool_add";
 	acl_pthread_job_t *job;
-	int   status;
 
 	if (thr_pool->valid != ACL_PTHREAD_POOL_VALID)
 		acl_msg_fatal("%s(%d), %s: thr_pool invalid",
@@ -557,28 +580,13 @@ void acl_pthread_pool_add_one(acl_pthread_pool_t *thr_pool,
 #endif
 		job = acl_pthread_pool_alloc_job(run_fn, run_arg, 0);
 
-	status = acl_pthread_mutex_lock(&thr_pool->worker_mutex);
-	if (status != 0) {
-		SET_ERRNO(status);
-		acl_msg_fatal("%s(%d), %s: pthread_mutex_lock: %s",
-			__FILE__, __LINE__, myname, acl_last_serror());
-	}
-
 	job_add(thr_pool, job);
-
-	status = acl_pthread_mutex_unlock(&thr_pool->worker_mutex);
-	if (status != 0) {
-		SET_ERRNO(status);
-		acl_msg_fatal("%s(%d), %s: pthread_mutex_unlock: %s",
-			__FILE__, __LINE__, myname, acl_last_serror());
-	}
 }
 
 void acl_pthread_pool_add_job(acl_pthread_pool_t *thr_pool,
 	acl_pthread_job_t *job)
 {
 	const char *myname = "acl_pthread_pool_add_job";
-	int   status;
 
 	if (thr_pool->valid != ACL_PTHREAD_POOL_VALID)
 		acl_msg_fatal("%s(%d), %s: thr_pool invalid",
@@ -587,21 +595,7 @@ void acl_pthread_pool_add_job(acl_pthread_pool_t *thr_pool,
 		acl_msg_fatal("%s(%d), %s: job null",
 			__FILE__, __LINE__, myname);
 
-	status = acl_pthread_mutex_lock(&thr_pool->worker_mutex);
-	if (status != 0) {
-		SET_ERRNO(status);
-		acl_msg_fatal("%s(%d), %s: pthread_mutex_lock: %s",
-			__FILE__, __LINE__, myname, acl_last_serror());
-	}
-
 	job_add(thr_pool, job);
-
-	status = acl_pthread_mutex_unlock(&thr_pool->worker_mutex);
-	if (status != 0) {
-		SET_ERRNO(status);
-		acl_msg_fatal("%s(%d), %s: pthread_mutex_unlock: %s",
-			__FILE__, __LINE__, myname, acl_last_serror());
-	}
 }
 
 void acl_pthread_pool_bat_add_begin(acl_pthread_pool_t *thr_pool)
@@ -831,8 +825,8 @@ static void init_thread_pool(acl_pthread_pool_t *thr_pool)
 	thr_pool->job_slot_last     = NULL;
 	thr_pool->job_nslot         = 0;
 	thr_pool->thr_first         = NULL;
-	thr_pool->thr_idle          = NULL;
 	thr_pool->thr_iter          = NULL;
+	thr_pool->thr_idle          = NULL;
 	thr_pool->qlen              = 0;
 	thr_pool->overload_timewait = 0;
 	thr_pool->count             = 0;

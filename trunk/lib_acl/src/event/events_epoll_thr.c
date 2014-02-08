@@ -342,8 +342,8 @@ static void event_loop(ACL_EVENT *eventp)
 	 * If any timer is scheduled, adjust the delay appropriately.
 	 */
 	if ((timer = ACL_FIRST_TIMER(&eventp->timer_head)) != 0) {
-		int   n = (int) (timer->when
-			- eventp->present + 1000000 - 1) / 1000000;
+		int   n = (int) (timer->when - eventp->present + 1000000 - 1)
+			/ 1000000;
 		if (n <= 0)
 			delay = 0;
 		else if (n < eventp->delay_sec)
@@ -426,7 +426,7 @@ TAG_DONE:
 
 	THREAD_LOCK(&event_thr->event.tm_mutex);
 
-	while ((timer = ACL_FIRST_TIMER(&eventp->timer_head)) != 0) {
+	while ((timer = ACL_FIRST_TIMER(&eventp->timer_head)) != NULL) {
 		if (timer->when > eventp->present)
 			break;
 
@@ -436,11 +436,7 @@ TAG_DONE:
 
 	THREAD_UNLOCK(&event_thr->event.tm_mutex);
 
-	while (1) {
-		entry_ptr = acl_ring_pop_head(&timer_ring);
-		if (entry_ptr == NULL)
-			break;
-
+	while ((entry_ptr = acl_ring_pop_head(&timer_ring)) != NULL) {
 		timer     = ACL_RING_TO_TIMER(entry_ptr);
 		timer_fn  = timer->callback;
 		timer_arg = timer->context;

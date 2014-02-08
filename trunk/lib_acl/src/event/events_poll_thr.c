@@ -54,6 +54,7 @@ static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 		fdp->stream = stream;
 		stream->fdp = (void *) fdp;
 	}
+
 	/* 对同一连接的读写操作禁止同时进行监控 */
 	else if (fdp->flag & EVENT_FDTABLE_FLAG_WRITE)
 		acl_msg_panic("%s(%d)->%s: fd %d: multiple I/O request",
@@ -76,22 +77,24 @@ static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 		fdp->r_timeout = 0;
 	}
 
+	if ((fdp->flag & EVENT_FDTABLE_FLAG_READ) != 0)
+		return;
+
+	stream->nrefer++;
+	fdp->flag = EVENT_FDTABLE_FLAG_READ | EVENT_FDTABLE_FLAG_EXPT;
+
 	THREAD_LOCK(&event_thr->event.tb_mutex);
 
-	if ((fdp->flag & EVENT_FDTABLE_FLAG_READ) == 0) {
-		fdp->flag = EVENT_FDTABLE_FLAG_READ | EVENT_FDTABLE_FLAG_EXPT;
-		stream->nrefer++;
-		fdp->fdidx = eventp->fdcnt;
-		eventp->fdtabs[eventp->fdcnt] = fdp;
-		eventp->fdcnt++;
+	fdp->fdidx = eventp->fdcnt;
+	eventp->fdtabs[eventp->fdcnt] = fdp;
+	eventp->fdcnt++;
 
-		event_thr->fds[fdp->fdidx].fd = sockfd;
-		event_thr->fds[fdp->fdidx].events = POLLIN | POLLHUP | POLLERR;
-		acl_fdmap_add(event_thr->fdmap, sockfd, fdp);
+	event_thr->fds[fdp->fdidx].fd = sockfd;
+	event_thr->fds[fdp->fdidx].events = POLLIN | POLLHUP | POLLERR;
+	acl_fdmap_add(event_thr->fdmap, sockfd, fdp);
 
-		if (eventp->maxfd != ACL_SOCKET_INVALID && eventp->maxfd < sockfd)
-			eventp->maxfd = sockfd;
-	}
+	if (eventp->maxfd != ACL_SOCKET_INVALID && eventp->maxfd < sockfd)
+		eventp->maxfd = sockfd;
 
 	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 
@@ -320,7 +323,7 @@ static void event_loop(ACL_EVENT *eventp)
 	ACL_RING timer_ring, *entry_ptr;
 	ACL_EVENT_NOTIFY_TIME timer_fn;
 	ACL_EVENT_TIMER *timer;
-	void    *timer_arg;
+	void *timer_arg;
 	int   delay, nready, i, revents;
 	ACL_EVENT_FDTABLE *fdp;
 
@@ -382,8 +385,6 @@ static void event_loop(ACL_EVENT *eventp)
 	} else if (nready == 0)
 		goto TAG_DONE;
 
-	THREAD_LOCK(&event_thr->event.tb_mutex);
-
 	for (i = 0; i < eventp->fdcnt; i++) {
 		fdp = acl_fdmap_ctx(event_thr->fdmap, event_thr->fds[i].fd);
 		if (fdp == NULL || fdp->stream == NULL)
@@ -399,21 +400,20 @@ static void event_loop(ACL_EVENT *eventp)
 			continue;
 		}
 
-		if ((fdp->flag & EVENT_FDTABLE_FLAG_READ) && (revents & POLLIN)) {
+		if ((revents & POLLIN) != 0) {
 			fdp->stream->sys_read_ready = 1;
 			if ((fdp->event_type & ACL_EVENT_READ) == 0) {
 				fdp->event_type |= ACL_EVENT_READ;
 				fdp->fdidx_ready = eventp->fdcnt_ready;
-				eventp->fdtabs_ready[eventp->fdcnt_ready++] = fdp;
+				eventp->fdtabs_ready[eventp->fdcnt_ready] = fdp;
+				eventp->fdcnt_ready++;
 			}
-		} else if ((fdp->flag & EVENT_FDTABLE_FLAG_WRITE) && (revents & POLLOUT)) {
+		} else if ((revents & POLLOUT) != 0) {
 			fdp->event_type |= ACL_EVENT_WRITE;
 			fdp->fdidx_ready = eventp->fdcnt_ready;
 			eventp->fdtabs_ready[eventp->fdcnt_ready++] = fdp;
 		}
 	}
-
-	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 
 TAG_DONE:
 
@@ -429,28 +429,23 @@ TAG_DONE:
 
 	THREAD_LOCK(&event_thr->event.tm_mutex);
 
-	while ((timer = ACL_FIRST_TIMER(&eventp->timer_head)) != 0) {
+	while ((timer = ACL_FIRST_TIMER(&eventp->timer_head)) != NULL) {
 		if (timer->when > eventp->present)
 			break;
 
-		acl_ring_detach(&timer->ring);          /* first this */
+		acl_ring_detach(&timer->ring);  /* first this */
 		acl_ring_prepend(&timer_ring, &timer->ring);
 	}
 
 	THREAD_UNLOCK(&event_thr->event.tm_mutex);
 
-	while (1) {
-		entry_ptr = acl_ring_pop_head(&timer_ring);
-		if (entry_ptr == NULL)
-			break;
-
+	while ((entry_ptr = acl_ring_pop_head(&timer_ring)) != NULL) {
 		timer     = ACL_RING_TO_TIMER(entry_ptr);
 		timer_fn  = timer->callback;
 		timer_arg = timer->context;
+		acl_myfree(timer);
 
 		timer_fn(ACL_EVENT_TIME, eventp, timer_arg);
-
-		acl_myfree(timer);
 	}
 
 	if (eventp->fdcnt_ready > 0)
@@ -509,7 +504,8 @@ ACL_EVENT *event_new_poll_thr(int fdsize)
 	LOCK_INIT(&event_thr->event.tm_mutex);
 	LOCK_INIT(&event_thr->event.tb_mutex);
 
-	event_thr->fds = (struct pollfd *) acl_mycalloc(fdsize + 1, sizeof(struct pollfd));
+	event_thr->fds = (struct pollfd *) acl_mycalloc(fdsize + 1,
+			sizeof(struct pollfd));
 	event_thr->fdmap = acl_fdmap_create(fdsize);
 	return (ACL_EVENT *) event_thr;
 }
