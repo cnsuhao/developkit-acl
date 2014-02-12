@@ -58,10 +58,7 @@ static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 		fdp->listener = 0;
 		fdp->stream = stream;
 		stream->fdp = (void *) fdp;
-	}
-
-	/* 对同一连接的读写操作禁止同时进行监控 */
-	else if (fdp->flag & EVENT_FDTABLE_FLAG_WRITE)
+	} else if (fdp->flag & EVENT_FDTABLE_FLAG_WRITE)
 		acl_msg_panic("%s(%d), %s: fd %d: multiple I/O request",
 			__FILE__, __LINE__, myname, sockfd);
 	else {
@@ -95,8 +92,7 @@ static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 	THREAD_LOCK(&event_thr->event.tb_mutex);
 
 	fdp->fdidx = eventp->fdcnt;
-	eventp->fdtabs[eventp->fdcnt] = fdp;
-	eventp->fdcnt++;
+	eventp->fdtabs[eventp->fdcnt++] = fdp;
 
 	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 
@@ -121,10 +117,7 @@ static void event_enable_listen(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 		fdp->stream = stream;
 		fdp->listener = 1;
 		stream->fdp = (void *) fdp;
-	}
-
-	/* 对同一连接的读写操作禁止同时进行监控 */
-	else if (fdp->flag & EVENT_FDTABLE_FLAG_WRITE)
+	} else if (fdp->flag & EVENT_FDTABLE_FLAG_WRITE)
 		acl_msg_panic("%s(%d)->%s: fd %d: multiple I/O request",
 			__FILE__, __LINE__, myname, sockfd);
 	else {
@@ -158,8 +151,7 @@ static void event_enable_listen(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 	THREAD_LOCK(&event_thr->event.tb_mutex);
 
 	fdp->fdidx = eventp->fdcnt;
-	eventp->fdtabs[eventp->fdcnt] = fdp;
-	eventp->fdcnt++;
+	eventp->fdtabs[eventp->fdcnt++] = fdp;
 
 	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 
@@ -184,9 +176,7 @@ static void event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 		fdp->listener = 0;
 		fdp->stream = stream;
 		stream->fdp = (void *) fdp;
-	}
-	/* 对同一连接的读写操作禁止同时进行监控 */
-	else if (fdp->flag & EVENT_FDTABLE_FLAG_READ)
+	} else if (fdp->flag & EVENT_FDTABLE_FLAG_READ)
 		acl_msg_panic("%s(%d)->%s: fd %d: multiple I/O request",
 			__FILE__, __LINE__, myname, sockfd);
 	else {
@@ -220,8 +210,7 @@ static void event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 	THREAD_LOCK(&event_thr->event.tb_mutex);
 
 	fdp->fdidx = eventp->fdcnt;
-	eventp->fdtabs[eventp->fdcnt] = fdp;
-	eventp->fdcnt++;
+	eventp->fdtabs[eventp->fdcnt++] = fdp;
 
 	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 
@@ -473,8 +462,8 @@ ACL_EVENT *event_epoll_alloc_thr(int fdsize acl_unused)
 
 	event_thr = (EVENT_EPOLL_THR*) event_alloc(sizeof(EVENT_EPOLL_THR));
 
-	snprintf(event_thr->event.event.name, sizeof(event_thr->event.event.name),
-		"thread events - epoll");
+	snprintf(event_thr->event.event.name,
+		sizeof(event_thr->event.event.name), "thread events - epoll");
 	event_thr->event.event.event_mode           = ACL_EVENT_KERNEL;
 	event_thr->event.event.use_thread           = 1;
 	event_thr->event.event.loop_fn              = event_loop;

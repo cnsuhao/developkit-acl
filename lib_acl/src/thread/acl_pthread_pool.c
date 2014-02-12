@@ -25,64 +25,75 @@
 #endif
 
 #define	ACL_PTHREAD_POOL_VALID		0x0decca62
+#define	SEC_TO_NSEC			1000000000
+
+#define SET_TIME(x) do { \
+	struct timeval t; \
+	gettimeofday(&t, NULL); \
+	(x) = ((acl_int64) t.tv_sec) * 1000 + ((acl_int64) t.tv_usec / 1000); \
+} while (0)
 
 struct acl_pthread_job_t {
 	struct acl_pthread_job_t *next;
 	void (*worker_fn)(void *arg);         /* user function              */
-	void *worker_arg;
-	int   fixed;
+	void *worker_arg;                     /* user function's arg        */
+	int   fixed;                          /* if can be freed ?          */
+	acl_int64  start;                     /* start time stamp           */
 };
 
 typedef struct thread_worker {
 	struct thread_worker *next;
 	struct thread_worker *prev;
 	unsigned long id;
-	int   quit;                           /* if thread need quit ?       */
-	int   idle_timeout;                   /* thread wait timeout         */
-	acl_pthread_job_t    *job_first;      /* thread's work queue first   */
-	acl_pthread_job_t    *job_last;       /* thread's work queue last    */
-	int   qlen;                           /* the work queue's length     */
+	int   quit;                           /* if thread need quit ?      */
+	int   idle;                           /* thread wait timeout        */
+	acl_int64 wait_base;                  /* timeout once wait          */
+	acl_int64 wait_count;                 /* timeout of total wait      */
+	acl_pthread_job_t    *job_first;      /* thread's work queue first  */
+	acl_pthread_job_t    *job_last;       /* thread's work queue last   */
+	int   qlen;                           /* the work queue's length    */
 	acl_pthread_cond_t    cond;
 	acl_pthread_mutex_t  *mutex;
 } thread_worker;
 
-#undef	USE_ONESHOT                           /* it's just for experiment    */
-#undef	USE_SLOT                              /* it's just for experiment    */
+#undef	USE_ONESHOT                           /* it's just for experiment   */
+#undef	USE_SLOT                              /* it's just for experiment   */
 
 struct acl_pthread_pool_t {
-	acl_pthread_mutex_t   worker_mutex;   /* control access to queue     */
-	acl_pthread_cond_t    cond;           /* wait for worker quit        */
-	acl_pthread_mutex_t   poller_mutex;   /* just for wait poller exit   */
-	acl_pthread_cond_t    poller_cond;    /* just for wait poller exit   */
-	acl_pthread_attr_t    attr;           /* create detached             */
-	acl_pthread_job_t    *job_first;      /* work queue first            */
-	acl_pthread_job_t    *job_last;       /* work queue last             */
-	acl_pthread_job_t    *job_slot_first; /* work queue first            */
-	acl_pthread_job_t    *job_slot_last;  /* work queue last             */
+	acl_pthread_mutex_t   worker_mutex;   /* control access to queue    */
+	acl_pthread_cond_t    cond;           /* wait for worker quit       */
+	acl_pthread_mutex_t   poller_mutex;   /* just for wait poller exit  */
+	acl_pthread_cond_t    poller_cond;    /* just for wait poller exit  */
+	acl_pthread_attr_t    attr;           /* create detached            */
+	acl_pthread_job_t    *job_first;      /* work queue first           */
+	acl_pthread_job_t    *job_last;       /* work queue last            */
+	acl_pthread_job_t    *job_slot_first; /* work queue first           */
+	acl_pthread_job_t    *job_slot_last;  /* work queue last            */
 #ifdef	USE_SLOT
 	acl_pthread_mutex_t   slot_mutex;
 #endif
-	thread_worker        *thr_first;      /* first idle thread           */
-	thread_worker        *thr_iter;       /* for bat operation           */
+	thread_worker        *thr_first;      /* first idle thread          */
+	thread_worker        *thr_iter;       /* for bat operation          */
 	thread_worker        *thr_idle;
-	int   poller_running;                 /* is poller thread running ?  */
-	int   qlen;                           /* the work queue's length     */
+	int   poller_running;                 /* is poller thread running ? */
+	int   qlen;                           /* the work queue's length    */
 	int   job_nslot;
-	int   qlen_warn;                      /* the work queue's length     */
-	int   valid;                          /* valid                       */
-	int   quit;                           /* worker should quit          */
-	int   poller_quit;                    /* poller should quit          */
-	int   parallelism;                    /* maximum threads             */
-	int   count;                          /* current threads             */
-	int   idle;                           /* idle threads                */
-	int   idle_timeout;                   /* idle timeout second         */
-	int   overload_timewait;              /* when too busy, need sleep ? */
-	time_t last_warn;                     /* last warn time              */
-	int  (*poller_fn)(void *arg);         /* worker poll function        */
-	void *poller_arg;                     /* the arg of poller_fn        */
-	int  (*worker_init_fn)(void *arg);    /* the arg is worker_init_arg  */
+	int   qlen_warn;                      /* the work queue's length    */
+	int   valid;                          /* valid                      */
+	int   quit;                           /* worker should quit         */
+	int   poller_quit;                    /* poller should quit         */
+	int   parallelism;                    /* maximum threads            */
+	int   count;                          /* current threads            */
+	int   idle;                           /* idle threads               */
+	int   idle_timeout;                   /* idle timeout second        */
+	acl_int64 schedule_warn;              /* schedule warn: millisecond */
+	int   overload_wait;                  /* when too busy, sleep time  */
+	time_t last_warn;                     /* last warn time             */
+	int  (*poller_fn)(void *arg);         /* worker poll function       */
+	void *poller_arg;                     /* the arg of poller_fn       */
+	int  (*worker_init_fn)(void *arg);    /* the arg is worker_init_arg */
 	void *worker_init_arg;
-	void (*worker_free_fn)(void *arg);    /* the arg is worker_free_arg  */
+	void (*worker_free_fn)(void *arg);    /* the arg is worker_free_arg */
 	void *worker_free_arg;
 };
 
@@ -120,7 +131,7 @@ static void *poller_thread(void *arg)
 		acl_msg_fatal("%s, %s(%d): poller_fn is null!",
 			__FILE__, myname, __LINE__);
 
-	acl_debug(ACL_DEBUG_THR_POOL, 2) ("%s(%d): poller(tid=%lu) started ...",
+	acl_debug(ACL_DEBUG_THR_POOL, 2) ("%s(%d): poller(tid=%lu) started.",
 		myname, __LINE__, (unsigned long) id);
 	loop_count = 0;
 	pre_loop_t = time(NULL);
@@ -153,7 +164,7 @@ static void *poller_thread(void *arg)
 			break;
 	}
 
-	acl_debug(ACL_DEBUG_THR_POOL, 2) ("%s(%d): poller(%lu) thread quit ...",
+	acl_debug(ACL_DEBUG_THR_POOL, 2) ("%s(%d): poller(%lu) thread quit.",
 		myname, __LINE__, (unsigned long) id);
 
 	thr_pool->poller_running = 0;
@@ -177,7 +188,12 @@ static thread_worker *worker_create(acl_pthread_pool_t *thr_pool)
 			sizeof(thread_worker));
 
 	thr->id = (unsigned long) acl_pthread_self();
-	thr->idle_timeout = thr_pool->idle_timeout;
+	thr->idle = thr_pool->idle_timeout;
+	if (thr->idle > 0) {
+		thr->wait_base = 100000000;
+		thr->wait_count = SEC_TO_NSEC/thr->wait_base * thr->idle;
+	}
+
 	acl_assert(acl_pthread_cond_init(&thr->cond, NULL) == 0);
 	thr->mutex = &thr_pool->worker_mutex;
 	return thr;
@@ -210,6 +226,24 @@ static void worker_run(acl_pthread_pool_t *thr_pool acl_unused,
 		acl_msg_fatal("%s(%d), %s: unlock error: %s, tid: %lu",
 			__FILE__, __LINE__, myname, acl_last_serror(),
 			(unsigned long) acl_pthread_self());
+	}
+
+	if (job->start > 0) {
+		acl_int64 now;
+
+		SET_TIME(now);
+		now -= job->start;
+		if (now >= thr_pool->schedule_warn) {
+			acl_int64 nn;
+			SET_TIME(nn);
+
+			printf("spent: %lld, start: %lld, end: %lld\r\n", nn - job->start, job->start, nn);
+			/*
+			acl_msg_warn("%s(%d), %s: schedule: %lld >= %lld",
+				__FILE__, __LINE__, myname,
+				now, thr_pool->schedule_warn);
+				*/
+		}
 	}
 
 #ifdef	USE_SLOT
@@ -281,13 +315,20 @@ static int worker_wait(acl_pthread_pool_t *thr_pool, thread_worker *thr)
 		thr_pool->thr_idle = thr;
 		thr_pool->idle++;
 
-		if (thr->idle_timeout > 0) {
+		if (thr->idle > 0) {
 			struct timespec  timeout;
 			struct timeval   tv;
+			acl_int64 n;
 
 			gettimeofday(&tv, NULL);
-			timeout.tv_sec = tv.tv_sec + 1;
-			timeout.tv_nsec = tv.tv_usec * 1000;
+			timeout.tv_sec = tv.tv_sec;
+			n = tv.tv_usec * 1000 + thr->wait_base;
+			if (n >= SEC_TO_NSEC) {
+				timeout.tv_sec += 1;
+				timeout.tv_nsec = n - SEC_TO_NSEC;
+			}
+			else
+				timeout.tv_nsec = n;
 
 			status = acl_pthread_cond_timedwait(&thr->cond,
 					thr->mutex, &timeout);
@@ -314,17 +355,15 @@ static int worker_wait(acl_pthread_pool_t *thr_pool, thread_worker *thr)
 			thr->prev->next = thr->next;
 		}
 
-		if (thr->job_first != NULL || thr_pool->job_first != NULL) {
-			idle_count = 0;
+		if (thr->job_first != NULL || thr_pool->job_first != NULL)
 			return 1;
-		}
 
 		if (thr_pool->quit)
 			break;
 
 		if (status == ACL_ETIMEDOUT) {
 			idle_count++;
-			if (idle_count < thr->idle_timeout)
+			if (idle_count < thr->wait_count)
 				continue;
 			break;
 		} else if (status == 0) {
@@ -354,7 +393,7 @@ static void *worker_thread(void* arg)
 
 	if (thr_pool->worker_init_fn != NULL) {
 		if (thr_pool->worker_init_fn(thr_pool->worker_init_arg) < 0) {
-			acl_msg_error("%s(%d), %s: tid: %lu, thread init error",
+			acl_msg_error("%s(%d), %s: thread(%lu) init error",
 				__FILE__, __LINE__, myname,
 				(unsigned long) acl_pthread_self());
 			acl_pthread_mutex_lock(&thr_pool->worker_mutex);
@@ -432,6 +471,20 @@ static void *worker_thread(void* arg)
 	return NULL;
 }
 
+#if 0
+static thread_worker *peek_idle_worker(acl_pthread_pool_t *thr_pool)
+{
+	thread_worker *thr;
+
+	for (thr = thr_pool->thr_first; thr != NULL; thr = thr->next) {
+		if (thr->qlen == 0)
+			return thr;
+	}
+
+	return NULL;
+}
+#endif
+
 static void job_add(acl_pthread_pool_t *thr_pool, acl_pthread_job_t *job)
 {
 	static const char *myname = "job_add";
@@ -439,6 +492,11 @@ static void job_add(acl_pthread_pool_t *thr_pool, acl_pthread_job_t *job)
 
 	/* must reset the job's next to NULL */
 	job->next = NULL;
+
+	if (thr_pool->schedule_warn > 0)
+		SET_TIME(job->start);
+	else
+		job->start = 0;
 
 	status = acl_pthread_mutex_lock(&thr_pool->worker_mutex);
 	if (status != 0) {
@@ -516,6 +574,32 @@ static void job_add(acl_pthread_pool_t *thr_pool, acl_pthread_job_t *job)
 		return;
 	}
 
+#if 0
+	if (thr_pool->idle > 0) {
+		thread_worker *thr;
+		job = thr_pool->job_first;
+
+		for (; job != NULL; job = thr_pool->job_first) {
+			thr = peek_idle_worker(thr_pool);
+			if (thr == NULL)
+				break;
+
+			thr_pool->job_first = job->next;
+			if (thr_pool->job_last == job)
+				thr_pool->job_last = NULL;
+			thr_pool->qlen--;
+
+			/*
+			printf(">>>job: %p\r\n", (void*) job);
+			*/
+			thr->job_first = job;
+			thr->job_last = job;
+			thr->qlen++;
+			acl_assert(acl_pthread_cond_signal(&thr->cond) == 0);
+		}
+	}
+#endif
+
 	/* if qlen is too long, should warning, event sleep a while */
 
 	if (thr_pool->qlen > thr_pool->qlen_warn) {
@@ -528,10 +612,10 @@ static void job_add(acl_pthread_pool_t *thr_pool, acl_pthread_job_t *job)
 				myname, thr_pool->parallelism, thr_pool->qlen,
 				thr_pool->idle);
 		}
-		if (thr_pool->overload_timewait > 0) {
+		if (thr_pool->overload_wait > 0) {
 			acl_msg_warn("%s(%d), %s: sleep %d seconds", __FILE__,
-				__LINE__, myname, thr_pool->overload_timewait);
-			sleep(thr_pool->overload_timewait);
+				__LINE__, myname, thr_pool->overload_wait);
+			sleep(thr_pool->overload_wait);
 		}
 	}
 
@@ -543,6 +627,9 @@ void acl_pthread_pool_add_one(acl_pthread_pool_t *thr_pool,
 {
 	const char *myname = "acl_pthread_pool_add";
 	acl_pthread_job_t *job;
+#ifdef	USE_SLOT
+	int   status;
+#endif
 
 	if (thr_pool->valid != ACL_PTHREAD_POOL_VALID)
 		acl_msg_fatal("%s(%d), %s: thr_pool invalid",
@@ -694,10 +781,10 @@ static void job_append(acl_pthread_pool_t *thr_pool, acl_pthread_job_t *job)
 				myname, thr_pool->parallelism, thr_pool->qlen,
 				thr_pool->idle);
 		}
-		if (thr_pool->overload_timewait > 0) {
+		if (thr_pool->overload_wait > 0) {
 			acl_msg_warn("%s(%d), %s: sleep %d seconds", __FILE__,
-			       	__LINE__, myname, thr_pool->overload_timewait);
-			sleep(thr_pool->overload_timewait);
+			       	__LINE__, myname, thr_pool->overload_wait);
+			sleep(thr_pool->overload_wait);
 		}
 	}
 }
@@ -828,9 +915,10 @@ static void init_thread_pool(acl_pthread_pool_t *thr_pool)
 	thr_pool->thr_iter          = NULL;
 	thr_pool->thr_idle          = NULL;
 	thr_pool->qlen              = 0;
-	thr_pool->overload_timewait = 0;
+	thr_pool->overload_wait = 0;
 	thr_pool->count             = 0;
 	thr_pool->idle              = 0;
+	thr_pool->schedule_warn     = 0;
 }
 
 /* create work queue */
@@ -846,6 +934,13 @@ acl_pthread_pool_t *acl_thread_pool_create(int threads_limit, int idle_timeout)
 
 	thr_pool = acl_pthread_pool_create(&attr);
 	return thr_pool;
+}
+
+void acl_pthread_pool_set_schedule_warn(acl_pthread_pool_t *thr_pool,
+	acl_int64 n)
+{
+	if (n >= 0)
+		thr_pool->schedule_warn = n;
 }
 
 acl_pthread_pool_t *acl_pthread_pool_create(const acl_pthread_pool_attr_t *attr)
@@ -951,7 +1046,7 @@ int acl_pthread_pool_set_timewait(acl_pthread_pool_t *thr_pool, int timewait)
 		return -1;
 	}
 
-	thr_pool->overload_timewait = timewait;
+	thr_pool->overload_wait = timewait;
 	return 0;
 }
 

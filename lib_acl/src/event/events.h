@@ -212,7 +212,7 @@ ACL_EVENT *event_new_select_thr(void);
 ACL_EVENT *event_new_poll(int fdsize);
 
 /* in events_poll_thr.c */
-ACL_EVENT *event_new_poll_thr(int fdsize);
+ACL_EVENT *event_poll_alloc_thr(int fdsize);
 
 /* in events_kernel.c */
 ACL_EVENT *event_new_kernel(int fdsize);

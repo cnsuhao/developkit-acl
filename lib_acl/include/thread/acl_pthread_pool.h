@@ -197,6 +197,13 @@ ACL_API int acl_pthread_pool_dispatch(void *dispatch_arg,
 ACL_API int acl_pthread_pool_size(acl_pthread_pool_t *thr_pool);
 
 /**
+ * 设置线程任务调度超时警告的时间
+ * @param thr_pool {acl_pthread_pool_t*} 线程池对象，不能为空
+ * @param n {acl_int64} 当该值 > 0 时，如果线程任务的调度时间超过此值则会记录警告日志
+ */
+ACL_API void acl_pthread_pool_set_schedule_warn(acl_pthread_pool_t *thr_pool, acl_int64 n);
+
+/**
  * 取得当前队列中未处理的任务个数
  * @param thr_pool {acl_pthread_pool_t*} 线程池对象，不能为空
  * @return {int} 当前未处理的任务数
