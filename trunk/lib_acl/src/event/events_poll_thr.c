@@ -35,6 +35,7 @@
 typedef struct EVENT_POLL_THR {
 	EVENT_THR event;
 	struct pollfd *fds;
+	struct pollfd *fdset;
 	ACL_FD_MAP *fdmap;
 } EVENT_POLL_THR;
 
@@ -53,10 +54,7 @@ static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 		fdp->listener = 0;
 		fdp->stream = stream;
 		stream->fdp = (void *) fdp;
-	}
-
-	/* 对同一连接的读写操作禁止同时进行监控 */
-	else if (fdp->flag & EVENT_FDTABLE_FLAG_WRITE)
+	} else if (fdp->flag & EVENT_FDTABLE_FLAG_WRITE)
 		acl_msg_panic("%s(%d)->%s: fd %d: multiple I/O request",
 			__FILE__, __LINE__, myname, sockfd);
 	else {
@@ -86,17 +84,16 @@ static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 	THREAD_LOCK(&event_thr->event.tb_mutex);
 
 	fdp->fdidx = eventp->fdcnt;
-	eventp->fdtabs[eventp->fdcnt] = fdp;
-	eventp->fdcnt++;
+	eventp->fdtabs[eventp->fdcnt++] = fdp;
 
 	event_thr->fds[fdp->fdidx].fd = sockfd;
 	event_thr->fds[fdp->fdidx].events = POLLIN | POLLHUP | POLLERR;
-	acl_fdmap_add(event_thr->fdmap, sockfd, fdp);
-
-	if (eventp->maxfd != ACL_SOCKET_INVALID && eventp->maxfd < sockfd)
+	if (eventp->maxfd == ACL_SOCKET_INVALID || eventp->maxfd < sockfd)
 		eventp->maxfd = sockfd;
 
 	THREAD_UNLOCK(&event_thr->event.tb_mutex);
+
+	acl_fdmap_add(event_thr->fdmap, sockfd, fdp);
 
 	/* 主要是为了减少通知次数 */
 	if (event_thr->event.blocked && event_thr->event.evdog
@@ -119,9 +116,7 @@ static void event_enable_listen(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 		fdp->listener = 1;
 		fdp->stream = stream;
 		stream->fdp = (void *) fdp;
-	}
-	/* 对同一连接的读写操作禁止同时进行监控 */
-	else if (fdp->flag & EVENT_FDTABLE_FLAG_WRITE)
+	} else if (fdp->flag & EVENT_FDTABLE_FLAG_WRITE)
 		acl_msg_panic("%s(%d)->%s: fd %d: multiple I/O request",
 			__FILE__, __LINE__, myname, sockfd);
 	else {
@@ -142,22 +137,23 @@ static void event_enable_listen(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 		fdp->r_timeout = 0;
 	}
 
+	if ((fdp->flag & EVENT_FDTABLE_FLAG_READ) != 0)
+		return;
+
+	stream->nrefer++;
+	fdp->flag = EVENT_FDTABLE_FLAG_READ | EVENT_FDTABLE_FLAG_EXPT;
+
 	THREAD_LOCK(&event_thr->event.tb_mutex);
 
-	if ((fdp->flag & EVENT_FDTABLE_FLAG_READ) == 0) {
-		fdp->flag = EVENT_FDTABLE_FLAG_READ | EVENT_FDTABLE_FLAG_EXPT;
-		stream->nrefer++;
-		fdp->fdidx = eventp->fdcnt;
-		eventp->fdtabs[eventp->fdcnt] = fdp;
-		eventp->fdcnt++;
+	fdp->fdidx = eventp->fdcnt;
+	eventp->fdtabs[eventp->fdcnt++] = fdp;
 
-		event_thr->fds[fdp->fdidx].fd = sockfd;
-		event_thr->fds[fdp->fdidx].events = POLLIN | POLLHUP | POLLERR;
-		acl_fdmap_add(event_thr->fdmap, sockfd, fdp);
+	event_thr->fds[fdp->fdidx].fd = sockfd;
+	event_thr->fds[fdp->fdidx].events = POLLIN | POLLHUP | POLLERR;
+	if (eventp->maxfd == ACL_SOCKET_INVALID || eventp->maxfd < sockfd)
+		eventp->maxfd = sockfd;
 
-		if (eventp->maxfd != ACL_SOCKET_INVALID && eventp->maxfd < sockfd)
-			eventp->maxfd = sockfd;
-	}
+	acl_fdmap_add(event_thr->fdmap, sockfd, fdp);
 
 	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 }
@@ -177,9 +173,7 @@ static void event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 		fdp->listener = 0;
 		fdp->stream = stream;
 		stream->fdp = (void *) fdp;
-	}
-	/* 对同一连接的读写操作禁止同时进行监控 */
-	else if (fdp->flag & EVENT_FDTABLE_FLAG_READ)
+	} else if (fdp->flag & EVENT_FDTABLE_FLAG_READ)
 		acl_msg_panic("%s(%d)->%s: fd %d: multiple I/O request",
 			__FILE__, __LINE__, myname, sockfd);
 	else {
@@ -200,24 +194,25 @@ static void event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 		fdp->w_timeout = 0;
 	}
 
+	if ((fdp->flag & EVENT_FDTABLE_FLAG_WRITE) != 0)
+		return;
+
+	stream->nrefer++;
+	fdp->flag = EVENT_FDTABLE_FLAG_WRITE | EVENT_FDTABLE_FLAG_EXPT;
+
 	THREAD_LOCK(&event_thr->event.tb_mutex);
 
-	if ((fdp->flag & EVENT_FDTABLE_FLAG_WRITE) == 0) {
-		fdp->flag = EVENT_FDTABLE_FLAG_WRITE | EVENT_FDTABLE_FLAG_EXPT;
-		stream->nrefer++;
-		fdp->fdidx = eventp->fdcnt;
-		eventp->fdtabs[eventp->fdcnt] = fdp;
-		eventp->fdcnt++;
+	fdp->fdidx = eventp->fdcnt;
+	eventp->fdtabs[eventp->fdcnt++] = fdp;
 
-		event_thr->fds[fdp->fdidx].fd = sockfd;
-		event_thr->fds[fdp->fdidx].events = POLLOUT | POLLHUP | POLLERR;
-		acl_fdmap_add(event_thr->fdmap, sockfd, fdp);
-
-		if (eventp->maxfd != ACL_SOCKET_INVALID && eventp->maxfd < sockfd)
-			eventp->maxfd = sockfd;
-	}
+	event_thr->fds[fdp->fdidx].fd = sockfd;
+	event_thr->fds[fdp->fdidx].events = POLLOUT | POLLHUP | POLLERR;
+	if (eventp->maxfd == ACL_SOCKET_INVALID || eventp->maxfd < sockfd)
+		eventp->maxfd = sockfd;
 
 	THREAD_UNLOCK(&event_thr->event.tb_mutex);
+
+	acl_fdmap_add(event_thr->fdmap, sockfd, fdp);
 
 	if (event_thr->event.blocked && event_thr->event.evdog
 	    && event_dog_client(event_thr->event.evdog) != stream)
@@ -240,7 +235,9 @@ static void event_disable_readwrite(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 		return;
 	}
 
-	if ((fdp->flag & (EVENT_FDTABLE_FLAG_READ | EVENT_FDTABLE_FLAG_WRITE)) == 0) {
+	if ((fdp->flag & (EVENT_FDTABLE_FLAG_READ
+		| EVENT_FDTABLE_FLAG_WRITE)) == 0)
+	{
 		acl_msg_error("%s(%d): sockfd(%d) not be set",
 			myname, __LINE__, sockfd);
 		return;
@@ -264,16 +261,9 @@ static void event_disable_readwrite(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 		event_thr->fds[fdp->fdidx] = event_thr->fds[eventp->fdcnt];
 	}
 
-	if (fdp->fdidx_ready > 0
-	    && fdp->fdidx_ready < eventp->fdcnt_ready
-	    && eventp->fdtabs_ready[fdp->fdidx_ready] == fdp)
-	{
-		eventp->fdtabs_ready[fdp->fdidx_ready] = NULL;
-	}
+	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 
 	acl_fdmap_del(event_thr->fdmap, sockfd);
-
-	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 
 	if (fdp->flag & EVENT_FDTABLE_FLAG_READ)
 		stream->nrefer--;
@@ -335,6 +325,7 @@ static void event_loop(ACL_EVENT *eventp)
 
 	SET_TIME(eventp->present);
 	THREAD_LOCK(&event_thr->event.tm_mutex);
+
 	/*
 	 * Find out when the next timer would go off. Timer requests are sorted.
 	 * If any timer is scheduled, adjust the delay appropriately.
@@ -367,14 +358,22 @@ static void event_loop(ACL_EVENT *eventp)
 			goto TAG_DONE;
 		}
 
+		memcpy(event_thr->fdset, event_thr->fds, eventp->fdcnt);
+
+		THREAD_UNLOCK(&event_thr->event.tb_mutex);
+
 		if (eventp->fdcnt_ready > 0)
 			delay = 0;
+	} else {
+		THREAD_LOCK(&event_thr->event.tb_mutex);
+
+		memcpy(event_thr->fdset, event_thr->fds, eventp->fdcnt);
 
 		THREAD_UNLOCK(&event_thr->event.tb_mutex);
 	}
 
 	event_thr->event.blocked = 1;
-	nready = poll(event_thr->fds, eventp->fdcnt, delay);
+	nready = poll(event_thr->fdset, eventp->fdcnt, delay);
 	event_thr->event.blocked = 0;
 
 	if (nready < 0) {
@@ -386,13 +385,13 @@ static void event_loop(ACL_EVENT *eventp)
 		goto TAG_DONE;
 
 	for (i = 0; i < eventp->fdcnt; i++) {
-		fdp = acl_fdmap_ctx(event_thr->fdmap, event_thr->fds[i].fd);
+		fdp = acl_fdmap_ctx(event_thr->fdmap, event_thr->fdset[i].fd);
 		if (fdp == NULL || fdp->stream == NULL)
 			continue;
 		if ((fdp->event_type & (ACL_EVENT_XCPT | ACL_EVENT_RW_TIMEOUT)))
 			continue;
 
-		revents = event_thr->fds[i].revents;
+		revents = event_thr->fdset[i].revents;
 		if ((revents & (POLLHUP | POLLERR)) != 0) {
 			fdp->event_type |= ACL_EVENT_XCPT;
 			fdp->fdidx_ready = eventp->fdcnt_ready;
@@ -418,11 +417,11 @@ static void event_loop(ACL_EVENT *eventp)
 TAG_DONE:
 
 	/*
-	 * Deliver timer events. Requests are sorted: we can stop when we reach
-	 * the future or the list end. Allow the application to update the timer
-	 * queue while it is being called back. To this end, we repeatedly pop
-	 * the first request off the timer queue before delivering the event to
-	 * the application.
+	 * Deliver timer events. Requests are sorted: we can stop when we
+	 * reach the future or the list end. Allow the application to update
+	 * the timer queue while it is being called back. To this end, we
+	 * repeatedly pop the first request off the timer queue before
+	 * delivering the event to the application.
 	 */
 
 	SET_TIME(eventp->present);
@@ -472,18 +471,19 @@ static void event_free(ACL_EVENT *eventp)
 	LOCK_DESTROY(&event_thr->event.tb_mutex);
 
 	acl_fdmap_free(event_thr->fdmap);
+	acl_myfree(event_thr->fdset);
 	acl_myfree(event_thr->fds);
 	acl_myfree(eventp);
 }
 
-ACL_EVENT *event_new_poll_thr(int fdsize)
+ACL_EVENT *event_poll_alloc_thr(int fdsize)
 {
 	EVENT_POLL_THR *event_thr;
 
 	event_thr = (EVENT_POLL_THR*) event_alloc(sizeof(EVENT_POLL_THR));
 
-	snprintf(event_thr->event.event.name, sizeof(event_thr->event.event.name),
-		"thread events - poll" );
+	snprintf(event_thr->event.event.name,
+		sizeof(event_thr->event.event.name), "thread events - poll");
 	event_thr->event.event.event_mode           = ACL_EVENT_POLL;
 	event_thr->event.event.use_thread           = 1;
 	event_thr->event.event.loop_fn              = event_loop;
@@ -505,6 +505,8 @@ ACL_EVENT *event_new_poll_thr(int fdsize)
 	LOCK_INIT(&event_thr->event.tb_mutex);
 
 	event_thr->fds = (struct pollfd *) acl_mycalloc(fdsize + 1,
+			sizeof(struct pollfd));
+	event_thr->fdset = (struct pollfd *) acl_mycalloc(fdsize + 1,
 			sizeof(struct pollfd));
 	event_thr->fdmap = acl_fdmap_create(fdsize);
 	return (ACL_EVENT *) event_thr;

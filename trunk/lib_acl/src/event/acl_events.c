@@ -130,7 +130,7 @@ ACL_EVENT *acl_event_new_poll_thr(int delay_sec, int delay_usec)
 	int   fdsize;
 
 	fdsize = event_limit(0);
-	eventp = event_new_poll_thr(fdsize);
+	eventp = event_poll_alloc_thr(fdsize);
 	event_init(eventp, fdsize, delay_sec, delay_usec);
 	return eventp;
 #else
