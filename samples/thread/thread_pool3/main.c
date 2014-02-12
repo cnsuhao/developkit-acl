@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 	int   nthreads = 10, nloop = 100000, timeout = 10;
 	int   nwait = 10, nwarn = 50;
 
-	while ((ch = getopt(argc, argv, "ht:n:T:")) > 0) {
+	while ((ch = getopt(argc, argv, "ht:n:T:w:W:")) > 0) {
 		switch (ch) {
 		case 'h':
 			usage(argv[0]);
