@@ -47,7 +47,7 @@ typedef struct thread_worker {
 	unsigned long id;
 	int   quit;                           /* if thread need quit ?      */
 	int   idle;                           /* thread wait timeout        */
-	acl_int64 wait_base;                  /* timeout once wait          */
+	acl_int64 wait_base;                  /* once wait: nanosecond      */
 	acl_int64 wait_count;                 /* timeout of total wait      */
 	acl_pthread_job_t    *job_first;      /* thread's work queue first  */
 	acl_pthread_job_t    *job_last;       /* thread's work queue last   */
@@ -87,6 +87,7 @@ struct acl_pthread_pool_t {
 	int   idle;                           /* idle threads               */
 	int   idle_timeout;                   /* idle timeout second        */
 	acl_int64 schedule_warn;              /* schedule warn: millisecond */
+	acl_int64 schedule_wait;              /* schedule wait: millisecond */
 	int   overload_wait;                  /* when too busy, sleep time  */
 	time_t last_warn;                     /* last warn time             */
 	int  (*poller_fn)(void *arg);         /* worker poll function       */
@@ -189,10 +190,11 @@ static thread_worker *worker_create(acl_pthread_pool_t *thr_pool)
 
 	thr->id = (unsigned long) acl_pthread_self();
 	thr->idle = thr_pool->idle_timeout;
-	if (thr->idle > 0) {
-		thr->wait_base = 100000000;
+	if (thr->idle > 0 && thr_pool->schedule_wait > 0) {
+		thr->wait_base = thr_pool->schedule_wait * 1000000;
 		thr->wait_count = SEC_TO_NSEC/thr->wait_base * thr->idle;
-	}
+	} else
+		thr->idle = 0;
 
 	acl_assert(acl_pthread_cond_init(&thr->cond, NULL) == 0);
 	thr->mutex = &thr_pool->worker_mutex;
@@ -234,15 +236,9 @@ static void worker_run(acl_pthread_pool_t *thr_pool acl_unused,
 		SET_TIME(now);
 		now -= job->start;
 		if (now >= thr_pool->schedule_warn) {
-			acl_int64 nn;
-			SET_TIME(nn);
-
-			printf("spent: %lld, start: %lld, end: %lld\r\n", nn - job->start, job->start, nn);
-			/*
 			acl_msg_warn("%s(%d), %s: schedule: %lld >= %lld",
 				__FILE__, __LINE__, myname,
 				now, thr_pool->schedule_warn);
-				*/
 		}
 	}
 
@@ -918,7 +914,8 @@ static void init_thread_pool(acl_pthread_pool_t *thr_pool)
 	thr_pool->overload_wait = 0;
 	thr_pool->count             = 0;
 	thr_pool->idle              = 0;
-	thr_pool->schedule_warn     = 0;
+	thr_pool->schedule_warn     = 100;
+	thr_pool->schedule_wait     = 50;
 }
 
 /* create work queue */
@@ -939,8 +936,15 @@ acl_pthread_pool_t *acl_thread_pool_create(int threads_limit, int idle_timeout)
 void acl_pthread_pool_set_schedule_warn(acl_pthread_pool_t *thr_pool,
 	acl_int64 n)
 {
-	if (n >= 0)
+	if (n > 0)
 		thr_pool->schedule_warn = n;
+}
+
+void acl_pthread_pool_set_schedule_wait(acl_pthread_pool_t *thr_pool,
+	acl_int64 n)
+{
+	if (n > 0)
+		thr_pool->schedule_wait = n;
 }
 
 acl_pthread_pool_t *acl_pthread_pool_create(const acl_pthread_pool_attr_t *attr)
