@@ -592,7 +592,7 @@ static void job_add(acl_pthread_pool_t *thr_pool, acl_pthread_job_t *job)
 		status = acl_pthread_mutex_unlock(&thr_pool->worker_mutex);
 		if (status != 0) {
 			SET_ERRNO(status);
-			acl_msg_error("%s(%d), %s: pthread_mutex_unlock: %s",
+			acl_msg_fatal("%s(%d), %s: pthread_mutex_unlock: %s",
 				__FILE__, __LINE__, myname, acl_last_serror());
 		}
 		return;
@@ -617,7 +617,12 @@ static void job_add(acl_pthread_pool_t *thr_pool, acl_pthread_job_t *job)
 		}
 	}
 
-	(void) acl_pthread_mutex_unlock(&thr_pool->worker_mutex);
+	status = acl_pthread_mutex_unlock(&thr_pool->worker_mutex);
+	if (status != 0) {
+		SET_ERRNO(status);
+		acl_msg_error("%s(%d), %s: pthread_mutex_unlock: %s",
+			__FILE__, __LINE__, myname, acl_last_serror());
+	}
 }
 
 void acl_pthread_pool_add_one(acl_pthread_pool_t *thr_pool,
