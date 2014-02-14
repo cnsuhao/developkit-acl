@@ -351,10 +351,10 @@ static int worker_wait(acl_pthread_pool_t *thr_pool, thread_worker *thr)
 			n = tv.tv_usec * 1000 + thr->wait_base;
 			if (n >= SEC_TO_NSEC) {
 				timeout.tv_sec += 1;
-				timeout.tv_nsec = n - SEC_TO_NSEC;
+				timeout.tv_nsec = (long) n - SEC_TO_NSEC;
 			}
 			else
-				timeout.tv_nsec = n;
+				timeout.tv_nsec = (long) n;
 
 			status = acl_pthread_cond_timedwait(&thr->cond->cond,
 					thr->mutex, &timeout);
