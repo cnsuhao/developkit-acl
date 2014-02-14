@@ -38,6 +38,7 @@ static void usage(const char *procname)
 		"	-T timeout\r\n"
 		"	-w thread wait timeout\r\n"
 		"	-W thread warn timeout\r\n"
+		"	-r [set random peek]\r\n"
 		"	-n loop_count[default: 100000]\r\n", procname);
 }
 
