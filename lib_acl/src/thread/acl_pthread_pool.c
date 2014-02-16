@@ -217,6 +217,8 @@ static thread_worker *worker_create(acl_pthread_pool_t *thr_pool)
 			% SEC_TO_NS;
 		thr->wait_count = (SEC_TO_MS * thr->idle)
 			/ thr_pool->schedule_wait;
+		if (thr->wait_count == 0)
+			thr->idle = 0;
 	} else
 		thr->idle = 0;
 
@@ -326,6 +328,9 @@ static int worker_wait(acl_pthread_pool_t *thr_pool, thread_worker *thr)
 {
 	const char *myname = "worker_wait";
 	int   status, idle_count = 0;
+	struct timespec  timeout;
+	struct timeval   tv;
+	acl_int64 n;
 
 	while (1) {
 
@@ -345,18 +350,13 @@ static int worker_wait(acl_pthread_pool_t *thr_pool, thread_worker *thr)
 		thr_pool->idle++;
 
 		if (thr->idle > 0) {
-			struct timespec  timeout;
-			struct timeval   tv;
-			acl_int64 n;
-
 			gettimeofday(&tv, NULL);
 			timeout.tv_sec = tv.tv_sec + thr->wait_sec;
 			n = tv.tv_usec * 1000 + thr->wait_nsec;
 			if (n >= SEC_TO_NS) {
 				timeout.tv_sec += 1;
 				timeout.tv_nsec = (long) n - SEC_TO_NS;
-			}
-			else
+			} else
 				timeout.tv_nsec = (long) n;
 
 			status = acl_pthread_cond_timedwait(&thr->cond->cond,
@@ -445,6 +445,7 @@ static void *worker_thread(void* arg)
 	}
 
 	for (;;) {
+
 		/* handle thread self's job first */
 		if (thr->job_first != NULL) {
 			job = thr->job_first;
@@ -457,7 +458,7 @@ static void *worker_thread(void* arg)
 		}
 
 		/* then handle thread pool's job */
-		if (thr_pool->job_first != NULL) {
+		else if (thr_pool->job_first != NULL) {
 			job = thr_pool->job_first;
 			thr_pool->job_first = job->next;
 			if (thr_pool->job_last == job)
@@ -469,6 +470,9 @@ static void *worker_thread(void* arg)
 
 		if (thr->job_first != NULL || thr_pool->job_first != NULL)
 			continue;
+
+		else if (thr_pool->quit)
+			break;
 
 		else if (worker_wait(thr_pool, thr) > 0)
 			continue;
