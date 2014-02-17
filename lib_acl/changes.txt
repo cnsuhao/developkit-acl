@@ -1,6 +1,10 @@
 修改历史列表：
 ------------------------------------------------------------------------
 
+426) 2014.2.17
+426.1) feature: acl_event.c 增加函数 acl_event_set_check_inter，可以用来
+设置事件循环过程进行全局描述字检查的时间间隔
+
 425) 2014.2.14
 425.1) performance: acl_pthread_pool.c，将 pthread_cond_signal 放在
 pthread_mutex_unlock 之后，从而减少了子线程等待任务被触发的时间(为了防止
