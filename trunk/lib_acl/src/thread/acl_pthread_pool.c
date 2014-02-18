@@ -351,7 +351,7 @@ static int worker_wait(acl_pthread_pool_t *thr_pool, thread_worker *thr)
 
 		if (thr->idle > 0) {
 			gettimeofday(&tv, NULL);
-			timeout.tv_sec = tv.tv_sec + thr->wait_sec;
+			timeout.tv_sec = tv.tv_sec + (time_t) thr->wait_sec;
 			n = tv.tv_usec * 1000 + thr->wait_nsec;
 			if (n >= SEC_TO_NS) {
 				timeout.tv_sec += 1;
