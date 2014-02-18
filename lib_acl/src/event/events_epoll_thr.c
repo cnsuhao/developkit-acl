@@ -371,7 +371,7 @@ static void event_loop(ACL_EVENT *eventp)
 
 	if (nready < 0) {
 		if (acl_last_error() != ACL_EINTR)
-			acl_msg_fatal("%s(%d), %s: event_loop: select: %s",
+			acl_msg_fatal("%s(%d), %s: event_loop: epoll: %s",
 				__FILE__, __LINE__, myname, acl_last_serror());
 		goto TAG_DONE;
 	} else if (nready == 0)
