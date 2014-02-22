@@ -64,7 +64,7 @@ static void stream_on_close(ACL_VSTREAM *stream, void *arg)
 	EVENT_KERNEL *ev = (EVENT_KERNEL*) arg;
 	ACL_EVENT_FDTABLE *fdp = (ACL_EVENT_FDTABLE*) stream->fdp;
 	ACL_SOCKET sockfd = ACL_VSTREAM_SOCK(stream);
-	BOOL is_pending;
+	BOOL is_completed;
 
 	if (fdp == NULL)
 		acl_msg_fatal("%s(%d): fdp null, sockfd(%d)",
@@ -78,7 +78,7 @@ static void stream_on_close(ACL_VSTREAM *stream, void *arg)
 	/* windows xp 环境下，必须在关闭套接字之前调用此宏判断重叠 IO
 	 * 是否处于 STATUS_PENDING 状态
 	 */
-	is_pending = HasOverlappedIoCompleted(&fdp->event_read->overlapped);
+	is_completed = HasOverlappedIoCompleted(&fdp->event_read->overlapped);
 
 	/* 必须在释放 fdp->event_read/fdp->event_write 前关闭套接口句柄 */
 	if (ACL_VSTREAM_SOCK(stream) != ACL_SOCKET_INVALID
@@ -98,7 +98,7 @@ static void stream_on_close(ACL_VSTREAM *stream, void *arg)
 		/* 如果完成端口处于未决状态，则不能释放重叠结构，需在主循环的
 		 * GetQueuedCompletionStatus 调用后来释放
 		 */
-		if (is_pending)
+		if (is_completed)
 			acl_myfree(fdp->event_read);
 		else {
 			fdp->event_read->type = IOCP_EVENT_DEAD;
