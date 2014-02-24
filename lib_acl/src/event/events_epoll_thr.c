@@ -50,6 +50,14 @@ static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 	ACL_EVENT_FDTABLE *fdp;
 	ACL_SOCKET sockfd;
 	struct epoll_event ev;
+	int   fd_ready;
+
+	if (ACL_VSTREAM_BFRD_CNT(stream) > 0
+		|| (stream->flag & ACL_VSTREAM_FLAG_BAD))
+	{
+		fd_ready = 1;
+	} else
+		fd_ready = 0;
 
 	sockfd = ACL_VSTREAM_SOCK(stream);
 	fdp = (ACL_EVENT_FDTABLE*) stream->fdp;
@@ -80,13 +88,20 @@ static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 	}
 
 	if ((fdp->flag & EVENT_FDTABLE_FLAG_READ) != 0)
+	{
+		acl_msg_info("has set read");
 		return;
+	}
 
 	stream->nrefer++;
 	fdp->flag = EVENT_FDTABLE_FLAG_READ | EVENT_FDTABLE_FLAG_EXPT;
 
 	memset(&ev, 0, sizeof(ev));
+#if 0
 	ev.events = EPOLLIN | EPOLLHUP | EPOLLERR | EPOLLET;
+#else
+	ev.events = EPOLLIN | EPOLLHUP | EPOLLERR;
+#endif
 	ev.data.ptr = fdp;
 
 	THREAD_LOCK(&event_thr->event.tb_mutex);
@@ -94,11 +109,31 @@ static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 	fdp->fdidx = eventp->fdcnt;
 	eventp->fdtabs[eventp->fdcnt++] = fdp;
 
-	THREAD_UNLOCK(&event_thr->event.tb_mutex);
+	if (fd_ready) {
+		if (epoll_ctl(event_thr->handle, EPOLL_CTL_ADD,
+			sockfd, &ev) < 0)
+		{
+			acl_msg_fatal("%s: epoll_ctl: %s, fd: %d",
+				myname, acl_last_serror(), sockfd);
+		}
 
-	if (epoll_ctl(event_thr->handle, EPOLL_CTL_ADD, sockfd, &ev) < 0)
-		acl_msg_fatal("%s: epoll_ctl: %s, fd: %d",
-			myname, acl_last_serror(), sockfd);
+		THREAD_UNLOCK(&event_thr->event.tb_mutex);
+
+		if (event_thr->event.blocked && event_thr->event.evdog
+			&& event_dog_client(event_thr->event.evdog) != stream)
+		{
+			event_dog_notify(event_thr->event.evdog);
+		}
+	} else {
+		THREAD_UNLOCK(&event_thr->event.tb_mutex);
+
+		if (epoll_ctl(event_thr->handle, EPOLL_CTL_ADD,
+			sockfd, &ev) < 0)
+		{
+			acl_msg_fatal("%s: epoll_ctl: %s, fd: %d",
+				myname, acl_last_serror(), sockfd);
+		}
+	}
 }
 
 static void event_enable_listen(ACL_EVENT *eventp, ACL_VSTREAM *stream,
@@ -168,6 +203,12 @@ static void event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 	ACL_EVENT_FDTABLE *fdp;
 	ACL_SOCKET sockfd;
 	struct epoll_event ev;
+	int   fd_ready;
+
+	if ((stream->flag & ACL_VSTREAM_FLAG_BAD))
+		fd_ready = 1;
+	else
+		fd_ready = 0;
 
 	sockfd = ACL_VSTREAM_SOCK(stream);
 	fdp = (ACL_EVENT_FDTABLE*) stream->fdp;
@@ -212,11 +253,25 @@ static void event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 	fdp->fdidx = eventp->fdcnt;
 	eventp->fdtabs[eventp->fdcnt++] = fdp;
 
-	THREAD_UNLOCK(&event_thr->event.tb_mutex);
+	if (fd_ready) {
+		if (epoll_ctl(event_thr->handle, EPOLL_CTL_ADD,
+			sockfd, &ev) < 0)
+		{
+			acl_msg_fatal("%s: epoll_ctl: %s, fd: %d",
+				myname, acl_last_serror(), sockfd);
+		}
 
-	if (epoll_ctl(event_thr->handle, EPOLL_CTL_ADD, sockfd, &ev) < 0)
-		acl_msg_fatal("%s: epoll_ctl: %s, fd: %d",
-			myname, acl_last_serror(), sockfd);
+		THREAD_UNLOCK(&event_thr->event.tb_mutex);
+	} else {
+		THREAD_UNLOCK(&event_thr->event.tb_mutex);
+
+		if (epoll_ctl(event_thr->handle, EPOLL_CTL_ADD,
+			sockfd, &ev) < 0)
+		{
+			acl_msg_fatal("%s: epoll_ctl: %s, fd: %d",
+				myname, acl_last_serror(), sockfd);
+		}
+	}
 }
 
 /* event_disable_readwrite - disable request for read or write events */
@@ -262,13 +317,17 @@ static void event_disable_readwrite(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 
 	if (fdp->flag & EVENT_FDTABLE_FLAG_READ)
 		stream->nrefer--;
+	else
+		acl_msg_info("not set read");
+
 	if (fdp->flag & EVENT_FDTABLE_FLAG_WRITE)
 		stream->nrefer--;
 
 	event_fdtable_reset(fdp);
 
 	if (epoll_ctl(event_thr->handle, EPOLL_CTL_DEL, sockfd, NULL) < 0)
-		acl_msg_fatal("%s: epoll_ctl: %s", myname, acl_last_serror());
+		acl_msg_fatal("%s: epoll_ctl: %s, fd: %d",
+			myname, acl_last_serror(), sockfd);
 }
 
 static int event_isrset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
