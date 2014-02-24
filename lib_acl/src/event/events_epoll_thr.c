@@ -438,6 +438,13 @@ TAG_DONE:
 		event_thr_fire(eventp);
 }
 
+static void event_add_dog(ACL_EVENT *eventp)
+{
+	EVENT_EPOLL_THR *event_thr = (EVENT_EPOLL_THR*) eventp;
+
+	event_thr->event.evdog = event_dog_create((ACL_EVENT*) event_thr, 1);
+}
+
 static void event_free(ACL_EVENT *eventp)
 {
 	const char *myname = "event_free";
@@ -468,6 +475,7 @@ ACL_EVENT *event_epoll_alloc_thr(int fdsize acl_unused)
 	event_thr->event.event.use_thread           = 1;
 	event_thr->event.event.loop_fn              = event_loop;
 	event_thr->event.event.free_fn              = event_free;
+	event_thr->event.event.add_dog_fn           = event_add_dog;
 	event_thr->event.event.enable_read_fn       = event_enable_read;
 	event_thr->event.event.enable_write_fn      = event_enable_write;
 	event_thr->event.event.enable_listen_fn     = event_enable_listen;
