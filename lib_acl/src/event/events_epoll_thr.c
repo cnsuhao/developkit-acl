@@ -113,8 +113,12 @@ static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 		if (epoll_ctl(event_thr->handle, EPOLL_CTL_ADD,
 			sockfd, &ev) < 0)
 		{
-			acl_msg_fatal("%s: epoll_ctl: %s, fd: %d",
-				myname, acl_last_serror(), sockfd);
+			if (errno == EEXIST)
+				acl_msg_warn("%s: epoll_ctl: %s, fd: %d",
+					myname, acl_last_serror(), sockfd);
+			else
+				acl_msg_fatal("%s: epoll_ctl: %s, fd: %d",
+					myname, acl_last_serror(), sockfd);
 		}
 
 		THREAD_UNLOCK(&event_thr->event.tb_mutex);
@@ -130,8 +134,12 @@ static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 		if (epoll_ctl(event_thr->handle, EPOLL_CTL_ADD,
 			sockfd, &ev) < 0)
 		{
-			acl_msg_fatal("%s: epoll_ctl: %s, fd: %d",
-				myname, acl_last_serror(), sockfd);
+			if (errno == EEXIST)
+				acl_msg_warn("%s: epoll_ctl: %s, fd: %d",
+					myname, acl_last_serror(), sockfd);
+			else
+				acl_msg_fatal("%s: epoll_ctl: %s, fd: %d",
+					myname, acl_last_serror(), sockfd);
 		}
 	}
 }
@@ -190,9 +198,14 @@ static void event_enable_listen(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 
 	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 
-	if (epoll_ctl(event_thr->handle, EPOLL_CTL_ADD, sockfd, &ev) < 0)
-		acl_msg_fatal("%s: epool_ctl: %s, fd: %d",
-			myname, acl_last_serror(), sockfd);
+	if (epoll_ctl(event_thr->handle, EPOLL_CTL_ADD, sockfd, &ev) < 0) {
+		if (errno == EEXIST)
+			acl_msg_warn("%s: epool_ctl: %s, fd: %d",
+				myname, acl_last_serror(), sockfd);
+		else
+			acl_msg_fatal("%s: epool_ctl: %s, fd: %d",
+				myname, acl_last_serror(), sockfd);
+	}
 }
 
 static void event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
@@ -257,8 +270,12 @@ static void event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 		if (epoll_ctl(event_thr->handle, EPOLL_CTL_ADD,
 			sockfd, &ev) < 0)
 		{
-			acl_msg_fatal("%s: epoll_ctl: %s, fd: %d",
-				myname, acl_last_serror(), sockfd);
+			if (errno == EEXIST)
+				acl_msg_warn("%s: epoll_ctl: %s, fd: %d",
+					myname, acl_last_serror(), sockfd);
+			else
+				acl_msg_fatal("%s: epoll_ctl: %s, fd: %d",
+					myname, acl_last_serror(), sockfd);
 		}
 
 		THREAD_UNLOCK(&event_thr->event.tb_mutex);
@@ -268,8 +285,12 @@ static void event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 		if (epoll_ctl(event_thr->handle, EPOLL_CTL_ADD,
 			sockfd, &ev) < 0)
 		{
-			acl_msg_fatal("%s: epoll_ctl: %s, fd: %d",
-				myname, acl_last_serror(), sockfd);
+			if (errno == EEXIST)
+				acl_msg_warn("%s: epoll_ctl: %s, fd: %d",
+					myname, acl_last_serror(), sockfd);
+			else
+				acl_msg_fatal("%s: epoll_ctl: %s, fd: %d",
+					myname, acl_last_serror(), sockfd);
 		}
 	}
 }
@@ -325,9 +346,14 @@ static void event_disable_readwrite(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 
 	event_fdtable_reset(fdp);
 
-	if (epoll_ctl(event_thr->handle, EPOLL_CTL_DEL, sockfd, NULL) < 0)
-		acl_msg_fatal("%s: epoll_ctl: %s, fd: %d",
-			myname, acl_last_serror(), sockfd);
+	if (epoll_ctl(event_thr->handle, EPOLL_CTL_DEL, sockfd, NULL) < 0) {
+		if (errno == ENOENT)
+			acl_msg_warn("%s: epoll_ctl: %s, fd: %d",
+				myname, acl_last_serror(), sockfd);
+		else
+			acl_msg_fatal("%s: epoll_ctl: %s, fd: %d",
+				myname, acl_last_serror(), sockfd);
+	}
 }
 
 static int event_isrset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
