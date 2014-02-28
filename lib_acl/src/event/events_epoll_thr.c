@@ -422,8 +422,13 @@ static void event_loop(ACL_EVENT *eventp)
 			delay = 0;
 		else if (n < eventp->delay_sec) {
 			delay = (int) n * 1000 + eventp->delay_usec / 1000;
-			if (delay <= 0)  /* xxx */
+			if (delay <= 0) {  /* xxx */
+				acl_msg_warn("%s(%d): interger overflow, "
+					"when: %lld, present: %lld, delay: %d",
+					myname, __LINE__, timer->when,
+					eventp->present, delay);
 				delay = 100;
+			}
 		}
 	}
 
