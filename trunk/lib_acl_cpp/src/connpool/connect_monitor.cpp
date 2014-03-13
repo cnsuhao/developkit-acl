@@ -1,4 +1,5 @@
 #include "acl_stdafx.hpp"
+#include <map>
 #include "acl_cpp/stream/aio_socket_stream.hpp"
 #include "acl_cpp/stream/aio_timer_callback.hpp"
 #include "acl_cpp/connpool/connect_manager.hpp"
