@@ -14,8 +14,8 @@ namespace acl
 class check_client : public aio_open_callback
 {
 public:
-	check_client(connect_manager& manager,
-		aio_socket_stream* conn, const char* addr);
+	check_client(connect_manager& manager, aio_socket_stream* conn,
+		const char* addr, std::map<string, int>& addrs);
 	~check_client();
 
 private:
@@ -29,14 +29,16 @@ private:
 	connect_manager& manager_;
 	aio_socket_stream* conn_;
 	string addr_;
+	std::map<string, int>& addrs_;
 };
 
-check_client::check_client(connect_manager& manager,
-	aio_socket_stream* conn, const char* addr)
+check_client::check_client(connect_manager& manager, aio_socket_stream* conn,
+	const char* addr, std::map<string, int>& addrs)
 : connected_(false)
 , manager_(manager)
 , conn_(conn)
 , addr_(addr)
+, addrs_(addrs)
 {
 }
 
@@ -56,7 +58,14 @@ void check_client::close_callback()
 	// 否则设置为存活状态
 	//printf(">>>server: %s %s\r\n", addr_.c_str(),
 	//	connected_ ? "alive" : "dead");
+
+	// 从当前检查服务器地址列表中删除当前的检测地址
+	std::map<string, int>::iterator it = addrs_.find(addr_);
+	if (it != addrs_.end())
+		addrs_.erase(it);
+
 	manager_.set_pools_status(addr_, connected_ ? true : false);
+
 	delete this;
 }
 
@@ -84,6 +93,7 @@ private:
 	connect_manager& manager_;
 	aio_handle& handle_;
 	int   conn_timeout_;
+	std::map<string, int> addrs_;
 };
 
 check_timer::check_timer(connect_manager& manager,
@@ -100,21 +110,26 @@ check_timer::~check_timer()
 
 void check_timer::timer_callback(unsigned int)
 {
-	std::list<string> addrs_;  // 服务器集群地址
 	const char* addr;
+
+	std::map<string, int>::const_iterator cit1;
 
 	// 先提取所有服务器地址
 
 	manager_.lock();
 
 	const std::vector<connect_pool*>& pools = manager_.get_pools();
-	std::vector<connect_pool*>::const_iterator cit = pools.begin();
+	std::vector<connect_pool*>::const_iterator cit2 = pools.begin();
 
-	for (; cit != pools.end(); ++cit)
+	for (; cit2 != pools.end(); ++cit2)
 	{
-		addr = (*cit)->get_addr();
-		if (addr && *addr)
-			addrs_.push_back(addr);
+		addr = (*cit2)->get_addr();
+		if (addr == NULL || *addr == 0)
+			continue;
+
+		cit1 = addrs_.find(addr);
+		if (cit1 != addrs_.end())
+			addrs_[addr] = 1;
 	}
 
 	manager_.unlock();
@@ -123,18 +138,25 @@ void check_timer::timer_callback(unsigned int)
 
 	aio_socket_stream* conn;
 	check_client* checker;
+	std::map<string, int>::const_iterator cit1_next;
 
-	std::list<string>::const_iterator cit2 = addrs_.begin();
-	for (; cit2 != addrs_.end(); ++cit2)
+	for (cit1 = addrs_.begin(); cit1 != addrs_.end(); cit1 = cit1_next)
 	{
-		addr = (*cit2).c_str();
+		cit1_next = cit1;
+		++cit1_next;
+
+		addr = cit1->first.c_str();
 		conn = aio_socket_stream::open(&handle_,
 			addr, conn_timeout_);
 		if (conn == NULL)
+		{
 			manager_.set_pools_status(addr, false);
+			addrs_.erase(cit1);
+		}
 		else
 		{
-			checker = new check_client(manager_, conn, addr);
+			checker = new check_client(manager_, conn,
+				addr, addrs_);
 			conn->add_open_callback(checker);
 			conn->add_close_callback(checker);
 			conn->add_timeout_callback(checker);
