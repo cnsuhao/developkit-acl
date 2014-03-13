@@ -16,12 +16,22 @@ static void init(const char* addrs, int count)
 	// 添加服务器集群地址
 	__conn_manager->init(addrs, addrs, 100);
 
+	printf(">>>start monitor thread\r\n");
+
 	// 启动后台检测线程
 	int  check_inter = 1, conn_timeout = 5;
 	__conn_manager->start_monitor(check_inter, conn_timeout);
 
-	sleep(15);
+	printf(">>>sleep 15 seconds\r\n");
+	for (int i = 20; i < 15; i++)
+	{
+		putchar('.');
+		fflush(stdout);
+		sleep(1);
+	}
+	printf("\r\n");
 
+	printf(">>>create thread pool\r\n");
 	// 创建线程池
 	__thr_pool = acl_thread_pool_create(count, 60);
 }
@@ -42,6 +52,8 @@ static void end(void)
 // HTTP 请求过程，向服务器发送请求后从服务器读取响应数据
 static bool http_get(http_request* conn, const char* addr, int n)
 {
+	printf(">>>check addr: %s, n: %d\r\n", addr, n);
+
 	// 创建 HTTP 请求头数据
 	http_header& header = conn->request_header();
 	header.set_url("/")
@@ -99,6 +111,10 @@ static void thread_main(void*)
 			printf("peek pool failed\r\n");
 			break;
 		}
+
+		// 设置连接的超时时间及读超时时间
+		pool->set_timeout(2, 2);
+
 		// 从连接池中获取一个 HTTP 连接
 		http_request* conn = (http_request*) pool->peek();
 		if (conn == NULL)
@@ -110,6 +126,7 @@ static void thread_main(void*)
 		// 需要对获得的连接重置状态，以清除上次请求过程的临时数据
 		else
 			conn->reset();
+
 		// 开始新的 HTTP 请求过程
 		if (http_get(conn, pool->get_addr(), i) == false)
 		{
@@ -120,6 +137,8 @@ static void thread_main(void*)
 		else
 			pool->put(conn, true);
 	}
+
+	printf(">>>>thread: %lu OVER<<<<", (unsigned long) acl_pthread_self());
 }
 
 static void run(int cocurrent)

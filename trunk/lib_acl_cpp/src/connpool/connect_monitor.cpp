@@ -17,7 +17,7 @@ class check_client : public aio_open_callback
 public:
 	check_client(connect_manager& manager, aio_socket_stream* conn,
 		const char* addr, std::map<string, int>& addrs);
-	~check_client();
+	~check_client() {}
 
 private:
 	// 基类虚函数
@@ -43,10 +43,6 @@ check_client::check_client(connect_manager& manager, aio_socket_stream* conn,
 {
 }
 
-check_client::~check_client()
-{
-}
-
 bool check_client::open_callback()
 {
 	connected_ = true;
@@ -57,7 +53,7 @@ void check_client::close_callback()
 {
 	// 如果未成功连接服务器，则设置该连接池状态为不可用状态，
 	// 否则设置为存活状态
-	//printf(">>>server: %s %s\r\n", addr_.c_str(),
+	// printf(">>>server: %s %s\r\n", addr_.c_str(),
 	//	connected_ ? "alive" : "dead");
 
 	// 从当前检查服务器地址列表中删除当前的检测地址
@@ -83,12 +79,12 @@ class check_timer : public aio_timer_callback
 public:
 	check_timer(connect_manager& manager, aio_handle& handle,
 		int conn_timeout);
-	~check_timer();
+	~check_timer() {}
 
 protected:
 	// 基类纯虚函数
 	void timer_callback(unsigned int id);
-	void destroy(void);
+	void destroy(void) {}
 
 private:
 	connect_manager& manager_;
@@ -105,15 +101,11 @@ check_timer::check_timer(connect_manager& manager,
 {
 }
 
-check_timer::~check_timer()
-{
-}
-
 void check_timer::timer_callback(unsigned int)
 {
 	const char* addr;
 
-	std::map<string, int>::const_iterator cit1;
+	std::map<string, int>::iterator cit1;
 
 	// 先提取所有服务器地址
 
@@ -129,8 +121,10 @@ void check_timer::timer_callback(unsigned int)
 			continue;
 
 		cit1 = addrs_.find(addr);
-		if (cit1 != addrs_.end())
+		if (cit1 == addrs_.end())
 			addrs_[addr] = 1;
+		else
+			cit1->second++;
 	}
 
 	manager_.unlock();
@@ -139,12 +133,15 @@ void check_timer::timer_callback(unsigned int)
 
 	aio_socket_stream* conn;
 	check_client* checker;
-	std::map<string, int>::const_iterator cit1_next;
+	std::map<string, int>::iterator cit1_next;
 
 	for (cit1 = addrs_.begin(); cit1 != addrs_.end(); cit1 = cit1_next)
 	{
 		cit1_next = cit1;
 		++cit1_next;
+
+		if (cit1->second > 1)
+			continue;
 
 		addr = cit1->first.c_str();
 		conn = aio_socket_stream::open(&handle_,
@@ -156,6 +153,7 @@ void check_timer::timer_callback(unsigned int)
 		}
 		else
 		{
+			// printf(">>>start connect: %s\r\n", addr);
 			checker = new check_client(manager_, conn,
 				addr, addrs_);
 			conn->add_open_callback(checker);
@@ -163,11 +161,6 @@ void check_timer::timer_callback(unsigned int)
 			conn->add_timeout_callback(checker);
 		}
 	}
-}
-
-void check_timer::destroy()
-{
-
 }
 
 //////////////////////////////////////////////////////////////////////////
