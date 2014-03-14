@@ -54,7 +54,14 @@ static void end(void)
 	printf("\r\n>>>sleep %d seconds to stop monitor\r\n", n);
 	sleep_while(n);
 #endif
-
+	std::vector<connect_pool*>& pools = __conn_manager->get_pools();
+	std::vector<connect_pool*>::const_iterator cit = pools.begin();
+	for (; cit != pools.end(); ++cit)
+	{
+		printf(">>>server: %s, %s\r\n",
+			(*cit)->get_addr(), (*cit)->aliving()
+			? "alive" : "dead");
+	}
 	printf("\r\n>>> STOPPING check thread now\r\n");
 	// 停止后台检测线程
 	__conn_manager->stop_monitor(true);
