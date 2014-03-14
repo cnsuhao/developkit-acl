@@ -16,7 +16,8 @@ class check_client : public aio_open_callback
 {
 public:
 	check_client(connect_manager& manager, aio_socket_stream* conn,
-		const char* addr, std::map<string, int>& addrs);
+		const char* addr, std::map<string, int>& addrs,
+		std::vector<aio_socket_stream*>& conns);
 	~check_client() {}
 
 private:
@@ -31,15 +32,18 @@ private:
 	aio_socket_stream* conn_;
 	string addr_;
 	std::map<string, int>& addrs_;
+	std::vector<aio_socket_stream*>& conns_;
 };
 
 check_client::check_client(connect_manager& manager, aio_socket_stream* conn,
-	const char* addr, std::map<string, int>& addrs)
+	const char* addr, std::map<string, int>& addrs,
+	std::vector<aio_socket_stream*>& conns)
 : connected_(false)
 , manager_(manager)
 , conn_(conn)
 , addr_(addr)
 , addrs_(addrs)
+, conns_(conns)
 {
 }
 
@@ -53,16 +57,27 @@ void check_client::close_callback()
 {
 	// 如果未成功连接服务器，则设置该连接池状态为不可用状态，
 	// 否则设置为存活状态
+
 	// printf(">>>server: %s %s\r\n", addr_.c_str(),
 	//	connected_ ? "alive" : "dead");
 
 	// 从当前检查服务器地址列表中删除当前的检测地址
-	std::map<string, int>::iterator it = addrs_.find(addr_);
-	if (it != addrs_.end())
-		addrs_.erase(it);
+	std::map<string, int>::iterator it1 = addrs_.find(addr_);
+	if (it1 != addrs_.end())
+		addrs_.erase(it1);
 
 	manager_.set_pools_status(addr_, connected_ ? true : false);
 
+	// 从检测连接集群中删除本连接对象
+	std::vector<aio_socket_stream*>::iterator it2 = conns_.begin();
+	for (; it2 != conns_.end(); ++it2)
+	{
+		if ((*it2) == conn_)
+		{
+			conns_.erase(it2);
+			break;
+		}
+	}
 	delete this;
 }
 
@@ -81,30 +96,41 @@ public:
 		int conn_timeout);
 	~check_timer() {}
 
+	bool finish(bool graceful);
+
 protected:
 	// 基类纯虚函数
 	void timer_callback(unsigned int id);
 	void destroy(void) {}
 
 private:
+	unsigned int id_;
+	bool stopping_;
 	connect_manager& manager_;
 	aio_handle& handle_;
 	int   conn_timeout_;
 	std::map<string, int> addrs_;
+	std::vector<aio_socket_stream*> conns_;
 };
 
 check_timer::check_timer(connect_manager& manager,
 	aio_handle& handle, int conn_timeout)
-: manager_(manager)
+: id_(0)
+, stopping_(false)
+, manager_(manager)
 , handle_(handle)
 , conn_timeout_(conn_timeout)
 {
 }
 
-void check_timer::timer_callback(unsigned int)
+void check_timer::timer_callback(unsigned int id)
 {
-	const char* addr;
+	id_ = id;
 
+	if (stopping_)
+		return;
+
+	const char* addr;
 	std::map<string, int>::iterator cit1;
 
 	// 先提取所有服务器地址
@@ -155,12 +181,28 @@ void check_timer::timer_callback(unsigned int)
 		{
 			// printf(">>>start connect: %s\r\n", addr);
 			checker = new check_client(manager_, conn,
-				addr, addrs_);
+				addr, addrs_, conns_);
 			conn->add_open_callback(checker);
 			conn->add_close_callback(checker);
 			conn->add_timeout_callback(checker);
+			conns_.push_back(conn);
 		}
 	}
+}
+
+bool check_timer::finish(bool graceful)
+{
+	if (!graceful || conns_.empty())
+		return true;
+
+	handle_.del_timer(this, 0);
+	keep_timer(false);
+
+	// 遍历当前所有正在检测的连接，异步关闭之
+	std::vector<aio_socket_stream*>::iterator it = conns_.begin();
+	for (; it != conns_.end(); ++it)
+		(*it)->close();
+	return false;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -168,6 +210,7 @@ void check_timer::timer_callback(unsigned int)
 connect_monitor::connect_monitor(connect_manager& manager,
 	int check_inter /* = 1 */, int conn_timeout /* = 10 */)
 : stop_(false)
+, stop_graceful_(true)
 , manager_(manager)
 , check_inter_(check_inter)
 , conn_timeout_(conn_timeout)
@@ -180,9 +223,10 @@ connect_monitor::~connect_monitor()
 
 }
 
-void connect_monitor::stop()
+void connect_monitor::stop(bool graceful)
 {
 	stop_ = true;
+	stop_graceful_ = graceful;
 }
 
 void* connect_monitor::run()
@@ -196,7 +240,8 @@ void* connect_monitor::run()
 	while (!stop_)
 		handle_.check();
 
-	handle_.check();
+	while (!timer.finish(stop_graceful_))
+		handle_.check();
 
 	return NULL;
 }
