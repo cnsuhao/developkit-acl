@@ -1,5 +1,6 @@
 #include "acl_stdafx.hpp"
 #include <map>
+#include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/stream/aio_socket_stream.hpp"
 #include "acl_cpp/stream/aio_timer_callback.hpp"
 #include "acl_cpp/connpool/connect_manager.hpp"
@@ -8,6 +9,24 @@
 
 namespace acl
 {
+
+//////////////////////////////////////////////////////////////////////////////
+
+static double stamp_sub(const struct timeval& from, const struct timeval& sub)
+{
+	struct timeval res;
+
+	memcpy(&res, &from, sizeof(struct timeval));
+
+	res.tv_usec -= sub.tv_usec;
+	if (res.tv_usec < 0) {
+		--res.tv_sec;
+		res.tv_usec += 1000000;
+	}
+	res.tv_sec -= sub.tv_sec;
+
+	return res.tv_sec * 1000.0 + res.tv_usec/1000.0;
+}
 
 /**
  * 异步连接回调函数处理类
@@ -27,7 +46,15 @@ private:
 	bool timeout_callback();
 
 private:
-	bool connected_;
+	typedef enum
+	{
+		CHECK_S_REFUSED,
+		CHECK_S_CONNECTED,
+		CHECK_S_TIMEDOUT
+	} check_status_t;
+
+	check_status_t status_;
+	struct timeval begin_;
 	connect_manager& manager_;
 	aio_socket_stream* conn_;
 	string addr_;
@@ -38,35 +65,49 @@ private:
 check_client::check_client(connect_manager& manager, aio_socket_stream* conn,
 	const char* addr, std::map<string, int>& addrs,
 	std::vector<aio_socket_stream*>& conns)
-: connected_(false)
+: status_(CHECK_S_REFUSED)
 , manager_(manager)
 , conn_(conn)
 , addr_(addr)
 , addrs_(addrs)
 , conns_(conns)
 {
+	gettimeofday(&begin_, NULL);
 }
 
 bool check_client::open_callback()
 {
-	connected_ = true;
+	status_ = CHECK_S_CONNECTED;
+
 	return false;  // 返回 false 让基类关闭连接
 }
 
 void check_client::close_callback()
 {
+	struct timeval end;
+	gettimeofday(&end, NULL);
+	double spent = stamp_sub(end, begin_);
+
 	// 如果未成功连接服务器，则设置该连接池状态为不可用状态，
 	// 否则设置为存活状态
 
-	// printf(">>>server: %s %s\r\n", addr_.c_str(),
-	//	connected_ ? "alive" : "dead");
+	if (status_ == CHECK_S_TIMEDOUT)
+		logger_warn("server: %s dead, timeout, spent: %.2f ms",
+			addr_.c_str(), spent);
+	else if (status_ == CHECK_S_REFUSED)
+		logger_warn("server: %s dead, refused, spent: %.2f ms",
+			addr_.c_str(), spent);
+	//else if (status_ == CHECK_S_CONNECTED)
+	//	logger("server: %s alive, spent: %.2f ms",
+	//		addr_.c_str(), spent);
 
 	// 从当前检查服务器地址列表中删除当前的检测地址
 	std::map<string, int>::iterator it1 = addrs_.find(addr_);
 	if (it1 != addrs_.end())
 		addrs_.erase(it1);
 
-	manager_.set_pools_status(addr_, connected_ ? true : false);
+	manager_.set_pools_status(addr_, status_ == CHECK_S_CONNECTED
+		? true : false);
 
 	// 从检测连接集群中删除本连接对象
 	std::vector<aio_socket_stream*>::iterator it2 = conns_.begin();
@@ -78,11 +119,14 @@ void check_client::close_callback()
 			break;
 		}
 	}
+
 	delete this;
 }
 
 bool check_client::timeout_callback()
 {
+	status_ = CHECK_S_TIMEDOUT;
+
 	// 连接超时，则直接返回失败
 	return false;
 }
@@ -179,7 +223,6 @@ void check_timer::timer_callback(unsigned int id)
 		}
 		else
 		{
-			// printf(">>>start connect: %s\r\n", addr);
 			checker = new check_client(manager_, conn,
 				addr, addrs_, conns_);
 			conn->add_open_callback(checker);

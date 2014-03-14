@@ -7,6 +7,17 @@ static connect_manager* __conn_manager = NULL;
 static acl_pthread_pool_t* __thr_pool = NULL;
 static bool __unzip = false;
 
+static void sleep_while(int n)
+{
+	for (int i = 0; i < n; i++)
+	{
+		putchar('.');
+		fflush(stdout);
+		sleep(1);
+	}
+	printf("\r\n");
+}
+
 // 初始化过程
 static void init(const char* addrs, int count)
 {
@@ -22,14 +33,10 @@ static void init(const char* addrs, int count)
 	int  check_inter = 1, conn_timeout = 5;
 	__conn_manager->start_monitor(check_inter, conn_timeout);
 
-	printf(">>>sleep 15 seconds\r\n");
-	for (int i = 20; i < 15; i++)
-	{
-		putchar('.');
-		fflush(stdout);
-		sleep(1);
-	}
-	printf("\r\n");
+
+	int   n = 10;
+	printf(">>>sleep %d seconds for monitor check\r\n", n);
+	sleep_while(n);
 
 	printf(">>>create thread pool\r\n");
 	// 创建线程池
@@ -42,6 +49,13 @@ static void end(void)
 	// 销毁线程池
 	acl_pthread_pool_destroy(__thr_pool);
 
+#if 0
+	int   n = 10;
+	printf("\r\n>>>sleep %d seconds to stop monitor\r\n", n);
+	sleep_while(n);
+#endif
+
+	printf("\r\n>>> STOPPING check thread now\r\n");
 	// 停止后台检测线程
 	__conn_manager->stop_monitor(true);
 
@@ -99,6 +113,15 @@ static bool http_get(http_request* conn, const char* addr, int n)
 	return true;
 }
 
+static void check_all_connections(void)
+{
+	std::vector<connect_pool*>& pools = __conn_manager->get_pools();
+	std::vector<connect_pool*>::const_iterator cit = pools.begin();
+	for (; cit != pools.end(); ++cit)
+		printf(">>>addr: %s %s\r\n", (*cit)->get_addr(),
+			(*cit)->aliving() ? "alive" : "dead");
+}
+
 // 线程处理过程
 static void thread_main(void*)
 {
@@ -108,8 +131,10 @@ static void thread_main(void*)
 			__conn_manager->peek();
 		if (pool == NULL)
 		{
-			printf("peek pool failed\r\n");
-			break;
+			printf("\r\n>>>%lu(%d): peek pool failed<<<\r\n",
+				(unsigned long) acl_pthread_self(), __LINE__);
+			check_all_connections();
+			exit (1);
 		}
 
 		// 设置连接的超时时间及读超时时间
@@ -119,8 +144,11 @@ static void thread_main(void*)
 		http_request* conn = (http_request*) pool->peek();
 		if (conn == NULL)
 		{
-			printf("peek connect failed\r\n");
-			break;
+			printf("\r\n>>>%lu: peek connect failed from %s<<<\r\n",
+				(unsigned long) acl_pthread_self(),
+				pool->get_addr());
+			check_all_connections();
+			exit (1);
 		}
 
 		// 需要对获得的连接重置状态，以清除上次请求过程的临时数据
@@ -138,7 +166,8 @@ static void thread_main(void*)
 			pool->put(conn, true);
 	}
 
-	printf(">>>>thread: %lu OVER<<<<", (unsigned long) acl_pthread_self());
+	printf(">>>>thread: %lu OVER<<<<\r\n",
+		(unsigned long) acl_pthread_self());
 }
 
 static void run(int cocurrent)
