@@ -43,7 +43,7 @@ static void end(void)
 	acl_pthread_pool_destroy(__thr_pool);
 
 	// 停止后台检测线程
-	__conn_manager->stop_monitor();
+	__conn_manager->stop_monitor(true);
 
 	// 销毁连接池
 	delete __conn_manager;

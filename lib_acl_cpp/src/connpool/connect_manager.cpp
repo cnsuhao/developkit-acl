@@ -289,12 +289,12 @@ void connect_manager::start_monitor(int check_inter /* = 1 */,
 	monitor_->start();
 }
 
-void connect_manager::stop_monitor()
+void connect_manager::stop_monitor(bool graceful /* = true */)
 {
 	if (monitor_)
 	{
 		// 先通知检测线程停止检测过程
-		monitor_->stop();
+		monitor_->stop(graceful);
 		// 再等待检测线程退出
 		monitor_->wait();
 		// 删除检测线程对象
