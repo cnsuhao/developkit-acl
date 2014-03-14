@@ -162,7 +162,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "thread_pool", "lib_acl_cpp\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_rpc", "lib_rpc\lib_rpc_vc2012.vcxproj", "{2B0C9A86-6C14-4CEF-BD7A-4A6752386A44}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "connect_manager", "lib_acl_cpp\samples\connect_manager\connect_manager_vc2012.vcxproj", "{312366B1-8882-4491-94F6-E105A19C63EF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "http_request_manager", "lib_acl_cpp\samples\http_request_manager\http_request_manager_vc2012.vcxproj", "{312366B1-8882-4491-94F6-E105A19C63EF}"
 	ProjectSection(ProjectDependencies) = postProject
 		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC} = {6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}
 		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}

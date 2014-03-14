@@ -370,7 +370,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_acl", "lib_acl\lib_acl_
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_acl_cpp", "lib_acl_cpp\lib_acl_cpp_vc2008.vcproj", "{64BF4D83-53BB-4045-8522-9FF9F73B14D4}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "connect_manager", "lib_acl_cpp\samples\connect_manager\connect_manager_vc2008.vcproj", "{5E83EEF1-A13E-4B61-A8DA-8884113C84B4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "http_request_manager", "lib_acl_cpp\samples\http_request_manager\http_request_manager_vc2008.vcproj", "{5E83EEF1-A13E-4B61-A8DA-8884113C84B4}"
 	ProjectSection(ProjectDependencies) = postProject
 		{64BF4D83-53BB-4045-8522-9FF9F73B14D4} = {64BF4D83-53BB-4045-8522-9FF9F73B14D4}
 		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
