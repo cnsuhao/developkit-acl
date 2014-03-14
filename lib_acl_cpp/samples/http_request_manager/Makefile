@@ -6,4 +6,4 @@ ifeq ($(findstring SunOS, $(UNIXNAME)), SunOS)
 else
 	LDFLAGS += -lz
 endif
-PROG = connect_manager
+PROG = http_request_manager
