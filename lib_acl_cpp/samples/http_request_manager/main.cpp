@@ -54,6 +54,9 @@ static void end(void)
 	printf("\r\n>>>sleep %d seconds to stop monitor\r\n", n);
 	sleep_while(n);
 #endif
+
+	// 打印所有连接池集群的存活状态
+	printf("\r\n");
 	std::vector<connect_pool*>& pools = __conn_manager->get_pools();
 	std::vector<connect_pool*>::const_iterator cit = pools.begin();
 	for (; cit != pools.end(); ++cit)
