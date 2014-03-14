@@ -34,9 +34,13 @@ static double stamp_sub(const struct timeval& from, const struct timeval& sub)
 class check_client : public aio_open_callback
 {
 public:
-	check_client(connect_manager& manager, aio_socket_stream* conn,
-		const char* addr, std::map<string, int>& addrs,
-		std::vector<aio_socket_stream*>& conns);
+	check_client(connect_manager& manager,
+		const char* addr,
+		std::map<string, int>& addrs,
+		aio_socket_stream* conn,
+		std::vector<aio_socket_stream*>& conns,
+		struct timeval& begin);
+
 	~check_client() {}
 
 private:
@@ -62,9 +66,12 @@ private:
 	std::vector<aio_socket_stream*>& conns_;
 };
 
-check_client::check_client(connect_manager& manager, aio_socket_stream* conn,
-	const char* addr, std::map<string, int>& addrs,
-	std::vector<aio_socket_stream*>& conns)
+check_client::check_client(connect_manager& manager,
+	const char* addr,
+	std::map<string, int>& addrs,
+	aio_socket_stream* conn,
+	std::vector<aio_socket_stream*>& conns,
+	struct timeval& begin)
 : status_(CHECK_S_REFUSED)
 , manager_(manager)
 , conn_(conn)
@@ -72,7 +79,7 @@ check_client::check_client(connect_manager& manager, aio_socket_stream* conn,
 , addrs_(addrs)
 , conns_(conns)
 {
-	gettimeofday(&begin_, NULL);
+	memcpy(&begin_, &begin, sizeof(begin_));
 }
 
 bool check_client::open_callback()
@@ -148,7 +155,7 @@ protected:
 	void destroy(void) {}
 
 private:
-	unsigned int id_;
+	int id_;
 	bool stopping_;
 	connect_manager& manager_;
 	aio_handle& handle_;
@@ -159,7 +166,7 @@ private:
 
 check_timer::check_timer(connect_manager& manager,
 	aio_handle& handle, int conn_timeout)
-: id_(0)
+: id_(-1)
 , stopping_(false)
 , manager_(manager)
 , handle_(handle)
@@ -169,7 +176,7 @@ check_timer::check_timer(connect_manager& manager,
 
 void check_timer::timer_callback(unsigned int id)
 {
-	id_ = id;
+	id_ = (int) id;
 
 	if (stopping_)
 		return;
@@ -201,6 +208,8 @@ void check_timer::timer_callback(unsigned int id)
 
 	// 连接所有服务器地址
 
+	struct timeval begin;
+
 	aio_socket_stream* conn;
 	check_client* checker;
 	std::map<string, int>::iterator cit1_next;
@@ -213,6 +222,8 @@ void check_timer::timer_callback(unsigned int id)
 		if (cit1->second > 1)
 			continue;
 
+		gettimeofday(&begin, NULL);
+
 		addr = cit1->first.c_str();
 		conn = aio_socket_stream::open(&handle_,
 			addr, conn_timeout_);
@@ -223,8 +234,8 @@ void check_timer::timer_callback(unsigned int id)
 		}
 		else
 		{
-			checker = new check_client(manager_, conn,
-				addr, addrs_, conns_);
+			checker = new check_client(manager_, addr,
+				addrs_, conn, conns_, begin);
 			conn->add_open_callback(checker);
 			conn->add_close_callback(checker);
 			conn->add_timeout_callback(checker);
@@ -238,8 +249,14 @@ bool check_timer::finish(bool graceful)
 	if (!graceful || conns_.empty())
 		return true;
 
-	handle_.del_timer(this, 0);
-	keep_timer(false);
+	// 需要等待所有检测连接关闭
+
+	if (id_ >= 0)
+	{
+		handle_.del_timer(this, id_);
+		id_ = -1;
+		keep_timer(false);
+	}
 
 	// 遍历当前所有正在检测的连接，异步关闭之
 	std::vector<aio_socket_stream*>::iterator it = conns_.begin();
@@ -254,6 +271,7 @@ connect_monitor::connect_monitor(connect_manager& manager,
 	int check_inter /* = 1 */, int conn_timeout /* = 10 */)
 : stop_(false)
 , stop_graceful_(true)
+, handle_(ENGINE_KERNEL)
 , manager_(manager)
 , check_inter_(check_inter)
 , conn_timeout_(conn_timeout)
@@ -283,6 +301,7 @@ void* connect_monitor::run()
 	while (!stop_)
 		handle_.check();
 
+	// 等待定时器结束
 	while (!timer.finish(stop_graceful_))
 		handle_.check();
 

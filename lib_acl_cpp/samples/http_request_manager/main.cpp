@@ -76,6 +76,7 @@ static void end(void)
 // HTTP 请求过程，向服务器发送请求后从服务器读取响应数据
 static bool http_get(http_request* conn, const char* addr, int n)
 {
+	if (0)
 	printf(">>>check addr: %s, n: %d\r\n", addr, n);
 
 	// 创建 HTTP 请求头数据
@@ -86,6 +87,7 @@ static bool http_get(http_request* conn, const char* addr, int n)
 		.set_method(HTTP_METHOD_GET)
 		.accept_gzip(__unzip);
 
+	if (0)
 	printf("%lu--%d: begin send request\r\n",
 		(unsigned long) acl_pthread_self(), n);
 	// 发送 HTTP 请求数据同时接收 HTTP 响应头
@@ -118,8 +120,9 @@ static bool http_get(http_request* conn, const char* addr, int n)
 				(unsigned long) acl_pthread_self(),
 				n, length, ret);
 	}
-	printf("%lu--%d: read body over, length: %d\r\n",
-		(unsigned long) acl_pthread_self(), n, length);
+	if (0)
+		printf("%lu--%d: read body over, length: %d\r\n",
+			(unsigned long) acl_pthread_self(), n, length);
 	return true;
 }
 
@@ -176,8 +179,9 @@ static void thread_main(void*)
 			pool->put(conn, true);
 	}
 
-	printf(">>>>thread: %lu OVER<<<<\r\n",
-		(unsigned long) acl_pthread_self());
+	if (0)
+		printf(">>>>thread: %lu OVER<<<<\r\n",
+			(unsigned long) acl_pthread_self());
 }
 
 static void run(int cocurrent)
@@ -203,6 +207,9 @@ int main(int argc, char* argv[])
 
 	// 初始化 acl 库
 	acl::acl_cpp_init();
+
+	// 日志输出至标准输出
+	acl::log::stdout_open(true);
 
 	while ((ch = getopt(argc, argv, "hs:n:c:z")) > 0)
 	{
