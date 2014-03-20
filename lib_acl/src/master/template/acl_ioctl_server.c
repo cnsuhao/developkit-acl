@@ -100,7 +100,7 @@ static ACL_CONFIG_INT_TABLE __conf_int_tab[] = {
 	{ ACL_VAR_IOCTL_ENABLE_CORE, ACL_DEF_IOCTL_ENABLE_CORE, &acl_var_ioctl_enable_core, 0, 0 },
 	{ ACL_VAR_IOCTL_MAX_DEBUG, ACL_DEF_IOCTL_MAX_DEBUG, &acl_var_ioctl_max_debug, 0, 0 },
 	{ ACL_VAR_IOCTL_STATUS_NOTIFY, ACL_DEF_IOCTL_STATUS_NOTIFY, &acl_var_ioctl_status_notify, 0, 0 },
-	{ ACL_VAR_IOCTL_CHECK_INTER, ACL_DEF_IOCTL_CHECK_INTER, acl_var_ioctl_check_inter, 0, 0 },
+	{ ACL_VAR_IOCTL_CHECK_INTER, ACL_DEF_IOCTL_CHECK_INTER, &acl_var_ioctl_check_inter, 0, 0 },
 
         { 0, 0, 0, 0, 0 },
 };
