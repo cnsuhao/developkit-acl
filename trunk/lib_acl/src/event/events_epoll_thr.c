@@ -96,12 +96,12 @@ static void event_enable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 	stream->nrefer++;
 	fdp->flag = EVENT_FDTABLE_FLAG_READ | EVENT_FDTABLE_FLAG_EXPT;
 
-	memset(&ev, 0, sizeof(ev));
 #if 0
 	ev.events = EPOLLIN | EPOLLHUP | EPOLLERR | EPOLLET;
 #else
 	ev.events = EPOLLIN | EPOLLHUP | EPOLLERR;
 #endif
+	ev.data.u64 = 0;  /* avoid valgrind warning */
 	ev.data.ptr = fdp;
 
 	THREAD_LOCK(&event_thr->event.tb_mutex);
@@ -187,8 +187,8 @@ static void event_enable_listen(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 	fdp->flag = EVENT_FDTABLE_FLAG_READ | EVENT_FDTABLE_FLAG_EXPT;
 	stream->nrefer++;
 
-	memset(&ev, 0, sizeof(ev));
 	ev.events = EPOLLIN | EPOLLHUP | EPOLLERR;
+	ev.data.u64 = 0;  /* avoid valgrind warning */
 	ev.data.ptr = fdp;
 
 	THREAD_LOCK(&event_thr->event.tb_mutex);
@@ -257,8 +257,8 @@ static void event_enable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream,
 	fdp->flag = EVENT_FDTABLE_FLAG_WRITE | EVENT_FDTABLE_FLAG_EXPT;
 	stream->nrefer++;
 
-	memset(&ev, 0, sizeof(ev));
 	ev.events = EPOLLIN | EPOLLHUP | EPOLLERR;
+	ev.data.u64 = 0;  /* avoid valgrind warning */
 	ev.data.ptr = fdp;
 
 	THREAD_LOCK(&event_thr->event.tb_mutex);
@@ -303,6 +303,11 @@ static void event_disable_readwrite(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 	EVENT_EPOLL_THR *event_thr = (EVENT_EPOLL_THR *) eventp;
 	ACL_EVENT_FDTABLE *fdp;
 	ACL_SOCKET sockfd;
+	struct epoll_event dummy;
+
+	dummy.events = EPOLLHUP | EPOLLERR;
+	dummy.data.u64 = 0;  /* avoid valgrind warning */
+	dummy.data.ptr = NULL;
 
 	sockfd = ACL_VSTREAM_SOCK(stream);
 
@@ -336,17 +341,19 @@ static void event_disable_readwrite(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 
 	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 
-	if (fdp->flag & EVENT_FDTABLE_FLAG_READ)
+	if (fdp->flag & EVENT_FDTABLE_FLAG_READ) {
 		stream->nrefer--;
-	else
-		acl_msg_info("not set read");
+		dummy.events |= EPOLLIN;
+	}
 
-	if (fdp->flag & EVENT_FDTABLE_FLAG_WRITE)
+	if (fdp->flag & EVENT_FDTABLE_FLAG_WRITE) {
 		stream->nrefer--;
+		dummy.events |= EPOLLOUT;
+	}
 
 	event_fdtable_reset(fdp);
 
-	if (epoll_ctl(event_thr->handle, EPOLL_CTL_DEL, sockfd, NULL) < 0) {
+	if (epoll_ctl(event_thr->handle, EPOLL_CTL_DEL, sockfd, &dummy) < 0) {
 		if (errno == ENOENT)
 			acl_msg_warn("%s: epoll_ctl: %s, fd: %d",
 				myname, acl_last_serror(), sockfd);

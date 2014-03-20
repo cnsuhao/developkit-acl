@@ -394,7 +394,7 @@ static void event_loop(ACL_EVENT *eventp)
 
 	eventp->fdcnt_ready = 0;
 
-	if (eventp->present - eventp->last_check >= 100000) {
+	if (eventp->present - eventp->last_check >= eventp->check_inter) {
 		eventp->last_check = eventp->present;
 
 		THREAD_LOCK(&event_thr->event.tb_mutex);
