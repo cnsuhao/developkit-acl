@@ -339,8 +339,6 @@ static void event_disable_readwrite(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 		eventp->fdtabs[fdp->fdidx]->fdidx = fdp->fdidx;
 	}
 
-	THREAD_UNLOCK(&event_thr->event.tb_mutex);
-
 	if (fdp->flag & EVENT_FDTABLE_FLAG_READ) {
 		stream->nrefer--;
 		dummy.events |= EPOLLIN;
@@ -351,7 +349,7 @@ static void event_disable_readwrite(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 		dummy.events |= EPOLLOUT;
 	}
 
-	event_fdtable_reset(fdp);
+	THREAD_UNLOCK(&event_thr->event.tb_mutex);
 
 	if (epoll_ctl(event_thr->handle, EPOLL_CTL_DEL, sockfd, &dummy) < 0) {
 		if (errno == ENOENT)
@@ -361,6 +359,8 @@ static void event_disable_readwrite(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 			acl_msg_fatal("%s: epoll_ctl: %s, fd: %d",
 				myname, acl_last_serror(), sockfd);
 	}
+
+	event_fdtable_reset(fdp);
 }
 
 static int event_isrset(ACL_EVENT *eventp acl_unused, ACL_VSTREAM *stream)
@@ -419,8 +419,8 @@ static void event_loop(ACL_EVENT *eventp)
 	THREAD_LOCK(&event_thr->event.tm_mutex);
 
 	/*
-	 * Find out when the next timer would go off. Timer requests are sorted.
-	 * If any timer is scheduled, adjust the delay appropriately.
+	 * Find out when the next timer would go off. Timer requests are
+	 * sorted. If any timer is scheduled, adjust the delay appropriately.
 	 */
 	if ((timer = ACL_FIRST_TIMER(&eventp->timer_head)) != 0) {
 		acl_int64  n = (timer->when - eventp->present + 1000000 - 1)
@@ -482,11 +482,7 @@ static void event_loop(ACL_EVENT *eventp)
 		if ((fdp->event_type & (ACL_EVENT_XCPT | ACL_EVENT_RW_TIMEOUT)))
 			continue;
 
-		if ((bp->events & (EPOLLERR | EPOLLHUP)) != 0) {
-			fdp->event_type |= ACL_EVENT_XCPT;
-			fdp->fdidx_ready = eventp->fdcnt_ready;
-			eventp->fdtabs_ready[eventp->fdcnt_ready++] = fdp;
-		} else if ((bp->events & EPOLLIN) != 0) {
+		if ((bp->events & EPOLLIN) != 0) {
 			fdp->stream->sys_read_ready = 1;
 			if ((fdp->event_type & ACL_EVENT_READ) == 0) {
 				fdp->event_type |= ACL_EVENT_READ;
@@ -498,17 +494,21 @@ static void event_loop(ACL_EVENT *eventp)
 			fdp->event_type |= ACL_EVENT_WRITE;
 			fdp->fdidx_ready = eventp->fdcnt_ready;
 			eventp->fdtabs_ready[eventp->fdcnt_ready++] = fdp;
+		} else if ((bp->events & (EPOLLERR | EPOLLHUP)) != 0) {
+			fdp->event_type |= ACL_EVENT_XCPT;
+			fdp->fdidx_ready = eventp->fdcnt_ready;
+			eventp->fdtabs_ready[eventp->fdcnt_ready++] = fdp;
 		}
 	}
 
 TAG_DONE:
 
 	/*
-	 * Deliver timer events. Requests are sorted: we can stop when we reach
-	 * the future or the list end. Allow the application to update the timer
-	 * queue while it is being called back. To this end, we repeatedly pop
-	 * the first request off the timer queue before delivering the event to
-	 * the application.
+	 * Deliver timer events. Requests are sorted: we can stop when
+	 * we reach the future or the list end. Allow the application
+	 * to update the timer queue while it is being called back. To
+	 * this end, we repeatedly pop the first request off the timer
+	 * queue before delivering the event to the application.
 	 */
 
 	SET_TIME(eventp->present);
@@ -595,6 +595,10 @@ ACL_EVENT *event_epoll_alloc_thr(int fdsize acl_unused)
 	event_thr->fdslots = __default_max_events;
 	event_thr->ebuf = (EVENT_BUFFER *) acl_mycalloc(event_thr->fdslots + 1,
 			sizeof(EVENT_BUFFER));
+
+	acl_msg_info("%s(%d), %s, use %s", __FILE__, __LINE__, __FUNCTION__,
+		event_thr->event.event.name);
+
 	return ((ACL_EVENT *) event_thr);
 }
 

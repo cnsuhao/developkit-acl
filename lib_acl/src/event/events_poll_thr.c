@@ -403,13 +403,6 @@ static void event_loop(ACL_EVENT *eventp)
 			continue;
 
 		revents = event_thr->fdset[i].revents;
-		if ((revents & (POLLHUP | POLLERR)) != 0) {
-			fdp->event_type |= ACL_EVENT_XCPT;
-			fdp->fdidx_ready = eventp->fdcnt_ready;
-			eventp->fdtabs_ready[eventp->fdcnt_ready++] = fdp;
-			continue;
-		}
-
 		if ((revents & POLLIN) != 0) {
 			fdp->stream->sys_read_ready = 1;
 			if ((fdp->event_type & ACL_EVENT_READ) == 0) {
@@ -420,6 +413,10 @@ static void event_loop(ACL_EVENT *eventp)
 			}
 		} else if ((revents & POLLOUT) != 0) {
 			fdp->event_type |= ACL_EVENT_WRITE;
+			fdp->fdidx_ready = eventp->fdcnt_ready;
+			eventp->fdtabs_ready[eventp->fdcnt_ready++] = fdp;
+		} else if ((revents & (POLLHUP | POLLERR)) != 0) {
+			fdp->event_type |= ACL_EVENT_XCPT;
 			fdp->fdidx_ready = eventp->fdcnt_ready;
 			eventp->fdtabs_ready[eventp->fdcnt_ready++] = fdp;
 		}
