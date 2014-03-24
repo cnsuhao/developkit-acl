@@ -115,7 +115,9 @@ void    acl_master_config(void)
 		}
 
 		/* reset all proc of the serv before restart the service. --zsx */
-		acl_master_avail_reset(serv);
+		/*
+		 * acl_master_avail_reset(serv);
+		 */
 
 		/*
 		 * Update an existing service entry. Make the current
