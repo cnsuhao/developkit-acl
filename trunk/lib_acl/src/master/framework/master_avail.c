@@ -85,7 +85,7 @@ static void master_avail_event(int type, ACL_EVENT *event,
 void acl_master_avail_listen(ACL_MASTER_SERV *serv)
 {
 	const char *myname = "acl_master_avail_listen";
-	int   listen_flag;
+	int   listen_flag, i;
 
 	/*
 	 * When no-one else is monitoring the service's listen socket,
@@ -99,26 +99,34 @@ void acl_master_avail_listen(ACL_MASTER_SERV *serv)
 
 	if (ACL_MASTER_THROTTLED(serv))
 		listen_flag = 0;
+
+	/* prefork services */
 	else if (serv->prefork_proc > 0)
-		listen_flag = master_prefork(serv) > 0 ? 0 : 1;  /* prefork services */
+		listen_flag = master_prefork(serv) > 0 ? 0 : 1;
+
+	/* check if there're idle proc */
 	else if (serv->avail_proc > 0)
 		listen_flag = 0;
-	else if (ACL_MASTER_LIMIT_OK(serv->max_proc, serv->total_proc))
+	else
+		listen_flag = 1;
+
+	/* at last, check the proc limit */
+	if (listen_flag && ACL_MASTER_LIMIT_OK(serv->max_proc, serv->total_proc))
 		listen_flag = 1;
 	else
 		listen_flag = 0;
 
-	if (listen_flag) {
-		int   i;
+	if (listen_flag == 0)
+		return;
 
-		if (acl_msg_verbose)
-			acl_msg_info("%s(%d), %s: enable events %s",
-				__FILE__, __LINE__, myname, serv->name);
-		for (i = 0; i < serv->listen_fd_count; i++) {
-			acl_event_enable_read(acl_var_master_global_event,
-				serv->listen_streams[i], 0,
-				master_avail_event, (void *) serv);
-		}
+	if (acl_msg_verbose)
+		acl_msg_info("%s(%d), %s: enable events %s",
+			__FILE__, __LINE__, myname, serv->name);
+
+	for (i = 0; i < serv->listen_fd_count; i++) {
+		acl_event_enable_read(acl_var_master_global_event,
+			serv->listen_streams[i], 0,
+			master_avail_event, (void *) serv);
 	}
 }
 
@@ -195,9 +203,8 @@ void acl_master_avail_reset(ACL_MASTER_SERV *serv)
 	if (acl_var_master_child_table == NULL)
 		return;
 
-	for (info = list = acl_binhash_list(acl_var_master_child_table);
-		*info; info++)
-	{
+	info = list = acl_binhash_list(acl_var_master_child_table);
+	for (; *info; info++) {
 		proc = (ACL_MASTER_PROC *) info[0]->value;
 		if (proc->serv == serv) {
 			/* just avoid panic error in acl_master_avail_less */
