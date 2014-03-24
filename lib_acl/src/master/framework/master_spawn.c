@@ -137,6 +137,10 @@ void    acl_master_spawn(ACL_MASTER_SERV *serv)
 		}
 	}
 
+	/* delete ACL_MASTER_FLAG_RELOADING set in acl_master_restart_service */
+	else
+	        serv->flags &= ~ACL_MASTER_FLAG_RELOADING;
+
 	if (serv->flags & ACL_MASTER_FLAG_THROTTLE)
 		acl_msg_panic("%s(%d)-%s: throttled service: %s",
 			__FILE__, __LINE__, myname, serv->path);

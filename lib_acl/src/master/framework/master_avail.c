@@ -104,13 +104,15 @@ void acl_master_avail_listen(ACL_MASTER_SERV *serv)
 	if (serv->prefork_proc > 0 && master_prefork(serv) > 0)
 		return;
 
-	/* check if there're idle proc */
-	if (serv->avail_proc > 0)
-		return;
+	if ((serv->flags & ACL_MASTER_FLAG_RELOADING) == 0) {
+		/* check if there're idle proc */
+		if (serv->avail_proc > 0)
+			return;
 
-	/* at last, check the proc limit */
-	if (!ACL_MASTER_LIMIT_OK(serv->max_proc, serv->total_proc))
-		return;
+		/* at last, check the proc limit */
+		if (!ACL_MASTER_LIMIT_OK(serv->max_proc, serv->total_proc))
+			return;
+	}
 
 	if (acl_msg_verbose)
 		acl_msg_info("%s(%d), %s: enable events %s",

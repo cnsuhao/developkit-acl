@@ -239,8 +239,8 @@ ACL_VSTREAM **acl_threads_server_streams(void)
 	return __sstreams;
 }
 
-static void close_listen_timer(int type acl_unused, ACL_EVENT *event,
-	void *context acl_unused)
+static void listen_cleanup_timer(int type acl_unused,
+	ACL_EVENT *event acl_unused, void *context acl_unused)
 {
 	int   i;
 
@@ -248,7 +248,6 @@ static void close_listen_timer(int type acl_unused, ACL_EVENT *event,
 		return;
 
 	for (i = 0; __sstreams[i] != NULL; i++) {
-		acl_event_disable_readwrite(event, __sstreams[i]);
 		acl_vstream_close(__sstreams[i]);
 		__sstreams[i] = NULL;
 		acl_msg_info("All listener closed now!");
@@ -257,10 +256,15 @@ static void close_listen_timer(int type acl_unused, ACL_EVENT *event,
 	__sstreams = NULL;
 }
 
-static void disable_listen(void)
+static void listen_cleanup(ACL_EVENT *event)
 {
+	int   i;
+
 	if (__sstreams == NULL)
 		return;
+
+	for (i = 0; __sstreams[i] != NULL; i++)
+		acl_event_disable_readwrite(event, __sstreams[i]);
 
 	/**
 	 * 只所以采用定时器关闭监听流，一方面因为监听流在事件集合中是“常驻留”的，
@@ -272,7 +276,7 @@ static void disable_listen(void)
 	 * 准备好也会因其从事件集合中被删除而不会被触发，这样在下次事件循环时 select()
 	 * 所调用的事件集合中就不存在该监听流了。
 	 */
-	acl_event_request_timer(__event, close_listen_timer, NULL, 1000000, 0);
+	acl_event_request_timer(event, listen_cleanup_timer, NULL, 1000000, 0);
 }
 
 /* server_exit - normal termination */
@@ -337,7 +341,7 @@ static void server_abort(int event_type acl_unused, ACL_EVENT *event,
 
 	if (!__listen_disabled) {
 		__listen_disabled = 1;
-		disable_listen();
+		listen_cleanup(event);
 	}
 	
 	__aborting = 1;
