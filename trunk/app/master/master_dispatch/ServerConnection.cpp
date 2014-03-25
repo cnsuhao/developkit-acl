@@ -27,3 +27,8 @@ void ServerConnection::close()
 {
 	conn_->close();
 }
+
+void ServerConnection::inc_nconns()
+{
+	nconns_++;
+}

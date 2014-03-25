@@ -15,6 +15,7 @@ public:
 		return nconns_;
 	}
 
+	void inc_nconns();
 	void close();
 
 protected:
