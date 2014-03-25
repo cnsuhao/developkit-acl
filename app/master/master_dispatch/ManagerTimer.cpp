@@ -36,6 +36,7 @@ bool ManagerTimer::transfer(ClientConnection* client)
 			server->close();
 		}
 
+		server->inc_nconns();
 		return true;
 	}
 }
