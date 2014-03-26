@@ -13,7 +13,10 @@ ClientConnection::ClientConnection(acl::aio_socket_stream* conn)
 
 void ClientConnection::run()
 {
+	// 调用描述字发送过程将客户端套接字传给服务端
 	if (ManagerTimer::transfer(this) == false)
+		// 如果传输描述字失败，则加入待处理队列，由定时器
+		// 进行处理
 		ClientManager::get_instance().set(this);
 	else
 		delete this;

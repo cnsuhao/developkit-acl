@@ -6,6 +6,7 @@
 ServerIOCallback::ServerIOCallback(ServerConnection* conn)
 : conn_(conn)
 {
+	ServerManager::get_instance().set(conn_);
 }
 
 ServerIOCallback::~ServerIOCallback()
@@ -23,19 +24,20 @@ bool ServerIOCallback::read_callback(char* data, int len)
 		return false;
 	}
 
+	// 处理服务端发来的命令
+
 	acl::url_coder coder;
 	coder.decode(data);
 
-	const char* ptr = coder.get("nconnections");
+	const char* ptr = coder.get("client_count");
 	if (ptr == NULL)
 	{
-		logger_warn("no nconnecttions");
+		logger_warn("no client_count");
+		return true;
 	}
 
 	unsigned int nconns = (unsigned int) atoi(ptr);
 	conn_->set_nconns(nconns);
-
-	ServerManager::get_instance().set(conn_);
 
 	return true;
 }
