@@ -67,10 +67,10 @@ int acl_read_fd(int fd, void *ptr, int nbytes, int *recv_fd)
 			acl_msg_fatal("%s: control level != SOL_SOCKET", myname);
 		if (cmptr->cmsg_type != SCM_RIGHTS)
 			acl_msg_fatal("%s: control type != SCM_RIGHTS", myname);
-		*recv_fd = *CMSG_DATA(cmptr);
 /*
-		*recv_fd = *((int *) CMSG_DATA(cmptr));
+		*recv_fd = *CMSG_DATA(cmptr);
 */
+		*recv_fd = *((int *) CMSG_DATA(cmptr));
 	} else
 		*recv_fd = -1;  /* descriptor was not passed */
 #else

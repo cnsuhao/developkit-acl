@@ -43,8 +43,11 @@ master_service::~master_service()
 
 bool master_service::on_accept(acl::aio_socket_stream* client)
 {
+	if (0)
 	logger("connect from %s, fd %d", client->get_peer(true),
 		client->sock_handle());
+
+	acl_non_blocking(client->sock_handle(), ACL_BLOCKING);
 
 	// 根据客户端连接服务端口号的不同来区分不同的服务应用协议
 	const char* local = client->get_local(true);

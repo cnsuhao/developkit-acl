@@ -30,19 +30,21 @@ bool ManagerTimer::transfer(ClientConnection* client)
 		peer = client->get_peer();
 		if (peer == NULL)
 			peer = "unkonwn";
+		memset(buf, 0, sizeof(buf));
 		snprintf(buf, sizeof(buf), "%s", peer);
 
 		// 将客户端连接传递给服务端，如果失败，则尝试下一个
 		// 服务端，同时将失败的服务端从服务端管理集合中删除
 		ret = acl_write_fd(server->sock_handle(), buf,
-			strlen(buf), client->sock_handle());
+			sizeof(buf) - 1, client->sock_handle());
 		if (ret == -1)
 		{
 			ServerManager::get_instance().del(server);
 			server->close();
 		}
+		else
+			server->inc_nconns();
 
-		server->inc_nconns();
 		return true;
 	}
 }
@@ -54,6 +56,10 @@ void ManagerTimer::timer_callback(unsigned int)
 	// 从客户端管理对象弹出所有延迟待处理的客户端连接对象
 	// 并传递给服务端，如果传递失败，则再次置入客户端管理
 	// 对象，由下次定时器再次尝试处理
+
+	logger("total client: %d, total server: %d",
+		(int) ClientManager::get_instance().length(),
+		(int) ServerManager::get_instance().length());
 
 	while (true)
 	{

@@ -124,6 +124,10 @@ extern int   acl_var_threads_check_inter;
 #define	ACL_DEF_THREADS_QLEN_WARN		0
 extern int   acl_var_threads_qlen_warn;
 
+#define	ACL_VAR_THREADS_DISPATCH_ADDR		"ioctl_dispatch_addr"
+#define	ACL_DEF_THREADS_DISPATCH_ADDR		""
+extern char *acl_var_threads_dispatch_addr;
+
 #endif /* ACL_UNIX */
 
 #ifdef	__cplusplus

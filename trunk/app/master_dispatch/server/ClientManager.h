@@ -31,6 +31,11 @@ public:
 	 */
 	ClientConnection* pop();
 
+	size_t length() const
+	{
+		return conns_.size();
+	}
+
 private:
 	// 存储客户端连接对象的数组集合
 	std::vector<ClientConnection*> conns_;

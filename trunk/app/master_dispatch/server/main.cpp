@@ -26,9 +26,9 @@ int main(int argc, char* argv[])
 		printf("listen on: %s\r\n", addr);
 
 		if (argc >= 4)
-			ms.run_alone(addr, argv[3], acl::ENGINE_SELECT); 
+			ms.run_alone(addr, argv[3], acl::ENGINE_KERNEL); 
 		else
-			ms.run_alone(addr, NULL, acl::ENGINE_SELECT);
+			ms.run_alone(addr, NULL, acl::ENGINE_KERNEL);
 
 		printf("Enter any key to exit now\r\n");
 		getchar();

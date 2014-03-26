@@ -43,6 +43,7 @@
 #include "net/acl_listen.h"
 #include "net/acl_tcp_ctl.h"
 #include "net/acl_sane_socket.h"
+#include "net/acl_vstream_net.h"
 #include "event/acl_events.h"
 
 /* Global library. */
@@ -117,6 +118,7 @@ char *acl_var_threads_event_mode;
 char *acl_var_threads_log_debug;
 char *acl_var_threads_deny_banner;
 char *acl_var_threads_access_allow;
+char *acl_var_threads_dispatch_addr;
 
 static ACL_CONFIG_STR_TABLE __conf_str_tab[] = {
 	{ ACL_VAR_THREADS_QUEUE_DIR, ACL_DEF_THREADS_QUEUE_DIR, &acl_var_threads_queue_dir },
@@ -125,6 +127,7 @@ static ACL_CONFIG_STR_TABLE __conf_str_tab[] = {
 	{ ACL_VAR_THREADS_LOG_DEBUG, ACL_DEF_THREADS_LOG_DEBUG, &acl_var_threads_log_debug },
 	{ ACL_VAR_THREADS_DENY_BANNER, ACL_DEF_THREADS_DENY_BANNER, &acl_var_threads_deny_banner },
 	{ ACL_VAR_THREADS_ACCESS_ALLOW, ACL_DEF_THREADS_ACCESS_ALLOW, &acl_var_threads_access_allow },
+	{ ACL_VAR_THREADS_DISPATCH_ADDR, ACL_DEF_THREADS_DISPATCH_ADDR, &acl_var_threads_dispatch_addr },
 
         { 0, 0, 0 },
 };
@@ -158,6 +161,8 @@ static ACL_APP_ON_ACCEPT __server_on_accept;
 static ACL_APP_ON_CLOSE __server_on_close;
 static ACL_APP_ON_TIMEOUT __server_on_timeout;
 static char *__deny_info = NULL;
+
+static void dispatch_open(ACL_EVENT *event, acl_pthread_pool_t *threads);
 
 static void lock_closing_time(void)
 {
@@ -784,6 +789,66 @@ static ACL_EVENT *event_open(int event_mode, acl_pthread_pool_t *threads)
 	return event;
 }
 
+static void dispatch_timer(int type acl_unused, ACL_EVENT *event, void *ctx)
+{
+	acl_pthread_pool_t *threads = (acl_pthread_pool_t*) ctx;
+
+	dispatch_open(event, threads);
+}
+
+static void receive_connect(int event_type acl_unused, ACL_EVENT *event,
+	ACL_VSTREAM *conn, void *context)
+{
+	acl_pthread_pool_t *threads = (acl_pthread_pool_t*) context;
+	char  buf[256], remote[256], local[256];
+	int   fd = -1, ret;
+
+	ret = acl_read_fd(ACL_VSTREAM_SOCK(conn), buf, sizeof(buf) - 1, &fd);
+	if (ret <= 0 || fd < 0)
+	{
+		acl_msg_warn("read from master_dispatch(%s) error",
+			acl_var_threads_dispatch_addr);
+		acl_vstream_close(conn);
+		dispatch_open(event, threads);
+	} else {
+		buf[ret] = 0;
+
+		acl_event_enable_read(event, conn, 0, receive_connect, threads);
+		if (acl_getsockname(fd, local, sizeof(local)) < 0)
+			local[0] = 0;
+		if (acl_getpeername(fd, remote, sizeof(remote)) < 0)
+			remote[0] = 0;
+		server_wakeup(event, threads, fd, remote, local);
+	}
+}
+
+static void dispatch_open(ACL_EVENT *event, acl_pthread_pool_t *threads)
+{
+	ACL_VSTREAM *conn;
+
+	if (!acl_var_threads_dispatch_addr || !*acl_var_threads_dispatch_addr) {
+		acl_msg_warn("acl_var_threads_dispatch_addr null!");
+		return;
+	}
+
+	conn = acl_vstream_connect(acl_var_threads_dispatch_addr,
+			ACL_BLOCKING, 0, 0, 4096);
+
+	if (conn == NULL) {
+		acl_msg_warn("connect master_dispatch(%s) failed",
+			acl_var_threads_dispatch_addr);
+		acl_event_request_timer(event, dispatch_timer,
+			threads, 1000000, 0);
+	} else if (acl_vstream_fprintf(conn, "client_count=0&pid=%u\r\n",
+		(unsigned int) getpid()) > 0)
+		acl_event_enable_read(event, conn, 0, receive_connect, threads);
+	else {
+		acl_vstream_close(conn);
+		acl_event_request_timer(event, dispatch_timer,
+			threads, 1000000, 0);
+	}
+}
+
 static acl_pthread_pool_t *threads_create(ACL_APP_THREAD_ON_INIT init_fn,
 	ACL_APP_THREAD_ON_EXIT exit_fn, void *init_ctx, void *exit_ctx)
 {
@@ -1115,6 +1180,10 @@ void acl_threads_server_main(int argc, char **argv,
 	/* Run post-jail initialization. */
 	if (post_init)
 		post_init(post_init_ctx);
+
+	/* connect the dispatch server */
+	if (acl_var_threads_dispatch_addr && *acl_var_threads_dispatch_addr)
+		dispatch_open(__event, __threads);
 
 	acl_msg_info("%s(%d), %s daemon started, log: %s",
 		myname, __LINE__, argv[0], acl_var_threads_log_file);
