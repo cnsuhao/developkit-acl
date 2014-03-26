@@ -9,7 +9,7 @@
 
 char *var_cfg_backend_service;
 acl::master_str_tbl var_conf_str_tab[] = {
-	{ "backend_service", "backend", &var_cfg_backend_service },
+	{ "backend_service", "dispatch.sock", &var_cfg_backend_service },
 
 	{ 0, 0, 0 }
 };
@@ -18,9 +18,11 @@ acl::master_bool_tbl var_conf_bool_tab[] = {
 	{ 0, 0, 0 }
 };
 
-int  var_cfg_manager_timer;
+int   var_cfg_manager_timer;
+int   var_cfg_conn_expired;
 acl::master_int_tbl var_conf_int_tab[] = {
 	{ "manager_timer", 1, &var_cfg_manager_timer, 0, 0 },
+	{ "conn_expired", 10, &var_cfg_conn_expired, 0, 0 },
 
 	{ 0, 0 , 0 , 0, 0 }
 };
@@ -58,7 +60,7 @@ bool master_service::on_accept(acl::aio_socket_stream* client)
 	else
 	{
 		// 创建对象处理来自于前端客户端模块的请求
-		IConnection* conn = new ClientConnection(client);
+		IConnection* conn = new ClientConnection(client, var_cfg_conn_expired);
 
 		conn->run();
 		return true;

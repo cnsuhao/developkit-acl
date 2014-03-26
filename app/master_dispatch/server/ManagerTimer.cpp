@@ -60,11 +60,24 @@ void ManagerTimer::timer_callback(unsigned int)
 		client = ClientManager::get_instance().pop();
 		if (client == NULL)
 			break;
-		if (transfer(client) == false)
+
+		if (transfer(client) == true)
 		{
-			ClientManager::get_instance().set(client);
-			break;
+			ClientManager::get_instance().del(client);
+			delete client;
+			continue;
 		}
-		delete client;
+
+		// 如果在规定的时间内依然没有服务端准备接收连接，
+		// 则直接删除该对象
+		if (client->expired())
+		{
+			logger_warn("no server side, client(%s) expired!",
+				client->get_peer());
+			delete client;
+		}
+		else
+			ClientManager::get_instance().set(client);
+		break;
 	}
 }

@@ -9,7 +9,6 @@ class ServerIOCallback : public acl::aio_callback
 {
 public:
 	ServerIOCallback(ServerConnection* conn);
-	~ServerIOCallback();
 
 protected:
 	bool read_callback(char* data, int len);
@@ -18,4 +17,6 @@ protected:
 
 private:
 	ServerConnection* conn_;
+
+	~ServerIOCallback();
 };

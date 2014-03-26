@@ -6,7 +6,6 @@
 ServerIOCallback::ServerIOCallback(ServerConnection* conn)
 : conn_(conn)
 {
-	ServerManager::get_instance().set(conn_);
 }
 
 ServerIOCallback::~ServerIOCallback()
@@ -39,11 +38,15 @@ bool ServerIOCallback::read_callback(char* data, int len)
 	unsigned int nconns = (unsigned int) atoi(ptr);
 	conn_->set_nconns(nconns);
 
+	// 尝试将服务端连接对象添加进服务端管理对象中
+	ServerManager::get_instance().set(conn_);
+
 	return true;
 }
 
 void ServerIOCallback::close_callback()
 {
+	delete this;
 }
 
 bool ServerIOCallback::timeout_callback()

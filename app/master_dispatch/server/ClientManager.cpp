@@ -8,7 +8,10 @@ void ClientManager::set(ClientConnection* conn)
 	for (; it != conns_.end(); ++it)
 	{
 		if ((*it) == conn)
-			logger_fatal("duplicate ClientConnection!");
+		{
+			logger_warn("duplicate ClientConnection!");
+			return;
+		}
 	}
 
 	conns_.push_back(conn);
@@ -29,7 +32,11 @@ void ClientManager::del(ClientConnection* conn)
 
 ClientConnection* ClientManager::pop()
 {
-	if (conns_.empty())
+	std::vector<ClientConnection*>::iterator it = conns_.begin();
+	if (it == conns_.end())
 		return NULL;
-	return conns_[0];
+
+	ClientConnection* conn = *it;
+	conns_.erase(it);
+	return conn;
 }
