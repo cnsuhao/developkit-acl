@@ -10,11 +10,14 @@ ServerConnection::ServerConnection(acl::aio_socket_stream* conn)
 
 void ServerConnection::run()
 {
+	// 创建服务端连接 IO 处理的回调处理对象
 	ServerIOCallback* callback = new ServerIOCallback(this);
 
 	conn_->add_read_callback(callback);
 	conn_->add_close_callback(callback);
 	conn_->add_timeout_callback(callback);
+
+	// 异步从服务端获取一行数据
 	conn_->gets();
 }
 

@@ -9,13 +9,12 @@
 
 char *var_cfg_backend_service;
 acl::master_str_tbl var_conf_str_tab[] = {
-	{ "backend_service", "20018", &var_cfg_backend_service },
+	{ "backend_service", "backend", &var_cfg_backend_service },
 
 	{ 0, 0, 0 }
 };
 
 acl::master_bool_tbl var_conf_bool_tab[] = {
-
 	{ 0, 0, 0 }
 };
 
@@ -26,10 +25,7 @@ acl::master_int_tbl var_conf_int_tab[] = {
 	{ 0, 0 , 0 , 0, 0 }
 };
 
-long long int  var_cfg_int64;
 acl::master_int64_tbl var_conf_int64_tab[] = {
-	{ "int64", 120, &var_cfg_int64, 0, 0 },
-
 	{ 0, 0 , 0 , 0, 0 }
 };
 
@@ -53,13 +49,17 @@ bool master_service::on_accept(acl::aio_socket_stream* client)
 	if (acl_strrncasecmp(local, var_cfg_backend_service,
 		strlen(var_cfg_backend_service)) == 0)
 	{
+		// 创建服务对象处理来自于后端服务模块的请求
 		IConnection* conn = new ServerConnection(client);
+
 		conn->run();
 		return true;
 	}
 	else
 	{
+		// 创建对象处理来自于前端客户端模块的请求
 		IConnection* conn = new ClientConnection(client);
+
 		conn->run();
 		return true;
 	}
@@ -71,6 +71,8 @@ void master_service::proc_on_init()
 {
 	if (var_cfg_manager_timer <= 0)
 		var_cfg_manager_timer = 1;
+
+	// 启动后台定时器，用来处理未处理的前端客户端连接
 
 	timer_ = new ManagerTimer();
 	timer_->keep_timer(true);

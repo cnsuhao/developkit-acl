@@ -8,5 +8,6 @@ public:
 	~ClientConnection() {}
 
 protected:
+	// 基类纯虚函数
 	void run();
 };
