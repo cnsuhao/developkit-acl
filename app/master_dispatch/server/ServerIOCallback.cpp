@@ -28,6 +28,7 @@ bool ServerIOCallback::read_callback(char* data, int len)
 	acl::url_coder coder;
 	coder.decode(data);
 
+	//printf(">>>gets: %s from server\r\n", data);
 	const char* ptr = coder.get("client_count");
 	if (ptr == NULL)
 	{

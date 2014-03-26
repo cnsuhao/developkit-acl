@@ -13,6 +13,11 @@ public:
 	void del(ServerConnection* conn);
 	ServerConnection* min();
 
+	size_t length() const
+	{
+		return conns_.size();
+	}
+
 private:
 	std::vector<ServerConnection*> conns_;
 };

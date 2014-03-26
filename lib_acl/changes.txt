@@ -6,6 +6,11 @@
 监听描述符的类型方式有误
 436.2) bugfix: acl_getpeername 函数当客户端连接的是域套接字时，给出的地址不对，
 解决方法是当判断为域套接字后再调用 acl_getsockname 取得域套接字监听路径
+436.3) bugfix: acl_transfer_fd.c 中 acl_read_fd() 函数在读取 fd 时应该如下表示：
+*recv_fd = *((int *) CMSG_DATA(cmptr)); 而不是 *recv_fd = *CMSG_DATA(cmptr);
+436.4) feature: acl_threads_server.c 服务器模板支持从描述字派发器处获取来自于
+客户端的连接，应用只需要增加配置项：ioctl_dispatch_addr = xxx 即可
+436.5) app: 增加了 app/master_dispatch 套接字接收与派发服务器
 
 435) 2014.3.24
 435.1) bugfix: acl_master 服务器模块在 reload 配置文件时有可能会导致产生 core
