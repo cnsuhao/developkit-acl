@@ -4,6 +4,8 @@
 436) 2014.3.26
 436.1) bugfix: acl_vstream_net.c 中 acl_vstream_accept_ex 接收外来连接时，判断
 监听描述符的类型方式有误
+436.2) bugfix: acl_getpeername 函数当客户端连接的是域套接字时，给出的地址不对，
+解决方法是当判断为域套接字后再调用 acl_getsockname 取得域套接字监听路径
 
 435) 2014.3.24
 435.1) bugfix: acl_master 服务器模块在 reload 配置文件时有可能会导致产生 core
