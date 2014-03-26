@@ -55,7 +55,7 @@ const char* aio_stream::get_peer(bool full /* = false */) const
 
 	if (ptr == NULL || *ptr == 0)
 	{
-		char  buf[108];
+		char  buf[256];
 		ACL_SOCKET fd = ACL_VSTREAM_SOCK(vs);
 
 		if (acl_getpeername(fd, buf, sizeof(buf)) == -1)
@@ -83,7 +83,7 @@ const char* aio_stream::get_local(bool full /* = false */) const
 	ACL_SOCKET fd = ACL_VSTREAM_SOCK(vs);
 	if (ptr == NULL || *ptr == 0)
 	{
-		char  buf[64];
+		char  buf[256];
 		if (acl_getsockname(fd, buf, sizeof(buf)) == -1)
 			return dummy_;
 		acl_vstream_set_local(vs, buf);
