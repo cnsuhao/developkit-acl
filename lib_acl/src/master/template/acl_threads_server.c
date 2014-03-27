@@ -119,6 +119,7 @@ char *acl_var_threads_log_debug;
 char *acl_var_threads_deny_banner;
 char *acl_var_threads_access_allow;
 char *acl_var_threads_dispatch_addr;
+char *acl_var_threads_dispatch_type;
 
 static ACL_CONFIG_STR_TABLE __conf_str_tab[] = {
 	{ ACL_VAR_THREADS_QUEUE_DIR, ACL_DEF_THREADS_QUEUE_DIR, &acl_var_threads_queue_dir },
@@ -128,6 +129,7 @@ static ACL_CONFIG_STR_TABLE __conf_str_tab[] = {
 	{ ACL_VAR_THREADS_DENY_BANNER, ACL_DEF_THREADS_DENY_BANNER, &acl_var_threads_deny_banner },
 	{ ACL_VAR_THREADS_ACCESS_ALLOW, ACL_DEF_THREADS_ACCESS_ALLOW, &acl_var_threads_access_allow },
 	{ ACL_VAR_THREADS_DISPATCH_ADDR, ACL_DEF_THREADS_DISPATCH_ADDR, &acl_var_threads_dispatch_addr },
+	{ ACL_VAR_THREADS_DISPATCH_TYPE, ACL_DEF_THREADS_DISPATCH_TYPE, &acl_var_threads_dispatch_type },
 
         { 0, 0, 0 },
 };
@@ -789,65 +791,128 @@ static ACL_EVENT *event_open(int event_mode, acl_pthread_pool_t *threads)
 	return event;
 }
 
-static void dispatch_timer(int type acl_unused, ACL_EVENT *event, void *ctx)
+/*==========================================================================*/
+
+static void dispatch_connect_timer(int type acl_unused,
+	ACL_EVENT *event, void *ctx)
 {
 	acl_pthread_pool_t *threads = (acl_pthread_pool_t*) ctx;
 
 	dispatch_open(event, threads);
 }
 
-static void receive_connect(int event_type acl_unused, ACL_EVENT *event,
+static ACL_VSTREAM *__dispatch_conn = NULL;
+
+static int dispatch_report(void)
+{
+	const char *myname = "dispatch_report";
+	int   n;
+	char  buf[256];
+
+	if (__dispatch_conn == NULL) {
+		acl_msg_warn("%s(%d), %s: dispatch connection not available",
+			__FUNCTION__, __LINE__, myname);
+		return -1;
+	}
+
+	n = get_client_count();
+	snprintf(buf, sizeof(buf), "count=%d&used=%d&pid=%u&type=%s\r\n",
+		n, __use_count, (unsigned) getpid(),
+		acl_var_threads_dispatch_type);
+
+	if (acl_vstream_writen(__dispatch_conn, buf, strlen(buf))
+		== ACL_VSTREAM_EOF)
+	{
+		acl_msg_warn("%s(%d), %s: write to master_dispatch(%s) failed",
+			__FUNCTION__, __LINE__, myname,
+			acl_var_threads_dispatch_addr);
+
+		return -1;
+	}
+
+	return 0;
+}
+
+static void dispatch_timer(int type acl_unused, ACL_EVENT *event, void *ctx)
+{
+	acl_pthread_pool_t *threads = (acl_pthread_pool_t*) ctx;
+
+	if (dispatch_report() == 0)
+		acl_event_request_timer(event, dispatch_timer,
+			threads, 1000000, 0);
+}
+
+static void dispatch_receive(int event_type acl_unused, ACL_EVENT *event,
 	ACL_VSTREAM *conn, void *context)
 {
+	const char *myname = "dispatch_receive";
 	acl_pthread_pool_t *threads = (acl_pthread_pool_t*) context;
 	char  buf[256], remote[256], local[256];
 	int   fd = -1, ret;
 
-	ret = acl_read_fd(ACL_VSTREAM_SOCK(conn), buf, sizeof(buf) - 1, &fd);
-	if (ret <= 0 || fd < 0)
-	{
-		acl_msg_warn("read from master_dispatch(%s) error",
-			acl_var_threads_dispatch_addr);
-		acl_vstream_close(conn);
-		dispatch_open(event, threads);
-	} else {
-		buf[ret] = 0;
+	if (conn != __dispatch_conn)
+		acl_msg_fatal("%s(%d), %s: conn invalid",
+			__FUNCTION__, __LINE__, myname);
 
-		acl_event_enable_read(event, conn, 0, receive_connect, threads);
-		if (acl_getsockname(fd, local, sizeof(local)) < 0)
-			local[0] = 0;
-		if (acl_getpeername(fd, remote, sizeof(remote)) < 0)
-			remote[0] = 0;
-		server_wakeup(event, threads, fd, remote, local);
+	ret = acl_read_fd(ACL_VSTREAM_SOCK(conn), buf, sizeof(buf) - 1, &fd);
+	if (ret <= 0 || fd < 0) {
+		acl_msg_warn("%s(%d), %s: read from master_dispatch(%s) error",
+			__FUNCTION__, __LINE__, myname,
+			acl_var_threads_dispatch_addr);
+
+		acl_vstream_close(conn);
+		__dispatch_conn = NULL;
+
+		acl_event_request_timer(event, dispatch_connect_timer,
+			threads, 1000000, 0);
+
+		return;
 	}
+
+	buf[ret] = 0;
+
+	if (acl_getsockname(fd, local, sizeof(local)) < 0)
+		local[0] = 0;
+	if (acl_getpeername(fd, remote, sizeof(remote)) < 0)
+		remote[0] = 0;
+
+	/* begin handle one client connection same as accept */
+	server_wakeup(event, threads, fd, remote, local);
+
+	acl_event_enable_read(event, conn, 0, dispatch_receive, threads);
 }
 
 static void dispatch_open(ACL_EVENT *event, acl_pthread_pool_t *threads)
 {
-	ACL_VSTREAM *conn;
+	const char *myname = "dispatch_open";
 
-	if (!acl_var_threads_dispatch_addr || !*acl_var_threads_dispatch_addr) {
-		acl_msg_warn("acl_var_threads_dispatch_addr null!");
+	if (acl_var_threads_dispatch_addr == NULL
+		|| *acl_var_threads_dispatch_addr == 0)
+	{
+		acl_msg_warn("%s(%d), %s: acl_var_threads_dispatch_addr null",
+			__FUNCTION__, __LINE__, myname);
 		return;
 	}
 
-	conn = acl_vstream_connect(acl_var_threads_dispatch_addr,
+	__dispatch_conn = acl_vstream_connect(acl_var_threads_dispatch_addr,
 			ACL_BLOCKING, 0, 0, 4096);
 
-	if (conn == NULL) {
+	if (__dispatch_conn == NULL) {
 		acl_msg_warn("connect master_dispatch(%s) failed",
 			acl_var_threads_dispatch_addr);
+		acl_event_request_timer(event, dispatch_connect_timer,
+			threads, 1000000, 0);
+	} else if (dispatch_report() == 0) {
+		acl_event_enable_read(event, __dispatch_conn, 0,
+			dispatch_receive, threads);
 		acl_event_request_timer(event, dispatch_timer,
 			threads, 1000000, 0);
-	} else if (acl_vstream_fprintf(conn, "client_count=0&pid=%u\r\n",
-		(unsigned int) getpid()) > 0)
-		acl_event_enable_read(event, conn, 0, receive_connect, threads);
-	else {
-		acl_vstream_close(conn);
-		acl_event_request_timer(event, dispatch_timer,
+	} else
+		acl_event_request_timer(event, dispatch_connect_timer,
 			threads, 1000000, 0);
-	}
 }
+
+/*==========================================================================*/
 
 static acl_pthread_pool_t *threads_create(ACL_APP_THREAD_ON_INIT init_fn,
 	ACL_APP_THREAD_ON_EXIT exit_fn, void *init_ctx, void *exit_ctx)

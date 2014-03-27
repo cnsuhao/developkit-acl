@@ -16,6 +16,8 @@ ServerIOCallback::~ServerIOCallback()
 
 bool ServerIOCallback::read_callback(char* data, int len)
 {
+	const char* myname = "read_callback";
+
 	if (data == NULL || *data == 0 || len <= 0)
 	{
 		logger_warn("invalid data: %s, len: %d",
@@ -28,11 +30,11 @@ bool ServerIOCallback::read_callback(char* data, int len)
 	acl::url_coder coder;
 	coder.decode(data);
 
-	//printf(">>>gets: %s from server\r\n", data);
-	const char* ptr = coder.get("client_count");
+	printf(">>>gets: %s\r\n", data);
+	const char* ptr = coder.get("count");
 	if (ptr == NULL)
 	{
-		logger_warn("no client_count");
+		logger_warn("%s(%d), %s: no count", __FILE__, __LINE__, myname);
 		return true;
 	}
 
