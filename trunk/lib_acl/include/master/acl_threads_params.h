@@ -128,6 +128,10 @@ extern int   acl_var_threads_qlen_warn;
 #define	ACL_DEF_THREADS_DISPATCH_ADDR		""
 extern char *acl_var_threads_dispatch_addr;
 
+#define	ACL_VAR_THREADS_DISPATCH_TYPE		"ioctl_dispatch_type"
+#define	ACL_DEF_THREADS_DISPATCH_TYPE		"default"
+extern char *acl_var_threads_dispatch_type;
+
 #endif /* ACL_UNIX */
 
 #ifdef	__cplusplus
