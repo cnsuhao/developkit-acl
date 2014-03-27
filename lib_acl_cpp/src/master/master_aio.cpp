@@ -152,7 +152,9 @@ public:
 protected:
 	void close_callback()
 	{
+#ifndef WIN32
 		acl_aio_server_on_close(stream_);
+#endif // !WIN32
 		delete this;
 	}
 
