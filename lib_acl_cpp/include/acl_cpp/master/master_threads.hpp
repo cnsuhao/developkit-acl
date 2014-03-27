@@ -6,6 +6,10 @@ struct ACL_EVENT;
 
 namespace acl {
 
+#if 1
+typedef class master_threads2 master_threads;
+#else
+
 class socket_stream;
 
 /**
@@ -141,5 +145,7 @@ private:
 	// 当线程退出前调用的回调函数
 	static void thread_exit(void*);
 };
+
+#endif
 
 } // namespace acl
