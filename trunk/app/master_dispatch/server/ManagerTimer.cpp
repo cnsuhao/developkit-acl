@@ -36,7 +36,7 @@ bool ManagerTimer::transfer(ClientConnection* client)
 		// 将客户端连接传递给服务端，如果失败，则尝试下一个
 		// 服务端，同时将失败的服务端从服务端管理集合中删除
 		ret = acl_write_fd(server->sock_handle(), buf,
-			sizeof(buf) - 1, client->sock_handle());
+			strlen(buf), client->sock_handle());
 		if (ret == -1)
 		{
 			ServerManager::get_instance().del(server);

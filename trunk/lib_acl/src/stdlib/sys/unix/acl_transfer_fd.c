@@ -67,10 +67,11 @@ int acl_read_fd(int fd, void *ptr, int nbytes, int *recv_fd)
 			acl_msg_fatal("%s: control level != SOL_SOCKET", myname);
 		if (cmptr->cmsg_type != SCM_RIGHTS)
 			acl_msg_fatal("%s: control type != SCM_RIGHTS", myname);
-/*
+#if 0
 		*recv_fd = *CMSG_DATA(cmptr);
-*/
+#else
 		*recv_fd = *((int *) CMSG_DATA(cmptr));
+#endif
 	} else
 		*recv_fd = -1;  /* descriptor was not passed */
 #else
@@ -98,11 +99,13 @@ int acl_write_fd(int fd, void *ptr, int nbytes, int send_fd)
 	cmptr->cmsg_len = CMSG_LEN(sizeof(int));
 	cmptr->cmsg_level = SOL_SOCKET;
 	cmptr->cmsg_type = SCM_RIGHTS;
-	*CMSG_DATA(cmptr) = send_fd;
 
-/*
+#if 0
+	*CMSG_DATA(cmptr) = send_fd;
+#else
 	*((int *) CMSG_DATA(cmptr)) = send_fd;
-*/
+#endif
+
 #else
 	msg.msg_accrights = (caddr_t) &send_fd;
 	msg.msg_accrightslen = sizeof(int);
