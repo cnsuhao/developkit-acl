@@ -1253,12 +1253,6 @@ void acl_threads_server_main(int argc, char **argv,
 	acl_msg_info("%s(%d), %s daemon started, log: %s",
 		myname, __LINE__, argv[0], acl_var_threads_log_file);
 
-	/*
-	 * Traditionally, BSD select() can't handle threadsple processes
-	 * selecting on the same socket, and wakes up every process in
-	 * select(). See TCP/IP Illustrated volume 2 page 532. We avoid
-	 * select() collisions with an external lock file.
-	 */
 	while (1)
 		acl_event_loop(__event);
 

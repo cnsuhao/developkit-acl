@@ -4,6 +4,8 @@
 437) 2014.3.27
 437.1) bugfix: acl_ioctl_server.c 中调用 acl_event_set_check_inter 时应该在调用
 acl_ioctl_start 之后，否则因为 ACL_EVENT 对象还未创建而出现空指针引用
+437.1) feature: acl_aio_server.c 支持与 master_dispatch 服务模块配合，接收来自
+于 master_dispatch 模块的连接转发及向其汇报自身当前连接数
 
 436) 2014.3.26
 436.1) bugfix: acl_vstream_net.c 中 acl_vstream_accept_ex 接收外来连接时，判断
