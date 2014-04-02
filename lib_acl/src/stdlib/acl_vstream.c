@@ -1249,6 +1249,7 @@ TAG_AGAIN:
 			fp->read_cnt = 0;
 		}
 	} else {
+#if 0
 		if (fp->rw_timeout > 0 && acl_write_wait(ACL_VSTREAM_SOCK(fp),
 			fp->rw_timeout) < 0)
 		{
@@ -1263,6 +1264,7 @@ TAG_AGAIN:
 				sizeof(fp->errbuf));
 			return -1;
 		}
+#endif
 
 		n = fp->write_fn(ACL_VSTREAM_SOCK(fp), vptr, dlen,
 			fp->rw_timeout, fp, fp->context);
@@ -1348,6 +1350,7 @@ TAG_AGAIN:
 			fp->read_cnt = 0;
 		}
 	} else {
+#if 0
 		if (fp->rw_timeout > 0 && acl_write_wait(ACL_VSTREAM_SOCK(fp),
 			fp->rw_timeout) < 0)
 		{
@@ -1362,6 +1365,7 @@ TAG_AGAIN:
 				sizeof(fp->errbuf));
 			return -1;
 		}
+#endif
 
 		n = fp->writev_fn(ACL_VSTREAM_SOCK(fp), vec, count,
 			fp->rw_timeout, fp, fp->context);
