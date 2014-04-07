@@ -39,7 +39,9 @@ bool http_servlet::doPost(acl::HttpServletRequest& req,
 		req.getSession().setAttribute("sid", "xxxxxx");
 	sid = req.getSession().getAttribute("sid");
 
+	/*
 	$<GET_COOKIES>
+	*/
 
 	// ÉèÖÃ×Ö·û¼¯
 	res.setContentType("text/xml; charset=utf-8");
@@ -56,14 +58,13 @@ bool http_servlet::doPost(acl::HttpServletRequest& req,
 					.add_attr("sid", sid ? sid : "null")
 				.get_parent()
 			.get_parent()
+			/*
 			.add_child("cookies", true)
 				.add_child("cookie", true)
 					.add_attr("name1", cookie1 ? cookie1 : "null")
 				.get_parent()
-				.add_child("cookie", true)
-					.add_attr("name2", cookie2 ? cookie2 : "null")
-				.get_parent()
 			.get_parent()
+				*/
 			.add_child("params", true)
 				.add_child("param", true)
 					.add_attr("name1", param1 ? param1 : "null")
