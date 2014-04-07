@@ -43,8 +43,10 @@ bool http_servlet::doPost(acl::HttpServletRequest& req,
 	$<GET_COOKIES>
 	*/
 
-	// 设置字符集
-	res.setContentType("text/xml; charset=utf-8");
+	bool keep_alive = req.isKeepAlive();
+
+	res.setContentType("text/xml; charset=utf-8")	// 设置响应字符集
+		.setKeepAlive(keep_alive);		// 设置是否保持长连接
 
 	const char* param1 = req.getParameter("name1");
 	const char* param2 = req.getParameter("name2");
@@ -74,11 +76,6 @@ bool http_servlet::doPost(acl::HttpServletRequest& req,
 	acl::string buf;
 	body.build_xml(buf);
 
-	// 发送 http 响应头
-	if (res.sendHeader() == false)
-		return false;
 	// 发送 http 响应体
-	if (res.getOutputStream().write(buf) == -1)
-		return false;
-	return true;
+	return res.write(buf) && keep_alive;
 }
