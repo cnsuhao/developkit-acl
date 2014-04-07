@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "http_servlet.h"
 
-//////////////////////////////////////////////////////////////////////////
-
 http_servlet::http_servlet(void)
 {
 
@@ -13,24 +11,28 @@ http_servlet::~http_servlet(void)
 
 }
 
-void http_servlet::doUnknown(HttpServletRequest&, HttpServletResponse& res)
+bool http_servlet::doUnknown(acl::HttpServletRequest&,
+	acl::HttpServletResponse& res)
 {
 	res.setStatus(400);
 	res.setContentType("text/html; charset=$<CHARSET>");
 	// 发送 http 响应头
 	if (res.sendHeader() == false)
-		return;
+		return false;
 	// 发送 http 响应体
-	string buf("<root error='unkown request method' />\r\n");
+	acl::string buf("<root error='unkown request method' />\r\n");
 	(void) res.getOutputStream().write(buf);
+	return false;
 }
 
-bool http_servlet::doGet(HttpServletRequest& req, HttpServletResponse& res)
+bool http_servlet::doGet(acl::HttpServletRequest& req,
+	acl::HttpServletResponse& res)
 {
 	return doPost(req, res);
 }
 
-bool http_servlet::doPost(HttpServletRequest& req, HttpServletResponse& res)
+bool http_servlet::doPost(acl::HttpServletRequest& req,
+	acl::HttpServletResponse& res)
 {
 	const char* sid = req.getSession().getAttribute("sid");
 	if (*sid == 0)
@@ -40,13 +42,13 @@ bool http_servlet::doPost(HttpServletRequest& req, HttpServletResponse& res)
 	$<GET_COOKIES>
 
 	// 设置字符集
-	res.setContentType("text/xml; charset=$<CHARSET>");
+	res.setContentType("text/xml; charset=utf-8");
 
 	const char* param1 = req.getParameter("name1");
 	const char* param2 = req.getParameter("name2");
 
 	// 创建 xml 格式的数据体
-	xml body;
+	acl::xml body;
 	body.get_root()
 		.add_child("root", true)
 			.add_child("sessions", true)
@@ -68,7 +70,7 @@ bool http_servlet::doPost(HttpServletRequest& req, HttpServletResponse& res)
 				.get_parent()
 				.add_child("param", true)
 					.add_attr("name2", param2 ? param2 : "null");
-	string buf;
+	acl::string buf;
 	body.build_xml(buf);
 
 	// 发送 http 响应头
@@ -78,56 +80,4 @@ bool http_servlet::doPost(HttpServletRequest& req, HttpServletResponse& res)
 	if (res.getOutputStream().write(buf) == -1)
 		return false;
 	return true;
-}
-
-//////////////////////////////////////////////////////////////////////////
-
-static void do_run(socket_stream* stream)
-{
-	memcache_session session("$<MEMCACHED_ADDR>");
-	http_servlet servlet;
-	servlet.setLocalCharset("$<CHARSET>");
-	servlet.doRun(session, stream);
-}
-
-// 服务器方式运行时的服务类
-class master_service : public master_proc
-{
-public:
-	master_service() {}
-	~master_service() {}
-protected:
-	virtual void on_accept(socket_stream* stream)
-	{
-		do_run(stream);
-	}
-};
-
-// WEB 服务模式
-static void do_alone(void)
-{
-	master_service service;
-	printf("listen: 0.0.0.0:8888 ...\r\n");
-	service.run_alone("0.0.0.0:8888", NULL, 1);  // 单独运行方式
-}
-
-// WEB CGI 模式
-static void do_cgi(void)
-{
-	do_run(NULL);
-}
-
-int main(int argc, char* argv[])
-{
-#ifdef WIN32
-	acl::acl_cpp_init();
-#endif
-
-	// 开始运行
-	if (argc >= 2 && strcmp(argv[1], "alone") == 0)
-		do_alone();
-	else
-		do_cgi();
-
-	return 0;
 }
