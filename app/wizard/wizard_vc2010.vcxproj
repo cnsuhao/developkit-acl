@@ -81,7 +81,7 @@
       <AdditionalIncludeDirectories>..\..\lib_acl\include;..\..\lib_protocol\include;..\..\lib_acl_cpp\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <OutputFile>$(OutDir)wizard.exe</OutputFile>
+      <OutputFile>wizard.exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
