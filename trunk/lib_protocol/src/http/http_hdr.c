@@ -504,9 +504,12 @@ int http_hdr_parse(HTTP_HDR *hh)
 			hh->content_length = acl_atoui64(entry->value) * 1ll;
 #endif
 			if (hh->content_length < 0) {
+				/*
 				acl_msg_error("%s: content_length(%s) invalid",
-						myname, entry->value);
+					myname, entry->value);
 				return (-1);
+				*/
+				hh->content_length = -1;
 			}
 			care_cnt++;
 		} else if (strcasecmp(entry->name, "Transfer-Encoding") == 0) {
