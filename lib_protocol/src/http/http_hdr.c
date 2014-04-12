@@ -392,7 +392,9 @@ void http_hdr_entry_off(HTTP_HDR *hh, const char *name)
 
 int http_hdr_parse(HTTP_HDR *hh)
 {
+	/*
 	const char *myname = "http_hdr_parse";
+	*/
 	int   keep_alive = -1;
 	HTTP_HDR_ENTRY *entry;
 	ACL_ITER  iter;
