@@ -93,6 +93,9 @@ connect_client* connect_pool::peek()
 	current_used_++;
 
 	lock_.unlock();
+
+	conn->set_pool(this);
+
 	return conn;
 }
 
