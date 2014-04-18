@@ -225,6 +225,15 @@ copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
+				RelativePath=".\connect_client.cpp">
+			</File>
+			<File
+				RelativePath=".\connect_manager.cpp">
+			</File>
+			<File
+				RelativePath=".\connect_pool.cpp">
+			</File>
+			<File
 				RelativePath=".\main.cpp">
 			</File>
 			<File
@@ -259,6 +268,15 @@ copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y
 			Name="Í·ÎÄ¼þ"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			<File
+				RelativePath=".\connect_client.h">
+			</File>
+			<File
+				RelativePath=".\connect_manager.h">
+			</File>
+			<File
+				RelativePath=".\connect_pool.h">
+			</File>
 			<File
 				RelativePath=".\stdafx.h">
 			</File>
