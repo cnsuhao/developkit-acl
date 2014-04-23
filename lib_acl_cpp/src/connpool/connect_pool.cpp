@@ -42,6 +42,12 @@ connect_pool& connect_pool::set_idle_ttl(time_t ttl)
 	return *this;
 }
 
+connect_pool& connect_pool::set_retry_inter(int retry_inter)
+{
+	retry_inter_ = retry_inter;
+	return *this;
+}
+
 connect_client* connect_pool::peek()
 {
 	lock_.lock();
