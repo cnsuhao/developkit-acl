@@ -2363,7 +2363,6 @@ SYS_SEEK:
 acl_off_t acl_vstream_ftell(ACL_VSTREAM *fp)
 {
 	const char *myname = "acl_vstream_ftell";
-	acl_off_t n;
 
 	if (fp == NULL || ACL_VSTREAM_FILE(fp) == ACL_FILE_INVALID)
 		acl_msg_fatal("%s, %s(%d): input error",
