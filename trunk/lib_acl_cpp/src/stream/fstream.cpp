@@ -97,6 +97,11 @@ acl_off_t fstream::fseek(acl_off_t offset, int whence)
 	return acl_vstream_fseek(stream_, offset, whence);
 }
 
+acl_off_t fstream::ftell()
+{
+	return acl_vstream_ftell(stream_);
+}
+
 bool fstream::ftruncate(acl_off_t length)
 {
 	fseek(0, SEEK_SET); // 需要先将文件指针移到开始位置

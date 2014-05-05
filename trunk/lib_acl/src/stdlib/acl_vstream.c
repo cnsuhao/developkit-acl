@@ -2360,6 +2360,32 @@ SYS_SEEK:
 	return fp->offset;
 }
 
+acl_off_t acl_vstream_ftell(ACL_VSTREAM *fp)
+{
+	const char *myname = "acl_vstream_ftell";
+	acl_off_t n;
+
+	if (fp == NULL || ACL_VSTREAM_FILE(fp) == ACL_FILE_INVALID)
+		acl_msg_fatal("%s, %s(%d): input error",
+			myname, __FILE__, __LINE__);
+
+	if (fp->type != ACL_VSTREAM_TYPE_FILE) {
+		acl_msg_error("%s, %s(%d): type(%d) not ACL_VSTREAM_TYPE_FILE",
+			myname, __FILE__, __LINE__, fp->type);
+		return -1;
+	}
+
+	if (fp->wbuf_dlen > 0) {
+		if (acl_vstream_fflush(fp) == ACL_VSTREAM_EOF) {
+			acl_msg_error("%s, %s(%d): acl_vstream_fflush error",
+				myname, __FILE__, __LINE__);
+			return -1;
+		}
+	}
+
+	return acl_vstream_fseek(fp, 0, SEEK_CUR);
+}
+
 #ifdef WIN32
 int acl_file_ftruncate(ACL_VSTREAM *fp, acl_off_t length)
 {
