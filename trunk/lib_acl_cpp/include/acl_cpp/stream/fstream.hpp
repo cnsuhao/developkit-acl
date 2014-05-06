@@ -61,12 +61,13 @@ public:
 	 * @param offset {__int64} 偏移量
 	 * @param whence {int} 移动方向：SEEK_SET（从文件起始位置后移动）,
 	 *  SEEK_CUR（从当前文件指针位置向后移动）, SEEK_END（从文件尾向前移动）
+	 * @return {acl_off_t} 正常时返回值 >= 0，出错时返回 -1
 	 */
 	__int64 fseek(__int64 offset, int whence);
 
 	/**
 	 * 获得当前系统文件指针在文件中的偏移位置
-	 * @return {acl_off_t} -1 表示出错，正常时返回值 >= 0
+	 * @return {acl_off_t} 正常时返回值 >= 0，出错时返回 -1
 	 */
 	__int64 ftell();
 
