@@ -3,6 +3,7 @@
 ------------------------------------------------------------------------
 441) 2014.5.7
 441.1) bugfix: acl_vstream.c 中 acl_vstream_ftell 应该将读缓冲区中读到的数据减去
+441.2) bugfix: acl_aqueue.c 中应支持无限等待方式
 
 440) 2014.5.5
 440.1) feature: acl_vstream.c/acl_file.c 支持类似于标准 C 中的 ftell 功能，用来获得
