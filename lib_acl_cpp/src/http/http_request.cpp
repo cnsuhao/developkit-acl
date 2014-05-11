@@ -336,6 +336,30 @@ bool http_request::request(const void* data, size_t len)
 	return true;
 }
 
+int http_request::http_status() const
+{
+	acl_assert(client_);
+	return client_->response_status();
+}
+
+acl_int64 http_request::body_length() const
+{
+	acl_assert(client_);
+	return client_->body_length();
+}
+
+bool http_request::keep_alive() const
+{
+	acl_assert(client_);
+	return client_->keep_alive();
+}
+
+const char* http_request::header_value(const char* name) const
+{
+	acl_assert(client_);
+	return client_->header_value(name);
+}
+
 void http_request::check_range()
 {
 	http_off_t range_from, range_to;
