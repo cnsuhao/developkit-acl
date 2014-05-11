@@ -209,7 +209,7 @@ public:
 
 	/**
 	 * 从 HTTP 服务器读取响应体数据或从 HTTP 客户端读取请求体数据，
-	 * 只有调用此函数才能进行解压操作
+	 * 此函数将对收到的数据内容进行解压操作
 	 * @param out {string&} 存储数据体的缓冲区
 	 * @param clean {bool} 在接收数据前是否自动清空 buf 缓冲区
 	 * @param real_size {int*} 若该指针非空，则记录真正读到的数据长度，
@@ -236,6 +236,22 @@ public:
 	 *  < 0: 表示连接关闭
 	 */
 	int read_body(char* buf, size_t size);
+
+	/**
+	 * 从 HTTP 服务器读取响应体数据或从 HTTP 客户端读取请求体数据，
+	 * 此函数将对收到的数据内容进行解压操作
+	 * @param out {string&} 存储数据体的缓冲区，在该函数内部不会自动清理该缓冲区，
+	 *  用户应该在调用该函数前自行清理该缓冲区中的数据(可调用:out.clear())
+	 * @param real_size {int*} 若该指针非空，则记录真正读到的数据长度，
+	 *  通过该指针返回的数据值永远 >= 0
+	 * @return {int} 返回值含义如下：
+	 *  > 0: 表示已经读到的数据，并且数据还未读完
+	 *  == 0: 如果返回值为此值，则必须调用 body_finish 函数来判断是否已经读完
+	 *  HTTP 响应体数据，如果已经读完，则同时表明还可以继续保持长连接；当设置 nonl
+	 *  为 true 且读到一个空行时，该函数也会返回 0
+	 *  < 0: 表示连接关闭
+	 */
+	int gets_body(string& out, bool nonl = true, int* real_size = NULL);
 
 	/**
 	 * 判断是否已经读完 HTTP 响应数据体
@@ -290,6 +306,7 @@ private:
 	int  last_ret_;             // 数据读完后记录最后的返回值
 	bool body_finish_;          // 是否已经读完 HTTP 响应体数据
 	bool chunked_transfer_;     // 是否为 chunked 传输模式
+	string* buf_;               // 内部缓冲区，用在按行读等操作中
 
 	bool read_request_head(void);
 	bool read_response_head(void);

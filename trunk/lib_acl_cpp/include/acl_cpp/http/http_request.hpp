@@ -103,6 +103,38 @@ public:
 	 */
 	bool write_body(const void* data, size_t len);
 
+	/////////////////////////////////////////////////////////////////////
+
+	/**
+	 * 当发送完请求数据后，内部会自动调用读 HTTP 响应头过程，可以通过此函数获得服务端
+	 * 响应的 HTTP 状态字(2xx, 3xx, 4xx, 5xx)；
+	 * 其实该函数内部只是调用了 http_client::response_status 方法
+	 * @return {int}
+	 */
+	int http_status() const;
+
+	/**
+	 * 获得 HTTP 响应的数据体长度
+	 * @return {int64) 返回值若为 -1 则表明 HTTP 头不存在或没有长度字段
+	 */
+#ifdef WIN32
+	__int64 body_length(void) const;
+#else
+	long long int body_length(void) const;
+#endif
+	/**
+	 * HTTP 数据流(响应流是否允许保持长连接)
+	 * @return {bool}
+	 */
+	bool keep_alive(void) const;
+
+	/**
+	 * 获得 HTTP 响应头中某个字段名的字段值
+	 * @param name {const char*} 字段名
+	 * @return {const char*} 字段值，为空时表示不存在
+	 */
+	const char* header_value(const char* name) const;
+
 	/**
 	 * 当调用 request 成功后调用本函数，读取服务器响应体数据
 	 * 并将结果存储于规定的 xml 对象中
@@ -219,6 +251,8 @@ public:
 	 */
 	const HttpCookie* get_cookie(const char* name,
 		bool case_insensitive = true) const;
+
+	/////////////////////////////////////////////////////////////////////
 
 	/**
 	 * 获得 http_client HTTP 连接流，可以通过返回的对象获得

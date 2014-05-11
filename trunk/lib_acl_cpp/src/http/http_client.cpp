@@ -636,6 +636,40 @@ int http_client::read_request_body(string& out, bool clean,
 	return (ret);
 }
 
+int http_client::gets_body(string& out, bool nonl /* = true */,
+	int* real_size /* = NULL */)
+{
+	if (buf_ == NULL)
+		buf_ = new string(1024);
+
+	if (!buf_->empty())
+	{
+		int ln_pos = buf_->find('\n');
+		if (ln_pos >= 0)
+		{
+			ln_pos++;
+			out.append(buf_->c_str(), ln_pos);
+			buf_->memmove(buf_->c_str() + ln_pos, ln_pos);
+			if (real_size)
+				*real_size = ln_pos;
+			return ln_pos;
+		}
+	}
+
+	int ret = read_body(*buf_, false);
+	if (ret <= 0)
+	{
+		if (buf_->empty())
+			return -1;
+		out.append(*buf_);
+		size_t len = buf_->length();
+		buf_->clear();
+		return (int) len;
+	}
+
+	return 0;
+}
+
 HTTP_HDR_RES* http_client::get_respond_head(string* buf)
 {
 	if (hdr_res_ == NULL)
