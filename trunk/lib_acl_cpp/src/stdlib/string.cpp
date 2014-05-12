@@ -442,8 +442,12 @@ char* string::buf_end()
 	return pEnd;
 }
 
-size_t string::scan_line(string& out, bool part_copy /* = false */)
+size_t string::scan_line(string& out, bool* found /* = false */
+	bool part_copy /* = false */)
 {
+	if (found)
+		*found = false;
+
 	char* pEnd = buf_end();
 	if (pEnd == NULL)
 		return 0;
@@ -452,6 +456,8 @@ size_t string::scan_line(string& out, bool part_copy /* = false */)
 	char *ln = (char*) memchr(m_ptr, '\n', len);
 	if (ln != NULL)
 	{
+		if (found)
+			*found = true;
 		len = ln - m_ptr + 1;
 		out.append(m_ptr, len);
 		acl_vstring_memmove(m_pVbf, m_ptr, len);
