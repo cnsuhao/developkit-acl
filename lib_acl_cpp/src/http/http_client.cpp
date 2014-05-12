@@ -644,6 +644,10 @@ int http_client::gets_body(string& out, bool nonl /* = true */,
 
 	if (!buf_->empty())
 	{
+		bool found;
+		
+	}
+
 		int ln_pos = buf_->find('\n');
 		if (ln_pos >= 0)
 		{
