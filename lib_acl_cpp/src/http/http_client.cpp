@@ -639,6 +639,7 @@ int http_client::read_request_body(string& out, bool clean,
 int http_client::gets_body(string& out, bool nonl /* = true */,
 	int* real_size /* = NULL */)
 {
+	(void) nonl; (void) real_size;
 	if (buf_ == NULL)
 		buf_ = new string(1024);
 
