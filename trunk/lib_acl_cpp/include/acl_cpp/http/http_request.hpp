@@ -136,6 +136,12 @@ public:
 	const char* header_value(const char* name) const;
 
 	/**
+	 * 是否读完了数据体
+	 * @return {bool}
+	 */
+	bool body_finish() const;
+
+	/**
 	 * 当调用 request 成功后调用本函数，读取服务器响应体数据
 	 * 并将结果存储于规定的 xml 对象中
 	 * @param out {xml&} HTTP 响应体数据存储于该 xml 对象中
@@ -199,6 +205,21 @@ public:
 	 */
 	int read_body(string& out, bool clean = false,
 		int* real_size = NULL);
+
+	/**
+	 * 当调用 request 成功后调用本函数来从 HTTP 服务端读一行数据，可以循环调用
+	 * 本函数，直到返回 false 或 body_finish() 返回 true 为止；
+	 * 本函数内部自动对压缩数据进行解压，如果在调用本函数之前调用 set_charset 设置了
+	 * 本地字符集，则还同时对数据进行字符集转码操作
+	 * @param out {string&} 存储结果数据
+	 * @param nonl {bool} 读到的一行数据是否自动去掉尾部的 "\r\n" 或 "\n"
+	 * @param size {size_t*} 该指针非空时存放读到的数据长度
+	 * @return {bool} 是否读到了一行数据：当返回 true 时表示读到了一行数据，可以
+	 *  通过 body_finish() 是否为 true 来判断是否读数据体已经结束，当读到一个空行
+	 *  且 nonl = true 时，则 *size = 0；当返回 false 时表示未读完整行且读完毕，
+	 *  *size 中存放着读到的数据长度
+	 */
+	bool body_gets(string& out, bool nonl = true, size_t* size = NULL);
 
 	/**
 	 * 当通过 http_request::request_header().set_range() 设置了

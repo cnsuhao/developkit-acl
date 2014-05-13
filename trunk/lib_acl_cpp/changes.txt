@@ -1,5 +1,8 @@
 修改历史列表：
 ------------------------------------------------------------------------
+233) 2014.5.13
+233.1) feature: string/http_client/http_request 类增加了按行读数据的方法
+
 232) 2014.5.11
 232.1) feature: string 类增加了 scan_line/trim_left_space/trim_right_space/
 trim_space/trim_left_line/trim_right_line/trim_line 方法

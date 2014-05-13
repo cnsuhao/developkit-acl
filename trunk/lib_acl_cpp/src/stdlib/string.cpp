@@ -442,38 +442,55 @@ char* string::buf_end()
 	return pEnd;
 }
 
-size_t string::scan_line(string& out, bool* found /* = false */,
-	bool part_copy /* = false */)
+bool string::scan_line(string& out, bool nonl /* = true */,
+	size_t* size /* = NULL */, bool part_copy /* = false */)
 {
-	if (found)
-		*found = false;
+	if (size)
+		*size = 0;
 
 	char* pEnd = buf_end();
 	if (pEnd == NULL)
-		return 0;
+		return false;
 	
 	size_t len = pEnd - m_ptr;
 	char *ln = (char*) memchr(m_ptr, '\n', len);
 	if (ln != NULL)
 	{
-		if (found)
-			*found = true;
 		len = ln - m_ptr + 1;
-		out.append(m_ptr, len);
-		acl_vstring_memmove(m_pVbf, m_ptr, len);
+		size_t len_saved = len;
+		if (nonl)
+		{
+			ln--;
+			len--;
+			if (ln >= m_ptr && *ln == '\r')
+			{
+				ln--;
+				len--;
+			}
+			if (len > 0)
+				out.append(m_ptr, len);
+		}
+		else
+			out.append(m_ptr, len);
+
+		acl_vstring_memmove(m_pVbf, m_ptr, len_saved);
 		m_ptr = STR(m_pVbf);
-		return len;
+		if (size)
+			*size = len;
+		return true;
 	}
 
 	if (!part_copy)
-		return 0;
+		return false;
 
 	// 注：此处使用内部指针 m_ptr 而不是 STR(m_pVbf) 的主要原因是：之前可能有调用
 	// scan_buf 的操作但没有要求移动数据指针，为防止拷贝重复数据，所以此处使用了内部
 	// 内存指针 m_ptr
 	out.append(m_ptr, len);
 	clear();
-	return len;
+	if (size)
+		*size = len;
+	return false;
 }
 
 size_t string::scan_buf(void* pbuf, size_t n, bool move /* false */)
