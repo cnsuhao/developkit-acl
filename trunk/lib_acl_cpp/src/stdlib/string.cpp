@@ -1087,7 +1087,7 @@ string& string::trim_right_line()
 		return *this;
 	pEnd--;
 	size_t n = 0;
-	while (pEnd >= pBegin && *pEnd == '\n ')
+	while (pEnd >= pBegin && *pEnd == '\n')
 	{
 		pEnd--;
 		n++;
