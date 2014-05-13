@@ -651,14 +651,14 @@ public:
 	 * 从当前对象的缓冲区中拷贝一行数据(包含"\r\n")至目标缓冲区内，当数据被拷贝至
 	 * 目标缓冲区后，在源缓冲区内未被拷贝的数据会发生移动并覆盖被拷贝的数据区域
 	 * @param out {string&} 目标缓冲区
-	 * @param part {bool} 当当前缓冲区内数据没有一行数据时是否依然拷贝
-	 * @param found {bool} 当该参数为非空指针时，其存放查询结果表明是否包含 \n
-	 * @return {size_t} 实际被拷贝的数据的长度，当没有完整的行数据且不希望拷贝部分
-	 *  数据（即 part_copy == false）或当前缓冲区为空时，该函数返回 0；当拷贝了完
-	 *  整的一行数据或仅拷贝了部分数据时（即缓冲区非空且 part_copy == true）时该函
-	 *  数返回值 > 0
+	 * @param nonl {bool} 返回的一行数据是否去掉尾部的 "\r\n" 或 "\n"
+	 * @param size {size_t*} 该参数为非空指针时，则存储拷贝到的数据长度；当读到一
+	 *  个空行且 nonl 为 true 时，则该地址存储 0
+	 * @param part_copy {bool} 若当前缓冲区没有一行数据时是否依然拷贝
+	 * @return {bool} 是否拷贝了一个完整行数据 
 	 */
-	size_t scan_line(string& out, bool* found, bool part_copy = false);
+	bool scan_line(string& out, bool nonl = true,
+		size_t* size = NULL, bool part_copy = false);
 
 	/**
 	 * 返回当前对象缓冲区中第一个不含数据的尾部地址
