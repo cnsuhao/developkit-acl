@@ -442,7 +442,7 @@ char* string::buf_end()
 	return pEnd;
 }
 
-size_t string::scan_line(string& out, bool* found /* = false */
+size_t string::scan_line(string& out, bool* found /* = false */,
 	bool part_copy /* = false */)
 {
 	if (found)
