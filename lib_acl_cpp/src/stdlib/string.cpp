@@ -443,10 +443,10 @@ char* string::buf_end()
 }
 
 bool string::scan_line(string& out, bool nonl /* = true */,
-	size_t* size /* = NULL */, bool part_copy /* = false */)
+	size_t* n /* = NULL */, bool part_copy /* = false */)
 {
-	if (size)
-		*size = 0;
+	if (n)
+		*n = 0;
 
 	char* pEnd = buf_end();
 	if (pEnd == NULL)
@@ -475,8 +475,8 @@ bool string::scan_line(string& out, bool nonl /* = true */,
 
 		acl_vstring_memmove(m_pVbf, m_ptr, len_saved);
 		m_ptr = STR(m_pVbf);
-		if (size)
-			*size = len;
+		if (n)
+			*n = len;
 		return true;
 	}
 
@@ -488,8 +488,8 @@ bool string::scan_line(string& out, bool nonl /* = true */,
 	// ÄÚ´æÖ¸Õë m_ptr
 	out.append(m_ptr, len);
 	clear();
-	if (size)
-		*size = len;
+	if (n)
+		*n = len;
 	return false;
 }
 
