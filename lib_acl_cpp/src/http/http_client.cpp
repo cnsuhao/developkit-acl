@@ -642,6 +642,7 @@ int http_client::gets_body(string& out, bool nonl /* = true */,
 	if (buf_ == NULL)
 		buf_ = new string(1024);
 
+	/*
 	if (!buf_->empty())
 	{
 		bool found;
@@ -658,7 +659,7 @@ int http_client::gets_body(string& out, bool nonl /* = true */,
 				*real_size = ln_pos;
 			return ln_pos;
 		}
-	}
+	}*/
 
 	int ret = read_body(*buf_, false);
 	if (ret <= 0)
