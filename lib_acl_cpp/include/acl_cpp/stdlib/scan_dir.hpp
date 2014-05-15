@@ -47,11 +47,14 @@ public:
 	/**
 	 * 扫描下一个目录或文件，当在 open 指定了允许递归扫描项(即 resursive = true)，
 	 * 则该函数会递归扫描所打开目录的所有子目录及文件
-	 * @param full {bool} 是否需要返回目录或文件的全路径
+	 * @param full {bool} 是否需要返回目录或文件的全路径，如果为 true 则返回全路径，
+	 *  否则只返回文件名或目录名且都不含路径
+	 * @param is_file {bool*} 当返回结果非空时，该地址存储的值表示所扫描到的是否是
+	 *  文件，如果为 true 则为文件，否则为目录
 	 * @return {const char*} 非 NULL 表示所扫描到的目录名或文件名，否则表示扫描
 	 *  完毕或目录还未打开 
 	 */
-	const char* next(bool full = false);
+	const char* next(bool full = false, bool* is_file = NULL);
 
 	/**
 	 * 获得当前扫描过程所在的目录路径
