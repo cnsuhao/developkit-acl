@@ -1,7 +1,10 @@
 #include "lib_acl.h"
 #ifdef WIN32
 #include <io.h>
+#include <direct.h>
 #define access _access
+#define chdir _chdir
+#define getcwd _getcwd
 #endif // WIN32
 #include "acl_cpp/lib_acl.hpp"
 
@@ -128,15 +131,18 @@ static bool cmp_copy(acl::scan_dir& scan, const char* name,
 		{
 			if (read_len == length)
 				return true;
-
-			logger_error("read from file(%s) error(%s),"
 #ifdef WIN32
+			logger_error("read from file(%s) error(%s),"
 				"file size: %I64d read len: %I64d",
-#else
-				"file size: %lld, read len: %lld",
-#endif
 				from_fp.file_path(), acl::last_serror(),
 				length, read_len);
+#else
+			logger_error("read from file(%s) error(%s),"
+				"file size: %lld, read len: %lld",
+				from_fp.file_path(), acl::last_serror(),
+				length, read_len);
+#endif
+
 			return false;
 		}
 
