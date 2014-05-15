@@ -129,39 +129,60 @@ ACL_API ACL_SCAN_DIR *acl_scan_dir_pop(ACL_SCAN_DIR *scan);
 ACL_API const char *acl_scan_dir_next(ACL_SCAN_DIR *scan);
 
 /**
- * 获得下一个文件名(不包含路径名, 相对路径名可以通过 acl_scan_dir_path获得),
+ * 获得下一个文件名(不包含路径名, 相对路径名可以通过 acl_scan_dir_path 获得),
  * 该函数内部支持递归扫描目录功能, acl_scan_dir_open 中的参数 recursive 对该函数有效
  * @param scan {ACL_SCAN_DIR*} 类型指针
- * @return {const char*} 返回下一个扫描的文件名，
- *             != NULL, OK; == NULL 扫描出错, 应该退出扫描
+ * @return {const char*} 返回下一个扫描的文件名: !NULL, OK; NULL 扫描完毕，应结束扫描
  */
 ACL_API const char *acl_scan_dir_next_file(ACL_SCAN_DIR *scan);
+
+/**
+ * 获得下一个目录名(不包含路径名, 相对路径名可以通过 acl_scan_dir_path 获得),
+ * 该函数内部支持递归扫描目录功能, acl_scan_dir_open 中的参数 recursive 对该函数有效
+ * @param scan {ACL_SCAN_DIR*} 类型指针
+ * @return {const char*} 返回下一个扫描的目录名: !NULL, OK; NULL 扫描完毕, 应结束扫描
+ */
+ACL_API const char *acl_scan_dir_next_dir(ACL_SCAN_DIR *scan);
+
+/**
+ * 获得下一个目录名或文件名(不包含路径名, 相对路径名可以通过 acl_scan_dir_path 获得),
+ * 该函数内部支持递归扫描目录功能, acl_scan_dir_open 中的参数 recursive 对该函数有效
+ * @param scan {ACL_SCAN_DIR*} 类型指针
+ * @return {const char*} 返回下一个扫描的目录名或文件名: !NULL, OK; NULL 扫描完毕,
+ *  应结束扫描
+ */
+ACL_API const char *acl_scan_dir_next_name(ACL_SCAN_DIR *scan);
 
 /**
  * 取得当前目录下所占磁盘空间大小(以字节计算)
  * 该函数内部支持递归扫描目录功能, acl_scan_dir_open 中的参数 recursive 对该函数有效
  * @param scan {ACL_SCAN_DIR*} 打开目录时的扫描句柄
+ * @param nfile {int*} 扫描完后记录所扫描的文件总数
+ * @param ndir {int*} 扫描完后记录所扫描的目录总数
  * @return {acl_int64} -1: Error; >= 0: Ok
  */
-ACL_API acl_int64 acl_scan_dir_size2(ACL_SCAN_DIR *scan);
+ACL_API acl_int64 acl_scan_dir_size2(ACL_SCAN_DIR *scan, int *nfile, int *ndir);
 
 /**
-* 取得当前目录下所占磁盘空间大小(以字节计算)
-* @param pathname {const char*} 目录路径名
-* @param recursive {int} 是否要递归扫描该目录下的所有子目录
-* @param nfile {int*} 扫描完后记录所扫描的文件总数
-* @param ndir {int*} 扫描完后记录所扫描的目录总数
-* @return {acl_int64} -1: Error, >= 0: Ok
-*/
+ * 取得当前目录下所占磁盘空间大小(以字节计算)
+ * @param pathname {const char*} 目录路径名
+ * @param recursive {int} 是否要递归扫描该目录下的所有子目录
+ * @param nfile {int*} 扫描完后记录所扫描的文件总数
+ * @param ndir {int*} 扫描完后记录所扫描的目录总数
+ * @return {acl_int64} -1: Error, >= 0: Ok
+ */
 ACL_API acl_int64 acl_scan_dir_size(const char *pathname, int recursive,
 		int *nfile, int *ndir);
 
 /**
  * 删除所给路径下所有的文件及目录
+ * @param nfile {int*} 扫描完后记录所扫描的文件总数
+ * @param ndir {int*} 扫描完后记录所扫描的目录总数
  * 该函数内部支持递归扫描目录功能, acl_scan_dir_open 中的参数 recursive 对该函数有效
  * @param scan {ACL_SCAN_DIR*} 打开目录时的扫描句柄
+ * @return {acl_int64} >= 0: 实际删除的文件数与目录数的尺寸大小之和(字节); < 0: 出错.
  */
-ACL_API void acl_scan_dir_rm2(ACL_SCAN_DIR *scan);
+ACL_API acl_int64 acl_scan_dir_rm2(ACL_SCAN_DIR *scan, int *nfile, int *ndir);
 
 /**
  * 删除所给路径下所有的文件及目录
