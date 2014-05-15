@@ -136,6 +136,7 @@ const char* scan_dir::curr_path(bool full /* = false */)
 		return NULL;
 
 	const char* rpath = acl_scan_dir_path(scan_);
+
 	if (rpath == NULL || *rpath == 0)
 		return rpath;
 	if (!full)
@@ -221,7 +222,7 @@ size_t scan_dir::file_count() const
 acl_uint64 scan_dir::scaned_size() const
 {
 	if (scan_ == NULL)
-		return NULL;
+		return 0;
 	acl_uint64 n = (acl_uint64) acl_scan_dir_nsize(scan_);
 	return n;
 }

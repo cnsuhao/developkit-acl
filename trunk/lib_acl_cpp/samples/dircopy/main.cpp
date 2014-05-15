@@ -6,11 +6,11 @@
 #include "acl_cpp/lib_acl.hpp"
 
 static bool copy_file(acl::ifstream& in, const acl::string& to_path,
-	const acl::string& to_filepath)
+	const acl::string& to_filepath, int* ncopied)
 {
 	if (in.fseek(0, SEEK_SET) < 0)
 	{
-		printf("fseek from file: %s error: %s\r\n",
+		logger_error("fseek from file: %s error: %s",
 			in.file_path(), acl::last_serror());
 		return false;
 	}
@@ -19,7 +19,7 @@ static bool copy_file(acl::ifstream& in, const acl::string& to_path,
 	{
 		if (acl_make_dirs(to_path.c_str(), 0755) == -1)
 		{
-			printf("create dirs: %s error: %s\r\n",
+			logger_error("create dirs: %s error: %s",
 				to_path.c_str(), acl::last_serror());
 			return false;
 		}
@@ -28,7 +28,7 @@ static bool copy_file(acl::ifstream& in, const acl::string& to_path,
 	acl_int64 length = in.fsize();
 	if (length < 0)
 	{
-		printf("get file(%s)'s size error: %s\r\n", in.file_path(),
+		logger_error("get file(%s)'s size error: %s", in.file_path(),
 			acl::last_serror());
 		return false;
 	}
@@ -37,7 +37,7 @@ static bool copy_file(acl::ifstream& in, const acl::string& to_path,
 
 	if (out.open_trunc(to_filepath.c_str()) == false)
 	{
-		printf("ope_trunc file: %s error: %s\r\n",
+		logger_error("ope_trunc file: %s error: %s",
 			to_filepath.c_str(), acl::last_serror());
 		return false;
 	}
@@ -53,31 +53,35 @@ static bool copy_file(acl::ifstream& in, const acl::string& to_path,
 		{
 			if (nread != length)
 			{
-				printf("read from file: %s error: %s\r\n",
-					in.file_path(), acl::last_serror());
+				logger_error("read from file: %s error: %s, nread: %lld, "
+					"length: %lld", in.file_path(),
+					acl::last_serror(), nread, length);
 				return false;
 			}
 			break;
 		}
+		nread += ret;
 
 		if (out.write(buf, ret) == -1)
 		{
-			printf("write to file: %s error: %s\r\n",
+			logger_error("write to file: %s error: %s",
 				to_filepath.c_str(), acl::last_serror());
 			return false;
 		}
 	}
 
+	(*ncopied)++;
+
 	return true;
 }
 
 static bool cmp_copy(acl::scan_dir& scan, const char* name,
-	const acl::string& to_path)
+	const acl::string& to_path, int* ncopied)
 {
-	const char* rpath = scan.curr_path();
+	const char* rpath = scan.curr_path(false);
 	if (rpath == NULL)
 	{
-		printf("get current path error: %s, file: %s",
+		logger_error("get current path error: %s, file: %s",
 			acl::last_serror(), name);
 		return false;
 	}
@@ -88,26 +92,29 @@ static bool cmp_copy(acl::scan_dir& scan, const char* name,
 	acl::ifstream from_fp;
 	if (from_fp.open_read(from_filepath.c_str()) == false)
 	{
-		printf("open source file: %s error: %s\r\n",
+		logger_error("open source file: %s error: %s",
 			from_filepath.c_str(), acl::last_serror());
 		return false;
 	}
 
 	acl::string to_pathbuf;
 	acl::string to_filepath;
-	to_pathbuf.format("%s/%s", to_path, rpath);
-	to_filepath.format("%s/%s/%s", to_path, rpath, name);
+	to_pathbuf.format("%s/%s", to_path.c_str(), rpath);
+	to_filepath.format("%s/%s/%s", to_path.c_str(), rpath, name);
+
+	//printf("from_filepath: %s, to_filepath: %s\r\n",
+	//	from_fp.file_path(), to_filepath.c_str());
 
 	acl::ifstream to_fp;
 	if (to_fp.open_read(to_filepath.c_str()) == false)
-		return copy_file(from_fp, to_pathbuf, to_filepath);
+		return copy_file(from_fp, to_pathbuf, to_filepath, ncopied);
 
 
 	acl_int64 length;
 	if ((length = to_fp.fsize()) != from_fp.fsize())
 	{
 		to_fp.close();
-		return copy_file(from_fp, to_pathbuf, to_filepath);
+		return copy_file(from_fp, to_pathbuf, to_filepath, ncopied);
 	}
 
 	char from_buf[4096], to_buf[4096];
@@ -122,11 +129,11 @@ static bool cmp_copy(acl::scan_dir& scan, const char* name,
 			if (read_len == length)
 				return true;
 
-			printf("read from file(%s) error(%s),"
+			logger_error("read from file(%s) error(%s),"
 #ifdef WIN32
-				"file size: %I64d read len: %I64d\r\n",
+				"file size: %I64d read len: %I64d",
 #else
-				"file size: %lld, read len: %lld\r\n",
+				"file size: %lld, read len: %lld",
 #endif
 				from_fp.file_path(), acl::last_serror(),
 				length, read_len);
@@ -138,35 +145,45 @@ static bool cmp_copy(acl::scan_dir& scan, const char* name,
 		if (to_len == -1)
 		{
 			to_fp.close();
-			return copy_file(from_fp, to_pathbuf, to_filepath);
+			return copy_file(from_fp, to_pathbuf,
+					to_filepath, ncopied);
 		}
 
 		if (memcmp(from_buf, to_buf, to_len) != 0)
 		{
 			to_fp.close();
-			return copy_file(from_fp, to_pathbuf, from_filepath);
+			return copy_file(from_fp, to_pathbuf,
+					from_filepath, ncopied);
 		}
 	}
 }
 
-static bool check_dir(acl::scan_dir& scan, const char* name, const char* to)
+static bool check_dir(acl::scan_dir& scan, const char* to, int* ncopied)
 {
 	const char* rpath = scan.curr_path();
 	if (rpath == false)
 	{
-		printf("get from's path error: %s, name: %s\r\n",
-			acl::last_serror(), name);
+		logger_error("get from's path error: %s, to: %s",
+			acl::last_serror(), to);
 		return false;
 	}
 
 	acl::string to_path;
-	to_path.format("%s/%s/%s", to, rpath, name);
+	to_path.format("%s/%s", to, rpath);
 
 	if (access(to_path.c_str(), 0) == 0)
 		return true;
 	else
-		return acl_make_dirs(to_path.c_str(), 0755) == -1
-				? false : true;
+	{
+		int ret = acl_make_dirs(to_path.c_str(), 0755);
+		if (ret == 0)
+		{
+			(*ncopied)++;
+			return true;
+		}
+		else
+			return false;
+	}
 }
 
 static void do_copy(const acl::string& from, const acl::string& to)
@@ -174,36 +191,53 @@ static void do_copy(const acl::string& from, const acl::string& to)
 	acl::scan_dir scan;
 	if (scan.open(from.c_str()) == false)
 	{
-		printf("open path: %s error: %s\r\n",
+		logger_error("open path: %s error: %s",
 			from.c_str(), acl::last_serror());
 		return;
 	}
 
 	const char* name;
-	bool is_file;
+	bool  is_file;
+	int   nfiles = 0, ndirs = 0, nfiles_copied = 0, ndirs_copied = 0;
 	while ((name = scan.next(false, &is_file)) != NULL)
 	{
 		if (is_file)
 		{
-			if (cmp_copy(scan, name, to) == false)
+			if (cmp_copy(scan, name, to, &nfiles_copied) == false)
 				break;
+			nfiles++;
 		}
-		else if (check_dir(scan, name, to) == false)
+		else if (check_dir(scan, to, &ndirs_copied) == false)
 			break;
+		else
+			ndirs++;
+
+		if ((nfiles + ndirs) % 100 == 0)
+		{
+			printf("current file count: copied %d / scaned %d, "
+				"dir count: copied %d / scaned %d\r",
+				nfiles_copied, nfiles, ndirs_copied, ndirs);
+			fflush(stdout);
+		}
 	}
+
+	printf("total file count: copyied %d / scaned %d, dir count: "
+		"copied %d / scaned %d\r\n", nfiles_copied, nfiles,
+		ndirs_copied, ndirs);
 }
 
 static void usage(const char* procname)
 {
-	printf("usage: %s -h [help] -f from_path -t to_path\r\n", procname);
+	logger_error("usage: %s -h [help] -f from_path -t to_path", procname);
 }
 
 int main(int argc, char* argv[])
 {
 	int  ch;
 	acl::string path_from, path_to;
+	acl::log::stdout_open(true);
 
-	while ((ch = getopt(argc, argv, "hf:t:")))
+	while ((ch = getopt(argc, argv, "hf:t:")) > 0)
 	{
 		switch (ch)
 		{
@@ -221,7 +255,38 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	printf("enter any key to exit\r\n");
+	if (path_from.empty() || path_to.empty())
+	{
+		usage(argv[0]);
+		return 1;
+	}
+
+	if (path_from == path_to)
+	{
+		logger_error("path_from(%s) == path_to(%s)", path_from.c_str(),
+			path_to.c_str());
+		usage(argv[0]);
+		return 1;
+	}
+
+	if (chdir(path_from.c_str()) == -1)
+	{
+		logger_error("chdir to %s error: %s",
+			path_from.c_str(), acl::last_serror());
+		return 1;
+	}
+
+	char path[256];
+	if (getcwd(path, sizeof(path)) < 0)
+	{
+		logger_error("getcwd error: %s", path);
+		return 1;
+	}
+	logger_error("current path: %s", path);
+
+	do_copy(".", path_to);
+
+	logger_error("enter any key to exit");
 	getchar();
 
 	return (0);
