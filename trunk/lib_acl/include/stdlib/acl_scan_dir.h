@@ -148,10 +148,12 @@ ACL_API const char *acl_scan_dir_next_dir(ACL_SCAN_DIR *scan);
  * 获得下一个目录名或文件名(不包含路径名, 相对路径名可以通过 acl_scan_dir_path 获得),
  * 该函数内部支持递归扫描目录功能, acl_scan_dir_open 中的参数 recursive 对该函数有效
  * @param scan {ACL_SCAN_DIR*} 类型指针
+ * @param is_file {int*} 当返回结果非空时，该地址存储的值表示所扫描到的是否是
+ *  文件，如果为 true 则为文件，否则为目录
  * @return {const char*} 返回下一个扫描的目录名或文件名: !NULL, OK; NULL 扫描完毕,
  *  应结束扫描
  */
-ACL_API const char *acl_scan_dir_next_name(ACL_SCAN_DIR *scan);
+ACL_API const char *acl_scan_dir_next_name(ACL_SCAN_DIR *scan, int *is_file);
 
 /**
  * 取得当前目录下所占磁盘空间大小(以字节计算)

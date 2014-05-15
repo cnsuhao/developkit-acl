@@ -105,14 +105,17 @@ const char* scan_dir::next_dir(bool full /* = false */)
 	return file_buf_->c_str();
 }
 
-const char* scan_dir::next(bool full /* = false */)
+const char* scan_dir::next(bool full /* = false */, bool* is_file /* = NULL */)
 {
 	if (scan_ == NULL)
 		return NULL;
 
-	const char* name = acl_scan_dir_next_name(scan_);
+	int res;
+	const char* name = acl_scan_dir_next_name(scan_, &res);
 	if (name == NULL || *name == 0)
 		return NULL;
+	if (is_file)
+		*is_file = res ? true : false;
 	if (!full)
 		return name;
 

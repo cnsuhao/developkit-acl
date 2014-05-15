@@ -359,7 +359,7 @@ const char *acl_scan_dir_next_dir(ACL_SCAN_DIR *scan)
 	}
 }
 
-const char *acl_scan_dir_next_name(ACL_SCAN_DIR *scan)
+const char *acl_scan_dir_next_name(ACL_SCAN_DIR *scan, int *is_file)
 {
 	const char *myname = "acl_scan_dir_next_name";
 	const char *name;
@@ -393,9 +393,14 @@ const char *acl_scan_dir_next_name(ACL_SCAN_DIR *scan)
 			{
 				return (NULL);
 			}
+			if (is_file)
+				*is_file = 0;
 			return (name);
-		} else
+		} else {
+			if (is_file)
+				*is_file = 1;
 			return (name);
+		}
 	}
 }
 
