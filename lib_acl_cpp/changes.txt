@@ -2,6 +2,7 @@
 ------------------------------------------------------------------------
 234) 2014.5.15
 234.1) feature: 增加了 stdlib/scan_dir 类，该类用于磁盘目录扫描
+234.2) sample: 新增示例 samples/dircopy 用来拷贝目录结构，内部使用了 scan_dir 类
 
 233) 2014.5.13
 233.1) feature: string/http_client/http_request 类增加了按行读数据的方法
