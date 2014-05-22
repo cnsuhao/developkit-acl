@@ -323,7 +323,7 @@ int main(int argc, char* argv[])
 	}
 
 	char path[256];
-	if (getcwd(path, sizeof(path)) < 0)
+	if (getcwd(path, sizeof(path)) == NULL)
 	{
 		logger_error("getcwd error: %s", path);
 		return 1;
