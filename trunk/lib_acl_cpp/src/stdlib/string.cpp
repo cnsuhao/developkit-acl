@@ -749,7 +749,7 @@ int string::find(char ch) const
 	return (int)(ptr - STR(m_pVbf));
 }
 
-const char* string::find(const char* needle, bool case_sensitive) const
+char* string::find(const char* needle, bool case_sensitive) const
 {
 	if (case_sensitive)
 		return acl_vstring_strstr(m_pVbf, needle);
@@ -757,7 +757,7 @@ const char* string::find(const char* needle, bool case_sensitive) const
 		return acl_vstring_strcasestr(m_pVbf, needle);
 }
 
-const char* string::rfind(const char* needle, bool case_sensitive) const
+char* string::rfind(const char* needle, bool case_sensitive) const
 {
 	if (case_sensitive)
 		return acl_vstring_rstrstr(m_pVbf, needle);
@@ -765,14 +765,14 @@ const char* string::rfind(const char* needle, bool case_sensitive) const
 		return acl_vstring_rstrcasestr(m_pVbf, needle);
 }
 
-const string string::left(size_t npos)
+string string::left(size_t npos)
 {
 	if (npos >= LEN(m_pVbf))
 		return *this;
 	return string(STR(m_pVbf), npos);
 }
 
-const string string::right(size_t npos)
+string string::right(size_t npos)
 {
 	npos++;
 	if (npos >= LEN(m_pVbf))
@@ -781,7 +781,7 @@ const string string::right(size_t npos)
 	return string(STR(m_pVbf) + npos, nLeft);
 }
 
-const std::list<acl::string>& string::split(const char* sep)
+std::list<acl::string>& string::split(const char* sep)
 {
 	ACL_ARGV *argv = acl_argv_split(STR(m_pVbf), sep);
 	ACL_ITER it;
@@ -799,7 +799,7 @@ const std::list<acl::string>& string::split(const char* sep)
 	return *m_psList;
 }
 
-const std::vector<acl::string>& string::split2(const char* sep)
+std::vector<acl::string>& string::split2(const char* sep)
 {
 	ACL_ARGV *argv = acl_argv_split(STR(m_pVbf), sep);
 	ACL_ITER it;
@@ -817,7 +817,7 @@ const std::vector<acl::string>& string::split2(const char* sep)
 	return *m_psList2;
 }
 
-const std::pair<acl::string, acl::string>& string::split_nameval()
+std::pair<acl::string, acl::string>& string::split_nameval()
 {
 	char *name, *value;
 
@@ -1278,28 +1278,28 @@ static string& get_buf(void)
 	return *s;
 }
 
-const string& string::parse_int(int n)
+string& string::parse_int(int n)
 {
 	string& s = get_buf();
 	s.format("%d", n);
 	return s;
 }
 
-const string& string::parse_int(unsigned int n)
+string& string::parse_int(unsigned int n)
 {
 	string& s = get_buf();
 	s.format("%u", n);
 	return s;
 }
 
-const string& string::parse_int64(acl_int64 n)
+string& string::parse_int64(acl_int64 n)
 {
 	string& s = get_buf();
 	s.format("%lld", n);
 	return s;
 }
 
-const string& string::parse_int64(acl_uint64 n)
+string& string::parse_int64(acl_uint64 n)
 {
 	string& s = get_buf();
 	s.format("%llu", n);
