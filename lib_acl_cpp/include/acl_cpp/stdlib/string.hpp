@@ -607,26 +607,26 @@ public:
 	 * 查找指定字符吕在当前对象缓冲区的起始位置（下标从 0 开始）
 	 * @param needle {const char*} 要查找的有符号字符串
 	 * @param case_sensitive {bool} 为 true 表示区分大小写
-	 * @return {const char*} 字符串在缓冲区中的起始位置，若返回值为空指针则表示不存在
+	 * @return {char*} 字符串在缓冲区中的起始位置，若返回值为空指针则表示不存在
 	 */
-	const char* find(const char* needle, bool case_sensitive=true) const;
+	char* find(const char* needle, bool case_sensitive=true) const;
 
 	/**
 	 * 从尾部向前查找指定字符吕在当前对象缓冲区的起始位置（下标从 0 开始）
 	 * @param needle {const char*} 要查找的有符号字符串
 	 * @param case_sensitive {bool} 为 true 表示区分大小写
-	 * @return {const char*} 字符串在缓冲区中的起始位置，若返回值为空指针则表示不存在
+	 * @return {char*} 字符串在缓冲区中的起始位置，若返回值为空指针则表示不存在
 	 */
-	const char* rfind(const char* needle, bool case_sensitive=true) const;
+	char* rfind(const char* needle, bool case_sensitive=true) const;
 
 	/**
 	 * 返回从当前字符串对象中缓冲区指定位置以左的内容
 	 * @param npos {size_t} 下标位置，当该值大于等于当前字符串的数据长度时，
 	 *  则返回整个字符串对象；返回值不包含该值指定位置的字符内容
-	 * @return {const string} 返回值为一完整的对象，不需要单独释放，该函数的效率
+	 * @return {string} 返回值为一完整的对象，不需要单独释放，该函数的效率
 	 *  可能并不太高
 	 */
-	const string left(size_t npos);
+	string left(size_t npos);
 
 	/**
 	 * 返回从当前字符串对象中缓冲区指定位置以右的内容
@@ -635,7 +635,7 @@ public:
 	 * @return {const string} 返回值为一完整的对象，不需要单独释放，该函数的效率
 	 *  可能并不太高
 	 */
-	const string right(size_t npos);
+	string right(size_t npos);
 
 	/**
 	 * 将当前对象的缓冲内容拷贝一部分数据至目标缓冲内
@@ -726,24 +726,27 @@ public:
 	/**
 	 * 将当前对象存储的字符串进行分割
 	 * @param sep {const char*} 进行分割时的分割标记
-	 * @return {const std::list<string>&} 返回 list 格式的分割结果
+	 * @return {std::list<string>&} 返回 list 格式的分割结果，返回的结果不需要
+	 *  释放，其引用了当前对象的一个内部指针
 	 */
-	const std::list<string>& split(const char* sep);
+	std::list<string>& split(const char* sep);
 
 	/**
 	 * 将当前对象存储的字符串进行分割
 	 * @param sep {const char*} 进行分割时的分割标记
-	 * @return {const std::vector<string>&} 返回 vector 格式的分割结果
+	 * @return {std::vector<string>&} 返回 vector 格式的分割结果，返回的结果不
+	 *  需要释放，其引用了当前对象的一个内部指针
 	 */
-	const std::vector<string>& split2(const char* sep);
+	std::vector<string>& split2(const char* sep);
 
 	/**
 	 * 以 '=' 为分隔符将当前对象存储的字符串分割成 name/value 对，分割时会自动
 	 * 去掉源字符串的起始处、结尾处以及分隔符 '=' 两边的空格及 TAB
-	 * @return {const std::pair<string, string>&} 如果当前对象存储的字符串
-	 *  不符合分割条件（即不是严格的 name=value格式），则返回的结果中字符串对象为空串
+	 * @return {std::pair<string, string>&} 如果当前对象存储的字符串
+	 *  不符合分割条件（即不是严格的 name=value格式），则返回的结果中字符串对象为空串,
+	 *  返回的结果不需要释放，其引用了当前对象的一个内部地址
 	 */
-	const std::pair<string, string>& split_nameval(void);
+	std::pair<string, string>& split_nameval(void);
 
 	/**
 	 * 将字符串拷贝到当前对象的缓冲区中
@@ -1012,33 +1015,33 @@ public:
 	/**
 	 * 将 32 位有符号整数转为字符串存（内部使用了线程局部变量）
 	 * @param n {int} 32 位有符号整数
-	 * @return {const string&} 转换结果对象的引用
+	 * @return {string&} 转换结果对象的引用，其引用了内部的一个线程局部变量
 	 */
-	static const string& parse_int(int n);
+	static string& parse_int(int n);
 
 	/**
 	 * 将 32 位无符号整数转为字符串存（内部使用了线程局部变量）
 	 * @param n {int} 32 位无符号整数
-	 * @return {const string&} 转换结果对象的引用
+	 * @return {string&} 转换结果对象的引用，其引用了内部的一个线程局部变量
 	 */
-	static const string& parse_int(unsigned int n);
+	static string& parse_int(unsigned int n);
 #ifdef WIN32
-	static const string& parse_int64(__int64 n);
-	static const string& parse_int64(unsigned __int64 n);
+	static string& parse_int64(__int64 n);
+	static string& parse_int64(unsigned __int64 n);
 #else
 	/**
 	 * 将 64 位有符号整数转为字符串存（内部使用了线程局部变量）
 	 * @param n {long long int} 64 位有符号整数
-	 * @return {const string&} 转换结果对象的引用
+	 * @return {string&} 转换结果对象的引用，其引用了内部的一个线程局部变量
 	 */
-	static const string& parse_int64(long long int n);
+	static string& parse_int64(long long int n);
 
 	/**
 	 * 将 64 位无符号整数转为字符串存（内部使用了线程局部变量）
 	 * @param n {unsigned long long int} 64 位无符号整数
-	 * @return {const string&} 转换结果对象的引用
+	 * @return {string&} 转换结果对象的引用，其引用了内部的一个线程局部变量
 	 */
-	static const string& parse_int64(unsigned long long int n);
+	static string& parse_int64(unsigned long long int n);
 #endif
 
 private:
