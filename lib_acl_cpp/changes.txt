@@ -1,7 +1,11 @@
 修改历史列表：
 ------------------------------------------------------------------------
+238) 2014.5.26
+238.1) sample: samples/scan_dir 例子用来测试新增加的类 acl::scan_dir
+
 237) 2014.5.23
 237.1) feature: string 类为了使用方便，去掉了多个方法返回值中的限定词 const
+237.2) bugfix: scan_dir 类中的 curr_path 存在死循环过程
 
 236) 2014.5.22
 236.1) bufix: http_client 类的构造函数 http_client() 中没有对 buf_ 赋 NULL，结果
