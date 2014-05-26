@@ -165,6 +165,7 @@ const char* scan_dir::curr_path(bool full /* = false */)
 	if (buf[0] == 0)
 		return NULL;
 
+	// È¥µôÎ²²¿µÄ '/'
 	char* end = buf + strlen(buf) - 1;
 	while (end > buf)
 	{
@@ -175,6 +176,8 @@ const char* scan_dir::curr_path(bool full /* = false */)
 		if (*end == '/')
 			end--;
 #endif
+		else
+			break;
 	}
 
 	if (path_buf_ == NULL)
