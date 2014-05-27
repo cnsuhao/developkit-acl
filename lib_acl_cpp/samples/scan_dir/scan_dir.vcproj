@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="tokenizer"
+	Name="scan_dir"
 	ProjectGUID="{7680672C-4C9B-4BE8-8BAE-BB23B951AAA0}"
 	Keyword="Win32Proj">
 	<Platforms>
@@ -33,11 +33,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="lib_acl_vc2003d.lib ws2_32.lib"
-				OutputFile="tokenizer.exe"
+				OutputFile="scan_dir.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\..lib\win32;..\..\..\dist\lib\win32"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/tokenizer.pdb"
+				ProgramDatabaseFile="$(OutDir)/scan_dir.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
@@ -81,7 +81,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib wsock32.lib lib_acl_vc2003.lib"
-				OutputFile="$(OutDir)/tokenizer.exe"
+				OutputFile="$(OutDir)/scan_dir.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\lib\win32;..\..\..\dist\lib\win32"
 				GenerateDebugInformation="TRUE"
@@ -133,11 +133,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib"
-				OutputFile="tokenizer.exe"
+				OutputFile="scan_dir.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\..\lib\win32"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/tokenizer.pdb"
+				ProgramDatabaseFile="$(OutDir)/scan_dir.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
@@ -184,11 +184,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib"
-				OutputFile="tokenizer.exe"
+				OutputFile="scan_dir.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\..\lib\win32"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/tokenizer.pdb"
+				ProgramDatabaseFile="$(OutDir)/scan_dir.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
