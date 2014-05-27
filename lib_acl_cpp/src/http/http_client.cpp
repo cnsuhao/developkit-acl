@@ -743,6 +743,8 @@ bool http_client::body_gets(string& out, bool nonl /* = true */,
 
 	// 继续读 HTTP 数据体，并尝试从中读取一行数据
 
+	len = 0;
+
 	while (true)
 	{
 		if (!buf_->empty())
@@ -757,12 +759,10 @@ bool http_client::body_gets(string& out, bool nonl /* = true */,
 			// 为了减少下次循环时调用 scan_line 的字符串查找次数，
 			// 将读缓冲区中的数据先拷贝至目标缓冲区中
 
-			len = buf_->length();
+			len += buf_->length();
 			out.append(buf_);
 			buf_->clear();
 		}
-		else
-			len = 0;
 
 		if (body_finish_)
 		{
