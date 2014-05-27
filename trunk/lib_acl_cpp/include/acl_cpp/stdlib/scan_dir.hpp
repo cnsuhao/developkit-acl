@@ -62,11 +62,9 @@ public:
 	 * 或 '\\' (win32)，如对于路径：/home/zsx/，则会返回 /home/zsx，如果
 	 * 路径为根路径：/ 则该 '/' 将会保留；在 WIN32 下，返回类似于
 	 * C:\Users\zsx 的路径
-	 * @param full {bool} 为 true 时表示获得扫描程序当前所在系统绝对路径，
-	 *  否则为相对于程序调用 open 函数时的程序运行路径
 	 * @return {const char*} 当目录打开时该函数返回非空指针，否则返回 NULL
 	 */
-	const char* curr_path(bool full = false);
+	const char* curr_path();
 
 	/**
 	 * 获得当前程序扫描过程所扫到的文件名
@@ -140,6 +138,13 @@ public:
 	static unsigned long long remove_all(const char* path, bool recursive = true,
 		int* nfiles = NULL, int* ndirs = NULL);
 #endif
+
+	/**
+	 * 获得当前程序运行的路径
+	 * @param out {string&} 存储结果
+	 * @return {bool} 是否成功获得当前程序运行路径
+	 */
+	static bool getcwd(string& out);
 
 private:
 	char* path_;
