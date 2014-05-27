@@ -49,7 +49,8 @@ public:
 		{
 			if (req.body_gets(line) == false)
 				break;
-			printf(">>>%s\r\n", line.c_str());
+			printf(">>>[%s], len: %d\r\n", line.c_str(),
+				(int) line.size());
 			line.clear();
 		}
 

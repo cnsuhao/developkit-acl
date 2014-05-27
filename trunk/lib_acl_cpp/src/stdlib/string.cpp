@@ -442,8 +442,7 @@ char* string::buf_end()
 	return pEnd;
 }
 
-bool string::scan_line(string& out, bool nonl /* = true */,
-	size_t* n /* = NULL */)
+bool string::scan_line(string& out, bool nonl /* true */, size_t* n /* NULL */)
 {
 	if (n)
 		*n = 0;
@@ -475,6 +474,7 @@ bool string::scan_line(string& out, bool nonl /* = true */,
 	else
 		out.append(scan_ptr_, len);
 
+#if 0
 	if (pEnd > next)
 	{
 		acl_vstring_memmove(vbf_, next, pEnd - next);
@@ -483,9 +483,16 @@ bool string::scan_line(string& out, bool nonl /* = true */,
 	}
 	else
 		clear();
+#else
+	if (next >= pEnd)
+		clear();
+	else
+		scan_ptr_ = next;
+#endif
 
 	if (n)
 		*n = len;
+
 	return true;
 }
 
