@@ -434,7 +434,8 @@ char* string::buf_end()
 	if (scan_ptr_ == NULL)
 		scan_ptr_ = STR(vbf_);
 	char *pEnd = acl_vstring_end(vbf_);
-	if (scan_ptr_ >= pEnd) {
+	if (scan_ptr_ >= pEnd)
+	{
 		if (!empty())
 			clear();
 		return NULL;
@@ -442,7 +443,8 @@ char* string::buf_end()
 	return pEnd;
 }
 
-bool string::scan_line(string& out, bool nonl /* true */, size_t* n /* NULL */)
+bool string::scan_line(string& out, bool nonl /* = true */,
+	size_t* n /* = NULL */, bool move /* = false */)
 {
 	if (n)
 		*n = 0;
@@ -474,21 +476,24 @@ bool string::scan_line(string& out, bool nonl /* true */, size_t* n /* NULL */)
 	else
 		out.append(scan_ptr_, len);
 
-#if 0
-	if (pEnd > next)
+	if (move)
 	{
-		acl_vstring_memmove(vbf_, next, pEnd - next);
-		TERM(vbf_);
-		scan_ptr_ = STR(vbf_);
+		if (pEnd > next)
+		{
+			acl_vstring_memmove(vbf_, next, pEnd - next);
+			TERM(vbf_);
+			scan_ptr_ = STR(vbf_);
+		}
+		else
+			clear();
 	}
 	else
-		clear();
-#else
-	if (next >= pEnd)
-		clear();
-	else
-		scan_ptr_ = next;
-#endif
+	{
+		if (next >= pEnd)
+			clear();
+		else
+			scan_ptr_ = next;
+	}
 
 	if (n)
 		*n = len;
@@ -496,7 +501,7 @@ bool string::scan_line(string& out, bool nonl /* true */, size_t* n /* NULL */)
 	return true;
 }
 
-size_t string::scan_buf(void* pbuf, size_t n, bool move /* false */)
+size_t string::scan_buf(void* pbuf, size_t n, bool move /* = false */)
 {
 	if (pbuf == NULL || n == 0)
 		return 0;
@@ -512,10 +517,31 @@ size_t string::scan_buf(void* pbuf, size_t n, bool move /* false */)
 	if (move)
 	{
 		acl_vstring_memmove(vbf_, scan_ptr_, len);
+		TERM(vbf_);
 		scan_ptr_ = STR(vbf_);
 	}
 	else
 		scan_ptr_ += len;
+	return len;
+}
+
+size_t string::scan_move()
+{
+	if (scan_ptr_ == NULL)
+		return 0;
+
+	char *pEnd = acl_vstring_end(vbf_);
+	if (scan_ptr_ >= pEnd)
+	{
+		clear();
+		return 0;
+	}
+
+	size_t len = pEnd - scan_ptr_;
+	acl_vstring_memmove(vbf_, scan_ptr_, len);
+	TERM(vbf_);
+	scan_ptr_  = STR(vbf_);
+
 	return len;
 }
 
@@ -696,6 +722,8 @@ int string::rncompare(const char* s, size_t len, bool case_sensitive/* =true */)
 
 char* string::c_str() const
 {
+	if (scan_ptr_)
+		return scan_ptr_;
 	return STR(vbf_);
 }
 
@@ -706,12 +734,14 @@ void* string::buf() const
 
 size_t string::length() const
 {
+	if (scan_ptr_)
+		return LEN(vbf_) - (scan_ptr_ - STR(vbf_));
 	return LEN(vbf_);
 }
 
 size_t string::size() const
 {
-	return LEN(vbf_);
+	return length();
 }
 
 size_t string::capacity() const
