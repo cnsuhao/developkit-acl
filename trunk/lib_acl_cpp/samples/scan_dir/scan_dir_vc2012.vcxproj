@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{98BB9F33-AFC3-4943-8855-4D253B87F8F1}</ProjectGuid>
+    <ProjectGuid>{8A5563B4-C546-46D0-9C64-D051CA29F164}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <ProjectName>tokenizer</ProjectName>
+    <ProjectName>scan_dir</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Releasedll|Win32'" Label="Configuration">
@@ -102,10 +102,10 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>ws2_32.lib;lib_acl_vc2012d.lib;lib_acl_cpp_vc2012d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)tokenizer.exe</OutputFile>
+      <OutputFile>$(OutDir)scan_dir.exe</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\lib\win32;..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)tokenizer.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(OutDir)scan_dir.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
       <IgnoreSpecificDefaultLibraries>
@@ -124,7 +124,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>ws2_32.lib;wsock32.lib;lib_acl_vc2012.lib;lib_acl_cpp_vc2012.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)tokenizer.exe</OutputFile>
+      <OutputFile>$(OutDir)scan_dir.exe</OutputFile>
       <AdditionalLibraryDirectories>..\..\lib;..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
@@ -150,10 +150,10 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>lib_acl_d.lib;lib_acl_cpp_d.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)tokenizer.exe</OutputFile>
+      <OutputFile>$(OutDir)scan_dir.exe</OutputFile>
       <AdditionalLibraryDirectories>..\..\lib;..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)tokenizer.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(OutDir)scan_dir.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
@@ -173,10 +173,10 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>lib_acl.lib;lib_acl_cpp.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)tokenizer.exe</OutputFile>
+      <OutputFile>$(OutDir)scan_dir.exe</OutputFile>
       <AdditionalLibraryDirectories>..\..\lib;..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)tokenizer.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(OutDir)scan_dir.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
