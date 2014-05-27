@@ -666,10 +666,20 @@ public:
 	 * @param nonl {bool} 返回的一行数据是否去掉尾部的 "\r\n" 或 "\n"
 	 * @param n {size_t*} 该参数为非空指针时，则存储拷贝到的数据长度；当读
 	 *  到一个空行且 nonl 为 true 时，则该地址存储 0
+	 * @param move {bool} 在拷贝完数据后，是否需要将后面的数据向前移动并
+	 *  覆盖前面的已拷贝的数据
 	 * @return {bool} 是否拷贝了一个完整行数据，如果返回 false 还需要根据
 	 *  empty() == true 来判断当前缓冲区中是否还有数据
 	 */
-	bool scan_line(string& out, bool nonl = true, size_t* n = NULL);
+	bool scan_line(string& out, bool nonl = true, size_t* n = NULL,
+		bool move = false);
+
+	/**
+	 * 当使用 scan_xxx 类方法对缓冲区进行操作时未指定 move 动作，则调用本
+	 * 函数可以使缓冲区内剩余的数据向前移动至缓冲区首部
+	 * @return {size_t} 移动的字节数
+	 */
+	size_t scan_move();
 
 	/**
 	 * 返回当前对象缓冲区中第一个不含数据的尾部地址
@@ -1058,7 +1068,7 @@ public:
 private:
 	bool use_bin_;
 	ACL_VSTRING* vbf_;
-	const char* scan_ptr_;
+	char* scan_ptr_;
 	std::list<string>* list_tmp_;
 	std::vector<string>* vector_tmp_;
 	std::pair<string, string>* pair_tmp_;
