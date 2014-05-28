@@ -165,7 +165,7 @@ const char* scan_dir::curr_path()
 	return acl_scan_dir_path(scan_);
 }
 
-bool scan_dir::getcwd(string& out)
+bool scan_dir::get_cwd(string& out)
 {
 
 #ifndef MAX_PATH
