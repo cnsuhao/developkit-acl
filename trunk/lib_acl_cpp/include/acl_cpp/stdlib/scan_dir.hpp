@@ -144,7 +144,7 @@ public:
 	 * @param out {string&} 存储结果
 	 * @return {bool} 是否成功获得当前程序运行路径
 	 */
-	static bool getcwd(string& out);
+	static bool get_cwd(string& out);
 
 private:
 	char* path_;
