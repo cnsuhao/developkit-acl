@@ -19,6 +19,17 @@ static void thread_run(void *arg)
 	acl_pthread_mutex_unlock(mutex);
 }
 
+static int thread_init(void *arg acl_unused)
+{
+	printf(">>>thread init, id: %lu\r\n", acl_pthread_self());
+	return 0;
+}
+
+static void thread_exit(void *arg acl_unused)
+{
+	printf(">>>thread exit, id: %lu\r\n", acl_pthread_self());
+}
+
 static void usage(const char *procname)
 {
 	printf("usage: %s -h[help]\r\n"
@@ -57,6 +68,9 @@ int main(int argc, char *argv[])
 	acl_pthread_mutex_init(&mutex, NULL);
 	thrpool = acl_thread_pool_create(nthreads, idle_ttl);
 
+	acl_pthread_pool_atinit(thrpool, thread_init, NULL);
+	acl_pthread_pool_atfree(thrpool, thread_exit, NULL);
+
 	if (schedule_wait > 0)
 		acl_pthread_pool_set_schedule_wait(thrpool, 5);
 
@@ -65,7 +79,7 @@ int main(int argc, char *argv[])
 	fflush(stdout);
 	getchar();
 
-	__nsleep = 1000;
+	__nsleep = 100;
 	__count = 0;
 
 	for (i = 0; i < nthreads * 2; i++)
