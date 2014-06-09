@@ -46,7 +46,8 @@ bool http_servlet::doPost(acl::HttpServletRequest& req,
 	bool keep_alive = req.isKeepAlive();
 
 	res.setContentType("text/xml; charset=utf-8")	// 设置响应字符集
-		.setKeepAlive(keep_alive);		// 设置是否保持长连接
+		.setKeepAlive(keep_alive),		// 设置是否保持长连接
+		.setChunkedTransferEncoding(true);	// 采用 chunk 传输方式
 
 	const char* param1 = req.getParameter("name1");
 	const char* param2 = req.getParameter("name2");
@@ -60,13 +61,6 @@ bool http_servlet::doPost(acl::HttpServletRequest& req,
 					.add_attr("sid", sid ? sid : "null")
 				.get_parent()
 			.get_parent()
-			/*
-			.add_child("cookies", true)
-				.add_child("cookie", true)
-					.add_attr("name1", cookie1 ? cookie1 : "null")
-				.get_parent()
-			.get_parent()
-				*/
 			.add_child("params", true)
 				.add_child("param", true)
 					.add_attr("name1", param1 ? param1 : "null")
@@ -77,5 +71,5 @@ bool http_servlet::doPost(acl::HttpServletRequest& req,
 	body.build_xml(buf);
 
 	// 发送 http 响应体
-	return res.write(buf) && keep_alive;
+	return res.write(buf) && res.write(NULL, 0) && keep_alive;
 }
