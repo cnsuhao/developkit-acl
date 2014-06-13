@@ -3,7 +3,7 @@
 
 int main(int argc, char *argv[])
 {
-	acl_threads_server_main(argc, argv, service_main, NULL,
+	acl_ioctl_app_main(argc, argv, service_main, NULL,
 		ACL_APP_CTL_INIT_FN, service_init,
 		/* ACL_APP_CTL_INIT_CTX, NULL, */
 		ACL_APP_CTL_EXIT_FN, service_exit,

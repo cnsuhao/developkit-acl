@@ -88,15 +88,15 @@ extern void acl_multi_server_enable_read(ACL_VSTREAM *stream);
   * @deprecated 该线程服务模型将被丢弃，请使用 acl_threads_server.c 中的函数
   */
 typedef void (*ACL_IOCTL_SERVER_FN) (ACL_IOCTL*, ACL_VSTREAM*, char*, char **);
-extern void acl_ioctl_server_request_timer(ACL_EVENT_NOTIFY_TIME timer_fn,
+extern ACL_DEPRECATED void acl_ioctl_server_request_timer(ACL_EVENT_NOTIFY_TIME timer_fn,
 	void *arg, int delay);
-extern void acl_ioctl_server_cancel_timer(ACL_EVENT_NOTIFY_TIME timer_fn,
+extern ACL_DEPRECATED void acl_ioctl_server_cancel_timer(ACL_EVENT_NOTIFY_TIME timer_fn,
 	void *arg);
-extern void acl_ioctl_server_main(int, char **, ACL_IOCTL_SERVER_FN,...);
-extern ACL_IOCTL *acl_ioctl_server_handle(void);
-extern ACL_EVENT *acl_ioctl_server_event(void);
-extern ACL_VSTREAM **acl_ioctl_server_streams(void);
-extern void acl_ioctl_server_enable_read(ACL_IOCTL*, ACL_VSTREAM*,
+extern ACL_DEPRECATED void acl_ioctl_server_main(int, char **, ACL_IOCTL_SERVER_FN,...);
+extern ACL_DEPRECATED ACL_IOCTL *acl_ioctl_server_handle(void);
+extern ACL_DEPRECATED ACL_EVENT *acl_ioctl_server_event(void);
+extern ACL_DEPRECATED ACL_VSTREAM **acl_ioctl_server_streams(void);
+extern ACL_DEPRECATED void acl_ioctl_server_enable_read(ACL_IOCTL*, ACL_VSTREAM*,
 	int timeout, ACL_IOCTL_NOTIFY_FN notify_fn, void *context);
 
  /*
@@ -105,8 +105,30 @@ extern void acl_ioctl_server_enable_read(ACL_IOCTL*, ACL_VSTREAM*,
 ACL_EVENT *acl_threads_server_event(void);
 acl_pthread_pool_t *acl_threads_server_threads(void);
 ACL_VSTREAM **acl_threads_server_streams(void);
+
+/**
+ * 主函数入口, 用户级的初始化函数指针及运行函数指针通过控制参数进行注册,
+ * 主函数内部会在初始化时自动调用用户级初始化函数(ACL_APP_INIT_FN 类型),
+ * 当接收到允许访问的客户端连接时会自动调用用户(ACL_APP_RUN_FN 类型)的函数.
+ * @deprecated 请使用 acl_threads_server_main 函数
+ * @param argc "int main(int argc, char *argv[])" 中的 argc
+ * @param argv "int main(int argc, char *argv[])" 中的 argv
+ * @param run_fn 用户级运行主函数
+ * @param run_ctx run_fn() 运行时的参数之一
+ * @param name 控制参数中的第一个控制类型, 所支持的类型如上定义: ACL_APP_CTL_XXX
+ *  调用方式: ACL_APP_CTL_XXX, xxx; 其中 ACL_APP_CTL_END 为特殊的控制参数, 
+ *  表示控制参数结束.
+ * @example:
+ *   acl_threads_server_main(argc, argv, {run_fn}, {run_ctx},
+ *		ACL_APP_CTL_INIT_FN, {run_init_fn},
+ *		ACL_APP_CTL_INIT_CTX, {run_init_ctx},
+ *		ACL_APP_CTL_END);
+ * 注: acl_xxx_app_main() 的所有参数中, argc, argv, run_fn,
+ *   run_ctx(可以为NULL), ACL_APP_CTL_END 都是必需的.
+ */
 extern void acl_threads_server_main(int argc, char **argv,
 	int (*service)(ACL_VSTREAM*, void*), void *service_ctx, int name, ...);
+#define	acl_ioctl_app_main	acl_threads_server_main
 
  /*
   * acl_aio_server.c

@@ -1085,9 +1085,6 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
 						RelativePath=".\src\master\template\acl_aio_server.c">
 					</File>
 					<File
-						RelativePath=".\src\master\template\acl_ioctl_app_main.c">
-					</File>
-					<File
 						RelativePath=".\src\master\template\acl_ioctl_server.c">
 					</File>
 					<File
