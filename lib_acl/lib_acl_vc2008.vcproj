@@ -1428,10 +1428,6 @@
 						>
 					</File>
 					<File
-						RelativePath=".\src\master\template\acl_ioctl_app_main.c"
-						>
-					</File>
-					<File
 						RelativePath=".\src\master\template\acl_ioctl_server.c"
 						>
 					</File>

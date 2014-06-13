@@ -99,7 +99,7 @@ all: build
 build:
 	@(cd single_echo; make)
 	@(cd multi_echo; make)
-	@(cd ioctl_echo; make)
+#	@(cd ioctl_echo; make)
 	@(cd ioctl_echo2; make)
 	@(cd ioctl_echo3; make)
 	@(cd master_threads; make)
@@ -117,7 +117,7 @@ $(OBJ_OUTPATH)%.o: %.c *.h
 clean:
 	@(cd single_echo; make clean)
 	@(cd multi_echo; make clean)
-	@(cd ioctl_echo; make clean)
+#	@(cd ioctl_echo; make clean)
 	@(cd ioctl_echo2; make clean)
 	@(cd ioctl_echo3; make clean)
 	@(cd master_threads; make clean)
