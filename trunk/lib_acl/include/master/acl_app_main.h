@@ -64,29 +64,34 @@ typedef void (*ACL_APP_THREAD_ON_EXIT)(void*);
 /* in app_main.c */
 
 /**
- * 主函数入口, 用户级的初始化函数指针及运行函数指针通过控制参数进行注册, 主函数内部
- * 会在初始化时自动调用用户级初始化函数(ACL_APP_INIT_FN 类型), 当接收到允许访问的客户端
- * 连接时会自动调用用户(ACL_APP_RUN_FN 类型).
- * 级的运行函数.
+ * 主函数入口, 用户级的初始化函数指针及运行函数指针通过控制参数进行注册,
+ * 主函数内部会在初始化时自动调用用户级初始化函数(ACL_APP_INIT_FN 类型),
+ * 当接收到允许访问的客户端连接时会自动调用用户(ACL_APP_RUN_FN 类型)的函数.
+ * @deprecated 请使用 acl_threads_server_main 函数
  * @param argc "int main(int argc, char *argv[])" 中的 argc
  * @param argv "int main(int argc, char *argv[])" 中的 argv
  * @param run_fn 用户级运行主函数
  * @param run_ctx run_fn() 运行时的参数之一
  * @param name 控制参数中的第一个控制类型, 所支持的类型如上定义: ACL_APP_CTL_XXX
- *        调用方式: ACL_APP_CTL_XXX, xxx; 其中 ACL_APP_CTL_END 为特殊的控制参数, 表示控制参数
- *        结束.
+ *  调用方式: ACL_APP_CTL_XXX, xxx; 其中 ACL_APP_CTL_END 为特殊的控制参数, 
+ *  表示控制参数结束.
  * @example:
  *   acl_xxx_app_main(argc, argv, {run_fn}, {run_ctx},
  *		ACL_APP_CTL_INIT_FN, {run_init_fn},
  *		ACL_APP_CTL_INIT_CTX, {run_init_ctx},
  *		ACL_APP_CTL_END);
- * 注: acl_xxx_app_main() 的所有参数中, argc, argv, run_fn, run_ctx(可以为NULL), ACL_APP_CTL_END
- *     都是必需的.
+ * 注: acl_xxx_app_main() 的所有参数中, argc, argv, run_fn,
+ *   run_ctx(可以为NULL), ACL_APP_CTL_END 都是必需的.
  */
 
-void acl_ioctl_app_main(int argc, char *argv[], ACL_IOCTL_RUN_FN run_fn, void *run_ctx, int name, ...);
-void acl_aio_app_main(int argc, char *argv[], ACL_AIO_RUN_FN run_fn, void *run_ctx, int name, ...);
-void acl_aio_app2_main(int argc, char *argv[], ACL_AIO_RUN2_FN run2_fn, void *run_ctx, int name, ...);
+ACL_DEPRECATED void acl_ioctl_app_main(int argc, char *argv[],
+	ACL_IOCTL_RUN_FN run_fn, void *run_ctx, int name, ...);
+
+void acl_aio_app_main(int argc, char *argv[], ACL_AIO_RUN_FN run_fn,
+	void *run_ctx, int name, ...);
+
+void acl_aio_app2_main(int argc, char *argv[], ACL_AIO_RUN2_FN run2_fn,
+	void *run_ctx, int name, ...);
 /*----------------------------------------------------------------------------*/
 
 #endif
