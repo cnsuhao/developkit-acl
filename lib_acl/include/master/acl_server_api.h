@@ -43,7 +43,7 @@ extern "C" {
 #define	ACL_MASTER_SERVER_CTX			24
 #define	ACL_MASTER_SERVER_DENY_INFO		25
 
-/* 为了保持兼容性，进行如下宏定义 */
+/* 为了保持兼容性，进行如下宏定�?*/
 
 #define	ACL_APP_CTL_END			ACL_MASTER_SERVER_END
 #define	ACL_APP_CTL_CFG_INT		ACL_MASTER_SERVER_INT_TABLE
@@ -94,7 +94,7 @@ void acl_multi_server_enable_read(ACL_VSTREAM *stream);
 
  /*
   * acl_ioctl_server.c
-  * @deprecated 该线程服务模型将被丢弃，请使用 acl_threads_server.c 中的函数
+  * @deprecated ��ʹ�� acl_threads_server.c �еĺ���
   */
 typedef void (*ACL_IOCTL_SERVER_FN) (ACL_IOCTL*, ACL_VSTREAM*, char*, char **);
 ACL_DEPRECATED void acl_ioctl_server_request_timer(ACL_EVENT_NOTIFY_TIME timer_fn,
@@ -114,20 +114,6 @@ ACL_DEPRECATED void acl_ioctl_server_enable_read(ACL_IOCTL*, ACL_VSTREAM*,
 
 typedef int (*ACL_THREADS_SERVER_FN) (ACL_VSTREAM*, void*);
 
-/**
- * 主函数入口, 用户级的初始化函数指针及运行函数指针通过控制参数进行注册,
- * 主函数内部会在初始化时自动调用用户级初始化函数(ACL_APP_INIT_FN 类型),
- * 当接收到允许访问的客户端连接时会自动调用用户(ACL_APP_RUN_FN 类型)的函数.
- * @deprecated 请使用 acl_threads_server_main 函数
- * @param argc "int main(int argc, char *argv[])" 中的 argc
- * @param argv "int main(int argc, char *argv[])" 中的 argv
- * @param run_fn 用户级运行主函数
- * @param run_ctx run_fn() 运行时的参数之一
- * @param name 控制参数中的第一个控制类型, 所支持的类型如上定义:
- *  ACL_MASTER_SERVER_XXX
- *  调用方式: ACL_APP_CTL_XXX, xxx; 其中 ACL_APP_CTL_END 为特殊的控制参数, 
- *  表示控制参数结束.
- */
 void acl_threads_server_main(int argc, char **argv, ACL_THREADS_SERVER_FN,
 	void *service_ctx, int name, ...);
 #define	acl_ioctl_app_main	acl_threads_server_main
