@@ -3,6 +3,8 @@
 ------------------------------------------------------------------------
 447) 2014.6.17
 447.1) master/template: 整理了一下该模块的代码
+447.2) removed: 去掉了 acl_aio_app_main.c，将其功能合并至 acl_aio_server.c 中，
+去掉了 acl_app_main.h 头文件，将其中的部分代码合并至 acl_server_api.h 中
 
 446) 2014.6.13
 446.1) upgrade: 去掉了 acl_ioctl_app_main.c，该模块将由 acl_threads_server.c
