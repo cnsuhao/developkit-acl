@@ -732,7 +732,7 @@ static void log_event_mode(int event_mode)
 	}
 }
 
-static void open_log(int event_mode)
+static void open_service_log(int event_mode)
 {
 	/* first, close the master's log */
 	master_log_close();
@@ -1037,7 +1037,7 @@ void acl_threads_server_main(int argc, char **argv,
 
 	/*******************************************************************/
 
-	/* use master's log before init, so can log something */
+	/* 在子进程切换用户身份之前，先用 acl_master 的日志句柄记日志 */
 	acl_master_log_open(argv[0]);
 
 	/*
@@ -1084,7 +1084,7 @@ void acl_threads_server_main(int argc, char **argv,
 	if (conf_file[0] == 0)
 		acl_msg_fatal("%s(%d)->%s: need \"-f pathname\"",
 			__FILE__, __LINE__, myname);
-	else if (acl_msg_verbose)
+	if (acl_msg_verbose)
 		acl_msg_info("%s(%d)->%s: configure file = %s", 
 			__FILE__, __LINE__, myname, conf_file);
 
@@ -1099,16 +1099,20 @@ void acl_threads_server_main(int argc, char **argv,
 	for (; name != ACL_APP_CTL_END; name = va_arg(ap, int)) {
 		switch (name) {
 		case ACL_MASTER_SERVER_BOOL_TABLE:
-			acl_get_app_conf_bool_table(va_arg(ap, ACL_CONFIG_BOOL_TABLE *));
+			acl_get_app_conf_bool_table(
+				va_arg(ap, ACL_CONFIG_BOOL_TABLE *));
 			break;
 		case ACL_MASTER_SERVER_INT_TABLE:
-			acl_get_app_conf_int_table(va_arg(ap, ACL_CONFIG_INT_TABLE *));
+			acl_get_app_conf_int_table(
+				va_arg(ap, ACL_CONFIG_INT_TABLE *));
 			break;
 		case ACL_MASTER_SERVER_INT64_TABLE:
-			acl_get_app_conf_int64_table(va_arg(ap, ACL_CONFIG_INT64_TABLE *));
+			acl_get_app_conf_int64_table(
+				va_arg(ap, ACL_CONFIG_INT64_TABLE *));
 			break;
 		case ACL_MASTER_SERVER_STR_TABLE:
-			acl_get_app_conf_str_table(va_arg(ap, ACL_CONFIG_STR_TABLE *));
+			acl_get_app_conf_str_table(
+				va_arg(ap, ACL_CONFIG_STR_TABLE *));
 			break;
 
 		case ACL_MASTER_SERVER_PRE_INIT:
@@ -1119,27 +1123,33 @@ void acl_threads_server_main(int argc, char **argv,
 			break;
 
 		case ACL_MASTER_SERVER_ON_ACCEPT:
-			__server_on_accept = va_arg(ap, ACL_MASTER_SERVER_ACCEPT_FN);
+			__server_on_accept =
+				va_arg(ap, ACL_MASTER_SERVER_ACCEPT_FN);
 			break;
 		case ACL_MASTER_SERVER_ON_TIMEOUT:
-			__server_on_timeout = va_arg(ap, ACL_MASTER_SERVER_TIMEOUT_FN);
+			__server_on_timeout =
+				va_arg(ap, ACL_MASTER_SERVER_TIMEOUT_FN);
 			break;
 		case ACL_MASTER_SERVER_ON_CLOSE:
-			__server_on_close = va_arg(ap, ACL_MASTER_SERVER_DISCONN_FN);
+			__server_on_close =
+				va_arg(ap, ACL_MASTER_SERVER_DISCONN_FN);
 			break;
 
 		case ACL_MASTER_SERVER_EXIT:
-			__server_onexit = va_arg(ap, ACL_MASTER_SERVER_EXIT_FN);
+			__server_onexit =
+				va_arg(ap, ACL_MASTER_SERVER_EXIT_FN);
 			break;
 
 		case ACL_MASTER_SERVER_THREAD_INIT:
-			thread_init_fn = va_arg(ap, ACL_MASTER_SERVER_THREAD_INIT_FN);
+			thread_init_fn =
+				va_arg(ap, ACL_MASTER_SERVER_THREAD_INIT_FN);
 			break;
 		case ACL_MASTER_SERVER_THREAD_INIT_CTX:
 			thread_init_ctx = va_arg(ap, void*);
 			break;
 		case ACL_MASTER_SERVER_THREAD_EXIT:
-			thread_exit_fn = va_arg(ap, ACL_MASTER_SERVER_THREAD_EXIT_FN);
+			thread_exit_fn =
+				va_arg(ap, ACL_MASTER_SERVER_THREAD_EXIT_FN);
 			break;
 		case ACL_MASTER_SERVER_THREAD_EXIT_CTX:
 			thread_exit_ctx = va_arg(ap, void*);
@@ -1152,7 +1162,6 @@ void acl_threads_server_main(int argc, char **argv,
 			acl_msg_fatal("%s: bad name(%d)", myname, name);
 		}
 	}
-
 
 	va_end(ap);
 
@@ -1210,9 +1219,6 @@ void acl_threads_server_main(int argc, char **argv,
 		acl_msg_fatal("chdir(\"%s\"): %s", acl_var_threads_queue_dir,
 			acl_last_serror());
 
-	/* open the server's log */
-	open_log(event_mode);
-
 	/* create threads pool */
 	__threads = threads_create(thread_init_fn, thread_exit_fn,
 		thread_init_ctx, thread_exit_ctx);
@@ -1227,6 +1233,9 @@ void acl_threads_server_main(int argc, char **argv,
 		pre_jail(pre_jail_ctx);
 
 	acl_chroot_uid(root_dir, user_name);
+
+	/* open the server's log */
+	open_service_log(event_mode);
 
 	/* if enable dump core when program crashed ? */
 	if (acl_var_threads_enable_core)

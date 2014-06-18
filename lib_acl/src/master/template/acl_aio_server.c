@@ -979,7 +979,7 @@ static void aio_server_init(const char *procname)
 	acl_master_vars_init(acl_var_aio_buf_size, acl_var_aio_rw_timeout);
 }
 
-static void aio_server_open_log(void)
+static void open_service_log(void)
 {
 	/* first, close the master's log */
 	master_log_close();
@@ -1222,15 +1222,30 @@ static void server_main(int argc, char **argv, va_list ap)
 {
 	const char *myname = "acl_aio_server_main";
 	ACL_VSTREAM *stream = 0;
-	int     key, f_flag = 0;
-	char   *root_dir = 0, *user_name = 0 /*, debug_me = 0 */;
+	int     key, f_flag = 0, alone = 0;
+	char   *root_dir = 0, *user_name = 0;
 	char   *service_name = acl_mystrdup(acl_safe_basename(argv[0]));
 	ACL_MASTER_SERVER_INIT_FN pre_init = 0;
 	ACL_MASTER_SERVER_INIT_FN post_init = 0;
-	int     alone = 0, zerolimit = 0;
 	char   *transport = 0, *generation, *conf_file_ptr = 0;
 
-	aio_init();  /* 初始化ACL库 */
+	/*******************************************************************/
+
+	/* If not connected to stdin, stdin must not be a terminal. */
+	if (isatty(STDIN_FILENO)) {
+		printf("%s(%d), %s: do not run this command by hand\r\n",
+			__FILE__, __LINE__, myname);
+		exit (1);
+	}
+
+	/*******************************************************************/
+
+	aio_init();  /* 初始化 */
+
+	/* 在子进程切换用户身份之前，先用 acl_master 的日志句柄记日志 */
+	acl_master_log_open(argv[0]);
+
+	/*******************************************************************/
 
 	/*
 	 * Pick up policy settings from master process. Shut up error
@@ -1275,25 +1290,17 @@ static void server_main(int argc, char **argv, va_list ap)
 		case 'v':
 			acl_msg_verbose++;
 			break;
-		case 'z':
-			zerolimit = 1;
-			break;
 		default:
 			break;
 		}
 	}
 
-	/* If not connected to stdin, stdin must not be a terminal. */
-	if (stream == 0 && isatty(STDIN_FILENO))
-		acl_msg_fatal("%s(%d), %s: do not run this command by hand",
-			__FILE__, __LINE__, myname);
 	if (stream == 0)
 		aio_server_init(argv[0]);
-
 	if (f_flag == 0)
 		acl_msg_fatal("%s(%d), %s: need \"-f pathname\"",
 			__FILE__, __LINE__, myname);
-	else if (acl_msg_verbose)
+	if (acl_msg_verbose)
 		acl_msg_info("%s(%d), %s: configure file = %s", 
 			__FILE__, __LINE__, myname, conf_file_ptr);
 
@@ -1343,7 +1350,7 @@ static void server_main(int argc, char **argv, va_list ap)
 		}
 	}
 
-	va_end(ap);
+	va_end(ap);  /* 将传入的 va_list 参数收尾 */
 
 	/* 读完配置文件后重新设置 */
 
@@ -1385,12 +1392,12 @@ static void server_main(int argc, char **argv, va_list ap)
 		pre_init(__service_ctx);
 
 	acl_chroot_uid(root_dir, user_name);  /* 切换用户身份 */
+	open_service_log();  /* 打开本进程自己的日志 */
 
 	/* 设置子进程运行环境，允许产生 core 文件 */
 	if (acl_var_aio_enable_core)
 		set_core_limit();
 
-	aio_server_open_log();  /* 打开日志 */
 	log_event_mode(__event_mode);  /* 将事件模式记入日志中 */
 
 	create_timer(__h_aio, __use_limit_delay);  /* 创建定时器 */
@@ -1415,6 +1422,7 @@ void acl_aio_server_main(int argc, char **argv, ACL_AIO_SERVER_FN service,...)
 	__service_main = service;
 
 	va_start(ap, service);
+	/* ap 将在 server_mainn 中收尾 */
 	server_main(argc, argv, ap);
 }
 
@@ -1425,6 +1433,7 @@ void acl_aio_server2_main(int argc, char **argv, ACL_AIO_SERVER2_FN service,...)
 	__service2_main = service;
 
 	va_start(ap, service);
+	/* ap 将在 server_mainn 中收尾 */
 	server_main(argc, argv, ap);
 }
 

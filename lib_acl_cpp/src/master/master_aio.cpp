@@ -22,7 +22,6 @@ master_aio::~master_aio()
 {
 	if (__handle)
 	{
-		__handle->check();
 		if (daemon_mode_ == false)
 			delete __handle;
 		__handle = NULL;
@@ -46,7 +45,7 @@ void master_aio::run_daemon(int argc, char** argv)
 	daemon_mode_ = true;
 
 	// 调用 acl 服务器框架的单线程非阻塞模板
-	acl_aio_server2_main(argc, argv, service_main, NULL,
+	acl_aio_server2_main(argc, argv, service_main,
 		ACL_MASTER_SERVER_PRE_INIT, service_pre_jail,
 		ACL_MASTER_SERVER_POST_INIT, service_init,
 		ACL_MASTER_SERVER_EXIT, service_exit,
@@ -153,6 +152,8 @@ protected:
 	void close_callback()
 	{
 #ifndef WIN32
+		// 通过下面调用通知服务器框架目前已经处理的连接个数，便于
+		// 服务器框架半驻留操作
 		acl_aio_server_on_close(stream_);
 #endif // !WIN32
 		delete this;
