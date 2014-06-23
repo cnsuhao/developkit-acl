@@ -1012,7 +1012,6 @@ static void usage(int argc, char *argv[])
 	acl_msg_info("usage: %s -h[help]"
 		" -c [use chroot]"
 		" -d [debug]"
-		" -l [run alone]"
 		" -n service_name"
 		" -s socket_count"
 		" -i [use stdin]"
@@ -1222,7 +1221,7 @@ static void server_main(int argc, char **argv, va_list ap)
 {
 	const char *myname = "acl_aio_server_main";
 	ACL_VSTREAM *stream = 0;
-	int     key, f_flag = 0, alone = 0;
+	int     key, f_flag = 0;
 	char   *root_dir = 0, *user_name = 0;
 	char   *service_name = acl_mystrdup(acl_safe_basename(argv[0]));
 	ACL_MASTER_SERVER_INIT_FN pre_init = 0;
@@ -1254,7 +1253,7 @@ static void server_main(int argc, char **argv, va_list ap)
 
 	opterr = 0;
 
-	while ((key = getopt(argc, argv, "hcdlm:n:o:s:it:uvzf:")) > 0) {
+	while ((key = getopt(argc, argv, "hcdm:n:o:s:it:uvzf:")) > 0) {
 		switch (key) {
 		case 'h':
 			usage(argc, argv);
@@ -1266,9 +1265,6 @@ static void server_main(int argc, char **argv, va_list ap)
 			break;
 		case 'c':
 			root_dir = "setme";
-			break;
-		case 'l':
-			alone = 1;
 			break;
 		case 'n':
 			service_name = optarg;
