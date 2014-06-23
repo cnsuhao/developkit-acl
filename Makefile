@@ -42,7 +42,7 @@ endif
 ##############################################################################
 
 .PHONY = check help all clean install uninstall uninstall_all build_bin build_src
-VERSION = 3.0.17
+VERSION = 3.0.19
 
 help:
 	@(echo "usage: make help|all|clean|install|uninstall|uninstall_all|build_bin|build_src")
@@ -137,6 +137,7 @@ build_bin:
 	@(echo "begin building bin release...")
 	@(rm -rf acl.bin)
 	@(echo "copy files ...")
+g++ -c -g -W -Wall -Wcast-qual -Wcast-align -Wno-long-long -Wpointer-arith -Werror -Wshadow -O3 -D_REENTRANT -D_POSIX_PTHREAD_SEMANTICS -D_USE_FAST_MACRO -DLINUX2 -D_REENTRANT -I../../../lib_acl/include -I../../../lib_protocol/include -I../../../lib_acl_cpp/include stdafx.cpp -o stdafx.o
 	@(cp -R dist acl.bin)
 	@(cp lib_acl/changes.txt acl.bin/include/acl/)
 	@(cp lib_protocol/changes.txt acl.bin/include/protocol/)
