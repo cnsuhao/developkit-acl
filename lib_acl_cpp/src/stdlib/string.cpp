@@ -70,14 +70,26 @@ string::~string()
 		delete pair_tmp_;
 }
 
-void string::set_bin(bool bin)
+string& string::set_bin(bool bin)
 {
 	use_bin_ = bin;
+	return *this;
 }
 
 bool string::get_bin() const
 {
 	return use_bin_;
+}
+
+string& string::set_max(int max)
+{
+	vbf_->maxlen = max;
+	return *this;
+}
+
+int string::get_max(void) const
+{
+	return vbf_->maxlen;
 }
 
 char string::operator [](size_t n) const
