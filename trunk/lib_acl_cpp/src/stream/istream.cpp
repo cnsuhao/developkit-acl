@@ -147,7 +147,7 @@ bool istream::gets(string& s, bool nonl /* = true */, size_t max /* = 0 */)
 			s.append(buf, size);
 		max -= size;
 
-		// å¦‚æœè¯»åˆ°çš„è¡Œé•¿åº¦è¾¾åˆ°æœ€å¤§é™åˆ¶ï¼Œåˆ™ç›´æ¥è¿”å› true
+		// Èç¹û¶Áµ½µÄĞĞ³¤¶È´ïµ½×î´óÏŞÖÆ£¬ÔòÖ±½Ó·µ»Ø true
 		if (max == 0)
 		{
 			logger_warn("reached the max limit: %d",
