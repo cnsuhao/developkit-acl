@@ -23,79 +23,8 @@
 		ptr += 2;  \
 } while (0)
 
-static bool copy_file(acl::ifstream& in, const acl::string& to_path,
-	const acl::string& to_filepath, int* ncopied)
-{
-	if (in.fseek(0, SEEK_SET) < 0)
-	{
-		logger_error("fseek from file: %s error: %s",
-			in.file_path(), acl::last_serror());
-		return false;
-	}
-
-	if (access(to_path.c_str(), 0) != 0)
-	{
-		if (acl_make_dirs(to_path.c_str(), 0755) == -1)
-		{
-			logger_error("create dirs: %s error: %s",
-				to_path.c_str(), acl::last_serror());
-			return false;
-		}
-	}
-
-	acl_int64 length = in.fsize();
-	if (length < 0)
-	{
-		logger_error("get file(%s)'s size error: %s", in.file_path(),
-			acl::last_serror());
-		return false;
-	}
-
-	acl::ofstream out;
-
-	if (out.open_trunc(to_filepath.c_str()) == false)
-	{
-		logger_error("ope_trunc file: %s error: %s",
-			to_filepath.c_str(), acl::last_serror());
-		return false;
-	}
-
-	char  buf[4096];
-	int   ret;
-	acl_int64 nread = 0;
-
-	while (true)
-	{
-		ret = in.read(buf, sizeof(buf), false);
-		if (ret == -1)
-		{
-			if (nread == length)
-				break;
-
-			logger_error("read from file: %s error: %s, "
-				"nread: %lld, length: %lld",
-				in.file_path(), acl::last_serror(),
-				nread, length);
-			return false;
-		}
-
-		nread += ret;
-
-		if (out.write(buf, ret) == -1)
-		{
-			logger_error("write to file: %s error: %s",
-				to_filepath.c_str(), acl::last_serror());
-			return false;
-		}
-	}
-
-	(*ncopied)++;
-
-	return true;
-}
-
-static bool cmp_copy(acl::scan_dir& scan, const char* name,
-	const acl::string& to_path, int* ncopied)
+static bool cmp_file(acl::scan_dir& scan, const char* name,
+	const acl::string& to_path, int* ndiff)
 {
 	const char* rpath = scan.curr_path();
 	if (rpath == NULL)
@@ -117,6 +46,7 @@ static bool cmp_copy(acl::scan_dir& scan, const char* name,
 	else
 		from_filepath << rpath << SEP << name;
 
+	// 只读方式打开源文件，如果打开失败，则直接返回 false
 	acl::ifstream from_fp;
 	if (from_fp.open_read(from_filepath.c_str()) == false)
 	{
@@ -133,18 +63,27 @@ static bool cmp_copy(acl::scan_dir& scan, const char* name,
 	//printf("from_filepath: %s, to_filepath: %s\r\n",
 	//	from_fp.file_path(), to_filepath.c_str());
 
+	// 尝试打开目标文件，如果目标文件不存在，则将计数器加1
 	acl::ifstream to_fp;
 	if (to_fp.open_read(to_filepath.c_str()) == false)
-		return copy_file(from_fp, to_pathbuf, to_filepath, ncopied);
+	{
+		(*ndiff)++;
+		logger("file diff, from: %s, to: %s", from_filepath.c_str(),
+			to_filepath.c_str());
+		return true;
+	}
 
-
+	// 先比较目标文件与源文件大小是否相同
 	acl_int64 length;
 	if ((length = to_fp.fsize()) != from_fp.fsize())
 	{
-		to_fp.close();
-		return copy_file(from_fp, to_pathbuf, to_filepath, ncopied);
+		(*ndiff)++;
+		logger("file diff, from: %s, to: %s", from_filepath.c_str(),
+			to_filepath.c_str());
+		return true;
 	}
 
+	// 再比较目标文件与源文件内容是否相同
 	char from_buf[4096], to_buf[4096];
 	int from_len, to_len;
 	acl_int64 read_len = 0;
@@ -175,21 +114,23 @@ static bool cmp_copy(acl::scan_dir& scan, const char* name,
 		to_len = to_fp.read(to_buf, from_len, true);
 		if (to_len == -1)
 		{
-			to_fp.close();
-			return copy_file(from_fp, to_pathbuf,
-					to_filepath, ncopied);
+			(*ndiff)++;
+			logger("file diff, from: %s, to: %s",
+				from_filepath.c_str(), to_filepath.c_str());
+			return true;
 		}
 
 		if (memcmp(from_buf, to_buf, to_len) != 0)
 		{
-			to_fp.close();
-			return copy_file(from_fp, to_pathbuf,
-					from_filepath, ncopied);
+			(*ndiff)++;
+			logger("file diff, from: %s, to: %s",
+				from_filepath.c_str(), to_filepath.c_str());
+			return true;
 		}
 	}
 }
 
-static bool check_dir(acl::scan_dir& scan, const char* to, int* ncopied)
+static bool check_dir(acl::scan_dir& scan, const char* to, int* ndiff)
 {
 	const char* rpath = scan.curr_path();
 	if (rpath == false)
@@ -207,24 +148,14 @@ static bool check_dir(acl::scan_dir& scan, const char* to, int* ncopied)
 
 	if (access(to_path.c_str(), 0) == 0)
 		return true;
-	else
-	{
-		int ret = acl_make_dirs(to_path.c_str(), 0755);
-		if (ret == 0)
-		{
-			(*ncopied)++;
-			return true;
-		}
-		else
-		{
-			logger_error("make dirs(%s) error: %s",
-				to_path.c_str(), acl::last_serror());
-			return false;
-		}
-	}
+
+	(*ndiff)++;
+	logger("dir diff: %s, error: %s", to_path.c_str(), acl::last_serror());
+
+	return true;
 }
 
-static void do_copy(const acl::string& from, const acl::string& to)
+static void do_cmp(const acl::string& from, const acl::string& to)
 {
 	acl::scan_dir scan;
 	if (scan.open(from.c_str()) == false)
@@ -236,21 +167,21 @@ static void do_copy(const acl::string& from, const acl::string& to)
 
 	const char* name;
 	bool  is_file;
-	int   nfiles = 0, ndirs = 0, nfiles_copied = 0, ndirs_copied = 0;
+	int   nfiles = 0, ndirs = 0, nfiles_diff = 0, ndirs_diff = 0;
 	while ((name = scan.next(false, &is_file)) != NULL)
 	{
 		SKIP(name);
 
 		if (is_file)
 		{
-			if (cmp_copy(scan, name, to, &nfiles_copied) == false)
+			if (cmp_file(scan, name, to, &nfiles_diff) == false)
 			{
-				printf(">>cm_copy failed, name: %s\r\n", name);
+				printf(">>cmp failed, name: %s\r\n", name);
 				break;
 			}
 			nfiles++;
 		}
-		else if (check_dir(scan, to, &ndirs_copied) == false)
+		else if (check_dir(scan, to, &ndirs_diff) == false)
 		{
 			printf(">>check_dir failed, name: %s\r\n", name);
 			break;
@@ -260,16 +191,16 @@ static void do_copy(const acl::string& from, const acl::string& to)
 
 		if ((nfiles + ndirs) % 100 == 0)
 		{
-			printf("current file count: copied %d / scaned %d, "
-				"dir count: copied %d / scaned %d\r",
-				nfiles_copied, nfiles, ndirs_copied, ndirs);
+			printf("current file count: diff %d / scaned %d, "
+				"dir count: diff %d / scaned %d\r",
+				nfiles_diff, nfiles, ndirs_diff, ndirs);
 			fflush(stdout);
 		}
 	}
 
-	printf("total file count: copyied %d / scaned %d, dir count: "
-		"copied %d / scaned %d\r\n", nfiles_copied, nfiles,
-		ndirs_copied, ndirs);
+	printf("total file count: diff %d / scaned %d, dir count: "
+		"diff %d / scaned %d\r\n", nfiles_diff, nfiles,
+		ndirs_diff, ndirs);
 }
 
 static void usage(const char* procname)
@@ -330,7 +261,7 @@ int main(int argc, char* argv[])
 	}
 	logger_error("current path: %s", path);
 
-	do_copy(".", path_to);
+	do_cmp(".", path_to);
 
 	logger("enter any key to exit");
 	getchar();
