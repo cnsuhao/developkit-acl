@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="string"
+	Name="string3"
 	ProjectGUID="{C94BEF01-706C-49A7-9FF1-9D87FA5BB8E7}"
 	Keyword="Win32Proj">
 	<Platforms>
@@ -33,11 +33,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="lib_acl_vc2003d.lib ws2_32.lib"
-				OutputFile="$(OutDir)/string.exe"
+				OutputFile="$(OutDir)/string3.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\..\lib\win32;..\..\..\dist\lib\win32"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/string.pdb"
+				ProgramDatabaseFile="$(OutDir)/string3.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
@@ -81,7 +81,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib wsock32.lib lib_acl_vc2003.lib"
-				OutputFile="$(OutDir)/string.exe"
+				OutputFile="$(OutDir)/string3.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\lib\win32;..\..\..\dist\lib\win32"
 				GenerateDebugInformation="TRUE"
@@ -133,11 +133,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib"
-				OutputFile="$(OutDir)/string.exe"
+				OutputFile="$(OutDir)/string3.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\..\lib\win32"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/string.pdb"
+				ProgramDatabaseFile="$(OutDir)/string3.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
@@ -184,11 +184,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib"
-				OutputFile="$(OutDir)/string.exe"
+				OutputFile="$(OutDir)/string3.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\..\lib\win32"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/string.pdb"
+				ProgramDatabaseFile="$(OutDir)/string3.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool

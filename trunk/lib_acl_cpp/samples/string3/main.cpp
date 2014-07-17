@@ -113,5 +113,10 @@ int main(void)
 		a.c_str(), (int) a.length(), strlen(a.c_str()));
 	printf("over now\r\n");
 
+#ifdef WIN32
+	printf("Enter any key to exit ...\r\n");
+	getchar();
+#endif // WIN32
+
 	return 0;
 }
