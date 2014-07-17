@@ -111,9 +111,7 @@ char& string::operator [](size_t n)
 	if (n >= (size_t) CAP(vbf_))
 	{
 		int  len = CAP(vbf_);
-		printf("%d: cap1: %d\n", __LINE__, CAP(vbf_));
 		space(n + 1);
-		printf("%d: cap2: %d\n", __LINE__, CAP(vbf_));
 		int  new_len = CAP(vbf_);
 
 		// 初始化新分配的内存
