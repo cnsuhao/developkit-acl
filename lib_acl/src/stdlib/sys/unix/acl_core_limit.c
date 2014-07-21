@@ -12,9 +12,9 @@
 # include <sys/prctl.h>
 #endif
 #include "stdlib/acl_msg.h"
-#include "template.h"
+#include "stdlib/unix/acl_core_limit.h"
 
-void set_core_limit(void)
+void acl_set_core_limit(size_t max)
 {
 	const char *myname = "set_limit";
 	struct rlimit rlim, rlim_new;
@@ -27,7 +27,9 @@ void set_core_limit(void)
 #endif
 
 	if (getrlimit(RLIMIT_CORE, &rlim) == 0) {
-		rlim_new.rlim_cur = rlim_new.rlim_max = RLIM_INFINITY;
+		if (max == 0)
+			max = RLIM_INFINITY;
+		rlim_new.rlim_cur = rlim_new.rlim_max = max;
 		if (setrlimit(RLIMIT_CORE, &rlim_new) != 0) {
 			/* failed. try raising just to the old max */
 			rlim_new.rlim_cur = rlim_new.rlim_max = rlim.rlim_max;
@@ -36,8 +38,10 @@ void set_core_limit(void)
 					myname, __LINE__, acl_last_serror());
 		}
 	} else {
-		rlim.rlim_cur = RLIM_INFINITY;
-		rlim.rlim_max = RLIM_INFINITY;
+		if (max == 0)
+			max = RLIM_INFINITY;
+		rlim.rlim_cur = max;
+		rlim.rlim_max = max;
 		if (setrlimit(RLIMIT_CORE, &rlim) != 0)
 			acl_msg_warn("%s(%d): can't set core limit: %s",
 				myname, __LINE__, acl_last_serror());

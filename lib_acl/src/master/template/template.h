@@ -10,7 +10,6 @@ extern "C" {
 #ifdef	ACL_UNIX
 
 void master_log_close(void);
-void set_core_limit(void);
 
 #endif
 
