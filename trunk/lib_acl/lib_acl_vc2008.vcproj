@@ -1432,7 +1432,7 @@
 						>
 					</File>
 					<File
-						RelativePath=".\src\master\template\acl_master_log.c"
+						RelativePath=".\src\master\template\master_log.c"
 						>
 					</File>
 					<File

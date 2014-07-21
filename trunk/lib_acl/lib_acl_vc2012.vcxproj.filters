@@ -776,7 +776,7 @@
     <ClCompile Include=".\src\master\template\acl_ioctl_server.c">
       <Filter>Source Files\master\template</Filter>
     </ClCompile>
-    <ClCompile Include=".\src\master\template\acl_master_log.c">
+    <ClCompile Include=".\src\master\template\master_log.c">
       <Filter>Source Files\master\template</Filter>
     </ClCompile>
     <ClCompile Include=".\src\master\template\acl_multi_server.c">
