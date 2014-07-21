@@ -52,52 +52,52 @@ int main(void)
 		b[i] = '1';
 	}
 	b[b.capacity()] = '\0';
-	printf("cap: %lu\n", size);
+	printf("cap: %d\n", (int) size);
 
 	printf("---------------------------------------------------\n");
 
 	size = b.capacity();
-	printf("cap11: %lu\n", size);
+	printf("cap11: %d\n", (int) size);
 	for (int i = 0; i < (int) size; i++)
 		b[i] = '2';
 	size = b.capacity();
-	printf("cap12: %lu\n", size);
+	printf("cap12: %d\n", (int) size);
 
 	printf("---------------------------------------------------\n");
 
 	size = b.capacity();
-	printf("cap20: %lu\n", size);
+	printf("cap20: %d\n", (int) size);
 
 	b[b.capacity()] = '\0';
 	size = b.capacity();
-	printf("cap21: %lu\n", size);
+	printf("cap21: %d\n", (int) size);
 
 	for (int i = 0; i < (int) size; i++)
 	{
 		b[i] = '2';
-		printf("capxx22: %lu\n", b.capacity());
+		printf("capxx22: %d\n", (int) b.capacity());
 	}
 	size = b.capacity();
-	printf("cap22: %lu\n", size);
+	printf("cap22: %d\n", (int) size);
 
 	printf("---------------------------------------------------\n");
 
 	b[b.capacity()] = '\0';
 	size = b.capacity();
-	printf("cap31: %lu\n", size);
+	printf("cap31: %d\n", (int) size);
 
 	for (int i = 0; i < (int) size; i++)
 		b[i] = '3';
 	size = b.capacity();
-	printf("cap32: %lu\n", size);
+	printf("cap32: %d\n", (int) size);
 	b[size + 1] = '\0';
 	b[size + 2] = '\0';
 	b[size + 3] = '\0';
 	size = b.capacity();
-	printf("cap33: %lu\n", size);
+	printf("cap33: %d\n", (int) size);
 
-	printf("buf: %s, len: %d, cap: %lu\r\n",
-		b.c_str(), (int) b.length(), b.capacity());
+	printf("buf: %s, len: %d, cap: %d\r\n",
+		b.c_str(), (int) b.length(), (int) b.capacity());
 
 	printf("----------------------------\n");
 
@@ -109,8 +109,8 @@ int main(void)
 	a[1] = '2';
 	a[0] = '1';
 	a[5] = 0;
-	printf(">>>str: %s, len: %d, %lu\r\n",
-		a.c_str(), (int) a.length(), strlen(a.c_str()));
+	printf(">>>str: %s, len: %d, %d\r\n",
+		a.c_str(), (int) a.length(), (int) strlen(a.c_str()));
 	printf("over now\r\n");
 
 #ifdef WIN32
