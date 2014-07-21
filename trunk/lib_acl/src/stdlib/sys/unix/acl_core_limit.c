@@ -14,7 +14,7 @@
 #include "stdlib/acl_msg.h"
 #include "stdlib/unix/acl_core_limit.h"
 
-void acl_set_core_limit(size_t max)
+void acl_set_core_limit(unsigned long long int max)
 {
 	const char *myname = "set_limit";
 	struct rlimit rlim, rlim_new;
