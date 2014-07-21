@@ -229,9 +229,7 @@ public:
 					file2_ = filename;
 				else if (strcmp(name, "file3") == 0)
 					file3_ = filename;
-				printf("filename: %s\r\n", filename);
 				filename = acl_safe_basename(filename);
-				printf("2filename: %s\r\n", filename);
 #ifdef WIN32
 				path.format("var\\%s", filename);
 #else
