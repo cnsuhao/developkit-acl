@@ -419,7 +419,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClCompile Include=".\src\master\master_vars.c" />
     <ClCompile Include=".\src\master\template\acl_aio_server.c" />
     <ClCompile Include=".\src\master\template\acl_ioctl_server.c" />
-    <ClCompile Include=".\src\master\template\acl_master_log.c" />
+    <ClCompile Include=".\src\master\template\master_log.c" />
     <ClCompile Include=".\src\master\template\acl_multi_server.c" />
     <ClCompile Include=".\src\master\template\acl_single_server.c" />
     <ClCompile Include=".\src\master\template\acl_threads_server.c" />
