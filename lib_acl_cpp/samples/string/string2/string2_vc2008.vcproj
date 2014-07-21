@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="string2"
-	ProjectGUID="{C94BEF01-706C-49A7-9FF1-9D87FA5BB8E7}"
+	ProjectGUID="{3538D216-868E-4F9A-BC88-57A1A8F757F9}"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -360,6 +360,4 @@
 			>
 		</Filter>
 	</Files>
-	<Globals>
-	</Globals>
 </VisualStudioProject>
