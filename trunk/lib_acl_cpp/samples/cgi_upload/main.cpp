@@ -40,8 +40,6 @@ public:
 		const char* sid = req.getSession().getAttribute("sid");
 		if (*sid == 0)
 			req.getSession().setAttribute("sid", "xxxxxx");
-#else
-		const char* sid = "test_sid1";
 #endif
 
 		// 创建 HTTP 响应头
