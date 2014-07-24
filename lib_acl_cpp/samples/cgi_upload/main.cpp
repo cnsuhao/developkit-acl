@@ -211,6 +211,9 @@ public:
 		for (; cit != nodes.end(); ++cit)
 		{
 			const char* name = (*cit)->get_name();
+			if (name == NULL)
+				continue;
+
 			http_mime_t mime_type = (*cit)->get_mime_type();
 			if (mime_type == HTTP_MIME_FILE)
 			{
@@ -227,6 +230,9 @@ public:
 					file2_ = filename;
 				else if (strcmp(name, "file3") == 0)
 					file3_ = filename;
+
+				// 有的浏览器（如IE）上传文件时会带着文件路径，所以
+				// 需要先将路径去掉
 				filename = acl_safe_basename(filename);
 #ifdef WIN32
 				path.format("var\\%s", filename);
@@ -244,6 +250,9 @@ public:
 			const char* ptr = node->get_filename();
 			if (ptr)
 			{
+				// 有的浏览器（如IE）上传文件时会带着文件路径，所以
+				// 需要先将路径去掉
+				ptr = acl_safe_basename(ptr);
 #ifdef WIN32
 				path.format(".\\var\\1_%s", ptr);
 #else
