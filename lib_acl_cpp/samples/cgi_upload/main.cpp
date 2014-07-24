@@ -244,7 +244,11 @@ public:
 			const char* ptr = node->get_filename();
 			if (ptr)
 			{
+#ifdef WIN32
+				path.format(".\\var\\1_%s", ptr);
+#else
 				path.format("./var/1_%s", ptr);
+#endif
 				(void) node->save(path.c_str());
 			}
 		}
