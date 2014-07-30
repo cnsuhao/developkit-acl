@@ -3,10 +3,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-int main(void)
+int main(int argc, char* argv[])
 {
 	acl::socket_stream client;
 	acl::string addr = "127.0.0.1:9001";
+
+	if (argc >= 2)
+		addr = argv[1];
 
 	if (client.open(addr, 0, 0) == false)
 	{
