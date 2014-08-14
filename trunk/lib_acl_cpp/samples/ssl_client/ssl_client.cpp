@@ -47,15 +47,15 @@ static void test0(int i)
 
 static void test1(void)
 {
-	acl::string url("https://www.google.com.hk/");
+	acl::string url("/");
 	acl::http_header header;
 	header.set_url(url.c_str());
-	header.set_host("www.google.com.hk");
+	header.set_host("mail.sina.com.cn:443");
 	acl::string request;
 
 	header.build_request(request);
 
-	acl::string addr("www.google.com.hk:443");
+	acl::string addr("mail.sina.com.cn:443");
 	acl::socket_stream client;
 
 	if (client.open(addr.c_str(), 60, 60) == false)
@@ -64,7 +64,6 @@ static void test1(void)
 			<< " error!" << std::endl;
 		return;
 	}
-
 	if (client.open_ssl_client() == false)
 	{
 		std::cout << "open ssl client " << addr.c_str()
@@ -72,7 +71,7 @@ static void test1(void)
 		return;
 	}
 
-	std::cout << "request:" << std::endl;
+	std::cout << "request(len: " << request.length() << "):" << std::endl;
 	std::cout << "----------------------------------------" << std::endl;
 	std::cout << request.c_str();
 	std::cout << "----------------------------------------" << std::endl;
@@ -101,21 +100,26 @@ static void test1(void)
 	}
 }
 
-static void test2(void)
+static void test2(const acl::string& addr, bool gzip_enable, bool ssl_enable)
 {
 	acl::http_client client;
-	acl::string url("https://www.google.com.hk/");
+	acl::string url("/");
 	acl::http_header header;
 
 	header.set_url(url.c_str());
-	header.set_host("www.google.com.hk");
+	header.set_host(addr);
+	header.accept_gzip(gzip_enable);
+	header.add_entry("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:31.0) Gecko/20100101 Firefox/31.0");
+	header.add_entry("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+	header.add_entry("Accept-Languge", "zh-cn,en;q=0.5");
+	header.add_entry("Pragma", "no-cache");
+	header.add_entry("Cache-Control", "no-cache");
+
 	acl::string request;
 
 	header.build_request(request);
 
-	acl::string addr("www.google.com.hk:443");
-
-	if (client.open(addr.c_str(), 60, 60, true, true) == false)
+	if (client.open(addr.c_str(), 60, 60, gzip_enable, ssl_enable) == false)
 	{
 		std::cout << "connect " << addr.c_str()
 			<< " error!" << std::endl;
@@ -179,11 +183,9 @@ int main(int argc, char* argv[])
 	test1();
 
 	ACL_METER_TIME("---------- begin ----------");
-	for (int i = 0; i < 1; i++)
-	{
-		printf(">>>i: %d\n", i);
-		test2();
-	}
+	test2("mail.qq.com:443", false, true);
+	test2("mail.126.com:80", false, false);
+	test2("mail.sina.com.cn:443", false, true);
 	ACL_METER_TIME("---------- end ----------");
 
 	printf("Over, enter any key to exit!\n");
