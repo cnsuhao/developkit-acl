@@ -143,7 +143,15 @@ public:
 
 	/////////////////////////////////////////////////////////////////////
 
+	/**
+	 * 释放 SSL 相关的内存资源
+	 */
 	void close_ssl(void);
+
+	/**
+	 * 打开客户端方式 SSL 连接
+	 * @return {bool}
+	 */
 	bool open_ssl_client(void);
 
 private:

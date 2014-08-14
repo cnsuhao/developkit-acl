@@ -291,28 +291,28 @@ bool socket_stream::open_ssl_client(void)
 	int   ret;
 
 	// Setup stuff
-	if ((ret = ssl_init((ssl_context*) ssl_)) != 0)
+	if ((ret = ::ssl_init((ssl_context*) ssl_)) != 0)
 	{
 		logger_error("failed, ssl_init returned %d", ret);
 		return false;
 	}
 
-	ssl_set_endpoint((ssl_context*) ssl_, SSL_IS_CLIENT);
-	ssl_set_authmode((ssl_context*) ssl_, SSL_VERIFY_NONE);
+	::ssl_set_endpoint((ssl_context*) ssl_, SSL_IS_CLIENT);
+	::ssl_set_authmode((ssl_context*) ssl_, SSL_VERIFY_NONE);
 
-	ssl_set_rng((ssl_context*) ssl_, havege_random, hs_);
+	::ssl_set_rng((ssl_context*) ssl_, havege_random, hs_);
 	//ssl_set_dbg(ssl_, my_debug, stdout);
-	ssl_set_bio((ssl_context*) ssl_, sock_read, this, sock_send, this);
+	::ssl_set_bio((ssl_context*) ssl_, sock_read, this, sock_send, this);
 
-	const int* cipher_suites = ssl_list_ciphersuites();
+	const int* cipher_suites = ::ssl_list_ciphersuites();
 	if (cipher_suites == NULL)
 	{
 		logger_error("ssl_list_ciphersuites null");
 		return false;
 	}
 
-	ssl_set_ciphersuites((ssl_context*) ssl_, cipher_suites);
-	ssl_set_session((ssl_context*) ssl_, (ssl_session*) ssn_);
+	::ssl_set_ciphersuites((ssl_context*) ssl_, cipher_suites);
+	::ssl_set_session((ssl_context*) ssl_, (ssl_session*) ssn_);
 
 	acl_vstream_ctl(stream_,
 		ACL_VSTREAM_CTL_READ_FN, ssl_read,
@@ -322,7 +322,7 @@ bool socket_stream::open_ssl_client(void)
 	acl_tcp_set_nodelay(ACL_VSTREAM_SOCK(stream_));
 
 	// Handshake
-	while((ret = ssl_handshake((ssl_context*) ssl_)) != 0)
+	while((ret = ::ssl_handshake((ssl_context*) ssl_)) != 0)
 	{
 		if (ret != POLARSSL_ERR_NET_WANT_READ
 			&& ret != POLARSSL_ERR_NET_WANT_WRITE)
