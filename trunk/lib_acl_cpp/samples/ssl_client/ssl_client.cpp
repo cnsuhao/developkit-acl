@@ -77,7 +77,7 @@ static void test1(const char* domain, int port, bool use_gzip, bool use_ssl)
 	// mail.126.com 比较土鳖，有时客户端要求非压缩数据其也会返回压缩数据，所以此处
 	// 强制要求非压缩数据
 	if (!use_gzip)
-		header.add_entry("Accept-Encoding", "text/plain")
+		header.add_entry("Accept-Encoding", "text/plain");
 
 	acl::string request;
 	header.build_request(request);
