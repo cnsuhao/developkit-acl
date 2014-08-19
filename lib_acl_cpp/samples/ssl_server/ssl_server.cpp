@@ -20,24 +20,43 @@ public:
 		file1_ = NULL;
 		file2_ = NULL;
 		file3_ = NULL;
+		first_ = true;
 	}
 
 	~http_servlet(void)
 	{
 	}
 
+	virtual bool doError(HttpServletRequest&, HttpServletResponse&)
+	{
+		if (first_)
+			logger_error("first request error");
+		return false;
+	}
+
 	// GET 方法
 	virtual bool doGet(HttpServletRequest& req, HttpServletResponse& res)
 	{
-		return doPost(req, res);
+		bool ret = doPost(req, res);
+		if (ret == false)
+			logger_error("doPost error!");
+		else
+			logger("doPost OK!");
+		return ret;
 	}
 
 	// POST 方法
 	virtual bool doPost(HttpServletRequest& req, HttpServletResponse& res)
 	{
+		first_ = false;
+
+		logger("request one now");
+
 		// 创建 HTTP 响应头
 		res.addCookie("name1", "value1");
 		res.addCookie("name2", "value2", ".test.com", "/", 3600 * 24);
+		res.setChunkedTransferEncoding(true);
+		res.setKeepAlive(true);
 		//		res.setStatus(400);  // 可以设置返回的状态码
 
 		// 两种方式都可以设置字符集
@@ -66,19 +85,11 @@ public:
 		const char* cookie1 = req.getCookieValue("name1");
 		const char* cookie2 = req.getCookieValue("name2");
 
-		// 获得 sid session 值
-		const char* sid = "test_sid";
-
 		// 创建 xml 格式的数据体
 		xml body;
 		body.get_root().add_child("root", true)
 			.add_child("content_type", true)
 				.add_attr("type", (int) req.getRequestType())
-				.get_parent()
-			.add_child("sessions", true)
-				.add_child("session", true)
-					.add_attr("sid", sid ? sid : "null")
-					.get_parent()
 				.get_parent()
 			.add_child("cookies", true)
 				.add_child("cookie", true)
@@ -108,14 +119,17 @@ public:
 					.get_parent()
 				.add_child("file", true)
 					.add_attr("filename", file3_ ? file3_ : "null");
-		string buf;
+		string buf("<?xml version=\"1.0\"?>");
 		body.build_xml(buf);
 
-		// 发送 http 响应头
-		if (res.sendHeader() == false)
-			return false;
-		// 发送 http 响应体
-		if (res.getOutputStream().write(buf) == -1)
+		//printf(">>>response: %s\r\n", buf.c_str());
+		//res.setContentLength(buf.length());
+
+		// 不必显示工调用下面过程来发送 http 响应头
+		//if (res.sendHeader() == false)
+		//	return false;
+		// 发送 http 响应体，当使用 chunk 传输时，必须最后调用一次发送空数据
+		if (res.write(buf) == false || res.write(NULL, 0) == false)
 			return false;
 		return true;
 	}
@@ -257,6 +271,7 @@ public:
 	// Content-Type: application/octet-stream
 	bool doOctetStream(HttpServletRequest&, HttpServletResponse&)
 	{
+		logger_error("not support now!");
 		return false;
 	}
 
@@ -268,6 +283,7 @@ private:
 	const char* file1_;
 	const char* file2_;
 	const char* file3_;
+	bool first_;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -309,13 +325,15 @@ public:
 protected:
 	virtual void on_accept(socket_stream* stream)
 	{
+		stream->set_rw_timeout(60);
+
 		if (conf_)
 		{
-			polarssl_io* ssl = new polarssl_io;
+			polarssl_io* ssl = new polarssl_io(true);
 			ssl->set_conf(conf_);
 			stream->setup_hook(ssl);
 		}
-
+		printf(">>>call do_run\n");
 		do_run(stream);
 	}
 
@@ -323,15 +341,8 @@ protected:
 	{
 		if (conf_ )
 		{
-			//if (conf_->load_ca())
-			/*
-			if (conf_->add_server_cert("test_ca.crt", "test_ca.key") == false)
-				logger_error("add ca failed");
-			else
-				logger_error("add ca ok");
-			*/
-
-			if (conf_->add_server_cert(crt_file_.c_str(),
+			conf_->enable_cache(true);
+			if (conf_->add_cert(crt_file_.c_str(),
 				key_file_.c_str()) == false)
 			{
 				logger_error("add cert failed, crt: %s, key: %s",

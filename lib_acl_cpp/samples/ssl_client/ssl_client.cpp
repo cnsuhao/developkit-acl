@@ -21,7 +21,7 @@ static void test0(int i)
 		return;
 	}
 
-	acl::polarssl_io* ssl = new acl::polarssl_io();
+	acl::polarssl_io* ssl = new acl::polarssl_io(false);
 	if (client.setup_hook(ssl) == ssl)
 	{
 		std::cout << "open ssl " << addr.c_str() << " error!" << std::endl;
@@ -67,7 +67,7 @@ static void test1(const char* domain, int port, bool use_gzip, bool use_ssl)
 	// 如果使用 SSL 方式，则进行 SSL 握手过程
 	if (use_ssl)
 	{
-		acl::polarssl_io* ssl = new acl::polarssl_io;
+		acl::polarssl_io* ssl = new acl::polarssl_io(false);
 		if (client.setup_hook(ssl) == ssl)
 		{
 			std::cout << "open ssl client " << addr.c_str()

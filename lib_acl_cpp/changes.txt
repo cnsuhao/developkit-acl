@@ -1,5 +1,11 @@
 修改历史列表：
 ------------------------------------------------------------------------
+250) 2014.8.19
+250.1) feature: 支持使用 polarssl 库进行 SSL 服务端传输
+250.2) feature: stream 类中， 将 close 方法由原来的虚方法修改为非虚方法，其在 stream
+基类对象中实现， 且可以调用 stream_hook 的 on_close 方法
+250.3) sample: samples/ssl_server 新增的服务端 SSL 示例 
+
 249) 2014.8.15
 249.1) feature: stream 类的 set_ctx 方法增加是否允许覆盖旧对象的功能
 
