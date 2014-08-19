@@ -19,7 +19,6 @@ polarssl_conf::polarssl_conf()
 #ifdef HAS_POLARSSL
 	cacert_ = NULL;
 	entropy_ = acl_mycalloc(1, sizeof(entropy_context));
-	memset( entropy_, 0, sizeof(entropy_context) );
 	entropy_init((entropy_context*) entropy_);
 # ifdef HAS_SSLCACHE
 	cache_ = acl_mycalloc(1, sizeof(ssl_cache_context));
