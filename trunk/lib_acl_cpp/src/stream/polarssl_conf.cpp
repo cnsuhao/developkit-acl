@@ -20,9 +20,7 @@ polarssl_conf::polarssl_conf()
 	cacert_ = NULL;
 	entropy_ = acl_mycalloc(1, sizeof(entropy_context));
 	entropy_init((entropy_context*) entropy_);
-# ifdef HAS_SSLCACHE
-	cache_ = acl_mycalloc(1, sizeof(ssl_cache_context));
-# endif
+	cache_ = NULL;
 #endif
 }
 
@@ -35,14 +33,11 @@ polarssl_conf::~polarssl_conf()
 	entropy_free((entropy_context*) entropy_);
 	acl_myfree(entropy_);
 
-# ifdef HAS_SSLCACHE
 	if (cache_)
 	{
 		ssl_cache_free((ssl_cache_context*) cache_);
 		acl_myfree(cache_);
 	}
-# endif
-
 #endif
 }
 
@@ -98,7 +93,7 @@ bool polarssl_conf::load_ca(const char* ca_file, const char* ca_path)
 		ret = x509_crt_parse_path((x509_crt*) cacert_, ca_path);
 		if (ret != 0)
 		{
-			logger_error("x509_crt_parse_path(%s) error: %d",
+			logger_error("x509_crt_parse_path(%s) error: -0x%04x",
 				ca_path, ret);
 			free_ca();
 			return false;
@@ -117,7 +112,8 @@ bool polarssl_conf::load_ca(const char* ca_file, const char* ca_path)
 	ret = x509_crt_parse_file((x509_crt*) cacert_, ca_file);
 	if (ret != 0)
 	{
-		logger_error("x509_crt_parse_path(%s) error: %d", ca_path, ret);
+		logger_error("x509_crt_parse_path(%s) error: -0x%04x",
+			ca_path, ret);
 		free_ca();
 		return false;
 	}
@@ -129,7 +125,8 @@ bool polarssl_conf::load_ca(const char* ca_file, const char* ca_path)
 #endif
 }
 
-bool polarssl_conf::add_server_cert(const char* crt_file, const char* key_file)
+bool polarssl_conf::add_cert(const char* crt_file, const char* key_file,
+	const char* key_pass /* = NULL */)
 {
 	if (crt_file == NULL || *crt_file == 0)
 	{
@@ -154,7 +151,8 @@ bool polarssl_conf::add_server_cert(const char* crt_file, const char* key_file)
 	ret = x509_crt_parse_file((x509_crt*) cert, crt_file);
 	if (ret != 0)
 	{
-		logger_error("x509_crt_parse_file(%s) error: %d", crt_file, ret);
+		logger_error("x509_crt_parse_file(%s) error: -0x%04x",
+			crt_file, ret);
 
 		x509_crt_free((x509_crt*) cert);
 		pk_free((pk_context*) pkey);
@@ -163,10 +161,12 @@ bool polarssl_conf::add_server_cert(const char* crt_file, const char* key_file)
 		return false;
 	}
 
-	ret = pk_parse_keyfile((pk_context*) pkey, key_file, "");
+	ret = pk_parse_keyfile((pk_context*) pkey, key_file,
+		key_pass ? key_pass : "");
 	if (ret != 0)
 	{
-		logger_error("pk_parse_keyfile(%s) error: %d", key_file, ret);
+		logger_error("pk_parse_keyfile(%s) error: -0x%04x",
+			key_file, ret);
 
 		x509_crt_free((x509_crt*) cert);
 		pk_free((pk_context*) pkey);
@@ -185,6 +185,25 @@ bool polarssl_conf::add_server_cert(const char* crt_file, const char* key_file)
 #endif
 }
 
+void polarssl_conf::enable_cache(bool on)
+{
+#ifdef HAS_POLARSSL
+	if (on)
+	{
+		if (cache_ != NULL)
+			return;
+		cache_ = acl_mycalloc(1, sizeof(ssl_cache_context));
+		ssl_cache_init((ssl_cache_context*) cache_);
+	}
+	else if (cache_ != NULL)
+	{
+		ssl_cache_free((ssl_cache_context*) cache_);
+		acl_myfree(cache_);
+		cache_ = NULL;
+	}
+#endif
+}
+
 bool polarssl_conf::setup_certs(void* ssl_in)
 {
 #ifdef HAS_POLARSSL
@@ -200,7 +219,7 @@ bool polarssl_conf::setup_certs(void* ssl_in)
 		(const unsigned char *) pers,
 		strlen( pers ) ) ) != 0 )
 	{
-		logger_error("ctr_drbg_init error: %04x\n", ret);
+		logger_error("ctr_drbg_init error: -0x%04x\n", ret);
 		return false;
 	}
 
@@ -211,10 +230,10 @@ bool polarssl_conf::setup_certs(void* ssl_in)
 	size_t n = cert_chain_.size();
 	acl_assert(n == pkey_chain_.size());
 
-# ifdef HAS_SSLCACHE
-	ssl_set_session_cache(ssl, ssl_cache_get, (ssl_cache_context*) cache_,
-		ssl_cache_set, (ssl_cache_context*) cache_);
-# endif
+	if (cache_ != NULL)
+		ssl_set_session_cache(ssl, ssl_cache_get,
+			(ssl_cache_context*) cache_, ssl_cache_set,
+			(ssl_cache_context*) cache_);
 
 	for (size_t i = 0; i < n; ++i)
 	{
@@ -222,7 +241,7 @@ bool polarssl_conf::setup_certs(void* ssl_in)
 			(pk_context*) pkey_chain_[i]);
 		if (ret != 0)
 		{
-			logger_error("ssl_set_own_cert failed, i: %d", i);
+			logger_error("ssl_set_own_cert err: ret: -0x%04x", ret);
 			return false;
 		}
 	}

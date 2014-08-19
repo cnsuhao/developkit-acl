@@ -10,8 +10,9 @@
 
 namespace acl {
 
-polarssl_io::polarssl_io()
+polarssl_io::polarssl_io(bool server_side)
 {
+	server_side_ = server_side;
 	conf_ = NULL;
 	ssl_ = NULL;
 	ssn_ = NULL;
@@ -52,11 +53,13 @@ void polarssl_io::destroy()
 	delete this;
 }
 
+/*
 static void my_mutexed_debug( void *ctx, int level, const char *str )
 {
 	fprintf( (FILE *) ctx, "%s", str );
 	fflush(  (FILE *) ctx  );
 }
+*/
 
 bool polarssl_io::open(const stream* s)
 {
@@ -94,12 +97,16 @@ bool polarssl_io::open(const stream* s)
 		return false;
 	}
 
-	::ssl_set_endpoint((ssl_context*) ssl_, SSL_IS_CLIENT);
+	if (server_side_)
+		::ssl_set_endpoint((ssl_context*) ssl_, SSL_IS_SERVER);
+	else
+		::ssl_set_endpoint((ssl_context*) ssl_, SSL_IS_CLIENT);
+
 	::ssl_set_authmode((ssl_context*) ssl_, SSL_VERIFY_NONE);
 
 	::ssl_set_rng((ssl_context*) ssl_, havege_random, hs_);
 	//ssl_set_dbg(ssl_, my_debug, stdout);
-	ssl_set_dbg((ssl_context*) ssl_, my_mutexed_debug, stdout);
+	//ssl_set_dbg((ssl_context*) ssl_, my_mutexed_debug, stdout);
 	
 	const int* cipher_suites = ::ssl_list_ciphersuites();
 	if (cipher_suites == NULL)
@@ -123,7 +130,7 @@ bool polarssl_io::open(const stream* s)
 		if (ret != POLARSSL_ERR_NET_WANT_READ
 			&& ret != POLARSSL_ERR_NET_WANT_WRITE)
 		{
-			logger_error("ssl_handshake failed: 0x%x", ret);
+			logger_error("ssl_handshake failed: -0x%04x", ret);
 			return false;
 		}
 	}
@@ -218,7 +225,10 @@ int polarssl_io::sock_send(void *ctx, const unsigned char *buf, size_t len)
 		else if (errnum == ACL_ECONNRESET || errno == EPIPE)
 			return POLARSSL_ERR_NET_CONN_RESET;
 		else
+		{
+			logger_error("write error: %s", acl::last_serror());
 			return POLARSSL_ERR_NET_SEND_FAILED;
+		}
 	}
 
 	return ret;

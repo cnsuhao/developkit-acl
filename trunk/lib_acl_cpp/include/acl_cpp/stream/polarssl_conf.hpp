@@ -12,8 +12,9 @@ public:
 	~polarssl_conf();
 
 	bool load_ca(const char* ca_file, const char* ca_path);
-	bool add_server_cert(const char* crt_file, const char* key_file);
-
+	bool add_cert(const char* crt_file, const char* key_file,
+		const char* key_pass = NULL);
+	void enable_cache(bool on);
 	bool setup_certs(void* ssl);
 
 private:

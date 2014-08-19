@@ -129,7 +129,7 @@ bool http_client::open(const char* addr, int conn_timeout /* = 60 */,
 	}
 	if (use_ssl)
 	{
-		polarssl_io* ssl = new polarssl_io();
+		polarssl_io* ssl = new polarssl_io(false);
 		if (stream->setup_hook(ssl) == ssl)
 		{
 			delete stream;
