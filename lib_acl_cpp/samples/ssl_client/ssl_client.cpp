@@ -8,6 +8,7 @@
 #include "acl_cpp/http/http_header.hpp"
 #include "acl_cpp/stdlib/string.hpp"
 #include "acl_cpp/stream/socket_stream.hpp"
+#include "acl_cpp/stream/polarssl_io.hpp"
 #include "acl_cpp/http/http_client.hpp"
 
 static void test0(int i)
@@ -19,9 +20,12 @@ static void test0(int i)
 		std::cout << "connect " << addr.c_str() << " error!" << std::endl;
 		return;
 	}
-	if (client.open_ssl_client() == false)
+
+	acl::polarssl_io* ssl = new acl::polarssl_io();
+	if (client.setup_hook(ssl) == ssl)
 	{
 		std::cout << "open ssl " << addr.c_str() << " error!" << std::endl;
+		ssl->destroy();
 		return;
 	}
 
@@ -61,11 +65,16 @@ static void test1(const char* domain, int port, bool use_gzip, bool use_ssl)
 	}
 
 	// 如果使用 SSL 方式，则进行 SSL 握手过程
-	if (use_ssl && client.open_ssl_client() == false)
+	if (use_ssl)
 	{
-		std::cout << "open ssl client " << addr.c_str()
-			<< " error!" << std::endl;
-		return;
+		acl::polarssl_io* ssl = new acl::polarssl_io;
+		if (client.setup_hook(ssl) == ssl)
+		{
+			std::cout << "open ssl client " << addr.c_str()
+				<< " error!" << std::endl;
+			ssl->destroy();
+			return;
+		}
 	}
 
 	// 构建 HTTP 请求头
@@ -207,9 +216,9 @@ int main(int argc, char* argv[])
 	// 会报错，只能是：Host: mail.126.com，土鳖
 
 	test1("mail.126.com", 443, false, true);
-	test2("mail.126.com", 443, false, true);
-	test2("mail.qq.com", 443, false, true);
-	test2("mail.sina.com.cn", 443, false, true);
+	//test2("mail.126.com", 443, false, true);
+	//test2("mail.qq.com", 443, false, true);
+	//test2("mail.sina.com.cn", 443, false, true);
 
 	printf("Over, enter any key to exit!\n");
 	getchar();

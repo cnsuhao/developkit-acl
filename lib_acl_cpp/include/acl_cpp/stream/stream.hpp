@@ -7,6 +7,23 @@ struct ACL_VSTREAM;
 
 namespace acl {
 
+class stream;
+
+class ACL_CPP_API stream_hook
+{
+public:
+	stream_hook() {}
+
+	virtual int read(void* buf, size_t len) = 0;
+	virtual int send(const void* buf, size_t len) = 0;
+	virtual bool open(const stream* s) = 0;
+	virtual bool on_close() { return true; }
+	virtual void destroy() {}
+
+protected:
+	virtual ~stream_hook() {}
+};
+
 class ACL_CPP_API stream
 {
 public:
@@ -14,10 +31,10 @@ public:
 	virtual ~stream(void) = 0;
 
 	/**
-	* 纯虚函数, 本类不能直接被实例化, 要求子类必须实现流关闭函数
-	* @return {bool} true: 关闭成功; false: 关闭失败
-	*/
-	virtual bool close(void) = 0;
+	 * 调用本函数关闭流连接
+	 * @return {bool} true: 关闭成功; false: 关闭失败
+	 */
+	bool close(void);
 
 	/**
 	* 判断流是否已经结束
@@ -66,8 +83,10 @@ public:
 	 * 设置流的绑定对象
 	 * @param ctx {void*}
 	 * @param key {const char* } 标识该 ctx 的键
+	 * @param replace {bool} 当对应的 KEY 存在时是否允许覆盖
+	 * @return {bool} 当 replace 为 false 且 key 已经存在时则返回 false
 	 */
-	void set_ctx(void* ctx, const char* key = NULL);
+	bool set_ctx(void* ctx, const char* key = NULL, bool replace = true);
 
 	/**
 	 * 获得与流绑定的对象
@@ -97,13 +116,58 @@ public:
 	 */
 	int get_rw_timeout(void) const;
 
+	/**
+	 * 注册读写流对象，内部会自动调用 hook->open 过程，如果成功，则返回之前注册的对象
+	 * (可能为NULL)，若失败则返回与输入参数相同的指针，应用可以通过判断返回值与输入值
+	 * 是否相同来判断注册流对象是否成功
+	 * @param hook {stream_hook*} 非空对象指针
+	 * @return {stream_hook*} 返回值与输入值不同则表示成功
+	 */
+	stream_hook* setup_hook(stream_hook* hook);
+
+	/**
+	 * 获得当前注册的流读写对象
+	 * @return {stream_hook*}
+	 */
+	stream_hook* get_hook() const;
+
+	/**
+	 * 删除当前注册的流读写对象并返回该对象，恢复缺省的读写过程
+	 * @return {stream_hook*}
+	 */
+	stream_hook* remove_hook();
+
 protected:
+	stream_hook* hook_;
 	ACL_VSTREAM *stream_;
 	bool eof_;
 	bool opened_;
 
 	void* default_ctx_;
 	std::map<string, void*> ctx_table_;
+
+private:
+#ifdef WIN32
+	static int read_hook(SOCKET fd, void *buf, size_t len,
+		int timeout, ACL_VSTREAM* stream, void *ctx);
+	static int send_hook(SOCKET fd, const void *buf, size_t len,
+		int timeout, ACL_VSTREAM* stream, void *ctx);
+
+	static int fread_hook(HANDLE fd, void *buf, size_t len,
+		int timeout, ACL_VSTREAM* stream, void *ctx);
+	static int fsend_hook(HANDLE fd, const void *buf, size_t len,
+		int timeout, ACL_VSTREAM* stream, void *ctx);
+#else
+	static int read_hook(int fd, void *buf, size_t len,
+		int timeout, ACL_VSTREAM* stream, void *ctx);
+	static int send_hook(int fd, const void *buf, size_t len,
+		int timeout, ACL_VSTREAM* stream, void *ctx);
+
+	static int fread_hook(int fd, void *buf, size_t len,
+		int timeout, ACL_VSTREAM* stream, void *ctx);
+	static int fsend_hook(int fd, const void *buf, size_t len,
+		int timeout, ACL_VSTREAM* stream, void *ctx);
+#endif
 };
 
 } // namespace acl
