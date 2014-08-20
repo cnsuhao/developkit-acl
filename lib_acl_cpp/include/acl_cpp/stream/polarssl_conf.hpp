@@ -6,9 +6,9 @@ namespace acl
 {
 
 /**
- * SSL 连接对象的配置类，该类对象一般可以声明为全局对象，用来对每一个 SSL 连接对象进行证书
- * 配置；该类加载了全局性的证书、密钥等信息；每一个 SSL 对象 (polarssl_io) 调用本对象的
- * setup_certs 方法来初始化自身的证书、密钥等信息
+ * SSL 连接对象的配置类，该类对象一般可以声明为全局对象，用来对每一个 SSL
+ * 连接对象进行证书配置；该类加载了全局性的证书、密钥等信息；每一个 SSL 对象
+ * (polarssl_io) 调用本对象的setup_certs 方法来初始化自身的证书、密钥等信息
  */
 class ACL_CPP_API polarssl_conf
 {
@@ -35,7 +35,7 @@ public:
 	/**
 	 * 添加服务端/客户端的密钥(每个配置实例只需调用一次本方法)
 	 * @param key_file {const char*} 密钥文件全路径，非空
-	 * @param key_pass {const char*} 密钥文件的密码，如果没有密钥密码则可以写 NULL
+	 * @param key_pass {const char*} 密钥文件的密码，没有密钥密码可写 NULL
 	 * @return {bool} 设置是否成功
 	 */
 	bool set_key(const char* key_file, const char* key_pass = NULL);
@@ -58,7 +58,7 @@ public:
 	}
 
 	/**
-	 * 在 polarssl_io::open 内部会调用本方法用来安装当前 SSL 连接对象的证书
+	 * polarssl_io::open 内部会调用本方法用来安装当前 SSL 连接对象的证书
 	 * @param ssl {void*} SSL 连接对象，为 ssl_context 类型
 	 * @param server_side {bool} 该连接对象是否为服务端连接
 	 * @return {bool} 配置 SSL 对象是否成功

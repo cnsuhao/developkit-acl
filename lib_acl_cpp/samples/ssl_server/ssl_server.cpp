@@ -182,7 +182,7 @@ public:
 		// 读取 HTTP 客户端请求数据
 		while (len > 0)
 		{
-			k = len > sizeof(buf) ? sizeof(buf) : (size_t) len;
+			k = (size_t) len > sizeof(buf) ? sizeof(buf) : (size_t) len;
 			ret = in.read(buf, k, false);
 			if (ret == -1)
 			{
@@ -309,11 +309,7 @@ public:
 			conf_ = new polarssl_conf;
 		}
 		else
-		{
-			crt_file_ = NULL;
-			key_file_ = NULL;
 			conf_ = NULL;
-		}
 	}
 
 	~master_service()
@@ -331,12 +327,17 @@ protected:
 		{
 			// 对于使用 SSL 方式的流对象，需要将 SSL IO 流对象注册至网络
 			// 连接流对象中，即用 ssl io 替换 stream 中默认的底层 IO 过程
+
+			logger("begin setup ssl hook...");
+
 			polarssl_io* ssl = new polarssl_io(*conf_, true);
 			if (stream->setup_hook(ssl) == ssl)
 			{
 				logger_error("setup_hook error!");
 				ssl->destroy();
 			}
+
+			logger("setup ssl hook ok");
 		}
 		do_run(stream);
 	}

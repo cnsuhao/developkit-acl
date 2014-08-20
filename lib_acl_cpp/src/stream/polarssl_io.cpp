@@ -6,6 +6,7 @@
 # include "polarssl/entropy.h"
 #endif
 #include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/util.hpp"
 #include "acl_cpp/stream/stream.hpp"
 #include "acl_cpp/stream/polarssl_conf.hpp"
 #include "acl_cpp/stream/polarssl_io.hpp"
@@ -36,7 +37,8 @@ polarssl_io::~polarssl_io()
 		acl_myfree(ssn_);
 	}
 
-	// 默认使用 havege_random 随机生成器，因为 ctr_drbg_random 内部有线程加锁过程
+	// 默认使用 havege_random 随机生成器，因为 ctr_drbg_random
+	// 内部有线程加锁过程
 # define HAS_HAVEGE
 
 # ifdef HAS_HAVEGE
@@ -256,7 +258,7 @@ int polarssl_io::sock_send(void *ctx, const unsigned char *buf, size_t len)
 			return POLARSSL_ERR_NET_CONN_RESET;
 		else
 		{
-			logger_error("write error: %s", acl::last_serror());
+			logger_error("write error: %s", last_serror());
 			return POLARSSL_ERR_NET_SEND_FAILED;
 		}
 	}

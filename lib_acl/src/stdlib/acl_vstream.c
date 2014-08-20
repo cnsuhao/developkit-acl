@@ -109,6 +109,8 @@ ACL_VSTREAM acl_vstream_fstd[] = {
 		NULL,                           /* hproc */
 		ACL_SOCKET_INVALID,             /* iocp_sock */
 #endif
+		NULL,				/* objs */
+		0,				/* nobj */
 	},
 
 	{
@@ -165,6 +167,8 @@ ACL_VSTREAM acl_vstream_fstd[] = {
 		NULL,                           /* hproc */
 		ACL_SOCKET_INVALID,             /* iocp_sock */
 #endif
+		NULL,				/* objs */
+		0,				/* nobj */
 	},
 	{
 #ifdef ACL_UNIX
@@ -220,6 +224,8 @@ ACL_VSTREAM acl_vstream_fstd[] = {
 		NULL,                           /* hproc */
 		ACL_SOCKET_INVALID,             /* iocp_sock */
 #endif
+		NULL,				/* objs */
+		0,				/* nobj */
 	},
 };
 
@@ -2630,6 +2636,9 @@ int acl_vstream_close(ACL_VSTREAM *fp)
 		acl_array_destroy(fp->close_handle_lnk, NULL);
 	}
 
+	if (fp->objs)
+		acl_myfree(fp->objs);
+
 	if (ACL_VSTREAM_SOCK(fp) != ACL_SOCKET_INVALID && fp->close_fn)
 		ret = fp->close_fn(ACL_VSTREAM_SOCK(fp));
 	else if (ACL_VSTREAM_FILE(fp) != ACL_FILE_INVALID && fp->fclose_fn)
@@ -2923,4 +2932,72 @@ const char *acl_vstream_strerror(ACL_VSTREAM *fp)
 		return err;
 
 	return fp->errbuf;
+}
+
+int acl_vstream_add_object(ACL_VSTREAM *fp, void *obj)
+{
+	int   i, n;
+
+	if (fp == NULL || obj == NULL)
+		return -1;
+
+	if (fp->objs == NULL) {
+		fp->nobj = 10;
+		fp->objs = (void**) acl_mycalloc(fp->nobj, sizeof(void*));
+	}
+
+	for (i = 0; i < fp->nobj; i++) {
+		if (fp->objs[i] == NULL) {
+			fp->objs[i] = obj;
+			return i;
+		}
+	}
+
+	n = fp->nobj + 10;
+	fp->objs = (void**) acl_myrealloc(fp->objs, n * sizeof(void*));
+	for (i = fp->nobj; i < n; i++)
+		fp->objs[i] = NULL;
+	i = fp->nobj;
+	fp->nobj = n;
+	fp->objs[i] = obj;
+
+	return i;
+}
+
+int acl_vstream_del_object(ACL_VSTREAM *fp, void *obj)
+{
+	int   i;
+
+	if (fp == NULL || fp->objs == NULL || obj == NULL)
+		return -1;
+
+	for (i = 0; i < fp->nobj; i++) {
+		if (fp->objs[i] == obj) {
+			fp->objs[i] = NULL;
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+void *acl_vstream_get_object(ACL_VSTREAM *fp, int n)
+{
+	if (fp == NULL || fp->objs == NULL)
+		return NULL;
+	if (n >= fp->nobj)
+		return NULL;
+	return fp->objs[n];
+}
+
+void **acl_vstream_get_objs(ACL_VSTREAM *fp, int *n)
+{
+	if (n)
+		*n = 0;
+	if (fp == NULL || fp->objs == NULL)
+		return NULL;
+
+	if (n)
+		*n = fp->nobj;
+	return fp->objs;
 }
