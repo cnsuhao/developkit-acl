@@ -329,28 +329,44 @@ protected:
 
 		if (conf_)
 		{
-			polarssl_io* ssl = new polarssl_io(true);
-			ssl->set_conf(conf_);
-			stream->setup_hook(ssl);
+			// 对于使用 SSL 方式的流对象，需要将 SSL IO 流对象注册至网络
+			// 连接流对象中，即用 ssl io 替换 stream 中默认的底层 IO 过程
+			polarssl_io* ssl = new polarssl_io(*conf_, true);
+			if (stream->setup_hook(ssl) == ssl)
+			{
+				logger_error("setup_hook error!");
+				ssl->destroy();
+			}
 		}
-		printf(">>>call do_run\n");
 		do_run(stream);
 	}
 
 	virtual void proc_on_init()
 	{
-		if (conf_ )
+		if (conf_ == NULL)
+			return;
+
+		// 允许服务端的 SSL 会话缓存功能
+		conf_->enable_cache(true);
+
+		// 添加本地服务的证书
+		if (conf_->add_cert(crt_file_.c_str()) == false)
 		{
-			conf_->enable_cache(true);
-			if (conf_->add_cert(crt_file_.c_str(),
-				key_file_.c_str()) == false)
-			{
-				logger_error("add cert failed, crt: %s, key: %s",
-					crt_file_.c_str(), key_file_.c_str());
-			}
-			else
-				logger("load cert ok, crt: %s, key: %s",
-					crt_file_.c_str(), key_file_.c_str());
+			logger_error("add cert failed, crt: %s, key: %s",
+				crt_file_.c_str(), key_file_.c_str());
+			delete conf_;
+			conf_ = NULL;
+			return;
+		}
+		logger("load cert ok, crt: %s, key: %s",
+			crt_file_.c_str(), key_file_.c_str());
+
+		// 添加本地服务密钥
+		if (conf_->set_key(key_file_.c_str()) == false)
+		{
+			logger_error("set private key error");
+			delete conf_;
+			conf_ = NULL;
 		}
 	}
 
@@ -365,7 +381,7 @@ static void do_alone(const char* crt_file, const char* key_file)
 {
 	master_service service(crt_file, key_file);
 	acl::log::stdout_open(true);
-	const char* addr = "0.0.0.0:8081";
+	const char* addr = "0.0.0.0:443";
 	printf("listen: %s ...\r\n", addr);
 	service.run_alone(addr, NULL, 0);  // 单独运行方式
 }
