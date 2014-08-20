@@ -10,7 +10,6 @@ stream::stream(void)
 , stream_(NULL)
 , eof_(true)
 , opened_(false)
-, obj_id_(-1)
 , default_ctx_(NULL)
 {
 }
@@ -180,6 +179,8 @@ stream_hook* stream::remove_hook()
 	return hook;
 }
 
+#define	HOOK_KEY	"stream::setup_hook"
+
 stream_hook* stream::setup_hook(stream_hook* hook)
 {
 	if (stream_ == NULL)
@@ -194,11 +195,10 @@ stream_hook* stream::setup_hook(stream_hook* hook)
 	{
 		ACL_FSTREAM_RD_FN read_fn = stream_->fread_fn;
 		ACL_FSTREAM_WR_FN write_fn = stream_->fwrite_fn;
-		void* ctx = stream_->context;
 
 		stream_->fread_fn = fread_hook;
 		stream_->fwrite_fn = fsend_hook;
-		obj_id_  = acl_vstream_add_object(stream_, this);
+		acl_vstream_add_object(stream_, HOOK_KEY, this);
 
 		if (hook->open(this) == false)
 		{
@@ -206,7 +206,7 @@ stream_hook* stream::setup_hook(stream_hook* hook)
 
 			stream_->fread_fn = read_fn;
 			stream_->fwrite_fn = write_fn;
-			stream_->context = ctx;
+			acl_vstream_del_object(stream_, HOOK_KEY);
 			return hook;
 		}
 	}
@@ -214,11 +214,10 @@ stream_hook* stream::setup_hook(stream_hook* hook)
 	{
 		ACL_VSTREAM_RD_FN read_fn = stream_->read_fn;
 		ACL_VSTREAM_WR_FN write_fn = stream_->write_fn;
-		void* ctx = stream_->context;
 
 		stream_->read_fn = read_hook;
 		stream_->write_fn = send_hook;
-		obj_id_  = acl_vstream_add_object(stream_, this);
+		acl_vstream_add_object(stream_, HOOK_KEY, this);
 
 		acl_tcp_set_nodelay(ACL_VSTREAM_SOCK(stream_));
 
@@ -228,7 +227,7 @@ stream_hook* stream::setup_hook(stream_hook* hook)
 
 			stream_->read_fn = read_fn;
 			stream_->write_fn = write_fn;
-			stream_->context = ctx;
+			acl_vstream_del_object(stream_, HOOK_KEY);
 			return hook;
 		}
 	}
@@ -240,7 +239,7 @@ stream_hook* stream::setup_hook(stream_hook* hook)
 int stream::read_hook(ACL_SOCKET, void *buf, size_t len, int,
 	ACL_VSTREAM* vs, void *)
 {
-	stream* s = acl_vstream_get_obj(vs, obj_id_);
+	stream* s = (stream*) acl_vstream_get_object(vs, HOOK_KEY);
 	acl_assert(s);
 
 	if (s->hook_ == NULL)
@@ -254,7 +253,7 @@ int stream::read_hook(ACL_SOCKET, void *buf, size_t len, int,
 int stream::send_hook(ACL_SOCKET, const void *buf, size_t len, int,
 	ACL_VSTREAM* vs, void *)
 {
-	stream* s = acl_vstream_get_obj(vs, obj_id_);
+	stream* s = (stream*) acl_vstream_get_object(vs, HOOK_KEY);
 	acl_assert(s);
 
 	if (s->hook_ == NULL)
@@ -268,7 +267,7 @@ int stream::send_hook(ACL_SOCKET, const void *buf, size_t len, int,
 int stream::fread_hook(ACL_FILE_HANDLE, void *buf, size_t len, int,
 	ACL_VSTREAM* vs, void *)
 {
-	stream* s = acl_vstream_get_obj(vs, obj_id_);
+	stream* s = (stream*) acl_vstream_get_object(vs, HOOK_KEY);
 	acl_assert(s);
 
 	if (s->hook_ == NULL)
@@ -282,7 +281,7 @@ int stream::fread_hook(ACL_FILE_HANDLE, void *buf, size_t len, int,
 int stream::fsend_hook(ACL_FILE_HANDLE, const void *buf, size_t len, int,
 	ACL_VSTREAM* vs, void *)
 {
-	stream* s = acl_vstream_get_obj(vs, obj_id_);
+	stream* s = (stream*) acl_vstream_get_object(vs, HOOK_KEY);
 	acl_assert(s);
 
 	if (s->hook_ == NULL)

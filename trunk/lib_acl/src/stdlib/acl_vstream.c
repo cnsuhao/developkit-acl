@@ -109,8 +109,7 @@ ACL_VSTREAM acl_vstream_fstd[] = {
 		NULL,                           /* hproc */
 		ACL_SOCKET_INVALID,             /* iocp_sock */
 #endif
-		NULL,				/* objs */
-		0,				/* nobj */
+		NULL,				/* objs_table */
 	},
 
 	{
@@ -167,8 +166,7 @@ ACL_VSTREAM acl_vstream_fstd[] = {
 		NULL,                           /* hproc */
 		ACL_SOCKET_INVALID,             /* iocp_sock */
 #endif
-		NULL,				/* objs */
-		0,				/* nobj */
+		NULL,				/* objs_table */
 	},
 	{
 #ifdef ACL_UNIX
@@ -224,8 +222,7 @@ ACL_VSTREAM acl_vstream_fstd[] = {
 		NULL,                           /* hproc */
 		ACL_SOCKET_INVALID,             /* iocp_sock */
 #endif
-		NULL,				/* objs */
-		0,				/* nobj */
+		NULL,				/* objs_table */
 	},
 };
 
@@ -2636,8 +2633,8 @@ int acl_vstream_close(ACL_VSTREAM *fp)
 		acl_array_destroy(fp->close_handle_lnk, NULL);
 	}
 
-	if (fp->objs)
-		acl_myfree(fp->objs);
+	if (fp->objs_table)
+		acl_htable_free(fp->objs_table, NULL);
 
 	if (ACL_VSTREAM_SOCK(fp) != ACL_SOCKET_INVALID && fp->close_fn)
 		ret = fp->close_fn(ACL_VSTREAM_SOCK(fp));
@@ -2934,70 +2931,29 @@ const char *acl_vstream_strerror(ACL_VSTREAM *fp)
 	return fp->errbuf;
 }
 
-int acl_vstream_add_object(ACL_VSTREAM *fp, void *obj)
+int acl_vstream_add_object(ACL_VSTREAM *fp, const char *key, void *obj)
 {
-	int   i, n;
-
-	if (fp == NULL || obj == NULL)
+	if (fp == NULL || key == NULL || *key == 0 || obj == NULL)
 		return -1;
 
-	if (fp->objs == NULL) {
-		fp->nobj = 10;
-		fp->objs = (void**) acl_mycalloc(fp->nobj, sizeof(void*));
-	}
+	if (fp->objs_table == NULL)
+		fp->objs_table = acl_htable_create(5, ACL_HTABLE_FLAG_KEY_LOWER);
 
-	for (i = 0; i < fp->nobj; i++) {
-		if (fp->objs[i] == NULL) {
-			fp->objs[i] = obj;
-			return i;
-		}
-	}
-
-	n = fp->nobj + 10;
-	fp->objs = (void**) acl_myrealloc(fp->objs, n * sizeof(void*));
-	for (i = fp->nobj; i < n; i++)
-		fp->objs[i] = NULL;
-	i = fp->nobj;
-	fp->nobj = n;
-	fp->objs[i] = obj;
-
-	return i;
+	acl_htable_enter(fp->objs_table, key, obj);
+	return 0;
 }
 
-int acl_vstream_del_object(ACL_VSTREAM *fp, void *obj)
+int acl_vstream_del_object(ACL_VSTREAM *fp, const char *key)
 {
-	int   i;
-
-	if (fp == NULL || fp->objs == NULL || obj == NULL)
+	if (fp == NULL || fp->objs_table == NULL || key == NULL || *key == 0)
 		return -1;
 
-	for (i = 0; i < fp->nobj; i++) {
-		if (fp->objs[i] == obj) {
-			fp->objs[i] = NULL;
-			return i;
-		}
-	}
-
-	return -1;
+	return acl_htable_delete(fp->objs_table, key, NULL);
 }
 
-void *acl_vstream_get_object(ACL_VSTREAM *fp, int n)
+void *acl_vstream_get_object(ACL_VSTREAM *fp, const char *key)
 {
-	if (fp == NULL || fp->objs == NULL)
+	if (fp == NULL || fp->objs_table == NULL || key == NULL || *key == 0)
 		return NULL;
-	if (n >= fp->nobj)
-		return NULL;
-	return fp->objs[n];
-}
-
-void **acl_vstream_get_objs(ACL_VSTREAM *fp, int *n)
-{
-	if (n)
-		*n = 0;
-	if (fp == NULL || fp->objs == NULL)
-		return NULL;
-
-	if (n)
-		*n = fp->nobj;
-	return fp->objs;
+	return acl_htable_find(fp->objs_table, key);
 }
