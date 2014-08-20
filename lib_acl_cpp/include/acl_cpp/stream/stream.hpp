@@ -178,7 +178,6 @@ protected:
 	ACL_VSTREAM *stream_;
 	bool eof_;
 	bool opened_;
-	int  obj_id_;
 
 	void* default_ctx_;
 	std::map<string, void*> ctx_table_;
