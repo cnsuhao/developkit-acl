@@ -248,6 +248,8 @@ bool polarssl_conf::setup_certs(void* ssl_in, bool server_side)
 
 	return true;
 #else
+	(void) ssl_in;
+	(void) server_side;
 	logger_error("HAS_POLARSSL not defined!");
 	return false;
 #endif
