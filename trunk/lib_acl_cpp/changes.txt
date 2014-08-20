@@ -4,6 +4,9 @@
 251.1) feature: 完善了 polarssl 与 stream 对象的整合功能
 251.2) 接口调整：http_client 类中的 open 方法去掉了 use_ssl 方法，这样应用可以通过获得
 http_client 对象的 stream 后使用 stream::setup_hook 方法使之具有 SSL 通信功能
+251.3) stream: 当调用 setup_hook 时注册给 ACL_VSTREAM 对象中的 context 与其它
+应用冲突，使用 ACL_VSTREAM 中 objs_table 来存放临时对象（其为一个哈希表）
+251.4) sample: 增加了 samples/https_server，该程序为一个支持 HTTPS 协议的 WEB 服务
 
 250) 2014.8.19
 250.1) feature: 支持使用 polarssl 库进行 SSL 服务端传输
