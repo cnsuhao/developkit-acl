@@ -3,7 +3,6 @@
 #include "acl_cpp/stdlib/zlib_stream.hpp"
 #include "acl_cpp/stream/ostream.hpp"
 #include "acl_cpp/stream/socket_stream.hpp"
-#include "acl_cpp/stream/polarssl_io.hpp"
 #include "acl_cpp/http/http_header.hpp"
 #include "acl_cpp/http/http_client.hpp"
 
@@ -105,8 +104,7 @@ void http_client::reset(void)
 }
 
 bool http_client::open(const char* addr, int conn_timeout /* = 60 */,
-	int rw_timeout /* = 60 */, bool unzip /* = true */,
-	bool use_ssl /* = false */)
+	int rw_timeout /* = 60 */, bool unzip /* = true */)
 {
 	is_request_ = true;
 
@@ -126,17 +124,6 @@ bool http_client::open(const char* addr, int conn_timeout /* = 60 */,
 		delete stream;
 		disconnected_ = true;
 		return false;
-	}
-	if (use_ssl)
-	{
-		polarssl_io* ssl = new polarssl_io(false);
-		if (stream->setup_hook(ssl) == ssl)
-		{
-			delete stream;
-			disconnected_ = true;
-			ssl->destroy();
-			return false;
-		}
 	}
 
 	disconnected_ = false;

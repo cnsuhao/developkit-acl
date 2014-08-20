@@ -9,7 +9,10 @@
 #include "acl_cpp/stdlib/string.hpp"
 #include "acl_cpp/stream/socket_stream.hpp"
 #include "acl_cpp/stream/polarssl_io.hpp"
+#include "acl_cpp/stream/polarssl_conf.hpp"
 #include "acl_cpp/http/http_client.hpp"
+
+static acl::polarssl_conf __ssl_conf;
 
 static void test0(int i)
 {
@@ -21,7 +24,7 @@ static void test0(int i)
 		return;
 	}
 
-	acl::polarssl_io* ssl = new acl::polarssl_io(false);
+	acl::polarssl_io* ssl = new acl::polarssl_io(__ssl_conf, false);
 	if (client.setup_hook(ssl) == ssl)
 	{
 		std::cout << "open ssl " << addr.c_str() << " error!" << std::endl;
@@ -67,7 +70,7 @@ static void test1(const char* domain, int port, bool use_gzip, bool use_ssl)
 	// 如果使用 SSL 方式，则进行 SSL 握手过程
 	if (use_ssl)
 	{
-		acl::polarssl_io* ssl = new acl::polarssl_io(false);
+		acl::polarssl_io* ssl = new acl::polarssl_io(__ssl_conf, false);
 		if (client.setup_hook(ssl) == ssl)
 		{
 			std::cout << "open ssl client " << addr.c_str()
@@ -131,11 +134,25 @@ static void test2(const char* domain, int port, bool use_gzip, bool use_ssl)
 	addr << domain << ':' << port;
 
 	acl::http_client client;
-	if (client.open(addr.c_str(), 60, 60, use_gzip, use_ssl) == false)
+	if (client.open(addr.c_str(), 60, 60, use_gzip) == false)
 	{
 		std::cout << "connect " << addr.c_str()
 			<< " error!" << std::endl;
 		return;
+	}
+
+	if (use_ssl)
+	{
+		// 创建 SSL 对象并与网络客户端连接流绑定，当流对象被释放前该 SSL 对象
+		// 将由流对象内部通过调用 stream_hook::destroy() 释放
+		acl::polarssl_io* ssl = new acl::polarssl_io(__ssl_conf, false);
+		if (client.get_stream().setup_hook(ssl) == ssl)
+		{
+			std::cout << "open ssl client " << addr.c_str()
+				<< " error!" << std::endl;
+			ssl->destroy();
+			return;
+		}
 	}
 
 	// 构建 HTTP 请求头
@@ -216,9 +233,10 @@ int main(int argc, char* argv[])
 	// 会报错，只能是：Host: mail.126.com，土鳖
 
 	test1("mail.126.com", 443, false, true);
-	//test2("mail.126.com", 443, false, true);
-	//test2("mail.qq.com", 443, false, true);
-	//test2("mail.sina.com.cn", 443, false, true);
+	test2("mail.126.com", 443, false, true);
+	test2("mail.qq.com", 443, false, true);
+	test2("mail.sohu.com", 443, false, true);
+	test2("mail.sina.com.cn", 443, false, true);
 
 	printf("Over, enter any key to exit!\n");
 	getchar();
