@@ -276,6 +276,12 @@ bool polarssl_conf::setup_certs(void* ssl_in, bool server_side)
 	}
 	::ssl_set_ciphersuites((ssl_context*) ssl, cipher_suites);
 
+//	::ssl_set_min_version((ssl_context*) ssl, SSL_MAJOR_VERSION_3,
+//		SSL_MINOR_VERSION_0);
+//	::ssl_set_renegotiation((ssl_context*) ssl, SSL_RENEGOTIATION_DISABLED);
+//	::ssl_set_dh_param((ssl_context*) &ssl, POLARSSL_DHM_RFC5114_MODP_2048_P,
+//		POLARSSL_DHM_RFC5114_MODP_2048_G );
+
 	// Setup cache only for server-side
 	if (server_side && cache_ != NULL)
 		::ssl_set_session_cache(ssl, ssl_cache_get,

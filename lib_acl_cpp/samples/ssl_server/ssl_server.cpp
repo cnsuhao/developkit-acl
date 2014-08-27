@@ -338,8 +338,8 @@ protected:
 				logger_error("setup_hook error!");
 				ssl->destroy();
 			}
-
-			logger("setup ssl hook ok");
+			else
+				logger("setup ssl hook ok");
 		}
 		do_run(stream);
 	}

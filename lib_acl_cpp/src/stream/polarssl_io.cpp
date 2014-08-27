@@ -65,13 +65,13 @@ void polarssl_io::destroy()
 	delete this;
 }
 
-/*
-static void my_debug( void *ctx, int level, const char *str )
+#ifdef	DEBUG_SSL
+static void my_debug( void *ctx, int level acl_unused, const char *str )
 {
-	fprintf( (FILE *) ctx, "%s", str );
-	fflush(  (FILE *) ctx  );
+	fprintf((FILE *) ctx, "%s", str);
+	fflush((FILE *) ctx);
 }
-*/
+#endif
 
 bool polarssl_io::open(stream* s)
 {
@@ -134,7 +134,9 @@ bool polarssl_io::open(stream* s)
 	::ssl_set_rng((ssl_context*) ssl_, ctr_drbg_random, rnd_);
 # endif
 
-	//ssl_set_dbg(ssl_, my_debug, stdout);
+# ifdef	DEBUG_SSL
+	ssl_set_dbg((ssl_context*) ssl_, my_debug, stdout);
+# endif
 	
 	if (!server_side_)
 	{
@@ -172,6 +174,27 @@ bool polarssl_io::open(stream* s)
 		}
 	}
 
+#if 0
+	if ((ret = ssl_get_verify_result((ssl_context*) ssl_)) != 0)
+	{
+		printf("failed\n");
+
+		if (!ssl_get_peer_cert((ssl_context*) ssl_))
+			printf("! no client certificate sent\n");
+
+		if ((ret & BADCERT_EXPIRED) != 0)
+			printf("! client certificate has expired\n");
+
+		if ((ret & BADCERT_REVOKED) != 0)
+			printf("! client certificate has been revoked\n");
+
+		if ((ret & BADCERT_NOT_TRUSTED) != 0)
+			printf("! self-signed or not signed by a trusted CA\n");
+
+		printf("\n");
+	}
+#endif
+
 	return true;
 #else
 	logger_error("define HAS_POLARSSL first!");
@@ -179,7 +202,7 @@ bool polarssl_io::open(stream* s)
 #endif
 }
 
-bool polarssl_io::on_close()
+bool polarssl_io::on_close(bool alive)
 {
 #ifdef HAS_POLARSSL
 	if (ssl_ == NULL)
@@ -192,6 +215,9 @@ bool polarssl_io::on_close()
 		logger_error("stream_ null");
 		return false;
 	}
+
+	if (!alive)
+		return false;
 
 	int   ret;
 	while((ret = ssl_close_notify((ssl_context*) ssl_ )) < 0)
