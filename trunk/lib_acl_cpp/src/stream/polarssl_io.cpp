@@ -37,14 +37,14 @@ polarssl_io::~polarssl_io()
 		acl_myfree(ssn_);
 	}
 
-	// 默认使用 havege_random 随机生成器，因为 ctr_drbg_random
-	// 内部有线程加锁过程
+	// 使用 havege_random 随机数生成器时，在一些虚机上并不能保证随机性，
+	// 建议使用 ctr_drbg_random 随机数生成器
 # undef HAS_HAVEGE
 
 # ifdef HAS_HAVEGE
 	if (rnd_)
 	{
-		::havege_free((havege_state*) rnd_);
+//		::havege_free((havege_state*) rnd_);
 		acl_myfree(rnd_);
 	}
 # else
