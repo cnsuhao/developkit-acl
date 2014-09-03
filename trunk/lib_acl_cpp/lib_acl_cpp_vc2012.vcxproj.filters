@@ -896,4 +896,7 @@
   <ItemGroup>
     <ResourceCompile Include="lib_acl_cpp_vc2012.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="todo.txt" />
+  </ItemGroup>
 </Project>
