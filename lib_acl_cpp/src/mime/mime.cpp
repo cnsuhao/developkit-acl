@@ -52,11 +52,8 @@ mime& mime::reset(void)
 		m_pFilePath = NULL;
 	}
 
-	if (m_pBody)
-	{
-		delete m_pBody;
-		m_pBody = NULL;
-	}
+	delete m_pBody;
+	m_pBody = NULL;
 
 	if (m_pNodes)
 	{
