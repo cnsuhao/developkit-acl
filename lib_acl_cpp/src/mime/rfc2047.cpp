@@ -34,8 +34,7 @@ rfc2047::rfc2047(bool strip_sp /* false */, bool addCrlf /* true */)
 rfc2047::~rfc2047()
 {
 	reset();
-	if (m_coder)
-		delete m_coder;
+	delete m_coder;
 }
 
 void rfc2047::reset(bool strip_sp /* false */)
