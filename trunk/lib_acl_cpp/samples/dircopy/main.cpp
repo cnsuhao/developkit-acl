@@ -145,10 +145,10 @@ static bool cmp_copy(acl::scan_dir& scan, const char* name,
 	acl_int64 length;
 	if ((length = to_fp.fsize()) != from_fp.fsize())
 	{
-		to_fp.close();
 		printf("to fsize: %ld, from fsize: %ld, to file: %s, from file: %s\r\n",
 			(long) to_fp.fsize(), (long) from_fp.fsize(),
 			to_filepath.c_str(), from_filepath.c_str());
+		to_fp.close();
 		return copy_file(from_fp, to_pathbuf, to_filepath, ncopied);
 	}
 
