@@ -156,7 +156,7 @@ void event_fire(ACL_EVENT *ev)
 		if ((type & (ACL_EVENT_WRITE | ACL_EVENT_CONNECT))) {
 			if (fdp->w_timeout > 0)
 				fdp->w_ttl = ev->present + fdp->w_timeout;
-			fdp->event_type &= ~ACL_EVENT_WRITE;
+			fdp->event_type &= ~(ACL_EVENT_WRITE | ACL_EVENT_CONNECT);
 			fdp->w_callback(type, ev, fdp->stream, fdp->w_context);
 		}
 	}
