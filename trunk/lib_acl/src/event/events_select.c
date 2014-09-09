@@ -259,7 +259,7 @@ static void event_disable_write(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 	fdp->w_ttl = 0;
 	fdp->w_timeout = 0;
 	fdp->w_callback = NULL;
-	fdp->event_type &= ~ACL_EVENT_WRITE;
+	fdp->event_type &= ~(ACL_EVENT_WRITE | ACL_EVENT_CONNECT);
 	fdp->flag &= ~EVENT_FDTABLE_FLAG_WRITE;
 
 	if ((fdp->flag & EVENT_FDTABLE_FLAG_READ)) {
