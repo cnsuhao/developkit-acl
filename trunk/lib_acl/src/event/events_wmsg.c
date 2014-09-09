@@ -236,7 +236,7 @@ static void event_disable_read(ACL_EVENT *eventp, ACL_VSTREAM *stream)
 	fdp->r_ttl = 0;
 	fdp->r_timeout = 0;
 	fdp->r_callback = NULL;
-	fdp->event_type &= ~ACL_EVENT_READ;
+	fdp->event_type &= ~(ACL_EVENT_READ | ACL_EVENT_ACCEPT);
 	fdp->flag &= ~EVENT_FDTABLE_FLAG_READ;
 
 	if ((fdp->flag & EVENT_FDTABLE_FLAG_WRITE)) {
@@ -520,7 +520,7 @@ static void handleAccept(EVENT_WMSG *ev, ACL_SOCKET sockfd)
 	else if (fdp->r_callback == NULL)
 		acl_msg_fatal("%s(%d): fdp callback null", myname, __LINE__);
 
-	fdp->r_callback(ACL_EVENT_READ, &ev->event,
+	fdp->r_callback(ACL_EVENT_READ | ACL_EVENT_ACCEPT, &ev->event,
 		fdp->stream, fdp->r_context);
 }
 
