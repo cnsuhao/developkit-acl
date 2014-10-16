@@ -199,7 +199,7 @@ int main(int argc, char* argv[])
 
 	// 开始运行
 	http_request_test request(server_addr, file, stype, charset);
-	req.run();
+	request.run();
 
 	return 0;
 }
