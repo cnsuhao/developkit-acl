@@ -53,9 +53,7 @@ public:
 		}
 
 		// 取出 HTTP 响应头的数据字段
-		acl::http_client* client = req.get_client();
-		assert(client);
-		const char* p = client->header_value("Content-Type");
+		const char* p = req.header_value("Content-Type");
 		if (p == NULL || *p == 0)
 		{
 			logger_error("no Content-Type");
