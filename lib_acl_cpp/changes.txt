@@ -4,6 +4,8 @@
 257) 2014.10.25
 257.1) feature: socket_stream 类增加了 TCP 套接字的设置/获取方法；server_socket
 增加了设置服务器套接字延迟接收选项方法
+257.2) feature: 增加了 query 数据库查询对象类，通过该类构建安全的 SQL 查询语句，并通过
+db_handle 类对象查询该 query 对象，此设计借鉴了 java hiberate 的一些思想
 
 256) 2014.9.12
 256.1) compile: 消除了使用 Makefile.db 编译时的一些警告
