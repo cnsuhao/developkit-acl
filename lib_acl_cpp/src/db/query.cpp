@@ -56,7 +56,7 @@ bool query::append_key(string& buf, char* key)
 		break;
 	case DB_PARAM_STR:
 		buf.format_append("'%s'",
-			escape(param->v.S, param->dlen).c_str());
+			escape(param->v.S, param->dlen, buf_).c_str());
 		break;
 	default:
 		logger_error("unknown type: %d", param->type);
@@ -122,50 +122,6 @@ const string& query::to_string()
 	return *sql_buf_;
 }
 
-const string& query::escape(const char* in, size_t len)
-{
-	buf_.clear();
-
-	for (size_t i = 0; i < len; i++, in++)
-	{
-		switch (*in) {
-		case 0:			/* Must be escaped for 'mysql' */
-			buf_ += '\\';
-			buf_ += '0';
-			break;
-		case '\n':		/* Must be escaped for logs */
-			buf_ += '\\';
-			buf_ += 'n';
-			break;
-		case '\r':
-			buf_ += '\\';
-			buf_ += 'r';
-			break;
-		case '\\':
-			buf_ += '\\';
-			buf_ += '\\';
-			break;
-		case '\'':
-			buf_ += '\\';
-			buf_ += '\'';
-			break;
-		case '"':		/* Better safe than sorry */
-			buf_ += '\\';
-			buf_ += '"';
-			break;
-		case '\032':		/* This gives problems on Win32 */
-			buf_ += '\\';
-			buf_ += 'Z';
-			break;
-		default:
-			buf_ += *in;
-			break;
-		}
-	}
-
-	return buf_;
-}
-
 void query::del_param(const string& key)
 {
 	std::map<string, query_param*>::iterator it = params_.find(key);
@@ -200,8 +156,8 @@ query& query::set_parameter(const char* name, char value)
 	key.lower();
 	del_param(key);
 
-	size_t len = sizeof(query_param);
-	query_param* param = (query_param*) acl_mymalloc(len);
+	query_param* param = (query_param*)
+		acl_mymalloc(sizeof(query_param));
 	param->type = DB_PARAM_CHAR;
 	param->v.c = value;
 	param->dlen = sizeof(char);
@@ -216,8 +172,8 @@ query& query::set_parameter(const char* name, short value)
 	key.lower();
 	del_param(key);
 
-	size_t len = sizeof(query_param);
-	query_param* param = (query_param*) acl_mymalloc(len);
+	query_param* param = (query_param*)
+		acl_mymalloc(sizeof(query_param));
 	param->type = DB_PARAM_SHORT;
 	param->v.s = value;
 	param->dlen = sizeof(short);
@@ -232,8 +188,8 @@ query& query::set_parameter(const char* name, int value)
 	key.lower();
 	del_param(key);
 
-	size_t len = sizeof(query_param);
-	query_param* param = (query_param*) acl_mymalloc(len);
+	query_param* param = (query_param*)
+		acl_mymalloc(sizeof(query_param));
 	param->type = DB_PARAM_INT32;
 	param->v.n = value;
 	param->dlen = sizeof(int);
@@ -248,11 +204,67 @@ query& query::set_parameter(const char* name, acl_int64 value)
 	key.lower();
 	del_param(key);
 
-	size_t len = sizeof(query_param);
-	query_param* param = (query_param*) acl_mymalloc(len);
+	query_param* param = (query_param*)
+		acl_mymalloc(sizeof(query_param));
 	param->type = DB_PARAM_INT64;
 	param->v.l = value;
 	param->dlen = sizeof(long long int);
+
+	params_[key] = param;
+	return *this;
+}
+
+query& query::set_date(const char* name, time_t value,
+	const char* fmt /* = "%Y-%m-%d %H:%M:%S" */)
+{
+	string key(name);
+	key.lower();
+	del_param(key);
+
+	string buf(128);
+	if (to_date(value, buf, fmt) == NULL)
+	{
+		logger_error("to_date_time failed, time: %ld", (long) value);
+		return *this;
+	}
+
+	size_t len = buf.length();
+	query_param* param = (query_param*)
+		acl_mymalloc(sizeof(query_param) + len + 1);
+	param->type = DB_PARAM_STR;
+	memcpy(param->v.S, buf.c_str(), len);
+	param->v.S[len] = 0;
+	param->dlen = len;
+
+	params_[key] = param;
+	return *this;
+}
+
+query& query::set_format(const char* name, const char* fmt, ...)
+{
+	va_list ap;
+	va_start(ap, fmt);
+	(void) set_vformat(name, fmt, ap);
+	va_end(ap);
+
+	return *this;
+}
+
+query& query::set_vformat(const char* name, const char* fmt, va_list ap)
+{
+	string key(name);
+	key.lower();
+	del_param(key);
+
+	string val;
+	val.vformat(fmt, ap);
+	size_t len = val.length();
+	query_param* param = (query_param*)
+		acl_mymalloc(sizeof(query_param) + len + 1);
+	param->type = DB_PARAM_STR;
+	memcpy(param->v.S, val.c_str(), len);
+	param->v.S[len] = 0;
+	param->dlen = len;
 
 	params_[key] = param;
 	return *this;
@@ -264,6 +276,97 @@ void query::reset()
 	for (; it != params_.end(); ++it)
 		acl_myfree(it->second);
 	params_.clear();
+}
+
+const string& query::escape(const char* in, size_t len, string& out)
+{
+	out.clear();
+
+	for (size_t i = 0; i < len; i++, in++)
+	{
+		switch (*in) {
+		case 0:			/* Must be escaped for 'mysql' */
+			out += '\\';
+			out += '0';
+			break;
+		case '\n':		/* Must be escaped for logs */
+			out += '\\';
+			out += 'n';
+			break;
+		case '\r':
+			out += '\\';
+			out += 'r';
+			break;
+		case '\\':
+			out += '\\';
+			out += '\\';
+			break;
+		case '\'':
+			out += '\\';
+			out += '\'';
+			break;
+		case '"':		/* Better safe than sorry */
+			out += '\\';
+			out += '"';
+			break;
+		case '\032':		/* This gives problems on Win32 */
+			out += '\\';
+			out += 'Z';
+			break;
+		default:
+			out += *in;
+			break;
+		}
+	}
+
+	return out;
+}
+
+const char* query::to_date(time_t t, string& out,
+	const char* fmt /* = "%Y-%m-%d %H:%M:%S" */)
+{
+	char buf[256];
+
+	if (fmt == NULL || *fmt == 0)
+		fmt = "%Y-%m-%d %H:%M:%S";
+
+	struct tm* local_ptr;
+
+#ifdef WIN32
+# ifdef __STDC_WANT_SECURE_LIB__
+	struct tm local;
+	if (localtime_s(&local, &t) != 0)
+	{
+		logger_error("localtime_s failed, t: %ld", (long) t);
+		return NULL;
+	}
+	local_ptr = &local;
+# else
+	local_ptr = localtime(&t);
+	if (local_ptr == NULL)
+	{
+		logger_error("localtime failed, t: %ld", (long) t);
+		return NULL;
+	}
+# endif
+#else
+	struct tm local;
+
+	if ((local_ptr = localtime_r(&t, &local)) == NULL)
+	{
+		logger_error("localtime_r failed, t: %ld", (long) t);
+		return NULL;
+	}
+#endif
+	if (strftime(buf, sizeof(buf), fmt, &local) == 0)
+	{
+		logger_error("strftime failed, t: %ld, fmt: %s",
+			(long) t, fmt);
+		return NULL;
+	}
+
+	out = buf;
+	return out.c_str();
 }
 
 } // namespace acl
