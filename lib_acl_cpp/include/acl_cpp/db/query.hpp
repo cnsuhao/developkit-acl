@@ -7,7 +7,7 @@ namespace acl
 {
 
 /**
- * SQL 查询语句构建类，该类会自动对 sql 中的一些特殊字符进行转义，使用方式类似于
+ * SQL 查询语句查询器，该类会自动对 sql 中的一些特殊字符进行转义，使用方式类似于
  * java hibernate 的 SQL 语句构建方式
  */
 class query
@@ -75,6 +75,19 @@ public:
 	 */
 	const string& to_string();
 
+	/**
+	 * 对 sql 中的一些特殊字符进行转义处理，以防止 SQL 注入问题
+	 * @param in {const char*} 变量值
+	 * @param len {size_t} in 数据长度
+	 * @return {const string&} 转义处理后的结果
+	 */
+	const string& escape(const char* in, size_t len);
+
+	/**
+	 * 清空查询器上一次的缓存数据
+	 */
+	void reset();
+
 private:
 	typedef enum
 	{
@@ -106,8 +119,6 @@ private:
 
 	void del_param(const string& key);
 	bool append_key(string& buf, char* key);
-
-	string& escape(const char* in, size_t len);
 };
 
 } // namespace acl

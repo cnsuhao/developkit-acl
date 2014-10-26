@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="query"
-	ProjectGUID="{9A04F86E-D4CB-45ED-9BB6-9939B9400B6F}"
+	ProjectGUID="{DF860891-7D7E-473C-A07C-B0959D91C298}"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -361,6 +361,4 @@
 			>
 		</Filter>
 	</Files>
-	<Globals>
-	</Globals>
 </VisualStudioProject>
