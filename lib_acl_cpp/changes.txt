@@ -4,6 +4,8 @@
 258) 2014.10.26
 258.1) feature: 丰富和完善了 SQL 查询器 query 的接口
 258.2) sample: 新增数据库查询示例 samples/db/mysql_query
+258.3) feature: string 类的 format_append 函数增加了变参类型校验功能
+258.4) bugfix: string 类中的 operator +=(long n) 的变参类型有误
 
 257) 2014.10.25
 257.1) feature: socket_stream 类增加了 TCP 套接字的设置/获取方法；server_socket
