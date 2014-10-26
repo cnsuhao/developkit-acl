@@ -15,9 +15,7 @@ query::~query()
 {
 	if (sql_buf_)
 		delete sql_buf_;
-	std::map<string, query_param*>::iterator it = params_.begin();
-	for (; it != params_.end(); ++it)
-		acl_myfree(it->second);
+	reset();
 }
 
 query& query::create_sql(const char* sql_fmt, ...)
@@ -99,7 +97,8 @@ const string& query::to_string()
 		sql_buf_->append(src, ptr - src - 1);
 		key = ptr;
 
-		SKIP_WHILE(*ptr != ' ' && *ptr != '\t'
+		SKIP_WHILE(*ptr != ',' && *ptr != ';'
+			&& *ptr != ' ' && *ptr != '\t'
 			&& *ptr != '(' && *ptr != ')'
 			&& *ptr != '\r' && *ptr != '\n', ptr);
 		if (ptr - key == 1)
@@ -123,7 +122,7 @@ const string& query::to_string()
 	return *sql_buf_;
 }
 
-string& query::escape(const char* in, size_t len)
+const string& query::escape(const char* in, size_t len)
 {
 	buf_.clear();
 
@@ -257,6 +256,14 @@ query& query::set_parameter(const char* name, acl_int64 value)
 
 	params_[key] = param;
 	return *this;
+}
+
+void query::reset()
+{
+	std::map<string, query_param*>::iterator it = params_.begin();
+	for (; it != params_.end(); ++it)
+		acl_myfree(it->second);
+	params_.clear();
 }
 
 } // namespace acl
