@@ -350,7 +350,7 @@ public:
 
 	/**
 	 * 创建一个 json_node 叶结点字符串对象，该结点对象的格式为："string"
-	 * 按 json 规范，该结点只能加入至数据对象中
+	 * 按 json 规范，该结点只能加入至数组对象中
 	 * @param text {const char*} 文本字符串
 	 * @return {json_node&} 新产生的 json_node 对象不需要用户手工释放，因为在
 	 *  json 对象被释放时这些结点会自动被释放，当然用户也可以在不用时调用
