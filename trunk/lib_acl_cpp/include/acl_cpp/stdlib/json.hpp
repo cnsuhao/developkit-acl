@@ -101,6 +101,8 @@ public:
 	 * @return {json_node&} return_child 为 true 时创建的新结点的引用，
 	 *  否则返回本 json 结点对象的引用
 	 */
+	json_node& add_text(const char* tag, const char* value,
+		bool return_child = false);
 	json_node& add_child(const char* tag, const char* value,
 		bool return_child = false);
 
@@ -113,10 +115,10 @@ public:
 	 *  否则返回本 json 结点对象的引用
 	 */
 #ifdef WIN32
-	json_node& add_child(const char* tag, __int64 value,
+	json_node& add_number(const char* tag, __int64 value,
 		bool return_child = false);
 #else
-	json_node& add_child(const char* tag, long long int value,
+	json_node& add_number(const char* tag, long long int value,
 		bool return_child = false);
 #endif
 
@@ -128,7 +130,7 @@ public:
 	 * @return {json_node&} return_child 为 true 时创建的新结点的引用，
 	 *  否则返回本 json 结点对象的引用
 	 */
-	json_node& add_child(const char* tag, bool value,
+	json_node& add_bool(const char* tag, bool value,
 		bool return_child = false);
 
 	/**

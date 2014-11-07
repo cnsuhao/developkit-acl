@@ -111,19 +111,25 @@ json_node& json_node::add_child(bool as_array /* = false */,
 	return add_child(json_->create_node(as_array), return_child);
 }
 
+json_node& json_node::add_text(const char* tag, const char* value,
+	bool return_child /* = false */)
+{
+	return add_child(json_->create_node(tag, value), return_child);
+}
+
 json_node& json_node::add_child(const char* tag, const char* value,
 	bool return_child /* = false */)
 {
-	return add_child(json_->create_node(tag, value), return_child);
+	return add_text(tag, value, return_child);
 }
 
-json_node& json_node::add_child(const char* tag, acl_int64 value,
+json_node& json_node::add_number(const char* tag, acl_int64 value,
 	bool return_child /* = false */)
 {
 	return add_child(json_->create_node(tag, value), return_child);
 }
 
-json_node& json_node::add_child(const char* tag, bool value,
+json_node& json_node::add_bool(const char* tag, bool value,
 	bool return_child /* = false */)
 {
 	return add_child(json_->create_node(tag, value), return_child);
