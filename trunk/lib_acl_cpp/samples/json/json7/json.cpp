@@ -26,7 +26,9 @@ int main(void)
 				.add_child(json.create_node("name12_1_1", "value12_1_1")))
 		.add_child("node2",
 			json.create_node()
-				.add_child(json.create_node("name12_1_2", "value12_1_2")));
+				.add_child(json.create_node("name12_1_2", "value12_1_2")))
+		.add_child(json.create_node()
+				.add_child(json.create_node("name12_1_3", "value12_1_3")));
 
 	acl::string buf;                                                       
 	json.build_json(buf);
