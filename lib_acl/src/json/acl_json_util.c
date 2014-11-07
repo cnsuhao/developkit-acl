@@ -89,14 +89,36 @@ ACL_ARRAY *acl_json_getElementsByTags(ACL_JSON *json, const char *tags)
 #define LEN	ACL_VSTRING_LEN
 #define STR	acl_vstring_str
 
-ACL_JSON_NODE *acl_json_create_leaf(ACL_JSON *json,
-	const char *name, const char *text)
+ACL_JSON_NODE *acl_json_create_text(ACL_JSON *json,
+	const char *name, const char *value)
 {
 	ACL_JSON_NODE *node = acl_json_node_alloc(json);
 
 	acl_vstring_strcpy(node->ltag, name);
-	acl_vstring_strcpy(node->text, text);
-	node->type = ACL_JSON_T_LEAF;
+	acl_vstring_strcpy(node->text, value);
+	node->type = ACL_JSON_T_TEXT;
+	return (node);
+}
+
+ACL_JSON_NODE *acl_json_create_bool(ACL_JSON *json,
+	const char *name, int value)
+{
+	ACL_JSON_NODE *node = acl_json_node_alloc(json);
+
+	acl_vstring_strcpy(node->ltag, name);
+	acl_vstring_strcpy(node->text, value == 0 ? "false" : "true");
+	node->type = ACL_JSON_T_BOOL;
+	return (node);
+}
+
+ACL_JSON_NODE *acl_json_create_int64(ACL_JSON *json,
+	const char *name, acl_int64 value)
+{
+	ACL_JSON_NODE *node = acl_json_node_alloc(json);
+
+	acl_vstring_strcpy(node->ltag, name);
+	acl_vstring_sprintf(node->text, "%lld", value);
+	node->type = ACL_JSON_T_NUMBER;
 	return (node);
 }
 
@@ -225,7 +247,15 @@ ACL_VSTRING *acl_json_build(ACL_JSON *json, ACL_VSTRING *buf)
 			json_escape_append(buf, STR(node->ltag));
 			ACL_VSTRING_ADDCH(buf, ':');
 			ACL_VSTRING_ADDCH(buf, ' ');
-			json_escape_append(buf, STR(node->text));
+			switch (node->type) {
+			case ACL_JSON_T_BOOL:
+			case ACL_JSON_T_NUMBER:
+				acl_vstring_strcat(buf, STR(node->text));
+				break;
+			default:
+				json_escape_append(buf, STR(node->text));
+				break;
+			}
 		}
 
 		/* 当结点为数组的字符串成员时 */
