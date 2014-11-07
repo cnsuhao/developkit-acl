@@ -286,7 +286,15 @@ ACL_VSTRING *acl_json_build(ACL_JSON *json, ACL_VSTRING *buf)
 		else if (LEN(node->text) > 0 && node->parent
 			&& node->parent->left_ch != 0)
 		{
-			json_escape_append(buf, STR(node->text));
+			switch (node->type) {
+			case ACL_JSON_T_A_BOOL:
+			case ACL_JSON_T_A_NUMBER:
+				acl_vstring_strcat(buf, STR(node->text));
+				break;
+			default:
+				json_escape_append(buf, STR(node->text));
+				break;
+			}
 		}
 
 		/* 当结点为没有标签名的容器(为 '{}' 或 '[]')时 */
