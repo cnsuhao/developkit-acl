@@ -100,6 +100,7 @@ public:
 	 * @param return_child {bool} 是否需要本函数返回新创建的子结点的引用
 	 * @return {json_node&} return_child 为 true 时创建的新结点的引用，
 	 *  否则返回本 json 结点对象的引用
+	 * 注：此处的 add_text 和 add_child 是同样的功能
 	 */
 	json_node& add_text(const char* tag, const char* value,
 		bool return_child = false);
