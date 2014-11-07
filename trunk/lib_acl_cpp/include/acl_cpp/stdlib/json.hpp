@@ -285,7 +285,7 @@ public:
 	ACL_JSON* get_json(void) const;
 
 	/**
-	 * 创建一个 json_node 叶结点对象，该结点对象的格式为：tag_name: "tag_value"
+	 * 创建一个 json_node 叶结点对象，该结点对象的格式为："tag_name": "tag_value"
 	 * @param tag {const char*} 标签名
 	 * @param value {const char*} 标签值
 	 * @return {json_node&} 新产生的 json_node 对象不需要用户手工释放，因为在
@@ -293,6 +293,30 @@ public:
 	 *  reset 来释放这些 json_node 结点对象
 	 */
 	json_node& create_node(const char* tag, const char* value);
+
+	/**
+	 * 创建一个 json_node 叶结点对象，该结点对象的格式为："tag_name": tag_value
+	 * @param tag {const char*} 标签名
+	 * @param value {int64} 标签值
+	 * @return {json_node&} 新产生的 json_node 对象不需要用户手工释放，因为在
+	 *  json 对象被释放时这些结点会自动被释放，当然用户也可以在不用时调用
+	 *  reset 来释放这些 json_node 结点对象
+	 */
+#ifdef WIN32
+	json_node& create_node(const char* tag, __int64 value);
+#else
+	json_node& create_node(const char* tag, long long int value);
+#endif
+
+	/**
+	 * 创建一个 json_node 叶结点对象，该结点对象的格式为："tag_name": true|false
+	 * @param tag {const char*} 标签名
+	 * @param value {bool} 标签值
+	 * @return {json_node&} 新产生的 json_node 对象不需要用户手工释放，因为在
+	 *  json 对象被释放时这些结点会自动被释放，当然用户也可以在不用时调用
+	 *  reset 来释放这些 json_node 结点对象
+	 */
+	json_node& create_node(const char* tag, bool value);
 
 	/**
 	 * 创建一个 json_node 叶结点字符串对象，该结点对象的格式为："string"

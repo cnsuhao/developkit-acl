@@ -300,7 +300,23 @@ ACL_JSON* json::get_json(void) const
 
 json_node& json::create_node(const char* tag, const char* value)
 {
-	ACL_JSON_NODE* node = acl_json_create_leaf(json_, tag, value);
+	ACL_JSON_NODE* node = acl_json_create_text(json_, tag, value);
+	json_node* n = NEW json_node(node, this);
+	nodes_.push_back(n);
+	return *n;
+}
+
+json_node& json::create_node(const char* tag, acl_int64 value)
+{
+	ACL_JSON_NODE* node = acl_json_create_int64(json_, tag, value);
+	json_node* n = NEW json_node(node, this);
+	nodes_.push_back(n);
+	return *n;
+}
+
+json_node& json::create_node(const char* tag, bool value)
+{
+	ACL_JSON_NODE* node = acl_json_create_bool(json_, tag, value ? 1 : 0);
 	json_node* n = NEW json_node(node, this);
 	nodes_.push_back(n);
 	return *n;
