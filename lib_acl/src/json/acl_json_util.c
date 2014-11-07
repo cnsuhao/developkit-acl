@@ -122,12 +122,35 @@ ACL_JSON_NODE *acl_json_create_int64(ACL_JSON *json,
 	return (node);
 }
 
-ACL_JSON_NODE *acl_json_create_string(ACL_JSON *json, const char *text)
+ACL_JSON_NODE *acl_json_create_array_text(ACL_JSON *json, const char *text)
 {
 	ACL_JSON_NODE *node = acl_json_node_alloc(json);
 
 	acl_vstring_strcpy(node->text, text);
-	node->type = ACL_JSON_T_STRING;
+	node->type = ACL_JSON_T_A_STRING;
+	return (node);
+}
+
+ACL_JSON_NODE *acl_json_create_string(ACL_JSON *json, const char *text)
+{
+	return acl_json_create_array_text(json, text);
+}
+
+ACL_JSON_NODE *acl_json_create_array_int64(ACL_JSON *json, acl_int64 value)
+{
+	ACL_JSON_NODE *node = acl_json_node_alloc(json);
+
+	acl_vstring_sprintf(node->text, "%lld", value);
+	node->type = ACL_JSON_T_A_NUMBER;
+	return (node);
+}
+
+ACL_JSON_NODE *acl_json_create_array_bool(ACL_JSON *json, int value)
+{
+	ACL_JSON_NODE *node = acl_json_node_alloc(json);
+
+	acl_vstring_strcpy(node->text, value ? "true" : "false");
+	node->type = ACL_JSON_T_A_BOOL;
 	return (node);
 }
 
@@ -247,6 +270,7 @@ ACL_VSTRING *acl_json_build(ACL_JSON *json, ACL_VSTRING *buf)
 			json_escape_append(buf, STR(node->ltag));
 			ACL_VSTRING_ADDCH(buf, ':');
 			ACL_VSTRING_ADDCH(buf, ' ');
+
 			switch (node->type) {
 			case ACL_JSON_T_BOOL:
 			case ACL_JSON_T_NUMBER:

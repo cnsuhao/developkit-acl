@@ -135,10 +135,24 @@ json_node& json_node::add_bool(const char* tag, bool value,
 	return add_child(json_->create_node(tag, value), return_child);
 }
 
-json_node& json_node::add_child(const char* text,
-	bool return_child /* = false */)
+json_node& json_node::add_text(const char* text, bool return_child /* = false */)
 {
-	return add_child(json_->create_node(text), return_child);
+	return add_child(json_->create_array_text(text), return_child);
+}
+
+json_node& json_node::add_child(const char* text, bool return_child /* = false */)
+{
+	return add_text(text, return_child);
+}
+
+json_node& json_node::add_number(acl_int64 value, bool return_child /* = false */)
+{
+	return add_child(json_->create_array_number(value), return_child);
+}
+
+json_node& json_node::add_bool(bool value, bool return_child /* = false */)
+{
+	return add_child(json_->create_array_bool(value), return_child);
 }
 
 json_node& json_node::add_child(const char* tag, json_node* node,
@@ -340,9 +354,30 @@ json_node& json::create_node(const char* tag, bool value)
 	return *n;
 }
 
+json_node& json::create_array_text(const char* text)
+{
+	ACL_JSON_NODE* node = acl_json_create_array_text(json_, text);
+	json_node* n = NEW json_node(node, this);
+	nodes_.push_back(n);
+	return *n;
+}
+
 json_node& json::create_node(const char* text)
 {
-	ACL_JSON_NODE* node = acl_json_create_string(json_, text);
+	return create_array_text(text);
+}
+
+json_node& json::create_array_number(acl_int64 value)
+{
+	ACL_JSON_NODE* node = acl_json_create_array_int64(json_, value);
+	json_node* n = NEW json_node(node, this);
+	nodes_.push_back(n);
+	return *n;
+}
+
+json_node& json::create_array_bool(bool value)
+{
+	ACL_JSON_NODE* node = acl_json_create_array_bool(json_, value);
 	json_node* n = NEW json_node(node, this);
 	nodes_.push_back(n);
 	return *n;
