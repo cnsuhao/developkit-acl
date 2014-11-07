@@ -117,6 +117,18 @@ json_node& json_node::add_child(const char* tag, const char* value,
 	return add_child(json_->create_node(tag, value), return_child);
 }
 
+json_node& json_node::add_child(const char* tag, acl_int64 value,
+	bool return_child /* = false */)
+{
+	return add_child(json_->create_node(tag, value), return_child);
+}
+
+json_node& json_node::add_child(const char* tag, bool value,
+	bool return_child /* = false */)
+{
+	return add_child(json_->create_node(tag, value), return_child);
+}
+
 json_node& json_node::add_child(const char* text,
 	bool return_child /* = false */)
 {

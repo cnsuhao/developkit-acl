@@ -94,7 +94,7 @@ public:
 	json_node& add_child(bool as_array = false, bool return_child = false);
 
 	/**
-	 * 创建一个 json 结点对象，并将之添加为本 json 结点的子结点
+	 * 创建一个字符串类型的 json 结点对象，并将之添加为本 json 结点的子结点
 	 * @param tag {const char*} 标签名
 	 * @param value {const char*} 标签值
 	 * @param return_child {bool} 是否需要本函数返回新创建的子结点的引用
@@ -102,6 +102,33 @@ public:
 	 *  否则返回本 json 结点对象的引用
 	 */
 	json_node& add_child(const char* tag, const char* value,
+		bool return_child = false);
+
+	/**
+	 * 创建一个int64 类型的 json 结点对象，并将之添加为本 json 结点的子结点
+	 * @param tag {const char*} 标签名
+	 * @param value {int64} 标签值
+	 * @param return_child {bool} 是否需要本函数返回新创建的子结点的引用
+	 * @return {json_node&} return_child 为 true 时创建的新结点的引用，
+	 *  否则返回本 json 结点对象的引用
+	 */
+#ifdef WIN32
+	json_node& add_child(const char* tag, __int64 value,
+		bool return_child = false);
+#else
+	json_node& add_child(const char* tag, long long int value,
+		bool return_child = false);
+#endif
+
+	/**
+	 * 创建一个布尔类型的 json 结点对象，并将之添加为本 json 结点的子结点
+	 * @param tag {const char*} 标签名
+	 * @param value {bool} 标签值
+	 * @param return_child {bool} 是否需要本函数返回新创建的子结点的引用
+	 * @return {json_node&} return_child 为 true 时创建的新结点的引用，
+	 *  否则返回本 json 结点对象的引用
+	 */
+	json_node& add_child(const char* tag, bool value,
 		bool return_child = false);
 
 	/**
