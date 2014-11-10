@@ -399,11 +399,30 @@ typedef struct {
 	void *serv_arg;
 } READ_CTX;
 
-static void client_wakeup(ACL_EVENT *event, acl_pthread_pool_t *threads,
-	ACL_VSTREAM *stream)
+static void client_wakeup(ACL_EVENT *event,
+	acl_pthread_pool_t *threads acl_unused, ACL_VSTREAM *stream)
 {
 	READ_CTX *ctx = (READ_CTX*) stream->ioctl_read_ctx;
-	(void) threads;
+	const char* peer = ACL_VSTREAM_PEER(stream);
+	char  addr[256];
+
+	if (peer) {
+		char *ptr;
+		ACL_SAFE_STRNCPY(addr, peer, sizeof(addr));
+		ptr = strchr(addr, ':');
+		if (ptr)
+			*ptr = 0;
+	} else
+		addr[0] = 0;
+
+	if (addr[0] != 0 && !acl_access_permit(addr)) {
+		if (__deny_info && *__deny_info)
+			acl_vstream_fprintf(stream, "%s\r\n", __deny_info);
+		if (__server_on_close != NULL)
+			__server_on_close(stream, __service_ctx);
+		acl_vstream_close(stream);
+		return;
+	}
 
 	if (acl_var_threads_status_notify && acl_var_threads_master_maxproc > 1
 	    && acl_master_notify(acl_var_threads_pid, __server_generation,
@@ -566,17 +585,8 @@ static void client_open(ACL_EVENT *event, acl_pthread_pool_t *threads,
 
 	stream = acl_vstream_fdopen(fd, O_RDWR, acl_var_threads_buf_size,
 			acl_var_threads_rw_timeout, ACL_VSTREAM_TYPE_SOCK);
-
-	if (remote) {
-		char *ptr;
+	if (remote)
 		acl_vstream_set_peer(stream, remote);
-		ACL_SAFE_STRNCPY(addr, remote, sizeof(addr));
-		ptr = strchr(addr, ':');
-		if (ptr)
-			*ptr = 0;
-	} else
-		addr[0] = 0;
-
 	if (local)
 		acl_vstream_set_local(stream, local);
 
@@ -586,14 +596,7 @@ static void client_open(ACL_EVENT *event, acl_pthread_pool_t *threads,
 	 */
 	acl_vstream_add_close_handle(stream, decrease_counter_callback, NULL);
 
-	if (addr[0] != 0 && !acl_access_permit(addr)) {
-		if (__deny_info && *__deny_info)
-			acl_vstream_fprintf(stream, "%s\r\n", __deny_info);
-		if (__server_on_close != NULL)
-			__server_on_close(stream, __service_ctx);
-		acl_vstream_close(stream);
-	} else
-		create_job(event, threads, stream);
+	create_job(event, threads, stream);
 }
 
 /* restart listening */
