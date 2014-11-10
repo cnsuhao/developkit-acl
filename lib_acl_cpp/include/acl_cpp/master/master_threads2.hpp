@@ -51,8 +51,8 @@ protected:
 	virtual bool thread_on_read(socket_stream* stream) = 0;
 
 	/**
-	 * 当线程池中的某个线程获得一个连接时的回调函数，
-	 * 子类可以做一些初始化工作
+	 * 当线程池中的某个线程获得一个连接时的回调函数，子类可以做一些
+	 * 初始化工作，该函数是在主线程的线程空间中运行
 	 * @param stream {socket_stream*}
 	 * @return {bool} 如果返回 false 则表示子类要求关闭连接，而不
 	 *  必将该连接再传递至 thread_main 过程
