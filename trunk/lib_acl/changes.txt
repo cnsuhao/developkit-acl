@@ -2,8 +2,10 @@
 
 ------------------------------------------------------------------------
 463) 2014.11.10
-463.1) bugfix: acl_thread_server.c 将对客户端 IP 地址访问权限的处理过程放在
+463.1) bugfix: acl_threads_server.c 将对客户端 IP 地址访问权限的处理过程放在
 client_wakeup 中，否则会造成 master_threads2 类产生 core
+463.2) feature: acl_threads_server.c 中增加了设置 ACL_MASTER_SERVER_HANDSHAKE_FN
+的方法，用来替代 ACL_MASTER_SERVER_ACCEPT_FN 函数的一些较长时间的初始化工作
 
 462) 2014.11.8
 462.1) bugfix: acl_json_util.c 中的函数 json_escape_append 不应针对字符

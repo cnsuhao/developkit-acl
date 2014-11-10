@@ -397,7 +397,10 @@ typedef struct {
 	int   event_type;
 	void  (*read_callback)(int, ACL_EVENT*, ACL_VSTREAM*, void*);
 	int   (*serv_callback)(ACL_VSTREAM*, void*);
+	ACL_MASTER_SERVER_ACCEPT_FN serv_accept;
 	ACL_MASTER_SERVER_HANDSHAKE_FN serv_handshake;
+	ACL_MASTER_SERVER_DISCONN_FN serv_close;
+	ACL_MASTER_SERVER_TIMEOUT_FN serv_timeout;
 	void *serv_arg;
 } READ_CTX;
 
@@ -420,8 +423,13 @@ static void client_wakeup(ACL_EVENT *event,
 	if (addr[0] != 0 && !acl_access_permit(addr)) {
 		if (__deny_info && *__deny_info)
 			acl_vstream_fprintf(stream, "%s\r\n", __deny_info);
-		if (__server_on_close != NULL)
-			__server_on_close(stream, __service_ctx);
+		if (ctx->serv_close != NULL)
+			ctx->serv_close(stream, ctx->serv_arg);
+		acl_vstream_close(stream);
+		return;
+	}
+
+	if (ctx->serv_handshake != NULL && ctx->serv_handshake(stream) < 0) {
 		acl_vstream_close(stream);
 		return;
 	}
@@ -457,38 +465,32 @@ static void thread_callback(void *arg)
 				ctx->stream->rw_timeout,
 				ctx->read_callback, ctx);
 		else if (ret < 0) {
-			if (__server_on_close != NULL)
-				__server_on_close(ctx->stream, ctx->serv_arg);
+			if (ctx->serv_close != NULL)
+				ctx->serv_close(ctx->stream, ctx->serv_arg);
 			acl_vstream_close(ctx->stream);
 		}
 	} else if ((ctx->event_type & ACL_EVENT_ACCEPT) != 0) {
-		acl_assert(__server_on_accept != NULL);
-
-		if (__server_on_accept(ctx->stream) >= 0)
-			client_wakeup(ctx->event, ctx->threads, ctx->stream);
-		else if (__server_on_close != NULL) {
-			__server_on_close(ctx->stream, __service_ctx);
-			acl_vstream_close(ctx->stream);
-		}
+		client_wakeup(ctx->event, ctx->threads, ctx->stream);
 	} else if ((ctx->event_type & ACL_EVENT_XCPT) != 0) {
-		if (__server_on_close != NULL)
-			__server_on_close(ctx->stream, ctx->serv_arg);
+		if (ctx->serv_close != NULL)
+			ctx->serv_close(ctx->stream, ctx->serv_arg);
 		acl_vstream_close(ctx->stream);
 	} else if ((ctx->event_type & ACL_EVENT_RW_TIMEOUT) == 0) {
 		acl_msg_fatal("%s, %s(%d): unknown event type(%d)",
 			__FILE__, __FUNCTION__, __LINE__, ctx->event_type);
-	} else if (__server_on_timeout == NULL) {
-		if (__server_on_close != NULL)
-			__server_on_close(ctx->stream, ctx->serv_arg);
+	} else if (ctx->serv_timeout == NULL) {
+		if (ctx->serv_close != NULL)
+			ctx->serv_close(ctx->stream, ctx->serv_arg);
 		acl_vstream_close(ctx->stream);
-	} else if (__server_on_timeout(ctx->stream, ctx->serv_arg) < 0) {
-		if (__server_on_close != NULL)
-			__server_on_close(ctx->stream, ctx->serv_arg);
+	} else if (ctx->serv_timeout(ctx->stream, ctx->serv_arg) < 0) {
+		if (ctx->serv_close != NULL)
+			ctx->serv_close(ctx->stream, ctx->serv_arg);
 		acl_vstream_close(ctx->stream);
-	} else
+	} else {
 		acl_event_enable_read(ctx->event, ctx->stream,
 			ctx->stream->rw_timeout,
 			ctx->read_callback, ctx);
+	}
 }
 
 static void read_callback1(int event_type, ACL_EVENT *event acl_unused,
@@ -543,7 +545,10 @@ static void create_job(ACL_EVENT *event, acl_pthread_pool_t *threads,
 	ctx->threads        = threads;
 	ctx->event          = event;
 	ctx->event_type     = -1;
+	ctx->serv_accept    = __server_on_accept;
 	ctx->serv_handshake = __server_on_handshake;
+	ctx->serv_close     = __server_on_close;
+	ctx->serv_timeout   = __server_on_timeout;
 	ctx->serv_callback  = __service_main;
 	ctx->serv_arg       = __service_ctx;
 	ctx->job = acl_pthread_pool_alloc_job(thread_callback, ctx, 1);
@@ -556,23 +561,15 @@ static void create_job(ACL_EVENT *event, acl_pthread_pool_t *threads,
 	stream->ioctl_read_ctx = ctx;
 	acl_vstream_add_close_handle(stream, free_ctx, ctx);
 
-	/* 如果没有 on_accept 回调函数，则直接在主线程中处理 */
-	if (__server_on_accept == NULL) {
-		client_wakeup(event, threads, stream);
-	} else
-
-	/* 为了防止 on_accept 的回调处理过程过长阻塞了主线程，可以通过配置
-	 * 项选择该过程是否交由线程池中的子线程处理
-	 */
-	if (acl_var_threads_thread_accept) {
+	if (ctx->serv_accept != NULL && ctx->serv_accept(stream) < 0) {
+		if (ctx->serv_close != NULL)
+			ctx->serv_close(stream, ctx->serv_arg);
+		acl_vstream_close(stream);
+	} else if (acl_var_threads_thread_accept) {
 		ctx->event_type = ACL_EVENT_ACCEPT;
 		acl_pthread_pool_add_job(ctx->threads, ctx->job);
-	} else if (__server_on_accept(stream) >= 0) {
-		client_wakeup(event, threads, stream);
 	} else {
-		if (__server_on_close != NULL)
-			__server_on_close(stream, __service_ctx);
-		acl_vstream_close(stream);
+		client_wakeup(event, threads, stream);
 	}
 }
 
