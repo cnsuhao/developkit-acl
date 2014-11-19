@@ -1,5 +1,5 @@
 // Protocol Buffers - Google's data interchange format
-// Copyright 2012 Google Inc.  All rights reserved.
+// Copyright 2008 Google Inc.  All rights reserved.
 // http://code.google.com/p/protobuf/
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,46 +28,23 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// This file is an internal atomic implementation, use atomicops.h instead.
+// A locale-independent version of strtod(), used to parse floating
+// point default values in .proto files, where the decimal separator
+// is always a dot.
 
-#ifndef GOOGLE_PROTOBUF_ATOMICOPS_INTERNALS_PNACL_H_
-#define GOOGLE_PROTOBUF_ATOMICOPS_INTERNALS_PNACL_H_
+#ifndef GOOGLE_PROTOBUF_IO_STRTOD_H__
+#define GOOGLE_PROTOBUF_IO_STRTOD_H__
 
 namespace google {
 namespace protobuf {
-namespace internal {
+namespace io {
 
-inline Atomic32 NoBarrier_CompareAndSwap(volatile Atomic32* ptr,
-                                         Atomic32 old_value,
-                                         Atomic32 new_value) {
-  return __sync_val_compare_and_swap(ptr, old_value, new_value);
-}
+// A locale-independent version of the standard strtod(), which always
+// uses a dot as the decimal separator.
+double NoLocaleStrtod(const char* str, char** endptr);
 
-inline void MemoryBarrier() {
-  __sync_synchronize();
-}
-
-inline Atomic32 Acquire_CompareAndSwap(volatile Atomic32* ptr,
-                                       Atomic32 old_value,
-                                       Atomic32 new_value) {
-  Atomic32 ret = NoBarrier_CompareAndSwap(ptr, old_value, new_value);
-  MemoryBarrier();
-  return ret;
-}
-
-inline void Release_Store(volatile Atomic32* ptr, Atomic32 value) {
-  MemoryBarrier();
-  *ptr = value;
-}
-
-inline Atomic32 Acquire_Load(volatile const Atomic32* ptr) {
-  Atomic32 value = *ptr;
-  MemoryBarrier();
-  return value;
-}
-
-}  // namespace internal
+}  // namespace io
 }  // namespace protobuf
-}  // namespace google
 
-#endif  // GOOGLE_PROTOBUF_ATOMICOPS_INTERNALS_PNACL_H_
+}  // namespace google
+#endif  // GOOGLE_PROTOBUF_IO_STRTOD_H__
