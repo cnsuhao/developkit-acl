@@ -20,14 +20,14 @@ static bool handle_one(http_request& rpc, bool output)
 	// 请求过程
 
 	static tutorial::AddressBook address;
-	size_t  person_count = 5;
+	int  person_count = 5;
 
 	address.Clear();
 
 	acl::string buf;
 
 	// 给地址簿中添加用户列表
-	for (size_t i = 0; i < person_count; i++)
+	for (int i = 0; i < person_count; i++)
 	{
 		tutorial::Person* person = address.add_person();
 		buf.format("zsxxsz-%d", i);
@@ -37,7 +37,7 @@ static bool handle_one(http_request& rpc, bool output)
 		person->set_id(i);
 
 		// 给一个用户添加多个电话号码
-		for (size_t j = 0; j < tutorial::Person::WORK; j++)
+		for (int j = 0; j < tutorial::Person::WORK; j++)
 		{
 			tutorial::Person::PhoneNumber* phone = person->add_phone();
 			buf.format("11111111-%d-%d", i, j);
