@@ -1,5 +1,9 @@
 #include "acl_cpp/lib_acl.hpp"
 
+#ifdef WIN32
+#define strdup _strdup
+#endif
+
 int main(void)
 {
 	char* s = strdup("aaa\r\n\r\n"
@@ -97,6 +101,11 @@ int main(void)
 		printf("error, second != third\r\n");
 	else
 		printf("All OK\r\n");
+
+#ifdef WIN32
+	printf("enter any key to exit\r\n");
+	getchar();
+#endif
 
 	return 0;
 }
