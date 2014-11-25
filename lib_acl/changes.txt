@@ -6,6 +6,8 @@
 数据中查找空行的位置
 466.2) feature: acl_pthread_pool.c 中增加了 acl_pthread_pool_idle，
 acl_pthread_pool_busy 两个函数，分别用来获得当前线程池中的空闲线程数及繁忙线程数
+466.3) feature: acl_threads_server.c 服务器模板当子进程退出时会优先调用应用
+回调函数，由应用回调函数优先决定是否退出
 
 465) 2014.11.23
 465.1) bugfix: acl_threads_server.c/acl_aio_server.c 服务器模板，当采用 TCP

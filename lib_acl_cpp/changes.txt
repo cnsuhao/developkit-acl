@@ -6,6 +6,8 @@
 当前缓冲区中查找一个空行的位置
 263.2) feature: string 类增加了 substr 方法，用来从当前缓冲区中提取数据
 263.3) samples: 新 string/blank_line 示例，用来测试上面新增的方法
+263.4) feature: master_threads2 类增加了 proc_exit_timer 虚函数，当子进程
+需要退出时服务器模板将会回调该虚函数以决定子进程是否可以退出
 
 262) 2014.11.19
 262.1) bugfix: http_response 类中当调用 read_header 方法时，需要自动将
