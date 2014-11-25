@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
 		if (res.read_header() == false)
 		{
 			printf("read_header error\r\n");
-			return 1;
+			break;
 		}
 
 		if (n < 10)
@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
 		if (res.get_body(tmp) == false)
 		{
 			printf("read_body error\r\n");
-			return 1;
+			break;
 		}
 
 		if (n < 10)
@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
 		if (res.response(buf.c_str(), buf.length()) == false)
 		{
 			printf("response error\r\n");
-			return 1;
+			break;
 		}
 
 		n++;
