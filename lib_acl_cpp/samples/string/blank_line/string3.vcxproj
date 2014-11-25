@@ -97,10 +97,10 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>lib_acl_vc2010d.lib;lib_acl_cpp_vc2010d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)string3.exe</OutputFile>
+      <OutputFile>$(OutDir)blank_line.exe</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)string3.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(OutDir)blank_line.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
       <IgnoreSpecificDefaultLibraries>
@@ -119,7 +119,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>ws2_32.lib;wsock32.lib;lib_acl_vc2010.lib;lib_acl_cpp_vc2010.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)string3.exe</OutputFile>
+      <OutputFile>$(OutDir)blank_line.exe</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
@@ -145,10 +145,10 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>lib_acl_d.lib;lib_acl_cpp_d.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)string3.exe</OutputFile>
+      <OutputFile>$(OutDir)blank_line.exe</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)string3.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(OutDir)blank_line.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
@@ -168,10 +168,10 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>lib_acl.lib;lib_acl_cpp.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)string3.exe</OutputFile>
+      <OutputFile>$(OutDir)blank_line.exe</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\..\dist\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)string3.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(OutDir)blank_line.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
