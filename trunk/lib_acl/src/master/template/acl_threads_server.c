@@ -164,6 +164,8 @@ static ACL_MASTER_SERVER_ACCEPT_FN __server_on_accept;
 static ACL_MASTER_SERVER_HANDSHAKE_FN __server_on_handshake;
 static ACL_MASTER_SERVER_DISCONN_FN __server_on_close;
 static ACL_MASTER_SERVER_TIMEOUT_FN __server_on_timeout;
+static ACL_MASTER_SERVER_EXIT_TIMER_FN __server_exit_timer;
+
 static char *__deny_info = NULL;
 
 static void dispatch_open(ACL_EVENT *event, acl_pthread_pool_t *threads);
@@ -311,22 +313,54 @@ static void server_exit(void)
 	exit(0);
 }
 
+static void server_exiting(int type acl_unused, ACL_EVENT *event, void *ctx)
+{
+	const char *myname = "server_exiting";
+	int   n = get_client_count();
+	int   nthreads = acl_pthread_pool_busy(__threads);
+
+	/* sanity check */
+	if (n < 0) {
+		acl_msg_warn("%s: invalid clients count: %d", myname, n);
+		n = 0;
+	}
+	if (nthreads < 0) {
+		acl_msg_warn("%s: invalid threads count: %d", myname, nthreads);
+		nthreads = 0;
+	}
+
+	if (!__listen_disabled) {
+		__listen_disabled = 1;
+		listen_cleanup(event);
+	}
+
+	if (__server_exit_timer != NULL
+		&& __server_exit_timer(n, nthreads) != 0)
+	{
+		acl_msg_info("%s: master disconnect -- timer exiting, "
+			"client: %d, threads: %d", myname, n, nthreads);
+		server_exit();
+	} else if (n <= 0) {
+		acl_msg_info("%s: master disconnect -- exiting, "
+			"clinet: %d, threads: %d", myname, n, nthreads);
+		server_exit();
+	} else if (acl_var_threads_quick_abort) {
+		acl_msg_info("%s: master disconnect -- quick exiting, "
+			"client: %d, threads: %d", myname, n, nthreads);
+		server_exit();
+	} else {
+		acl_msg_info("%s: master disconnect -- waiting exiting, "
+			"client: %d, threads: %d", myname, n, nthreads);
+		acl_event_request_timer(event, server_exiting, ctx, 1000000, 0);
+	}
+}
+
 /* server_timeout - idle time exceeded */
 
 static void server_timeout(int type acl_unused, ACL_EVENT *event, void *ctx)
 {
-	const char* myname = "server_timeout";
+	const char *myname = "server_timeout";
 	time_t last, inter;
-	int   n;
-
-	n = get_client_count();
-
-	/* if some fds not be closed, the timer should be reset again */
-	if (n > 0 && acl_var_threads_idle_limit > 0) {
-		acl_event_request_timer(event, server_timeout, ctx,
-			(acl_int64) acl_var_threads_idle_limit * 1000000, 0);
-		return;
-	}
 
 	last  = last_closing_time();
 	inter = time(NULL) - last;
@@ -335,13 +369,12 @@ static void server_timeout(int type acl_unused, ACL_EVENT *event, void *ctx)
 		acl_event_request_timer(event, server_timeout, ctx,
 			(acl_int64) (acl_var_threads_idle_limit - inter)
 				* 1000000, 0);
-		return;
+	} else {
+		acl_msg_info("%s: idle timeout -- exiting, idle: %ld, "
+			"limit: %d", myname, inter,
+			acl_var_threads_idle_limit);
+		server_exiting(type, event, ctx);
 	}
-
-	if (acl_msg_verbose)
-		acl_msg_info("%s: idle timeout -- exiting", myname);
-
-	server_exit();
 }
 
 /* server_abort - terminate after abnormal master exit */
@@ -349,36 +382,11 @@ static void server_timeout(int type acl_unused, ACL_EVENT *event, void *ctx)
 static void server_abort(int event_type acl_unused, ACL_EVENT *event,
 	ACL_VSTREAM *stream acl_unused, void *ctx)
 {
-	const char *myname = "server_abort";
-	int   n;
-
 	if (__aborting)
 		return;
-
-	if (acl_var_threads_quick_abort) {
-		acl_msg_info("%s: master disconnect -- quick exiting", myname);
-		server_exit();
-	}
-
-	if (!__listen_disabled) {
-		__listen_disabled = 1;
-		listen_cleanup(event);
-	}
-	
 	__aborting = 1;
 
-	n = get_client_count();
-	if (n > 0) {
-		acl_msg_info("%s: waiting for connections(%d)", myname, n);
-		/* set idle timeout to 1 second, one second check once */
-		acl_var_threads_idle_limit = 1;
-		acl_event_request_timer(event, server_timeout, ctx,
-			(acl_int64) acl_var_threads_idle_limit * 1000000, 0);
-		return;
-	}
-
-	acl_msg_info("%s: master disconnect -- exiting", myname);
-	server_exit();
+	server_exiting(event_type, event, ctx);
 }
 
 static void server_use_timer(int type acl_unused,
@@ -803,11 +811,11 @@ static ACL_EVENT *event_open(int event_mode, acl_pthread_pool_t *threads)
 	 */
 
 	if (acl_var_threads_idle_limit > 0)
-		acl_event_request_timer(event, server_timeout, event,
+		acl_event_request_timer(event, server_timeout, threads,
 			(acl_int64) acl_var_threads_idle_limit * 1000000, 0);
 
 	if (acl_var_threads_use_limit > 0)
-		acl_event_request_timer(event, server_use_timer, event,
+		acl_event_request_timer(event, server_use_timer, threads,
 			(acl_int64) __use_limit_delay * 1000000, 0);
 
 	if (acl_var_threads_enable_dog)
@@ -1173,6 +1181,11 @@ void acl_threads_server_main(int argc, char **argv,
 		case ACL_MASTER_SERVER_ON_CLOSE:
 			__server_on_close =
 				va_arg(ap, ACL_MASTER_SERVER_DISCONN_FN);
+			break;
+
+		case ACL_MASTER_SERVER_EXIT_TIMER:
+			__server_exit_timer =
+				va_arg(ap, ACL_MASTER_SERVER_EXIT_TIMER_FN);
 			break;
 
 		case ACL_MASTER_SERVER_EXIT:
