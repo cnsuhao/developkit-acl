@@ -20,6 +20,7 @@
 #include "stdlib/acl_msg.h"
 #include "stdlib/acl_mymalloc.h"
 #include "thread/acl_pthread.h"
+#include "stdlib/unix/acl_trace.h"
 #include "init/acl_init.h"
 
 #endif
@@ -303,6 +304,7 @@ void acl_msg_fatal(const char *fmt,...)
 	}
 
 	va_end (ap);
+	acl_log_strace();
 	acl_close_log();
 	acl_assert(0);
 }
@@ -326,6 +328,7 @@ void acl_msg_fatal2(const char *fmt, va_list ap)
 		vprintf(fmt, ap);
 		printf("\r\n");
 	}
+	acl_log_strace();
 	acl_close_log();
 	acl_assert(0);
 }
@@ -353,6 +356,7 @@ void acl_msg_fatal_status(int status, const char *fmt,...)
 	}
 
 	va_end (ap);
+	acl_log_strace();
 	acl_close_log();
 	acl_assert(0);
 }
@@ -375,6 +379,7 @@ void acl_msg_fatal_status2(int status, const char *fmt, va_list ap)
 		printf("\r\n");
 	}
 
+	acl_log_strace();
 	acl_close_log();
 	acl_assert(0);
 }
@@ -404,6 +409,8 @@ void acl_msg_panic(const char *fmt,...)
 	}
 
 	va_end (ap);
+
+	acl_log_strace();
 	acl_close_log();
 	acl_assert(0);
 }
@@ -428,6 +435,7 @@ void acl_msg_panic2(const char *fmt, va_list ap)
 		printf("\r\n");
 	}
 
+	acl_log_strace();
 	acl_close_log();
 	acl_assert(0);
 }

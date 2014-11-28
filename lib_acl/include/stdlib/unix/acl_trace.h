@@ -10,6 +10,8 @@ extern "C" {
 
 void acl_dump_trace(const char *filepath);
 
+void acl_log_strace(void);
+
 #endif /* ACL_UNIX */
 
 #ifdef	__cplusplus
