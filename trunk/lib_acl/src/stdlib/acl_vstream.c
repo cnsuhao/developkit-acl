@@ -282,23 +282,6 @@ AGAIN:
 		if (in->read_cnt > 0)
 			in->sys_offset += in->read_cnt;
 	} else {
-		if (in->sys_read_ready == 0 && in->rw_timeout > 0
-			&& acl_read_wait(ACL_VSTREAM_SOCK(in),
-				in->rw_timeout) < 0)
-		{
-			in->errnum = acl_last_error();
-			if (in->errnum == ACL_ETIMEDOUT) {
-				in->flag |= ACL_VSTREAM_FLAG_TIMEOUT;
-				SAFE_COPY(in->errbuf, "read timeout");
-				return -1;
-			}
-
-			in->flag |= ACL_VSTREAM_FLAG_ERR;
-			acl_strerror(in->errnum, in->errbuf,
-				sizeof(in->errbuf));
-			return -1;
-		}
-
 		read_cnt = in->read_fn(ACL_VSTREAM_SOCK(in), buf, size,
 			in->rw_timeout, in, in->context);
 	}
