@@ -13,9 +13,12 @@
 
 namespace acl {
 
-polarssl_io::polarssl_io(polarssl_conf& conf, bool server_side)
+polarssl_io::polarssl_io(polarssl_conf& conf, bool server_side,
+	bool non_block /* = false */)
 : conf_(conf)
 , server_side_(server_side)
+, non_block_(non_block)
+, handshake_ok_(false)
 , ssl_(NULL)
 , ssn_(NULL)
 , rnd_(NULL)
@@ -73,11 +76,11 @@ static void my_debug( void *ctx, int level acl_unused, const char *str )
 }
 #endif
 
-bool polarssl_io::open(stream* s)
+bool polarssl_io::open(ACL_VSTREAM* s)
 {
 	if (s == NULL)
 	{
-		logger_error("stream null");
+		logger_error("s null");
 		return false;
 	}
 
@@ -163,39 +166,12 @@ bool polarssl_io::open(stream* s)
 	// Setup SSL IO callback
 	::ssl_set_bio((ssl_context*) ssl_, sock_read, this, sock_send, this);
 
-	// SSL 握手过程
-	while((ret = ::ssl_handshake((ssl_context*) ssl_)) != 0)
-	{
-		if (ret != POLARSSL_ERR_NET_WANT_READ
-			&& ret != POLARSSL_ERR_NET_WANT_WRITE)
-		{
-			logger_error("ssl_handshake failed: -0x%04x", ret);
-			return false;
-		}
-	}
+	// 非阻塞模式下先不启动 SSL 握手过程
+	if (non_block_)
+		return true;
 
-#if 0
-	if ((ret = ssl_get_verify_result((ssl_context*) ssl_)) != 0)
-	{
-		printf("failed\n");
-
-		if (!ssl_get_peer_cert((ssl_context*) ssl_))
-			printf("! no client certificate sent\n");
-
-		if ((ret & BADCERT_EXPIRED) != 0)
-			printf("! client certificate has expired\n");
-
-		if ((ret & BADCERT_REVOKED) != 0)
-			printf("! client certificate has been revoked\n");
-
-		if ((ret & BADCERT_NOT_TRUSTED) != 0)
-			printf("! self-signed or not signed by a trusted CA\n");
-
-		printf("\n");
-	}
-#endif
-
-	return true;
+	// 阻塞模式下可以启动 SSL 握手过程
+	return handshake();
 #else
 	logger_error("define HAS_POLARSSL first!");
 	return false;
@@ -231,9 +207,124 @@ bool polarssl_io::on_close(bool alive)
 	}
 #else
 	(void) alive;
+	logger_error("HAS_POLARSSL not defined!");
 #endif
 
 	return true;
+}
+
+bool polarssl_io::handshake()
+{
+#ifdef HAS_POLARSSL
+	if (handshake_ok_)
+		return true;
+
+	while (true)
+	{
+		// SSL 握手过程
+		int ret = ::ssl_handshake((ssl_context*) ssl_);
+		if (ret == 0)
+		{
+			handshake_ok_ = true;
+			return true;
+		}
+
+		if (ret != POLARSSL_ERR_NET_WANT_READ
+			&& ret != POLARSSL_ERR_NET_WANT_WRITE)
+		{
+			logger_error("ssl_handshake failed: -0x%04x", ret);
+			return false;
+		}
+
+		if (non_block_)
+			break;
+	}
+
+	return true;
+#else
+	logger_error("HAS_POLARSSL not defined!");
+	return false;
+#endif
+}
+
+bool polarssl_io::check_peer()
+{
+#ifdef HAS_POLARSSL
+	int   ret = ssl_get_verify_result((ssl_context*) ssl_);
+	if (ret != 0)
+	{
+		if (!ssl_get_peer_cert((ssl_context*) ssl_))
+			logger("no client certificate sent");
+
+		if ((ret & BADCERT_EXPIRED) != 0)
+			logger("client certificate has expired");
+
+		if ((ret & BADCERT_REVOKED) != 0)
+			logger("client certificate has been revoked");
+
+		if ((ret & BADCERT_NOT_TRUSTED) != 0)
+			logger("self-signed or not signed by a trusted CA");
+
+		return false;
+	}
+	else
+		return true;
+#else
+	logger_error("HAS_POLARSSL not defined!");
+	return false;
+#endif
+}
+
+int polarssl_io::read(void* buf, size_t len)
+{
+#ifdef HAS_POLARSSL
+	int   ret;
+
+	while ((ret = ::ssl_read((ssl_context*) ssl_,
+		(unsigned char*) buf, len)) < 0)
+	{
+		if (ret != POLARSSL_ERR_NET_WANT_READ
+			&& ret != POLARSSL_ERR_NET_WANT_WRITE)
+		{
+			return ACL_VSTREAM_EOF;
+		}
+		if (non_block_)
+			return ACL_VSTREAM_EOF;
+	}
+
+	return ret;
+#else
+	(void) buf;
+	(void) len;
+	logger_error("HAS_POLARSSL not defined!");
+	return -1;
+#endif
+}
+
+int polarssl_io::send(const void* buf, size_t len)
+{
+#ifdef HAS_POLARSSL
+	int   ret;
+
+	while ((ret = ::ssl_write((ssl_context*) ssl_,
+		(unsigned char*) buf, len)) < 0)
+	{
+		if (ret != POLARSSL_ERR_NET_WANT_READ
+			&& ret != POLARSSL_ERR_NET_WANT_WRITE)
+		{
+			return ACL_VSTREAM_EOF;
+		}
+		if (non_block_)
+			return ACL_VSTREAM_EOF;
+	}
+
+	return ret;
+#else
+	(void) buf;
+	(void) len;
+	logger_error("HAS_POLARSSL not defined!");
+	return -1;
+#endif
 }
 
 int polarssl_io::sock_read(void *ctx, unsigned char *buf, size_t len)
@@ -241,7 +332,7 @@ int polarssl_io::sock_read(void *ctx, unsigned char *buf, size_t len)
 #ifdef HAS_POLARSSL
 	polarssl_io* io = (polarssl_io*) ctx;
 	int   ret, timeout = 120;
-	ACL_VSTREAM* vs = io->stream_->get_vstream();
+	ACL_VSTREAM* vs = io->stream_;
 	ACL_SOCKET fd = ACL_VSTREAM_SOCK(vs);
 
 	ret = acl_socket_read(fd, buf, len, timeout, vs, NULL);
@@ -278,7 +369,7 @@ int polarssl_io::sock_send(void *ctx, const unsigned char *buf, size_t len)
 #ifdef HAS_POLARSSL
 	polarssl_io* io = (polarssl_io*) ctx;
 	int   ret, timeout = 120;
-	ACL_VSTREAM* vs = io->stream_->get_vstream();
+	ACL_VSTREAM* vs = io->stream_;
 	ACL_SOCKET fd = ACL_VSTREAM_SOCK(vs);
 
 	ret = acl_socket_write(fd, buf, len, timeout, vs, NULL);
@@ -303,54 +394,6 @@ int polarssl_io::sock_send(void *ctx, const unsigned char *buf, size_t len)
 	return ret;
 #else
 	(void) ctx;
-	(void) buf;
-	(void) len;
-	logger_error("HAS_POLARSSL not defined!");
-	return -1;
-#endif
-}
-
-int polarssl_io::read(void* buf, size_t len)
-{
-#ifdef HAS_POLARSSL
-	int   ret;
-
-	while ((ret = ::ssl_read((ssl_context*) ssl_,
-		(unsigned char*) buf, len)) < 0)
-	{
-		if (ret != POLARSSL_ERR_NET_WANT_READ
-			&& ret != POLARSSL_ERR_NET_WANT_WRITE)
-		{
-			return ACL_VSTREAM_EOF;
-		}
-	}
-
-	return ret;
-#else
-	(void) buf;
-	(void) len;
-	logger_error("HAS_POLARSSL not defined!");
-	return -1;
-#endif
-}
-
-int polarssl_io::send(const void* buf, size_t len)
-{
-#ifdef HAS_POLARSSL
-	int   ret;
-
-	while ((ret = ::ssl_write((ssl_context*) ssl_,
-		(unsigned char*) buf, len)) < 0)
-	{
-		if (ret != POLARSSL_ERR_NET_WANT_READ
-			&& ret != POLARSSL_ERR_NET_WANT_WRITE)
-		{
-			return ACL_VSTREAM_EOF;
-		}
-	}
-
-	return ret;
-#else
 	(void) buf;
 	(void) len;
 	logger_error("HAS_POLARSSL not defined!");
