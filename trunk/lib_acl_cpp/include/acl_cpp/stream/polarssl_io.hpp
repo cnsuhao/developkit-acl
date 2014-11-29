@@ -68,8 +68,8 @@ private:
 private:
 	polarssl_conf& conf_;
 	bool  server_side_;
-	bool  handshake_ok_;
 	bool  non_block_;
+	bool  handshake_ok_;
 	void* ssl_;
 	void* ssn_;
 	void* rnd_;
