@@ -218,7 +218,7 @@ int acl_socket_read(ACL_SOCKET fd, void *buf, size_t size,
 int acl_socket_write(ACL_SOCKET fd, const void *buf, size_t size,
 	int timeout, ACL_VSTREAM *fp acl_unused, void *arg acl_unused)
 {
-	if (timeout > 0 &&¡¡acl_write_wait(fd, timeout) < 0) {
+	if (timeout > 0 && acl_write_wait(fd, timeout) < 0) {
 		errno = acl_last_error();
 		return -1;
 	}
@@ -228,7 +228,7 @@ int acl_socket_write(ACL_SOCKET fd, const void *buf, size_t size,
 int acl_socket_writev(ACL_SOCKET fd, const struct iovec *vec, int count,
 	int timeout, ACL_VSTREAM *fp acl_unused, void *arg acl_unused)
 {
-	if (timeout > 0 &&¡¡acl_write_wait(fd, timeout) < 0) {
+	if (timeout > 0 && acl_write_wait(fd, timeout) < 0) {
 		errno = acl_last_error();
 		return -1;
 	}
