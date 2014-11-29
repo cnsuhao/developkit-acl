@@ -1260,23 +1260,6 @@ TAG_AGAIN:
 			fp->read_cnt = 0;
 		}
 	} else {
-#if 0
-		if (fp->rw_timeout > 0 && acl_write_wait(ACL_VSTREAM_SOCK(fp),
-			fp->rw_timeout) < 0)
-		{
-			fp->errnum = acl_last_error();
-			if (fp->errnum == ACL_ETIMEDOUT) {
-				fp->flag |= ACL_VSTREAM_FLAG_TIMEOUT;
-				SAFE_COPY(fp->errbuf, "write timeout");
-				return -1;
-			}
-			fp->flag |= ACL_VSTREAM_FLAG_ERR;
-			acl_strerror(fp->errnum, fp->errbuf,
-				sizeof(fp->errbuf));
-			return -1;
-		}
-#endif
-
 		n = fp->write_fn(ACL_VSTREAM_SOCK(fp), vptr, dlen,
 			fp->rw_timeout, fp, fp->context);
 	}
@@ -1297,9 +1280,16 @@ TAG_AGAIN:
 		goto TAG_AGAIN;
 	}
 
+#if ACL_EAGAIN == ACL_EWOULDBLOCK
+	if (fp->errnum == ACL_EWOULDBLOCK)
+#else
 	if (fp->errnum == ACL_EAGAIN || fp->errnum == ACL_EWOULDBLOCK)
+#endif
 		acl_set_error(ACL_EAGAIN);
-	else
+	else if (fp->errnum == ACL_ETIMEDOUT) {
+		fp->flag |= ACL_VSTREAM_FLAG_TIMEOUT;
+		SAFE_COPY(fp->errbuf, "write timeout");
+	} else
 		fp->flag |= ACL_VSTREAM_FLAG_ERR;
 
 	return ACL_VSTREAM_EOF;

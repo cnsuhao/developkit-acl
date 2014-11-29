@@ -248,12 +248,15 @@ int polarssl_io::sock_read(void *ctx, unsigned char *buf, size_t len)
 	if (ret < 0)
 	{
 		int   errnum = acl_last_error();
-		if (ret == ACL_EINTR || ret == ACL_EWOULDBLOCK
-#if ACL_EWOULDBLOCK != ACL_EAGAIN
-			|| ret == ACL_EAGAIN
-#endif
-			)
+
+		if (errnum == ACL_EINTR)
 			return POLARSSL_ERR_NET_WANT_READ;
+		else if (errnum == ACL_EWOULDBLOCK)
+			return POLARSSL_ERR_NET_WANT_READ;
+#if ACL_EWOULDBLOCK != ACL_EAGAIN
+		else if (errnum == ACL_EAGAIN)
+			return POLARSSL_ERR_NET_WANT_READ;
+#endif
 		else if (errnum == ACL_ECONNRESET || errno == EPIPE)
 			return POLARSSL_ERR_NET_CONN_RESET;
 		else
@@ -282,19 +285,19 @@ int polarssl_io::sock_send(void *ctx, const unsigned char *buf, size_t len)
 	if (ret < 0)
 	{
 		int   errnum = acl_last_error();
-		if (ret == ACL_EINTR || ret == ACL_EWOULDBLOCK
-#if ACL_EWOULDBLOCK != ACL_EAGAIN
-			|| ret == ACL_EAGAIN
-#endif
-			)
+
+		if (errnum == ACL_EINTR)
 			return POLARSSL_ERR_NET_WANT_WRITE;
+		else if (errnum == ACL_EWOULDBLOCK)
+			return POLARSSL_ERR_NET_WANT_WRITE;
+#if ACL_EWOULDBLOCK != ACL_EAGAIN
+		else if (errnum == ACL_EAGAIN)
+			return POLARSSL_ERR_NET_WANT_WRITE;
+#endif
 		else if (errnum == ACL_ECONNRESET || errno == EPIPE)
 			return POLARSSL_ERR_NET_CONN_RESET;
 		else
-		{
-			logger_error("write error: %s", last_serror());
 			return POLARSSL_ERR_NET_SEND_FAILED;
-		}
 	}
 
 	return ret;
