@@ -21,6 +21,9 @@ aio_stream::aio_stream(aio_handle* handle)
 
 aio_stream::~aio_stream()
 {
+	if (hook_)
+		hook_->destroy();
+
 	if (stream_)
 	{
 		handle_->decrease();
