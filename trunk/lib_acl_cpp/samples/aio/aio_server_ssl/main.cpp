@@ -311,7 +311,7 @@ public:
 
 			// 将客户端置于读监听状态以触发 read_wakeup 回调过程，
 			// SSL 握手过程将在 read_wakeup 中完成
-			client->read_wait();
+			client->read_wait(__timeout);
 		}
 
 		// 非 SSL 模式下，从异步流读一行数据
