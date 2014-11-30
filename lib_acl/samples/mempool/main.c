@@ -4,9 +4,9 @@
 #include <string.h>
 #include <assert.h>
 
-#ifdef ACL_MS_WINDOWS
+#ifdef WIN32
 #pragma comment(lib,"ws2_32")
-#endif  /* ACL_MS_WINDOWS */
+#endif
 
 #if 1
 #define	USE_ACL_MALLOC
@@ -176,7 +176,7 @@ static void mempool_bench_test(const char *label, int mutex, int loop, acl_mem_t
 	void *buf;
 #ifdef	MUTEX_INIT
 	acl_pthread_mutex_t lock;
-#elif defined(ACL_MS_WINDOWS)
+#elif defined(WIN32)
 	acl_pthread_mutex_t lock;
 #define MUTEX_INIT
 #else

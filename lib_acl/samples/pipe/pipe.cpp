@@ -16,7 +16,7 @@ static void test(void)
 	}
 
 	sprintf(buf, "hello client");
-	ret = acl_file_write(fds[0], buf, strlen(buf), 0, 0);
+	ret = acl_file_write(fds[0], buf, strlen(buf), 0, 0, 0);
 	if (ret == ACL_VSTREAM_EOF) {
 		printf("write to client error(%s)\n", acl_last_serror());
 		acl_pipe_close(fds);
@@ -24,7 +24,7 @@ static void test(void)
 	}
 	printf(">>>server: write to client ok\n");
 
-	ret = acl_file_read(fds[1], buf, sizeof(buf), 0, 0);
+	ret = acl_file_read(fds[1], buf, sizeof(buf), 0, 0, 0);
 	if (ret == ACL_VSTREAM_EOF) {
 		printf(">>>client: read from server error(%s)\n", acl_last_serror());
 		acl_pipe_close(fds);
@@ -34,7 +34,7 @@ static void test(void)
 	printf(">>>client: read from server ok(%s)\n", buf);
 	
 	sprintf(buf, "hello server");
-	ret = acl_file_write(fds[1], buf, strlen(buf), 0, 0);
+	ret = acl_file_write(fds[1], buf, strlen(buf), 0, 0, 0);
 	if (ret == ACL_VSTREAM_EOF) {
 		printf("write to server error(%s)\n", acl_last_serror());
 		acl_pipe_close(fds);
@@ -42,7 +42,7 @@ static void test(void)
 	}
 	printf(">>>client: write to server ok\n");
 
-	ret = acl_file_read(fds[0], buf, sizeof(buf), 0, 0);
+	ret = acl_file_read(fds[0], buf, sizeof(buf), 0, 0, 0);
 	if (ret == ACL_VSTREAM_EOF) {
 		printf(">>>server: read from client error(%s)\n", acl_last_serror());
 		acl_pipe_close(fds);
