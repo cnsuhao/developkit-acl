@@ -85,7 +85,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\lib_acl\include;..\..\..\lib_tls\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\lib_acl\include;..\..\..\..\lib_tls\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;USE_TLS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -98,7 +98,7 @@
     <Link>
       <AdditionalDependencies>libeay32.lib;ssleay32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>tls_client.exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\..\lib\openssl;..\..\..\lib\bdb;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\lib\openssl;..\..\..\..\lib\bdb;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)tls_client.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
@@ -107,7 +107,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\lib_acl\include;..\..\..\lib_tls\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\lib_acl\include;..\..\..\..\lib_tls\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;USE_TLS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>
@@ -118,7 +118,7 @@
     <Link>
       <AdditionalDependencies>libeay32.lib;ssleay32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)tls_client.exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\..\lib\openssl;..\..\..\lib\bdb;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\lib\openssl;..\..\..\..\lib\bdb;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -129,7 +129,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugDll|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\lib_acl\include;..\..\..\lib_tls\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\lib_acl\include;..\..\..\..\lib_tls\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;USE_TLS;ACL_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -142,7 +142,7 @@
     <Link>
       <AdditionalDependencies>ws2_32.lib;libeay32.lib;ssleay32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>tls_client.exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\..\lib\openssl;..\..\..\lib\bdb;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\lib\openssl;..\..\..\..\lib\bdb;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)tls_client.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
@@ -151,7 +151,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDll|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\lib_acl\include;..\..\..\lib_tls\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\lib_acl\include;..\..\..\..\lib_tls\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;USE_TLS;ACL_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -169,15 +169,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\lib_acl\lib_acl_vc2010.vcxproj">
+    <ProjectReference Include="..\..\..\..\lib_acl\lib_acl_vc2010.vcxproj">
       <Project>{b40213c2-507c-4c7f-a6e1-b850c9bdc27b}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\lib_dict\lib_dict.vcxproj">
+    <ProjectReference Include="..\..\..\..\lib_dict\lib_dict.vcxproj">
       <Project>{9e6e9fe9-eaac-44ba-b463-70de0233822e}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\lib_tls\lib_tls.vcxproj">
+    <ProjectReference Include="..\..\..\..\lib_tls\lib_tls.vcxproj">
       <Project>{389fde47-7f16-4dd4-b37a-27918be745b6}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>

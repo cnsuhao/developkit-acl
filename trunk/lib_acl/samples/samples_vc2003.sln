@@ -207,19 +207,19 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tls_server", "tls\server\tl
 		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_acl", "..\lib_acl\lib_acl_vc2003.vcproj", "{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_acl", "..\..\lib_acl\lib_acl_vc2003.vcproj", "{B40213C2-507C-4C7F-A6E1-B850C9BDC27B}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_protocol", "..\lib_protocol\lib_protocol_vc2003.vcproj", "{FE724EF7-3763-4E78-BDF5-BCBC075719FD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_protocol", "..\..\lib_protocol\lib_protocol_vc2003.vcproj", "{FE724EF7-3763-4E78-BDF5-BCBC075719FD}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_dict", "..\lib_dict\lib_dict.vcproj", "{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_dict", "..\..\lib_dict\lib_dict.vcproj", "{9E6E9FE9-EAAC-44BA-B463-70DE0233822E}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_tls", "..\lib_tls\lib_tls.vcproj", "{389FDE47-7F16-4DD4-B37A-27918BE745B6}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_tls", "..\..\lib_tls\lib_tls.vcproj", "{389FDE47-7F16-4DD4-B37A-27918BE745B6}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
@@ -229,7 +229,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "smtp_client", "smtp_client\
 		{FE724EF7-3763-4E78-BDF5-BCBC075719FD} = {FE724EF7-3763-4E78-BDF5-BCBC075719FD}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unit_test", "..\unit_test\unit_test.vcproj", "{11BB762F-1998-4F62-81F0-7E0600029F70}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unit_test", "..\..\unit_test\unit_test.vcproj", "{11BB762F-1998-4F62-81F0-7E0600029F70}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject

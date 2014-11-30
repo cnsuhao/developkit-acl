@@ -44,7 +44,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\lib_acl\include;..\..\..\..\lib_protocol\include"
+				AdditionalIncludeDirectories="..\..\..\..\..\..\lib_acl\include;..\..\..\..\..\..\lib_protocol\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -71,7 +71,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib_acl;..\..\lib_protocol"
+				AdditionalLibraryDirectories="..\..\..\lib_acl;..\..\..\lib_protocol"
 				IgnoreDefaultLibraryNames="libcmtd"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -129,7 +129,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\..\lib_acl\include;..\..\..\..\lib_protocol\include"
+				AdditionalIncludeDirectories="..\..\..\..\..\..\lib_acl\include;..\..\..\..\..\..\lib_protocol\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -155,7 +155,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\lib_acl;..\..\lib_protocol"
+				AdditionalLibraryDirectories="..\..\..\lib_acl;..\..\..\lib_protocol"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				SubSystem="2"

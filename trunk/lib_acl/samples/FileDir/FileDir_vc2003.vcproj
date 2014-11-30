@@ -20,7 +20,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -35,7 +35,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib_acl"
+				AdditionalLibraryDirectories="..\..\..\lib_acl"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
@@ -75,7 +75,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
 				MinimalRebuild="FALSE"
 				RuntimeLibrary="0"
@@ -89,7 +89,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\lib_acl"
+				AdditionalLibraryDirectories="..\..\..\lib_acl"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
@@ -132,7 +132,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;ACL_DLL"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -147,7 +147,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib_acl"
+				AdditionalLibraryDirectories="..\..\..\lib_acl"
 				IgnoreDefaultLibraryNames="libcmtd"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
@@ -187,7 +187,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ACL_DLL"
 				MinimalRebuild="FALSE"
 				RuntimeLibrary="2"
@@ -201,7 +201,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\lib_acl"
+				AdditionalLibraryDirectories="..\..\..\lib_acl"
 				IgnoreDefaultLibraryNames="libcmtd;libcmt"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"

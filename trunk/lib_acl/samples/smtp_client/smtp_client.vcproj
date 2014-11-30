@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\lib_acl\include;..\..\lib_protocol\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include;..\..\..\lib_protocol\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -67,7 +67,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\lib_acl\include;..\..\lib_protocol\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include;..\..\..\lib_protocol\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="2"
@@ -115,7 +115,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\lib_acl\include;..\..\lib_protocol\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include;..\..\..\lib_protocol\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;ACL_DLL;SMTP_DLL"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -163,7 +163,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\lib_acl\include;..\..\lib_protocol\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include;..\..\..\lib_protocol\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;ACL_DLL;SMTP_DLL"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"

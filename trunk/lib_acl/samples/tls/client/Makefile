@@ -65,15 +65,15 @@ ifneq ($(SYSPATH),)
 endif
 ###########################################################
 
-ACL_PATH = ../../../lib_acl
+ACL_PATH = ../../../../lib_acl
 ACL_INC = $(ACL_PATH)/include
 ACL_LIB = $(ACL_PATH)/lib
 
-TLS_PATH = ../../../lib_tls
+TLS_PATH = ../../../../lib_tls
 TLS_INC = $(TLS_PATH)/include
 TLS_LIB = $(TLS_PATH)/lib
 
-DICT_PATH = ../../../lib_dict
+DICT_PATH = ../../../../lib_dict
 DICT_INC = $(DICT_PATH)/include
 DICT_LIB = $(DICT_PATH)/lib
 
