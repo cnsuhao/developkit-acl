@@ -7,13 +7,12 @@ struct ACL_VSTREAM;
 
 namespace acl {
 
-class stream;
 class polarssl_conf;
 
 /**
- * stream 流对象底层 IO 处理过程的处理类，该类对象中的读写的过程将会替代
- * stream 流对象中 默认的底层 IO 过程；该类对象必须是动态创建的(即为堆对象)，
- * stream 流对象通过调用本类对象的 destroy()　方法释放本类对象
+ * stream/aio_stream 流对象底层 IO 处理过程的处理类，该类对象中的读写的过程将会替代
+ * stream/aio_stream 流对象中 默认的底层 IO 过程；该类对象必须是动态创建的(即为堆对象)，
+ * stream/aio_stream 流对象通过调用本类对象的 destroy()　方法释放本类对象
  */
 class ACL_CPP_API polarssl_io : public stream_hook
 {
