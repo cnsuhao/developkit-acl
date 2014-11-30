@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;MS_VC"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -35,7 +35,7 @@
 				AdditionalDependencies="wsock32.lib ws2_32.lib"
 				OutputFile="$(OutDir)/server.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\..\acl_lib"
+				AdditionalLibraryDirectories="..\..\..\..\acl_lib"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/server.pdb"
@@ -70,7 +70,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="2"
@@ -84,7 +84,7 @@
 				AdditionalDependencies="ws2_32.lib wsock32.lib"
 				OutputFile="$(OutDir)/server.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\acl_lib"
+				AdditionalLibraryDirectories="..\..\..\..\acl_lib"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -120,7 +120,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;MS_VC;ACL_DLL"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -136,7 +136,7 @@
 				AdditionalDependencies="wsock32.lib ws2_32.lib"
 				OutputFile="$(OutDir)/server.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\..\acl_lib"
+				AdditionalLibraryDirectories="..\..\..\..\acl_lib"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/server.pdb"
@@ -171,7 +171,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;MS_VC;ACL_DLL"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
@@ -185,7 +185,7 @@
 				AdditionalDependencies="ws2_32.lib"
 				OutputFile="$(OutDir)/server.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\acl_lib"
+				AdditionalLibraryDirectories="..\..\..\..\acl_lib"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
 				OptimizeReferences="2"

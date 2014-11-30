@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -65,7 +65,7 @@
 				AdditionalDependencies="ws2_32.lib"
 				OutputFile="$(OutDir)/debug_malloc.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib_acl"
+				AdditionalLibraryDirectories="..\..\..\lib_acl"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/debug_malloc.pdb"
 				SubSystem="1"
@@ -120,7 +120,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
@@ -182,7 +182,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\..\..\samples\debug_malloc\main.cpp"
+				RelativePath=".\main.cpp"
 				>
 			</File>
 		</Filter>

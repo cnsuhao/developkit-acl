@@ -20,7 +20,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -36,7 +36,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="wsock32.lib ws2_32.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\..\..\dist\lib\win32"
+				AdditionalLibraryDirectories="..\..\..\dist\lib\win32"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
@@ -76,7 +76,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
 				MinimalRebuild="FALSE"
 				RuntimeLibrary="0"
@@ -131,7 +131,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;ACL_DLL"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -147,7 +147,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="wsock32.lib ws2_32.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\..\..\dist\lib\win32"
+				AdditionalLibraryDirectories="..\..\..\dist\lib\win32"
 				IgnoreDefaultLibraryNames="libcmtd"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
@@ -187,7 +187,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ACL_DLL"
 				MinimalRebuild="FALSE"
 				RuntimeLibrary="2"

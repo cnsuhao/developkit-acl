@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -35,7 +35,7 @@
 				AdditionalDependencies="ws2_32.lib"
 				OutputFile="$(OutDir)/chunk_chain.cpp.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib_acl"
+				AdditionalLibraryDirectories="..\..\..\lib_acl"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/chunk_chain.cpp.pdb"
 				SubSystem="1"
@@ -69,7 +69,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="3"
@@ -118,7 +118,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -134,7 +134,7 @@
 				AdditionalDependencies="ws2_32.lib"
 				OutputFile="$(OutDir)/chunk_chain.cpp.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib_acl"
+				AdditionalLibraryDirectories="..\..\..\lib_acl"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/chunk_chain.cpp.pdb"
 				SubSystem="1"
@@ -168,7 +168,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="3"

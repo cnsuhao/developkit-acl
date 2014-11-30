@@ -20,7 +20,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOL"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -36,7 +36,7 @@
 				AdditionalDependencies="ws2_32.lib"
 				OutputFile="$(OutDir)/memdb.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib_acl"
+				AdditionalLibraryDirectories="..\..\..\lib_acl"
 				IgnoreDefaultLibraryNames="libcd"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/memdb.pdb"
@@ -71,7 +71,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
@@ -85,7 +85,7 @@
 				AdditionalDependencies="ws2_32.lib"
 				OutputFile="$(OutDir)/memdb.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\lib_acl"
+				AdditionalLibraryDirectories="..\..\..\lib_acl"
 				IgnoreDefaultLibraryNames="libc"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
@@ -122,7 +122,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOL;ACL_DLL"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -138,7 +138,7 @@
 				AdditionalDependencies="ws2_32.lib"
 				OutputFile="$(OutDir)/memdb.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib_acl"
+				AdditionalLibraryDirectories="..\..\..\lib_acl"
 				IgnoreDefaultLibraryNames="libcd"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/memdb.pdb"
@@ -173,7 +173,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;ACL_DLL"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -187,7 +187,7 @@
 				AdditionalDependencies="ws2_32.lib"
 				OutputFile="$(OutDir)/memdb.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\lib_acl"
+				AdditionalLibraryDirectories="..\..\..\lib_acl"
 				IgnoreDefaultLibraryNames="libc"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
