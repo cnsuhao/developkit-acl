@@ -73,13 +73,15 @@ ACL_PATH   = ../../../../lib_acl
 ACL_INC    = $(ACL_PATH)/include
 ACL_LIB    = $(ACL_PATH)/lib
 
-PROTO_PATH = ../../../../lib_protocol
-PROTO_INC  = $(PROTO_PATH)/include
-PROTO_LIB  = $(PROTO_PATH)/lib
+#PROTO_PATH = ../../../../lib_protocol
+#PROTO_INC  = $(PROTO_PATH)/include
+#PROTO_LIB  = $(PROTO_PATH)/lib
 
 EXTLIBS =
-CFLAGS += -I$(ACL_INC) -I$(PROTO_INC)
-LDFLAGS = -L$(ACL_LIB) -L$(PROTO_LIB) -l_protocol -l_acl $(EXTLIBS) $(SYSLIB)
+#CFLAGS += -I$(ACL_INC) -I$(PROTO_INC)
+#LDFLAGS = -L$(ACL_LIB) -L$(PROTO_LIB) -l_protocol -l_acl $(EXTLIBS) $(SYSLIB)
+CFLAGS += -I$(ACL_INC)
+LDFLAGS = -L$(ACL_LIB) -l_acl $(EXTLIBS) $(SYSLIB)
 
 ###########################################################
 
