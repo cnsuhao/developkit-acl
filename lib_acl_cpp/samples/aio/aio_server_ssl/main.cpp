@@ -13,6 +13,7 @@
 static int   __max = 0;
 static int   __timeout = 0;
 
+// SSL 模式下的 SSL 配置对象
 static acl::polarssl_conf* __ssl_conf;
 
 /**
@@ -138,7 +139,8 @@ public:
 		// 如果 SSL 握手已经成功，则开始按行读数据
 		if (hook->handshake_ok())
 		{
-			// 取消 read_wakeup 回调过程
+			// 由 reactor 模式转为 proactor 模式，从而取消
+			// read_wakeup 回调过程
 			client_->disable_read();
 
 			// 异步读取一行
@@ -146,7 +148,7 @@ public:
 			return true;
 		}
 
-		// 等待本函数再次被触发
+		// SSL 握手还未完成，等待本函数再次被触发
 		return true;
 	}
 
@@ -293,12 +295,13 @@ public:
 		if (__max > 0)
 			client->set_buf_max(__max);
 
-		// 等待客户端发送握手信息
+		// SSL 模式下，等待客户端发送握手信息
 		if (__ssl_conf != NULL)
 		{
 			// 注册 SSL IO 过程的钩子
 			acl::polarssl_io* ssl = new
 				acl::polarssl_io(*__ssl_conf, true, true);
+
 			if (client->setup_hook(ssl) == ssl)
 			{
 				std::cout << "setup_hook error" << std::endl;
@@ -306,11 +309,12 @@ public:
 				return false;
 			}
 
-			// 将客户端置于读监听状态以触发 read_wakeup 回调过程
+			// 将客户端置于读监听状态以触发 read_wakeup 回调过程，
+			// SSL 握手过程将在 read_wakeup 中完成
 			client->read_wait();
 		}
 
-		// 从异步流读一行数据
+		// 非 SSL 模式下，从异步流读一行数据
 		else
 			client->gets(__timeout, false);
 
@@ -324,12 +328,13 @@ static void usage(const char* procname)
 		"	-L line_max_length\r\n"
 		"	-t timeout\r\n"
 		"	-k[use kernel event: epoll/iocp/kqueue/devpool]\r\n"
-		"	-K ssl_key_file -C ssl_cert_file\r\n",
+		"	-K ssl_key_file -C ssl_cert_file [in SSL mode]\r\n",
 		procname);
 }
 
 int main(int argc, char* argv[])
 {
+	// 事件引擎是否采用内核中的高效模式
 	bool use_kernel = false;
 	acl::string key_file, cert_file;
 	int  ch;
@@ -363,7 +368,7 @@ int main(int argc, char* argv[])
 
 	acl::log::stdout_open(true);
 
-	// 是否采用 SSL 模式
+	// 当私钥及证书都存在时才采用 SSL 通信方式
 	if (!key_file.empty() && !cert_file.empty())
 	{
 		__ssl_conf = new acl::polarssl_conf();
@@ -435,6 +440,7 @@ int main(int argc, char* argv[])
 	// XXX: 为了保证能关闭监听流，应在此处再 check 一下
 	handle.check();
 
+	// 删除 acl::polarssl_conf 动态对象
 	delete __ssl_conf;
 
 	return (0);
