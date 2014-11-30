@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef	ACL_MS_WINDOWS
+#ifdef	WIN32
 #include <process.h>
 #define getpid _getpid
 #else

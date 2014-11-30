@@ -19,12 +19,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flock", "flock\flock_vc2003
 		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "http_client", "http_client\http_client_vc2003.vcproj", "{9BCB6DE9-73D2-484A-B946-0BD5FDDF8CCB}"
-	ProjectSection(ProjectDependencies) = postProject
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD} = {FE724EF7-3763-4E78-BDF5-BCBC075719FD}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "memdb", "memdb\memdb_vc2003.vcproj", "{BA50914C-5890-4A29-85C0-F0C779552597}"
 	ProjectSection(ProjectDependencies) = postProject
 		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
@@ -58,12 +52,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "thread_pool", "thread\thread_pool1\thread_pool_vc2003.vcproj", "{143D67EE-85E1-4456-AD99-6FDE7B1F1469}"
 	ProjectSection(ProjectDependencies) = postProject
 		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ping", "ping\ping.vcproj", "{814B40D7-29D3-4B12-B347-E4B632190DF9}"
-	ProjectSection(ProjectDependencies) = postProject
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD} = {FE724EF7-3763-4E78-BDF5-BCBC075719FD}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "file", "file\file.vcproj", "{D4F73163-D0FF-4A01-94AE-41EC2D1FD658}"
@@ -131,12 +119,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cache2", "cache2\cache2.vcp
 		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "http_aio", "http_aio\http_aio.vcproj", "{0ED6281F-980A-47F7-B30B-0425EEB4C2A9}"
-	ProjectSection(ProjectDependencies) = postProject
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD} = {FE724EF7-3763-4E78-BDF5-BCBC075719FD}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "server1", "server1\server1.vcproj", "{59CBAC72-7596-44E6-85DF-FDA362C45CE0}"
 	ProjectSection(ProjectDependencies) = postProject
 		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
@@ -165,24 +147,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "json", "json\json.vcproj", "{8021ECD9-04CB-463B-B287-1FB0F5486D91}"
 	ProjectSection(ProjectDependencies) = postProject
 		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "http_get_url1", "http\url_get1\http_get_url1.vcproj", "{74114B21-D661-4AC4-B7BC-7D79C90DD4CE}"
-	ProjectSection(ProjectDependencies) = postProject
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD} = {FE724EF7-3763-4E78-BDF5-BCBC075719FD}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "http_get_url2", "http\url_get2\http_get_url2.vcproj", "{6604B655-BE74-4461-9E2C-FDCBD1B79A48}"
-	ProjectSection(ProjectDependencies) = postProject
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD} = {FE724EF7-3763-4E78-BDF5-BCBC075719FD}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "http_get_url3", "http\url_get3\http_get_url3.vcproj", "{2ADD53F3-3048-4D7B-8443-F0982FB17D3F}"
-	ProjectSection(ProjectDependencies) = postProject
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD} = {FE724EF7-3763-4E78-BDF5-BCBC075719FD}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "proctlc", "proctl\proctlc_vc2003.vcproj", "{805E87BF-E47B-4D25-8CFC-B61ECF98E84D}"
@@ -221,12 +185,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_dict", "..\..\lib_dict\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib_tls", "..\..\lib_tls\lib_tls.vcproj", "{389FDE47-7F16-4DD4-B37A-27918BE745B6}"
 	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "smtp_client", "smtp_client\smtp_client.vcproj", "{F704167E-5722-4D6D-9BE7-8EFA02FB8F2D}"
-	ProjectSection(ProjectDependencies) = postProject
-		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
-		{FE724EF7-3763-4E78-BDF5-BCBC075719FD} = {FE724EF7-3763-4E78-BDF5-BCBC075719FD}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unit_test", "..\..\unit_test\unit_test.vcproj", "{11BB762F-1998-4F62-81F0-7E0600029F70}"
