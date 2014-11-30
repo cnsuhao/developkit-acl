@@ -59,11 +59,11 @@ ifneq ($(SYSPATH),)
 endif
 ###########################################################
 
-ACL_PATH = ../../../lib_acl
+ACL_PATH = ../../../../lib_acl
 ACL_LIB  = $(ACL_PATH)/lib
 ACL_INC  = $(ACL_PATH)/include
 
-PRO_PATH = ../../../lib_protocol
+PRO_PATH = ../../../../lib_protocol
 PRO_LIB  = $(PRO_PATH)/lib
 PRO_INC  = $(PRO_PATH)/include
 
