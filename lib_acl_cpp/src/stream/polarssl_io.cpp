@@ -181,7 +181,7 @@ bool polarssl_io::open(ACL_VSTREAM* s)
 	if (non_block_)
 	{
 		// 需将套接字设为非阻塞模式
-		acl_non_blocking(ACL_VSTREAM_SOCK(s), ACL_NON_BLOCKING);
+	//	acl_non_blocking(ACL_VSTREAM_SOCK(s), ACL_NON_BLOCKING);
 		return true;
 	}
 
@@ -349,9 +349,46 @@ int polarssl_io::sock_read(void *ctx, unsigned char *buf, size_t len)
 	polarssl_io* io = (polarssl_io*) ctx;
 	ACL_VSTREAM* vs = io->stream_;
 
+#if 1
+	int   ret;
+	int   cnt = ACL_VSTREAM_BFRD_CNT(vs);
+	if (cnt >= (int) len)
+	{
+		ret = acl_vstream_bfcp_some(vs, buf, (int) len);
+		if (ret == ACL_VSTREAM_EOF)
+		{
+			logger("acl_vstream_bfcp_some error");
+			return POLARSSL_ERR_NET_RECV_FAILED;
+		}
+		return ret;
+	}
+	else if (cnt > 0)
+	{
+		ret = acl_vstream_bfcp_some(vs, buf, cnt);
+		if (ret == ACL_VSTREAM_EOF)
+		{
+			logger("acl_vstream_bfcp_some error");
+			return POLARSSL_ERR_NET_RECV_FAILED;
+		}
+		return ret;
+	}
+	else
+		ret = 0;
+
+	if (vs->sys_read_ready == 0)
+	{
+		logger("sys: %d, cnt: %d", vs->sys_read_ready,
+				ACL_VSTREAM_BFRD_CNT(vs));
+		return POLARSSL_ERR_NET_WANT_READ;
+	}
+#endif
+	vs->sys_read_ready = 0;
+
+	logger(">>>call read, sys: %d<<<", vs->sys_read_ready);
 	// 当为非阻塞模式时，超时等待为 0 秒
 	int ret = acl_socket_read(ACL_VSTREAM_SOCK(vs), buf, len,
 			io->non_block_ ? 0 : vs->rw_timeout, vs, NULL);
+	logger(">>>read ok, ret: %d<<<", ret);
 	if (ret < 0)
 	{
 		int   errnum = acl_last_error();
