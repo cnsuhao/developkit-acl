@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="ssl_server"
-	ProjectGUID="{B14C93A6-DABE-48F9-A78C-C94049B69984}"
+	ProjectGUID="{FEBEA70A-A560-4B26-8101-71190CCE2DB2}"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -403,6 +403,4 @@
 			>
 		</File>
 	</Files>
-	<Globals>
-	</Globals>
 </VisualStudioProject>
