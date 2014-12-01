@@ -107,6 +107,7 @@ static bool do_run(acl::socket_stream& conn, acl::polarssl_io* hook)
 
 bool master_service::thread_on_read(acl::socket_stream* conn)
 {
+	logger(">>>>>>>>>>>>on_read<<<<<<<<<<<<");
 	if (conf_ == NULL)
 		return do_run(*conn, NULL);
 
