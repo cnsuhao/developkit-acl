@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\lib_acl_cpp\include;..\..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\..\lib_acl_cpp\include;..\..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -64,7 +64,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/master_udp_threads.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\..\dist\lib\win32"
+				AdditionalLibraryDirectories="..\..\..\..\dist\lib\win32"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/master_udp_threads.pdb"
 				SubSystem="1"
@@ -119,7 +119,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\lib_acl_cpp\include;..\..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\..\lib_acl_cpp\include;..\..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="2"
@@ -140,7 +140,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/master_udp_threads.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\dist\lib\win32"
+				AdditionalLibraryDirectories="..\..\..\..\dist\lib\win32"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -181,7 +181,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="copy ..\..\..\dist\lib\win32\lib_acl.dll $(OutDir)\ /Y&#x0D;&#x0A;copy ..\..\..\dist\lib\win32\lib_acl_cpp_dll.dll $(OutDir)\ /Y&#x0D;&#x0A;copy ..\..\..\dist\lib\win32\lib_protocol.dll $(OutDir)\ /Y&#x0D;&#x0A;"
+				CommandLine="copy ..\..\..\..\dist\lib\win32\lib_acl.dll $(OutDir)\ /Y&#x0D;&#x0A;copy ..\..\..\..\dist\lib\win32\lib_acl_cpp_dll.dll $(OutDir)\ /Y&#x0D;&#x0A;copy ..\..\..\..\dist\lib\win32\lib_protocol.dll $(OutDir)\ /Y&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -197,7 +197,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\lib_acl_cpp\include;..\..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\..\lib_acl_cpp\include;..\..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;ACL_DLL;ACL_CPP_DLL"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
@@ -218,7 +218,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/master_udp_threads.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\dist\lib\win32"
+				AdditionalLibraryDirectories="..\..\..\..\dist\lib\win32"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -259,7 +259,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="copy ..\..\..\dist\lib\win32\lib_acl_d.dll $(OutDir)\ /Y&#x0D;&#x0A;copy ..\..\..\dist\lib\win32\lib_acl_cppd_dll.dll $(OutDir)\ /Y&#x0D;&#x0A;copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y&#x0D;&#x0A;"
+				CommandLine="copy ..\..\..\..\dist\lib\win32\lib_acl_d.dll $(OutDir)\ /Y&#x0D;&#x0A;copy ..\..\..\..\dist\lib\win32\lib_acl_cppd_dll.dll $(OutDir)\ /Y&#x0D;&#x0A;copy ..\..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir)\ /Y&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -276,7 +276,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\lib_acl_cpp\include;..\..\..\lib_acl\include"
+				AdditionalIncludeDirectories="..\..\..\..\lib_acl_cpp\include;..\..\..\..\lib_acl\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;ACL_DLL;ACL_CPP_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -299,7 +299,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/master_udp_threads.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\..\dist\lib\win32"
+				AdditionalLibraryDirectories="..\..\..\..\dist\lib\win32"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/master_udp_threads.pdb"
 				SubSystem="1"
