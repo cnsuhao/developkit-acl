@@ -31,6 +31,8 @@ static void test(const char* addr, int i)
 		return;
 	}
 
+	std::cout << "ssl handshake ok" << std::endl;
+
 	char line[1024];
 	memset(line, 'x', sizeof(line));
 	line[1023] = 0;
@@ -44,11 +46,12 @@ static void test(const char* addr, int i)
 	size_t n = sizeof(line);
 	if (client.gets(line, &n) == false)
 	{
-		std::cout << "gets from " << addr << " error!" << std::endl;
+		std::cout << "gets from " << addr << " error!"
+			<< acl_last_serror() << std::endl;
 		return;
 	}
 	if (i < 10)
-		std::cout << ">>gets: " << line << std::endl;
+		std::cout << ">>gets(" << n << "): " << line << std::endl;
 }
 
 static void usage(const char* procname)
