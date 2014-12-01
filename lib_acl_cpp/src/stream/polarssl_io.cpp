@@ -76,6 +76,17 @@ static void my_debug( void *ctx, int level acl_unused, const char *str )
 }
 #endif
 
+polarssl_io& polarssl_io::set_non_blocking(bool yes)
+{
+	// 如果套接字流已经要开，则设置其阻塞/非阻塞状态，否则当 open 函数
+	// 被回调时设置套接字的非阻塞状态
+	if (stream_)
+		acl_non_blocking(ACL_VSTREAM_SOCK(stream_), yes
+			? ACL_NON_BLOCKING : ACL_BLOCKING);
+	non_block_ = yes;
+	return *this;
+}
+
 bool polarssl_io::open(ACL_VSTREAM* s)
 {
 	if (s == NULL)
@@ -168,7 +179,12 @@ bool polarssl_io::open(ACL_VSTREAM* s)
 
 	// 非阻塞模式下先不启动 SSL 握手过程
 	if (non_block_)
+	{
+		// 需将套接字设为非阻塞模式
+		acl_non_blocking(ACL_VSTREAM_SOCK(s), ACL_NON_BLOCKING);
 		return true;
+	}
+
 
 	// 阻塞模式下可以启动 SSL 握手过程
 	return handshake();
@@ -331,11 +347,11 @@ int polarssl_io::sock_read(void *ctx, unsigned char *buf, size_t len)
 {
 #ifdef HAS_POLARSSL
 	polarssl_io* io = (polarssl_io*) ctx;
-	int   ret, timeout = 120;
 	ACL_VSTREAM* vs = io->stream_;
-	ACL_SOCKET fd = ACL_VSTREAM_SOCK(vs);
 
-	ret = acl_socket_read(fd, buf, len, timeout, vs, NULL);
+	// 当为非阻塞模式时，超时等待为 0 秒
+	int ret = acl_socket_read(ACL_VSTREAM_SOCK(vs), buf, len,
+			io->non_block_ ? 0 : vs->rw_timeout, vs, NULL);
 	if (ret < 0)
 	{
 		int   errnum = acl_last_error();
@@ -368,11 +384,11 @@ int polarssl_io::sock_send(void *ctx, const unsigned char *buf, size_t len)
 {
 #ifdef HAS_POLARSSL
 	polarssl_io* io = (polarssl_io*) ctx;
-	int   ret, timeout = 120;
 	ACL_VSTREAM* vs = io->stream_;
-	ACL_SOCKET fd = ACL_VSTREAM_SOCK(vs);
 
-	ret = acl_socket_write(fd, buf, len, timeout, vs, NULL);
+	// 当为非阻塞模式时，超时等待为 0 秒
+	int ret = acl_socket_write(ACL_VSTREAM_SOCK(vs), buf, len,
+			io->non_block_ ? 0 : vs->rw_timeout, vs, NULL);
 	if (ret < 0)
 	{
 		int   errnum = acl_last_error();

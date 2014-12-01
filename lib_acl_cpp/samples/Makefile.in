@@ -96,8 +96,9 @@ LINK = $(CC) $(OBJ) $(LDFLAGS)
 OBJ_PATH = .
 
 #Project's objs
-UTIL = $(wildcard $(UTIL_PATH)/*.cpp)
+#UTIL = $(wildcard $(UTIL_PATH)/*.cpp)
 SRC = $(wildcard *.cpp) $(UTIL)
+#SRC = $(wildcard *.cpp)
 OBJ = $(patsubst %.cpp, $(OBJ_PATH)/%.o, $(notdir $(SRC)))
 
 $(OBJ_PATH)/%.o: %.cpp

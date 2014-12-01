@@ -51,6 +51,23 @@ public:
 	}
 
 	/**
+	 * 设置套接字为阻塞模式/非阻塞模式
+	 * @param yes {bool} 当为 false 时则设为阻塞模式，否则设为非阻塞模式
+	 * @return {polarssl_io&}
+	 */
+	polarssl_io& set_non_blocking(bool yes);
+
+	/**
+	 * 判断当前设置的 SSL IO 是否阻塞模式还是非阻塞模式
+	 * @return {bool} 返回 true 则表示为非阻塞模式，否则为阻塞模式
+	 */
+	bool is_non_blocking(void) const
+	{
+		return non_block_;
+	}
+
+
+	/**
 	 * 检查对方证书是否有效（一般不必调用此函数）
 	 * @return {bool}
 	 */
