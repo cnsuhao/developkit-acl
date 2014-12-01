@@ -1,4 +1,5 @@
-include ../Makefile.in
+base_path = ../../..
+include ../../Makefile.in
 #EXTLIBS = -lz -liconv
 #Path for SunOS
 ifeq ($(findstring SunOS, $(UNIXNAME)), SunOS)
