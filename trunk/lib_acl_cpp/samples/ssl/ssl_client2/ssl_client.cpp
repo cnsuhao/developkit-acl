@@ -14,7 +14,7 @@
 
 static acl::polarssl_conf __ssl_conf;
 
-static bool test(const char* addr, int i)
+static bool test(const char* addr, int k, int nloop)
 {
 	acl::socket_stream client;
 	if (client.open(addr, 60, 60) == false)
@@ -31,27 +31,36 @@ static bool test(const char* addr, int i)
 		return false;
 	}
 
-	std::cout << "ssl handshake ok, i: " << i << std::endl;
+	std::cout << "ssl handshake ok, k: " << k << std::endl;
 
-	char line[1024];
-	memset(line, 'x', sizeof(line));
-	line[1023] = 0;
-	line[1022] = '\n';
-	if (client.write(line, strlen(line)) == -1)
+	for (int i = 0 ; i < nloop; i++)
 	{
-		std::cout << "write to " << addr << " error!" << std::endl;
-		return false;
-	}
+		char line[1024];
+		memset(line, 'x', sizeof(line));
+		line[1023] = 0;
+		line[1022] = '\n';
+		if (client.write(line, strlen(line)) == -1)
+		{
+			std::cout << "write to " << addr << " error!" << std::endl;
+			return false;
+		}
 
-	size_t n = sizeof(line);
-	if (client.gets(line, &n) == false)
-	{
-		std::cout << "gets from " << addr << " error!"
-			<< acl_last_serror() << std::endl;
-		return false;
+		size_t n = sizeof(line);
+		if (client.gets(line, &n) == false)
+		{
+			std::cout << "gets from " << addr << " error!"
+				<< acl_last_serror() << std::endl;
+			return false;
+		}
+		if (i < 1)
+			std::cout << ">>gets(" << n << "): " << line << std::endl;
+		if (i % 1000 == 0)
+		{
+			char  buf[256];
+			snprintf(buf, sizeof(buf), "write count: %d", i);
+			ACL_METER_TIME(buf);
+		}
 	}
-	if (i < 10)
-		std::cout << ">>gets(" << n << "): " << line << std::endl;
 
 	return true;
 }
@@ -60,17 +69,18 @@ static void usage(const char* procname)
 {
 	printf("usage: %s -h[help]\r\n"
 		"-s server_addr[default: 127.0.0.1:9001]\r\n"
-		"-n max_loop[default: 10]\r\n", procname);
+		"-c max_connections[default: 10]\r\n"
+		"-n max_loop_per_connection[default: 10]\r\n", procname);
 }
 
 int main(int argc, char* argv[])
 {
-	int   ch, max = 10;
+	int   ch, max_loop = 10, max_connections = 10;
 	acl::string addr("127.0.0.1:9001");
 
 	acl::acl_cpp_init();
 
-	while ((ch = getopt(argc, argv, "hs:n:")) > 0)
+	while ((ch = getopt(argc, argv, "hs:n:c:")) > 0)
 	{
 		switch (ch)
 		{
@@ -81,19 +91,22 @@ int main(int argc, char* argv[])
 			addr = optarg;
 			break;
 		case 'n':
-			max = atoi(optarg);
+			max_loop = atoi(optarg);
+			break;
+		case 'c':
+			max_connections = atoi(optarg);
 			break;
 		default:
 			break;
 		}
 	}
 
-	if (max <= 0)
-		max = 100;
+	if (max_connections <= 0)
+		max_connections = 100;
 
-	for (int i = 0; i < max; i++)
+	for (int i = 0; i < max_connections; i++)
 	{
-		if (test(addr, i) == false)
+		if (test(addr, i, max_loop) == false)
 			break;
 	}
 
