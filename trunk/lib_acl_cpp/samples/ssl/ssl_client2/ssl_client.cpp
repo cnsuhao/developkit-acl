@@ -14,13 +14,13 @@
 
 static acl::polarssl_conf __ssl_conf;
 
-static void test(const char* addr, int i)
+static bool test(const char* addr, int i)
 {
 	acl::socket_stream client;
 	if (client.open(addr, 60, 60) == false)
 	{
 		std::cout << "connect " << addr << " error!" << std::endl;
-		return;
+		return false;
 	}
 
 	acl::polarssl_io* ssl = new acl::polarssl_io(__ssl_conf, false);
@@ -28,10 +28,10 @@ static void test(const char* addr, int i)
 	{
 		std::cout << "open ssl " << addr << " error!" << std::endl;
 		ssl->destroy();
-		return;
+		return false;
 	}
 
-	std::cout << "ssl handshake ok" << std::endl;
+	std::cout << "ssl handshake ok, i: " << i << std::endl;
 
 	char line[1024];
 	memset(line, 'x', sizeof(line));
@@ -40,7 +40,7 @@ static void test(const char* addr, int i)
 	if (client.write(line, strlen(line)) == -1)
 	{
 		std::cout << "write to " << addr << " error!" << std::endl;
-		return;
+		return false;
 	}
 
 	size_t n = sizeof(line);
@@ -48,10 +48,12 @@ static void test(const char* addr, int i)
 	{
 		std::cout << "gets from " << addr << " error!"
 			<< acl_last_serror() << std::endl;
-		return;
+		return false;
 	}
 	if (i < 10)
 		std::cout << ">>gets(" << n << "): " << line << std::endl;
+
+	return true;
 }
 
 static void usage(const char* procname)
@@ -90,7 +92,10 @@ int main(int argc, char* argv[])
 		max = 100;
 
 	for (int i = 0; i < max; i++)
-		test(addr, i);
+	{
+		if (test(addr, i) == false)
+			break;
+	}
 
 	printf("Over, enter any key to exit!\n");
 	getchar();
