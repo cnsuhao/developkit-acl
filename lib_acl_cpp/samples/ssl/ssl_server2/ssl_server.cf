@@ -39,9 +39,9 @@ service http_server {
 #	预启动进程数，该值不得大于 master_maxproc
 	master_prefork = 1
 #	进程程序名
-	master_command = https_server
+	master_command = ssl_server
 #	进程日志记录文件
-	master_log = {install_path}/var/log/https_server
+	master_log = {install_path}/var/log/ssl_server
 #	调试日志方式，格式：tag:level; tag:level; tab:level, 如：all:1; 101:2
 #	master_debug =
 #	进程启动参数，只能为: -u [是否允许以某普通用户的身份运行]
@@ -92,7 +92,7 @@ service http_server {
 #	ioctl_dispatch_type = default
 
 #	线程池的最大线程数
-	ioctl_max_threads = 250
+	ioctl_max_threads = 1
 #	线程池中工作线程等待任务时间间隔(毫秒)
 #	ioctl_schedule_wait = 50
 #	线程任务调度的时间间隔大于此值(毫秒)后记警告日志
@@ -110,8 +110,8 @@ service http_server {
 ############################################################################
 #	应用自己的配置选项
 
-#	crt_file = {install_path}/conf/ssl/mm263com1.crt
-#	key_file = {install_path}/conf/ssl/mm263com.key
+#	crt_file = {install_path}/conf/ssl/imap.crt
+#	key_file = {install_path}/conf/ssl/imap.key
 	crt_file = imap.crt
 	key_file = imap.key
 }

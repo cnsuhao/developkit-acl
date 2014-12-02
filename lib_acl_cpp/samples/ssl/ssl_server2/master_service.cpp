@@ -55,7 +55,7 @@ static acl::polarssl_io* setup_ssl(acl::socket_stream& conn,
 	// 对于使用 SSL 方式的流对象，需要将 SSL IO 流对象注册至网络
 	// 连接流对象中，即用 ssl io 替换 stream 中默认的底层 IO 过程
 
-	logger("begin setup ssl hook...");
+	//logger("begin setup ssl hook...");
 
 	// 采用非阻塞 SSL 握手方式
 	acl::polarssl_io* ssl = new acl::polarssl_io(conf, true, true);
@@ -66,40 +66,31 @@ static acl::polarssl_io* setup_ssl(acl::socket_stream& conn,
 		return NULL;
 	}
 
-	logger("setup hook ok, tid: %lu", acl::thread::thread_self());
+	//logger("setup hook ok, tid: %lu", acl::thread::thread_self());
 	return ssl;
 }
 
-static bool do_run(acl::socket_stream& conn, acl::polarssl_io* hook)
+static bool do_run(acl::socket_stream& conn, acl::polarssl_io*)
 {
 	acl::string* buf =(acl::string*) conn.get_ctx();
 
-	// 非阻塞模式读取一行
+	// 非阻塞模式读取一行，该非阻塞读方式是由 polarssl_io 类的底层
+	// IO 过程保障的
 	if (conn.gets_peek(buf, false) == false)
 	{
 		if (conn.eof())
 			return false;
 		else
-		{
-			logger(">>>>>>>>>>>please peek again!<<<<<<<<<");
 			return true;
-		}
 	}
 
-	// 虽然读是非阻塞的，但写还得是阻塞的，否则易因循环非阻塞写次数
-	// 较多而造成 CPU 过高
-	if (hook)
-		hook->set_non_blocking(false);
-
+	// 阻塞模式回写数据，因为该套接字并未设置为非阻塞模式，所以写的过程
+	// 还是阻塞的
 	if (conn.write(*buf) == -1)
 	{
-		if (hook)
-			hook->set_non_blocking(true);
+		logger("write error!");
 		return false;
 	}
-
-	if (hook)
-		hook->set_non_blocking(true);
 
 	buf->clear();
 	return true;
@@ -107,7 +98,6 @@ static bool do_run(acl::socket_stream& conn, acl::polarssl_io* hook)
 
 bool master_service::thread_on_read(acl::socket_stream* conn)
 {
-	logger(">>>>>>>>>>>>on_read<<<<<<<<<<<<");
 	if (conf_ == NULL)
 		return do_run(*conn, NULL);
 
@@ -115,27 +105,27 @@ bool master_service::thread_on_read(acl::socket_stream* conn)
 	if (ssl == NULL)
 		return false;
 
-	//logger("begin call handshake");
 	if (ssl->handshake() == false)
 	{
 		logger_error("ssl handshake failed");
 		return false;
 	}
-	//logger("begin call handshake_ok");
 
 	if (ssl->handshake_ok() == false)
 	{
-		logger("handshake trying again...");
+		//logger("handshake trying again...");
 		return true;
 	}
+
+	//logger("handshake_ok");
 
 	return do_run(*conn, ssl);
 }
 
 bool master_service::thread_on_accept(acl::socket_stream* conn)
 {
-	logger("connect from %s, fd: %d, timeout: %d", conn->get_peer(true),
-		conn->sock_handle(), conn->get_rw_timeout());
+	//logger("connect from %s, fd: %d, timeout: %d", conn->get_peer(true),
+	//	conn->sock_handle(), conn->get_rw_timeout());
 
 	acl::string* buf = new acl::string(128);
 	conn->set_ctx(buf);
@@ -153,8 +143,8 @@ bool master_service::thread_on_timeout(acl::socket_stream* conn)
 
 void master_service::thread_on_close(acl::socket_stream* conn)
 {
-	logger("disconnect from %s, fd: %d", conn->get_peer(),
-		conn->sock_handle());
+	//logger("disconnect from %s, fd: %d", conn->get_peer(),
+	//	conn->sock_handle());
 	acl::string* buf = (acl::string*) conn->get_ctx();
 	delete buf;
 }

@@ -78,11 +78,9 @@ static void my_debug( void *ctx, int level acl_unused, const char *str )
 
 polarssl_io& polarssl_io::set_non_blocking(bool yes)
 {
-	// 如果套接字流已经要开，则设置其阻塞/非阻塞状态，否则当 open 函数
-	// 被回调时设置套接字的非阻塞状态
-	if (stream_)
-		acl_non_blocking(ACL_VSTREAM_SOCK(stream_), yes
-			? ACL_NON_BLOCKING : ACL_BLOCKING);
+	// 此处仅设置非阻塞 IO 标志位，至于套接字是否被设置了非阻塞模式
+	// 由应用自己来决定
+
 	non_block_ = yes;
 	return *this;
 }
@@ -179,12 +177,7 @@ bool polarssl_io::open(ACL_VSTREAM* s)
 
 	// 非阻塞模式下先不启动 SSL 握手过程
 	if (non_block_)
-	{
-		// 需将套接字设为非阻塞模式
-	//	acl_non_blocking(ACL_VSTREAM_SOCK(s), ACL_NON_BLOCKING);
 		return true;
-	}
-
 
 	// 阻塞模式下可以启动 SSL 握手过程
 	return handshake();
@@ -349,46 +342,26 @@ int polarssl_io::sock_read(void *ctx, unsigned char *buf, size_t len)
 	polarssl_io* io = (polarssl_io*) ctx;
 	ACL_VSTREAM* vs = io->stream_;
 
-#if 1
-	int   ret;
-	int   cnt = ACL_VSTREAM_BFRD_CNT(vs);
-	if (cnt >= (int) len)
+	// 非阻塞模式下，如果 sys_read_ready 标志位为 0，则说明有可能
+	// 本次 IO 将读不到数据，为了防止该读过程被阻塞，所以此处直接
+	// 返回给 polarssl 并告之等待下次读，下次读操作将由事件引擎触发，
+	// 这样做的优点是在非阻塞模式下即使套接字没有设置为非阻塞状态
+	// 也不会阻塞线程，但缺点是增加了事件循环触发的次数
+	if (io->non_block_ && vs->sys_read_ready == 0)
 	{
-		ret = acl_vstream_bfcp_some(vs, buf, (int) len);
-		if (ret == ACL_VSTREAM_EOF)
-		{
-			logger("acl_vstream_bfcp_some error");
-			return POLARSSL_ERR_NET_RECV_FAILED;
-		}
-		return ret;
-	}
-	else if (cnt > 0)
-	{
-		ret = acl_vstream_bfcp_some(vs, buf, cnt);
-		if (ret == ACL_VSTREAM_EOF)
-		{
-			logger("acl_vstream_bfcp_some error");
-			return POLARSSL_ERR_NET_RECV_FAILED;
-		}
-		return ret;
-	}
-	else
-		ret = 0;
-
-	if (vs->sys_read_ready == 0)
-	{
-		logger("sys: %d, cnt: %d", vs->sys_read_ready,
-				ACL_VSTREAM_BFRD_CNT(vs));
+		// 必须在此处设置系统的 errno 号，此处是模拟了非阻塞读过程
+		acl_set_error(ACL_EWOULDBLOCK);
 		return POLARSSL_ERR_NET_WANT_READ;
 	}
-#endif
-	vs->sys_read_ready = 0;
 
-	logger(">>>call read, sys: %d<<<", vs->sys_read_ready);
 	// 当为非阻塞模式时，超时等待为 0 秒
 	int ret = acl_socket_read(ACL_VSTREAM_SOCK(vs), buf, len,
 			io->non_block_ ? 0 : vs->rw_timeout, vs, NULL);
-	logger(">>>read ok, ret: %d<<<", ret);
+
+	// 须将该标志位置 0，这样在非阻塞模式下，如果 polarssl 在重复
+	// 调用 sock_read 函数时，可以在前面提前返回以免阻塞在 IO 读过程
+	vs->sys_read_ready = 0;
+
 	if (ret < 0)
 	{
 		int   errnum = acl_last_error();

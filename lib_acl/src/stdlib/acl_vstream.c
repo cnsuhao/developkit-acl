@@ -273,9 +273,6 @@ AGAIN:
 	/* 清除系统错误号 */
 	acl_set_error(0);
 
-	/* 清除可读标志位 */
-	in->sys_read_ready = 0;
-
 	if (in->type == ACL_VSTREAM_TYPE_FILE) {
 		read_cnt = in->fread_fn(ACL_VSTREAM_FILE(in), buf, size,
 			in->rw_timeout, in, in->context);
@@ -285,6 +282,9 @@ AGAIN:
 		read_cnt = in->read_fn(ACL_VSTREAM_SOCK(in), buf, size,
 			in->rw_timeout, in, in->context);
 	}
+
+	/* 清除可读标志位 */
+	in->sys_read_ready = 0;
 
 	if (read_cnt > 0) {
 		in->read_ptr = in->read_buf;
