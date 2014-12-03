@@ -47,9 +47,9 @@ int acl_write_wait(ACL_SOCKET fd, int timeout)
 			acl_set_error(ACL_ETIMEDOUT);
 			return -1;
 		default:
-			if ((fds.revents & (POLLHUP | POLLERR))
+			if ((fds.revents & (POLLHUP | POLLERR)))
 				return -1;
-			else if (fds.revents & POLLOUT))
+			else if (fds.revents & POLLOUT)
 				return 0;
 			else
 				return -1;

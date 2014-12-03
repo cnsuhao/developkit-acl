@@ -352,10 +352,13 @@ int polarssl_io::sock_read(void *ctx, unsigned char *buf, size_t len)
 	{
 		 int   ret = acl_readable(fd);
 		 if (ret == -1)
+		 {
 			 return POLARSSL_ERR_NET_RECV_FAILED;
+		 }
 		 else if (ret == 0)
 		 {
-			// 必须在此处设置系统的 errno 号，此处是模拟了非阻塞读过程
+			// 必须在此处设置系统的 errno 号，此处是模拟了
+			// 非阻塞读过程
 			acl_set_error(ACL_EWOULDBLOCK);
 			return POLARSSL_ERR_NET_WANT_READ;
 		 }
