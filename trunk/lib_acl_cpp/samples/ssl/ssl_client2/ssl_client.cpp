@@ -52,9 +52,9 @@ static bool test(const char* addr, int k, int nloop)
 				<< acl_last_serror() << std::endl;
 			return false;
 		}
-		if (i < 1)
+		if (i < 1 && k < 10)
 			std::cout << ">>gets(" << n << "): " << line << std::endl;
-		if (i % 1000 == 0)
+		if (i > 0 && i % 1000 == 0)
 		{
 			char  buf[256];
 			snprintf(buf, sizeof(buf), "write count: %d", i);

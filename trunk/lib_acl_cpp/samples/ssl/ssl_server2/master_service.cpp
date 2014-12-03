@@ -124,8 +124,8 @@ bool master_service::thread_on_read(acl::socket_stream* conn)
 
 bool master_service::thread_on_accept(acl::socket_stream* conn)
 {
-	logger("connect from %s, fd: %d, timeout: %d", conn->get_peer(true),
-		conn->sock_handle(), conn->get_rw_timeout());
+	//logger("connect from %s, fd: %d, timeout: %d", conn->get_peer(true),
+	//	conn->sock_handle(), conn->get_rw_timeout());
 
 	acl::string* buf = new acl::string(128);
 	conn->set_ctx(buf);

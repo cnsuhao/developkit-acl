@@ -14,6 +14,7 @@
 
 #ifdef ACL_UNIX
 # include <sys/time.h>
+# include <poll.h>
 #endif
 #include <string.h>
 
