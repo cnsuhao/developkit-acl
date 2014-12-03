@@ -252,7 +252,8 @@ void acl_vstream_init()
 
 static int __sys_read(ACL_VSTREAM *in, void *buf, size_t size)
 {
-	int   read_cnt;
+	const char *myname = "__sys_read";
+	int   read_cnt, nagain = 0;
 
 	if (in->type == ACL_VSTREAM_TYPE_FILE) {
 		if (ACL_VSTREAM_FILE(in) == ACL_FILE_INVALID) {
@@ -275,12 +276,14 @@ AGAIN:
 
 	if (in->type == ACL_VSTREAM_TYPE_FILE) {
 		read_cnt = in->fread_fn(ACL_VSTREAM_FILE(in), buf, size,
-			in->rw_timeout, in, in->context);
+			in->sys_read_ready ? 0 : in->rw_timeout,
+			in, in->context);
 		if (in->read_cnt > 0)
 			in->sys_offset += in->read_cnt;
 	} else {
 		read_cnt = in->read_fn(ACL_VSTREAM_SOCK(in), buf, size,
-			in->rw_timeout, in, in->context);
+			in->sys_read_ready ? 0 : in->rw_timeout,
+			in, in->context);
 	}
 
 	/* 清除可读标志位 */
@@ -305,12 +308,24 @@ AGAIN:
 
 	in->errnum = acl_last_error();
 
-	if (in->errnum == ACL_EINTR)
-		goto AGAIN;
-	else if (in->errnum == ACL_ETIMEDOUT) {
+	if (in->errnum == ACL_EINTR) {
+		if (nagain++ < 5)
+			goto AGAIN;
+
+		acl_msg_error("%s(%d), %s: nagain: %d too much, fd: %d",
+			__FILE__, __LINE__, myname, nagain,
+			in->type == ACL_VSTREAM_TYPE_FILE ?
+			(int) ACL_VSTREAM_FILE(in) : ACL_VSTREAM_SOCK(in));
+	} else if (in->errnum == ACL_ETIMEDOUT) {
 		in->flag |= ACL_VSTREAM_FLAG_TIMEOUT;
 		SAFE_COPY(in->errbuf, "read timeout");
-	} else if (in->errnum != ACL_EWOULDBLOCK && in->errnum != ACL_EAGAIN) {
+	}
+#if ACL_EWOULDBLOCK == ACL_EAGAIN
+	else if (in->errnum != ACL_EWOULDBLOCK)
+#else
+	else if (in->errnum != ACL_EWOULDBLOCK && in->errnum != ACL_EAGAIN)
+#endif
+	{
 		in->flag |= ACL_VSTREAM_FLAG_ERR;
 		acl_strerror(in->errnum, in->errbuf, sizeof(in->errbuf));
 	}
@@ -1264,7 +1279,7 @@ TAG_AGAIN:
 			fp->rw_timeout, fp, fp->context);
 	}
 
-	if (n >= 0) {
+	if (n > 0) {
 		fp->total_write_cnt += n;
 		return n;
 	}
@@ -1382,7 +1397,7 @@ TAG_AGAIN:
 			fp->rw_timeout, fp, fp->context);
 	}
 
-	if (n >= 0) {
+	if (n > 0) {
 		fp->total_write_cnt += n;
 		return n;
 	}
@@ -1396,7 +1411,11 @@ TAG_AGAIN:
 		goto TAG_AGAIN;
 	}
 
+#if ACL_EAGAIN == ACL_EWOULDBLOCK
+	if (fp->errnum == ACL_EAGAIN)
+#else
 	if (fp->errnum == ACL_EAGAIN || fp->errnum == ACL_EWOULDBLOCK)
+#endif
 		acl_set_error(ACL_EAGAIN);
 	else
 		fp->flag |= ACL_VSTREAM_FLAG_ERR;
@@ -1596,14 +1615,8 @@ static int __loop_writen(ACL_VSTREAM *fp, const void *vptr, size_t dlen)
 	ptr   = (const unsigned char *) vptr;
 	while (dlen > 0) {
 		n = __vstream_write(fp, ptr, dlen);
-		if (n <= 0) {
-			if (acl_last_error() == ACL_EINTR
-				|| acl_last_error() == ACL_EAGAIN)
-			{
-				continue;
-			}
+		if (n <= 0)
 			return ACL_VSTREAM_EOF;
-		}
 
 		dlen  -= n;
 		ptr   += n;
@@ -1816,14 +1829,8 @@ int acl_vstream_fflush(ACL_VSTREAM *fp)
 	ptr = fp->wbuf;
 	while (fp->wbuf_dlen > 0) {
 		n = __vstream_write(fp, ptr, (int) fp->wbuf_dlen);
-		if (n <= 0) {
-			if (acl_last_error() == ACL_EINTR
-				|| acl_last_error() == ACL_EAGAIN)
-			{
-				continue;
-			}
+		if (n <= 0)
 			return ACL_VSTREAM_EOF;
-		}
 
 		fp->wbuf_dlen -= n;
 		ptr += n;
