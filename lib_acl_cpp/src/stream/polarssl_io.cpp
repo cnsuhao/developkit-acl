@@ -341,6 +341,7 @@ int polarssl_io::sock_read(void *ctx, unsigned char *buf, size_t len)
 #ifdef HAS_POLARSSL
 	polarssl_io* io = (polarssl_io*) ctx;
 	ACL_VSTREAM* vs = io->stream_;
+	ACL_SOCKET fd = ACL_VSTREAM_SOCK(vs);
 
 	// 非阻塞模式下，如果 sys_read_ready 标志位为 0，则说明有可能
 	// 本次 IO 将读不到数据，为了防止该读过程被阻塞，所以此处直接
@@ -349,14 +350,21 @@ int polarssl_io::sock_read(void *ctx, unsigned char *buf, size_t len)
 	// 也不会阻塞线程，但缺点是增加了事件循环触发的次数
 	if (io->non_block_ && vs->sys_read_ready == 0)
 	{
-		// 必须在此处设置系统的 errno 号，此处是模拟了非阻塞读过程
-		acl_set_error(ACL_EWOULDBLOCK);
-		return POLARSSL_ERR_NET_WANT_READ;
+		 int   ret = acl_readable(fd);
+		 if (ret == -1)
+			 return POLARSSL_ERR_NET_RECV_FAILED;
+		 else if (ret == 0)
+		 {
+			// 必须在此处设置系统的 errno 号，此处是模拟了非阻塞读过程
+			acl_set_error(ACL_EWOULDBLOCK);
+			return POLARSSL_ERR_NET_WANT_READ;
+		 }
+		 // else: ret == 1
 	}
 
 	// 当为非阻塞模式时，超时等待为 0 秒
-	int ret = acl_socket_read(ACL_VSTREAM_SOCK(vs), buf, len,
-			io->non_block_ ? 0 : vs->rw_timeout, vs, NULL);
+	int ret = acl_socket_read(fd, buf, len, io->non_block_
+			? 0 : vs->rw_timeout, vs, NULL);
 
 	// 须将该标志位置 0，这样在非阻塞模式下，如果 polarssl 在重复
 	// 调用 sock_read 函数时，可以在前面提前返回以免阻塞在 IO 读过程
