@@ -281,6 +281,9 @@ AGAIN:
 		if (in->read_cnt > 0)
 			in->sys_offset += in->read_cnt;
 	} else {
+		/* 如果由事件引擎设置了套接字有数据可读，则将超时时间设 0，
+		 * 这样可以减少一次对读超时的调用
+		 */ 
 		read_cnt = in->read_fn(ACL_VSTREAM_SOCK(in), buf, size,
 			in->sys_read_ready ? 0 : in->rw_timeout,
 			in, in->context);
@@ -1234,6 +1237,9 @@ static int __vstream_write(ACL_VSTREAM *fp, const void *vptr, int dlen)
 
 TAG_AGAIN:
 
+	/* 清除系统错误号 */
+	acl_set_error(0);
+
 	if (fp->type == ACL_VSTREAM_TYPE_FILE) {
 		if ((fp->oflags & O_APPEND)) {
 #ifdef WIN32
@@ -1614,7 +1620,7 @@ static int __loop_writen(ACL_VSTREAM *fp, const void *vptr, size_t dlen)
 
 	ptr   = (const unsigned char *) vptr;
 	while (dlen > 0) {
-		n = __vstream_write(fp, ptr, dlen);
+		n = __vstream_write(fp, ptr, (int) dlen);
 		if (n <= 0)
 			return ACL_VSTREAM_EOF;
 
