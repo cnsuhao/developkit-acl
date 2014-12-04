@@ -1,6 +1,10 @@
 修改历史列表：
 
 ------------------------------------------------------------------------
+471) 2014.12.4
+471.1) performance: acl_vstream.c 优化了读 (__sys_read) 的性能
+471.2) bugfix: acl_vstream.c 在写时有可能会造成死循环
+
 470) 2014.12.2
 470.1) bugfix: acl_vstream.c 中函数 __sys_read 的标志位 sys_read_ready 置 0
 应该在 read_fn/fread_fn 函数返回后

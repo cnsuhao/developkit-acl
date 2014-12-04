@@ -40,6 +40,8 @@ int acl_readable(ACL_SOCKET fd)
 	fds.events = POLLIN | POLLHUP | POLLERR;
 	fds.fd = fd;
 
+	acl_set_error(0);
+
 	for (;;) {
 		switch (poll(&fds, 1, delay)) {
 		case -1:
@@ -89,6 +91,8 @@ int acl_readable(ACL_SOCKET fd)
 	FD_SET(fd, &xfds);
 	tv.tv_sec = 0;
 	tv.tv_usec = 0;
+
+	acl_set_error(0);
 
 	/*
 	 * Loop until we have an authoritative answer.

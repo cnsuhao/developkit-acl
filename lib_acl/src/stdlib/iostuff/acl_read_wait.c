@@ -33,6 +33,8 @@ int acl_read_wait(ACL_SOCKET fd, int timeout)
 	fds.events = POLLIN | POLLHUP | POLLERR;
 	fds.fd = fd;
 
+	acl_set_error(0);
+
 	for (;;) {
 		switch (poll(&fds, 1, delay)) {
 		case -1:
@@ -92,6 +94,8 @@ int acl_read_wait(ACL_SOCKET fd, int timeout)
 		tp = &tv;
 	} else
 		tp = 0;
+
+	acl_set_error(0);
 
 	for (;;) {
 		switch (select(fd + 1, &rfds, (fd_set *) 0, &xfds, tp)) {
