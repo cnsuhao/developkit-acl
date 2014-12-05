@@ -310,6 +310,7 @@ static void server_exit(void)
 	if (__server_onexit)
 		__server_onexit(__service_ctx);
 
+	acl_msg_info("---- SERVER EXIT NOW ----");
 	exit(0);
 }
 
@@ -349,8 +350,8 @@ static void server_exiting(int type acl_unused, ACL_EVENT *event, void *ctx)
 			"client: %d, threads: %d", myname, n, nthreads);
 		server_exit();
 	} else {
-		acl_msg_info("%s: master disconnect -- waiting exiting, "
-			"client: %d, threads: %d", myname, n, nthreads);
+		acl_msg_info("%s: waiting exiting, client: %d, threads: %d",
+			myname, n, nthreads);
 		acl_event_request_timer(event, server_exiting, ctx, 1000000, 0);
 	}
 }
@@ -389,23 +390,21 @@ static void server_abort(int event_type acl_unused, ACL_EVENT *event,
 	server_exiting(event_type, event, ctx);
 }
 
-static void server_use_timer(int type acl_unused,
-	ACL_EVENT *event, void *ctx)
+static void server_use_timer(int type, ACL_EVENT *event, void *ctx)
 {
-	int   n;
+	const char *myname = "server_use_timer";
 
-	n = get_client_count();
+	if (acl_var_threads_use_limit <= 0)
+		acl_msg_fatal("%s: invalid acl_var_threads_use_limit: %d",
+			myname, acl_var_threads_use_limit);
 
-	if (n > 0 || __use_count < acl_var_threads_use_limit) {
+	if (__use_count >= acl_var_threads_use_limit) {
+		acl_msg_info("%s: use limit reached(%d, %s) -- exiting",
+			myname, __use_count, acl_var_threads_use_limit);
+		server_exiting(type, event, ctx);
+	} else
 		acl_event_request_timer(event, server_use_timer, ctx,
 			(acl_int64) __use_limit_delay * 1000000, 0);
-		return;
-	}
-
-	if (acl_msg_verbose)
-		acl_msg_info("use limit -- exiting");
-
-	server_exit();
 }
 
 typedef struct {
