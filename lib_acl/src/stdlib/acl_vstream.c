@@ -728,22 +728,22 @@ int acl_vstream_gets(ACL_VSTREAM *fp, void *vptr, size_t maxlen)
 int acl_vstream_readtags(ACL_VSTREAM *fp, void *vptr, size_t maxlen,
 	const char *tag, size_t taglen)
 {
-	int   n, ch, flag_match = 0;
+	int   n, ch, matched = 0;
 	unsigned char *ptr;
-	const unsigned char *ptr_haystack;
-	const unsigned char *ptr_needle, *ptr_needle_end;
+	const unsigned char *haystack;
+	const unsigned char *needle, *needle_end;
 
 	if (fp == NULL || vptr == NULL || maxlen <= 0
 	    || tag == NULL || taglen <= 0)
 		return ACL_VSTREAM_EOF;
 
-	ptr_needle_end = (const unsigned char *) tag;
+	needle_end = (const unsigned char *) tag;
 
 	while(1) {
 		taglen--;
 		if (taglen == 0)
 			break;
-		ptr_needle_end++;
+		needle_end++;
 	}
 	ptr = (unsigned char *) vptr;
 
@@ -766,29 +766,29 @@ int acl_vstream_readtags(ACL_VSTREAM *fp, void *vptr, size_t maxlen,
 		}
 
 		*ptr = ch;
-		if (ch == *ptr_needle_end) {
-			ptr_haystack = ptr - 1;
-			ptr_needle = ptr_needle_end - 1;
-			flag_match = 0;
+		if (ch == *needle_end) {
+			haystack = ptr - 1;
+			needle = needle_end - 1;
+			matched = 0;
 			while(1) {
 				/* 已经成功比较完毕(匹配) */
-				if (ptr_needle < (const unsigned char *) tag) {
-					flag_match = 1;
+				if (needle < (const unsigned char *) tag) {
+					matched = 1;
 					break;
 				}
 
 				/* 原字符串用完而匹配串还没有比较完(不匹配) */
-				if (ptr_haystack < (unsigned char *) vptr)
+				if (haystack < (unsigned char *) vptr)
 					break;
 				/* 不相等(不匹配) */
-				if (*ptr_haystack != *ptr_needle)
+				if (*haystack != *needle)
 					break;
-				ptr_haystack--;
-				ptr_needle--;
+				haystack--;
+				needle--;
 			}
 		}
 		ptr++;
-		if (flag_match) {
+		if (matched) {
 			fp->flag |= ACL_VSTREAM_FLAG_TAGYES;
 			fp->flag &= ~ACL_VSTREAM_FLAG_TAGNO;
 			break;
