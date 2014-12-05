@@ -345,7 +345,7 @@ static void server_exiting(int type acl_unused, ACL_EVENT *event, void *ctx)
 		acl_msg_info("%s: master disconnect -- exiting, "
 			"clinet: %d, threads: %d", myname, n, nthreads);
 		server_exit();
-	} else if (acl_var_threads_quick_abort) {
+	} else if (__aborting && acl_var_threads_quick_abort) {
 		acl_msg_info("%s: master disconnect -- quick exiting, "
 			"client: %d, threads: %d", myname, n, nthreads);
 		server_exit();
@@ -838,7 +838,6 @@ static ACL_VSTREAM *__dispatch_conn = NULL;
 static int dispatch_report(void)
 {
 	const char *myname = "dispatch_report";
-	int   n;
 	char  buf[256];
 
 	if (__dispatch_conn == NULL) {
@@ -847,10 +846,14 @@ static int dispatch_report(void)
 		return -1;
 	}
 
-	n = get_client_count();
-	snprintf(buf, sizeof(buf), "count=%d&used=%d&pid=%u&type=%s\r\n",
-		n, __use_count, (unsigned) getpid(),
-		acl_var_threads_dispatch_type);
+	snprintf(buf, sizeof(buf), "count=%d&used=%d&pid=%u&type=%s"
+		"&max_threads=%d&curr_threads=%d&busy_threads=%d&qlen=%d\r\n",
+		get_client_count(), __use_count, (unsigned) getpid(),
+		acl_var_threads_dispatch_type,
+		acl_pthread_pool_limit(__threads),
+		acl_pthread_pool_size(__threads),
+		acl_pthread_pool_busy(__threads),
+		acl_pthread_pool_qlen(__threads));
 
 	if (acl_vstream_writen(__dispatch_conn, buf, strlen(buf))
 		== ACL_VSTREAM_EOF)

@@ -52,7 +52,7 @@ static unsigned char __vstream_stdin_buf[ACL_VSTREAM_BUFSIZE];
 static unsigned char __vstream_stdout_buf[ACL_VSTREAM_BUFSIZE];
 static unsigned char __vstream_stderr_buf[ACL_VSTREAM_BUFSIZE];
 
-static int __sys_getc(ACL_VSTREAM *fp);
+static int read_char(ACL_VSTREAM *fp);
 
 ACL_VSTREAM acl_vstream_fstd[] = {              
 	{       
@@ -93,7 +93,7 @@ ACL_VSTREAM acl_vstream_fstd[] = {
 		NULL,                           /* path */
 		NULL,                           /* context */
 		NULL,                           /* close_handle_lnk */
-		__sys_getc,                     /* sys_getc */
+		read_char,                      /* sys_getc */
 		acl_socket_read,                /* read_fn */
 		NULL,                           /* write_fn */
 		NULL,                           /* writev_fn */
@@ -150,7 +150,7 @@ ACL_VSTREAM acl_vstream_fstd[] = {
 		NULL,                           /* path */
 		NULL,                           /* context */
 		NULL,                           /* close_handle_lnk */
-		__sys_getc,                     /* sys_getc */
+		read_char,                      /* sys_getc */
 		NULL,                           /* read_fn */
 		acl_socket_write,               /* write_fn */
 		acl_socket_writev,              /* writev_fn */
@@ -206,7 +206,7 @@ ACL_VSTREAM acl_vstream_fstd[] = {
 		NULL,                           /* path */
 		NULL,                           /* context */
 		NULL,                           /* close_handle_lnk */
-		__sys_getc,                     /* sys_getc */
+		read_char,                      /* sys_getc */
 		NULL,                           /* read_fn */
 		acl_socket_write,               /* write_fn */
 		acl_socket_writev,              /* writev_fn */
@@ -347,7 +347,7 @@ static int read_once(ACL_VSTREAM *fp)
 		return fp->read_cnt;
 }
 
-static int __sys_getc(ACL_VSTREAM *fp)
+static int read_char(ACL_VSTREAM *fp)
 {
 	fp->read_cnt = read_once(fp);
 	if (fp->read_cnt <= 0)
@@ -1956,7 +1956,7 @@ ACL_VSTREAM *acl_vstream_fdopen(ACL_SOCKET fd, unsigned int oflags,
 	if (rw_timeo > 0)
 		fp->rw_timeout = rw_timeo;
 
-	fp->sys_getc = __sys_getc;
+	fp->sys_getc = read_char;
 	if (fdtype == ACL_VSTREAM_TYPE_FILE) {
 		fp->fread_fn  = acl_file_read;
 		fp->fwrite_fn = acl_file_write;
