@@ -399,7 +399,7 @@ static void server_use_timer(int type, ACL_EVENT *event, void *ctx)
 			myname, acl_var_threads_use_limit);
 
 	if (__use_count >= acl_var_threads_use_limit) {
-		acl_msg_info("%s: use limit reached(%d, %s) -- exiting",
+		acl_msg_info("%s: use limit reached(%d, %d) -- exiting",
 			myname, __use_count, acl_var_threads_use_limit);
 		server_exiting(type, event, ctx);
 	} else
