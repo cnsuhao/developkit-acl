@@ -1634,9 +1634,9 @@ static int loop_writen(ACL_VSTREAM *fp, const void *vptr, size_t size)
 			&& acl_write_wait(fd, fp->rw_timeout) < 0)
 		{
 			acl_msg_error("%s(%d), %s: write timemout, size: %d,"
-				" nleft: %d, peer: %s, fd: %d",
-				__FILE__, __LINE__, myname, (int) size,
-				nleft, ACL_VSTREAM_PEER(fp), fd);
+				" nleft: %d, peer: %s, fd: %d, timeout: %d",
+				__FILE__, __LINE__, myname, (int) size, nleft,
+				ACL_VSTREAM_PEER(fp), fd, fp->rw_timeout);
 			return ACL_VSTREAM_EOF;
 		}
 
