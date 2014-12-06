@@ -1618,30 +1618,37 @@ static int loop_writen(ACL_VSTREAM *fp, const void *vptr, size_t size)
 	const char *myname = "loop_writen";
 	const unsigned char *ptr = (const unsigned char *) vptr;
 	int   once_dlen = 64 * 1024 * 1024;  /* xxx: 以 64KB 为单位写 */
-	int   nleft = (int) size, ret, len;
+	int   nleft = (int) size, n, len;
+	time_t begin, end;
 	ACL_SOCKET fd = ACL_VSTREAM_SOCK(fp);
 
 	while (nleft > 0) {
 		len = nleft > once_dlen ? once_dlen : nleft;
-		ret = write_once(fp, ptr, len);
-		if (ret < 0)
+		n = write_once(fp, ptr, len);
+		if (n < 0)
 			return ACL_VSTREAM_EOF;
+
+		nleft -= n;
+		ptr   += n;
+
+		if (n == len || fp->writev_fn == NULL || fp->rw_timeout <= 0)
+			continue;
 
 		/* 对于套接口写操作，如果一次性写没有写完，可能是系统写缓冲区满，
 		 * 需要检测超时写
 		 */
-		if (ret < len && fp->rw_timeout > 0 && fp->write_fn != NULL
-			&& acl_write_wait(fd, fp->rw_timeout) < 0)
-		{
-			acl_msg_error("%s(%d), %s: write timemout, size: %d,"
-				" nleft: %d, peer: %s, fd: %d, timeout: %d",
-				__FILE__, __LINE__, myname, (int) size, nleft,
-				ACL_VSTREAM_PEER(fp), fd, fp->rw_timeout);
-			return ACL_VSTREAM_EOF;
-		}
+		begin = time(NULL);
 
-		nleft -= ret;
-		ptr   += ret;
+		if (acl_write_wait(fd, fp->rw_timeout) == 0)
+			continue;
+
+		end = time(NULL);
+		acl_msg_error("%s(%d), %s: acl_write_wait error,"
+			"size: %d, nleft: %d, peer: %s, fd: %d,"
+			" timeout: %d, cost: %ld", __FILE__, __LINE__,
+			myname, (int) size, nleft, ACL_VSTREAM_PEER(fp), fd,
+			fp->rw_timeout, end - begin);
+		return ACL_VSTREAM_EOF;
 	}
 
 	return ptr - (const unsigned char *) vptr;

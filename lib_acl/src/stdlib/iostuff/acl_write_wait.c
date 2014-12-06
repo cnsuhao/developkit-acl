@@ -49,12 +49,19 @@ int acl_write_wait(ACL_SOCKET fd, int timeout)
 			acl_set_error(ACL_ETIMEDOUT);
 			return -1;
 		default:
-			if ((fds.revents & (POLLHUP | POLLERR)))
+			if ((fds.revents & (POLLHUP | POLLERR))) {
+				acl_msg_error("%s(%d), %s: fd: %d,"
+					"POLLHUP: %s, POLLERR: %s, fd: %d",
+					__FILE__, __LINE__, myname, fd,
+					fds.revents & POLLHUP ? "yes" : "no",
+					fds.revents & POLLERR ? "yes" : "no");
 				return -1;
-			else if (fds.revents & POLLOUT)
+			}
+			if (fds.revents & POLLOUT)
 				return 0;
-			else
-				return -1;
+			acl_msg_error("%s(%d), %s: unknown error, fd: %d",
+				__FILE__, __LINE__, myname, fd);
+			return -1;
 		}
 	}
 }
