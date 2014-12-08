@@ -2,6 +2,9 @@
 #ifndef ACL_PREPARE_COMPILE
 #include "stdlib/acl_define.h"
 #include "stdlib/acl_msg.h"
+#include "stdlib/acl_mymalloc.h"
+#include "thread/acl_pthread.h"
+#include "init/acl_init.h"
 #include "stdlib/unix/acl_trace.h"
 #endif
 
@@ -36,7 +39,7 @@ void acl_trace_save(const char *filepath)
 
 static acl_pthread_key_t __trace_key;
 static acl_pthread_once_t __trace_once = ACL_PTHREAD_ONCE_INIT;
-static char *__main_buf = NULL;
+static unsigned int *__main_buf = NULL;
 
 static void trace_buf_free(void *buf)
 {
@@ -60,7 +63,7 @@ void acl_trace_info(void)
 	void *buffer[1000];
 	size_t n, i;
 	char **results;
-	char *intbuf;
+	unsigned int *intbuf;
 
 	/* 初始化线程局部变量 */
 	if (acl_pthread_once(&__trace_once, trace_buf_init) != 0)
@@ -68,6 +71,7 @@ void acl_trace_info(void)
 	intbuf = acl_pthread_getspecific(__trace_key);
 	if (intbuf == NULL) {
 		intbuf = acl_mymalloc(sizeof(int));
+		*intbuf = 0;
 		acl_assert(acl_pthread_setspecific(__trace_key, intbuf) == 0);
 		if ((unsigned long) acl_pthread_self()
 			== acl_main_thread_self())
@@ -75,7 +79,6 @@ void acl_trace_info(void)
 			__main_buf = intbuf;
 			atexit(main_buf_free);
 		}
-		*intbuf = 0;
 	}
 
 	/* 如果产生递归嵌套，则直接返回 */
