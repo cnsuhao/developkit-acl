@@ -2,14 +2,17 @@
 #include "ServerConnection.h"
 #include "ClientConnection.h"
 #include "ManagerTimer.h"
+#include "StatusTimer.h"
 #include "master_service.h"
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 // 配置内容项
 
 char *var_cfg_backend_service;
+char *var_cfg_status_server;
 acl::master_str_tbl var_conf_str_tab[] = {
 	{ "backend_service", "dispatch.sock", &var_cfg_backend_service },
+	{ "status_server", "", &var_cfg_status_server },
 
 	{ 0, 0, 0 }
 };
@@ -18,11 +21,13 @@ acl::master_bool_tbl var_conf_bool_tab[] = {
 	{ 0, 0, 0 }
 };
 
-int   var_cfg_manager_timer;
+int   var_cfg_manage_timer;
 int   var_cfg_conn_expired;
+int   var_cfg_status_timer;
 acl::master_int_tbl var_conf_int_tab[] = {
-	{ "manager_timer", 1, &var_cfg_manager_timer, 0, 0 },
+	{ "manager_timer", 1, &var_cfg_manage_timer, 0, 0 },
 	{ "conn_expired", 10, &var_cfg_conn_expired, 0, 0 },
+	{ "status_timer", 1, &var_cfg_status_timer, 0, 0 },
 
 	{ 0, 0 , 0 , 0, 0 }
 };
@@ -31,7 +36,7 @@ acl::master_int64_tbl var_conf_int64_tab[] = {
 	{ 0, 0 , 0 , 0, 0 }
 };
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 master_service::master_service()
 {
@@ -63,7 +68,8 @@ bool master_service::on_accept(acl::aio_socket_stream* client)
 	else
 	{
 		// 创建对象处理来自于前端客户端模块的请求
-		IConnection* conn = new ClientConnection(client, var_cfg_conn_expired);
+		IConnection* conn =
+			new ClientConnection(client, var_cfg_conn_expired);
 
 		conn->run();
 		return true;
@@ -74,17 +80,30 @@ bool master_service::on_accept(acl::aio_socket_stream* client)
 
 void master_service::proc_on_init()
 {
-	if (var_cfg_manager_timer <= 0)
-		var_cfg_manager_timer = 1;
+	if (var_cfg_manage_timer <= 0)
+		var_cfg_manage_timer = 1;
 
 	// 启动后台定时器，用来处理未处理的前端客户端连接
-
-	timer_ = new ManagerTimer();
-	timer_->keep_timer(true);
-	timer_->set_task(1, var_cfg_manager_timer * 1000000);
+	manage_timer_ = new ManagerTimer();
+	manage_timer_->keep_timer(true);
+	manage_timer_->set_task(1, var_cfg_manage_timer * 1000000);
 
 	// 调用基类方法设置定时器任务
-	proc_set_timer(timer_);
+	proc_set_timer(manage_timer_);
+
+	// 如果配置了状态服务器，则启动状态汇报定时器，定时向状态服务器
+	// 汇报进程状态
+	if (var_cfg_status_server && *var_cfg_status_server
+		&& var_cfg_status_timer > 0)
+	{
+		// 启动服务器状态汇报定时器
+		status_timer_ = new StatusTimer();
+		status_timer_->keep_timer(true);
+		status_timer_->set_tack(1, var_cfg_status_timer * 1000000);
+
+		// 调用基类方法设置定时器任务
+		proc_set_timer(status_timer_);
+	}
 }
 
 void master_service::proc_on_exit()
