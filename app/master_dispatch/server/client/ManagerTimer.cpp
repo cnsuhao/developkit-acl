@@ -1,8 +1,8 @@
 #include "stdafx.h"
-#include "client/ClientManager.h"
 #include "server/ServerManager.h"
-#include "client/ClientConnection.h"
 #include "server/ServerConnection.h"
+#include "client/ClientManager.h"
+#include "client/ClientConnection.h"
 #include "client/ManagerTimer.h"
 
 void ManagerTimer::destroy()
