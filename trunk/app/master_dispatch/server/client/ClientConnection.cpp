@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "client/ManagerTimer.h"
 #include "client/ClientManager.h"
-#include "server/ServerManager.h"
-#include "server/ServerConnection.h"
 #include "client/ClientConnection.h"
 
 ClientConnection::ClientConnection(acl::aio_socket_stream* conn, int ttl)
