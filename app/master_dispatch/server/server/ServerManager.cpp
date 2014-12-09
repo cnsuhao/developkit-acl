@@ -1,6 +1,6 @@
 #include "stdafx.h"
-#include "ServerConnection.h"
-#include "ServerManager.h"
+#include "server/ServerConnection.h"
+#include "server/ServerManager.h"
 
 ServerConnection* ServerManager::min()
 {

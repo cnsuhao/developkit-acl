@@ -1,6 +1,6 @@
 #include "stdafx.h"
-#include "ClientConnection.h"
-#include "ClientManager.h"
+#include "client/ClientConnection.h"
+#include "client/ClientManager.h"
 
 void ClientManager::set(ClientConnection* conn)
 {

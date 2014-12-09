@@ -1,7 +1,7 @@
 #include "stdafx.h"
-#include "ServerManager.h"
-#include "ServerConnection.h"
-#include "ServerIOCallback.h"
+#include "server/ServerManager.h"
+#include "server/ServerConnection.h"
+#include "server/ServerIOCallback.h"
 
 ServerIOCallback::ServerIOCallback(ServerConnection* conn)
 : conn_(conn)
