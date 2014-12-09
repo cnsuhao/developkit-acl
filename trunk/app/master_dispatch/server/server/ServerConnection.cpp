@@ -1,6 +1,6 @@
 #include "stdafx.h"
-#include "ServerIOCallback.h"
-#include "ServerConnection.h"
+#include "server/ServerIOCallback.h"
+#include "server/ServerConnection.h"
 
 ServerConnection::ServerConnection(acl::aio_socket_stream* conn)
 : IConnection(conn)
