@@ -130,7 +130,7 @@ static void do_alone(void)
 {
 	master_service service;
 	printf("listen: 0.0.0.0:8888 ...\r\n");
-	service.run_alone("0.0.0.0:8888", NULL, 1);  // 单独运行方式
+	service.run_alone("0.0.0.0:8888", NULL, 0);  // 单独运行方式
 }
 
 // WEB CGI 模式
