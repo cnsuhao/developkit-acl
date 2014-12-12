@@ -48,8 +48,10 @@ bool ManagerTimer::transfer(ClientConnection* client)
 			ServerManager::get_instance().del(server);
 			server->close();
 		}
+		// 发送成功后，先给该服务进程的客户端连接数加1，以便于新到的
+		// 连接可以有机会分配给其它服务进程
 		else
-			server->inc_nconns();
+			server->inc_conns();
 
 		return true;
 	}

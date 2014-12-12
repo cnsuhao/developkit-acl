@@ -81,9 +81,12 @@ LINK = $(CC) $(OBJ) $(LDFLAGS)
 OBJ_PATH = ./debug
 
 #Project's objs
-SRC = $(wildcard *.cpp) $(wildcard server/*.cpp) \
-	$(wildcard client/*.cpp) $(wildcard status/*.cpp)
-OBJ = $(patsubst %.cpp, $(OBJ_PATH)/%.o, $(notdir $(SRC)))
+SRC =	$(wildcard *.cpp) \
+	$(wildcard server/*.cpp) \
+	$(wildcard client/*.cpp) \
+	$(wildcard status/*.cpp)
+
+OBJ = $(patsubst %.cpp, $(OBJ_PATH)/%.o, $(notdir $(SRC))) 
 
 $(OBJ_PATH)/%.o: %.cpp
 	$(COMPILE) $< -o $@

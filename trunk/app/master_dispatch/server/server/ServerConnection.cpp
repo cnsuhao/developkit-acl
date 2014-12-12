@@ -4,7 +4,13 @@
 
 ServerConnection::ServerConnection(acl::aio_socket_stream* conn)
 : IConnection(conn)
-, nconns_(0)
+, conns_(0)
+, used_(0)
+, pid_(0)
+, max_threads_(0)
+, curr_threads_(0)
+, busy_threads_(0)
+, qlen_(0)
 {
 }
 
@@ -21,9 +27,10 @@ void ServerConnection::run()
 	conn_->gets();
 }
 
-void ServerConnection::set_nconns(unsigned int nconns)
+ServerConnection& ServerConnection::set_conns(unsigned int conns)
 {
-	nconns_ = nconns;
+	conns_ = conns;
+	return *this;
 }
 
 void ServerConnection::close()
@@ -31,7 +38,8 @@ void ServerConnection::close()
 	conn_->close();
 }
 
-void ServerConnection::inc_nconns()
+ServerConnection& ServerConnection::inc_conns()
 {
-	nconns_++;
+	conns_++;
+	return *this;
 }
