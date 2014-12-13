@@ -39,11 +39,15 @@ public:
 	}
 
 	/**
-	 * 将服务器连接对象集合转换为 JSON 对象
+	 * 统计服务器集群中的各个服务子进程实例的状态，并将之转换为 JSON 对象
 	 */
-	void buildJson();
+	void statusToJson();
 
-	void toString(acl::string& buf);
+	/**
+	 * 将 JSON 对象转为字符串对象
+	 * @param buf {acl::string&}
+	 */
+	void statusToString(acl::string& buf);
 
 private:
 	std::vector<ServerConnection*> conns_;

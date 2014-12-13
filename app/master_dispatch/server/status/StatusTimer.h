@@ -7,7 +7,7 @@
 class StatusTimer : public acl::event_timer
 {
 public:
-	StatusTimer() {}
+	StatusTimer();
 
 	/**
 	 * 销毁动态对象
@@ -19,5 +19,5 @@ protected:
 	virtual void timer_callback(unsigned int id);
 
 private:
-	~StatusTimer() {}
+	~StatusTimer();
 };

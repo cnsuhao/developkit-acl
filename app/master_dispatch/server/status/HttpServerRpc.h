@@ -1,10 +1,10 @@
 #pragma once
 
-class HttpStatusRpc : public acl::rpc_request
+class HttpServerRpc : public acl::rpc_request
 {
 public:
-	HttpStatusRpc(acl::aio_socket_stream* client);
-	~HttpStatusRpc();
+	HttpServerRpc(acl::aio_socket_stream* client);
+	~HttpServerRpc();
 
 protected:
 	// 基类 rpc_request 虚函数

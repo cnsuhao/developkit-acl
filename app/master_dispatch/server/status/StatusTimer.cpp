@@ -1,9 +1,16 @@
 #include "stdafx.h"
-#include "client/ClientManager.h"
+#include "rpc_manager.h"
 #include "server/ServerManager.h"
-#include "client/ClientConnection.h"
-#include "server/ServerConnection.h"
+#include "status/HttpClientRpc.h"
 #include "status/StatusTimer.h"
+
+StatusTimer::StatusTimer()
+{
+}
+
+StatusTimer::~StatusTimer()
+{
+}
 
 void StatusTimer::destroy()
 {
@@ -12,7 +19,10 @@ void StatusTimer::destroy()
 
 void StatusTimer::timer_callback(unsigned int)
 {
-	logger("total client: %d, total server: %d",
-		(int) ClientManager::get_instance().length(),
-		(int) ServerManager::get_instance().length());
+	acl::string* buf = new acl::string(256);
+	ServerManager::get_instance().statusToString(*buf);
+
+	// 发起一个 HTTP 请求过程，将之将由子线程处理
+	HttpClientRpc* rpc = new HttpClientRpc(buf, var_cfg_status_server);
+	rpc_manager::get_instance().fork(rpc);
 }

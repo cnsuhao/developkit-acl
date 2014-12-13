@@ -43,8 +43,10 @@ void ServerManager::del(ServerConnection* conn)
 	}
 }
 
-void ServerManager::buildJson()
+void ServerManager::statusToJson()
 {
+	// 因为在子线程中也会读取 json_ 对象，所以对单例成员变量
+	// json_ 进行加锁保护
 	lock_.lock();
 
 	json_.reset();
@@ -68,11 +70,31 @@ void ServerManager::buildJson()
 		servers.add_child(server);
 	}
 
+#if 0
+	acl::json_node& n = json_.create_node();
+	n.add_number("conns", 1).add_number("used", 2)
+		.add_number("pid", 1).add_number("max_threads", 10)
+		.add_number("curr_threads", 1).add_number("busy_threads", 2)
+		.add_number("qlen", 0).add_text("type", "default");
+	servers.add_child(n);
+	acl::json_node& m = json_.create_node();
+	m.add_number("conns", 2).add_number("used", 3)
+		.add_number("pid", 2).add_number("max_threads", 10)
+		.add_number("curr_threads", 2).add_number("busy_threads", 1)
+		.add_number("qlen", 0).add_text("type", "default");
+	servers.add_child(m);
+
+	acl::string buf;
+	statusToString(buf);
+	printf(">>>buf: %s\r\n", buf.c_str());
+#endif
+
 	lock_.unlock();
 }
 
-void ServerManager::toString(acl::string& buf)
+void ServerManager::statusToString(acl::string& buf)
 {
+	// 因为该方法将由子线程调用，所以对单例成员变量 json_ 进行加锁保护
 	lock_.lock();
 	buf = json_.to_string();
 	lock_.unlock();

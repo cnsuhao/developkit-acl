@@ -27,12 +27,6 @@ void ServerConnection::run()
 	conn_->gets();
 }
 
-ServerConnection& ServerConnection::set_conns(unsigned int conns)
-{
-	conns_ = conns;
-	return *this;
-}
-
 void ServerConnection::close()
 {
 	conn_->close();
