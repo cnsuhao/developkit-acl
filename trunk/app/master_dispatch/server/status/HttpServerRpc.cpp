@@ -1,19 +1,19 @@
 #include "stdafx.h"
 #include "status/StatusServlet.h"
-#include "status/HttpStatusRpc.h"
+#include "status/HttpServerRpc.h"
 
-HttpStatusRpc::HttpStatusRpc(acl::aio_socket_stream* client)
+HttpServerRpc::HttpServerRpc(acl::aio_socket_stream* client)
 : client_(client)
 , keep_alive_(false)
 {
 }
 
-HttpStatusRpc::~HttpStatusRpc()
+HttpServerRpc::~HttpServerRpc()
 {
 }
 
 // 在子线程中处理
-void HttpStatusRpc::rpc_run()
+void HttpServerRpc::rpc_run()
 {
 	// 打开阻塞流对象
 	acl::socket_stream stream;
@@ -37,7 +37,7 @@ void HttpStatusRpc::rpc_run()
 	stream.unbind();
 }
 
-void HttpStatusRpc::handle_http(acl::socket_stream& stream)
+void HttpServerRpc::handle_http(acl::socket_stream& stream)
 {
 	StatusServlet servlet;
 	acl::memcache_session session(var_cfg_session_addr);
@@ -52,7 +52,7 @@ void HttpStatusRpc::handle_http(acl::socket_stream& stream)
 /////////////////////////////////////////////////////////////////////////////
 
 // 在主线程中处理
-void HttpStatusRpc::rpc_onover()
+void HttpServerRpc::rpc_onover()
 {
 	if (keep_alive_)
 		client_->read_wait(var_cfg_rw_timeout);

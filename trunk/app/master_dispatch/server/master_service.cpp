@@ -1,9 +1,10 @@
 #include "stdafx.h"
-#include "server/ServerConnection.h"
+#include "client/ManagerTimer.h"
 #include "client/ClientConnection.h"
 #include "status/StatusConnection.h"
-#include "client/ManagerTimer.h"
 #include "status/StatusTimer.h"
+#include "server/ServerConnection.h"
+#include "server/ServerTimer.h"
 #include "rpc_manager.h"
 #include "master_service.h"
 
@@ -13,7 +14,7 @@
 char *var_cfg_backend_service;
 char *var_cfg_status_server;
 char *var_cfg_status_service;
-char *var_cfg_session_addr;
+char *var_cfg_session_addr;  // memcache 服务器地址，以备将来使用
 char *var_cfg_rpc_addr;
 acl::master_str_tbl var_conf_str_tab[] = {
 	{ "backend_service", "dispatch.sock", &var_cfg_backend_service },
@@ -32,12 +33,14 @@ acl::master_bool_tbl var_conf_bool_tab[] = {
 int   var_cfg_manage_timer;
 int   var_cfg_conn_expired;
 int   var_cfg_status_timer;
+int   var_cfg_server_timer;
 int   var_cfg_rw_timeout;
 int   var_cfg_rpc_nthreads;
 acl::master_int_tbl var_conf_int_tab[] = {
 	{ "manager_timer", 1, &var_cfg_manage_timer, 0, 0 },
 	{ "conn_expired", 10, &var_cfg_conn_expired, 0, 0 },
 	{ "status_timer", 1, &var_cfg_status_timer, 0, 0 },
+	{ "server_timer", 1, &var_cfg_server_timer, 0, 0 },
 	{ "rw_timeout", 30, &var_cfg_rw_timeout, 0, 0 },
 	{ "rpc_nthreads", 100, &var_cfg_rpc_nthreads, 0, 0 },
 
@@ -121,9 +124,18 @@ void master_service::proc_on_init()
 		status_timer_ = new StatusTimer();
 		status_timer_->keep_timer(true);
 		status_timer_->set_task(1, var_cfg_status_timer * 1000000);
-
-		// 调用基类方法设置定时器任务
 		proc_set_timer(status_timer_);
+	}
+
+	// 如果设置了状态服务，则启动状态汇总定时器，以等待管理端的连接请求
+	if (var_cfg_status_service && *var_cfg_status_service
+		&& var_cfg_server_timer > 0)
+	{
+		// 启动统计所有服务器状态定时器
+		server_timer_ = new ServerTimer();
+		server_timer_->keep_timer(true);
+		server_timer_->set_task(1, var_cfg_server_timer * 1000000);
+		proc_set_timer(server_timer_);
 	}
 
 	// 调用基类函数获得异步引擎句柄
