@@ -25,6 +25,8 @@ bool StatusServlet::doPost(acl::HttpServletRequest& req,
 	// 调用单例服务器状态方法获得后端服务子进程实例的状态
 	acl::string buf;
 	ServerManager::get_instance().statusToString(buf);
+	buf += "\r\n";
 
-	return res.write(buf) && req.isKeepAlive();
+	keep_alive_ = res.write(buf) && req.isKeepAlive();
+	return keep_alive_;
 }
