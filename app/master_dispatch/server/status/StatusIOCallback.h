@@ -1,7 +1,6 @@
 #pragma once
 
 class StatusConnection;
-class HttpServerRpc;
 
 /**
  * 服务端连接 IO 处理的回调处理类
@@ -20,7 +19,6 @@ protected:
 
 private:
 	StatusConnection* conn_;
-	HttpServerRpc* rpc_;
 
 	~StatusIOCallback();
 };
