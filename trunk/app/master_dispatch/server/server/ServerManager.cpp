@@ -47,8 +47,10 @@ void ServerManager::del(ServerConnection* conn)
 void ServerManager::buildStatus()
 {
 	// 因为在子线程中也会读取 json_ 对象，所以对单例成员变量
-	// json_ 进行加锁保护
-	lock_.lock();
+	// json_ 进行加锁保护，为了防止主线程被长期阻塞在锁上，所以
+	// 采用了尝试加锁方式
+	if (lock_.try_lock() == false)
+		return;
 
 	json_.reset();
 	xml_.reset();
@@ -59,9 +61,20 @@ void ServerManager::buildStatus()
 	acl::xml_node& xml_servers = xml_.create_node("servers");
 	xml_.get_root().add_child(xml_servers);
 
+	long long total_conns = 0, total_used = 0, total_qlen = 0;
+	long long total_max_threads = 0, total_curr_threads = 0;
+	long long total_busy_threads = 0;
+
 	std::vector<ServerConnection*>::const_iterator cit = conns_.begin();
 	for (; cit != conns_.end(); ++cit)
 	{
+		total_conns += (*cit)->get_conns();
+		total_used += (*cit)->get_used();
+		total_qlen += (*cit)->get_qlen();
+		total_max_threads += (*cit)->get_max_threads();
+		total_curr_threads += (*cit)->get_curr_threads();
+		total_busy_threads += (*cit)->get_busy_threads();
+
 		acl::json_node& json_server = json_.create_node();
 		json_server.add_number("conns", (*cit)->get_conns())
 			.add_number("used", (*cit)->get_used())
@@ -87,6 +100,22 @@ void ServerManager::buildStatus()
 			.add_child("qlen", (long long int) (*cit)->get_qlen())
 			.add_child("type", (*cit)->get_type().c_str());
 	}
+
+	json_.get_root().add_number("total_conns", total_conns)
+		.add_number("total_used", total_used)
+		.add_number("total_qlen", total_qlen)
+		.add_number("total_max_threads", total_max_threads)
+		.add_number("total_curr_threads", total_curr_threads)
+		.add_number("total_busy_threads", total_busy_threads)
+		.add_text("ip", var_cfg_local_ip.c_str());
+
+	xml_servers.add_attr("total_conns", total_conns)
+		.add_attr("total_used", total_used)
+		.add_attr("total_qlen", total_qlen)
+		.add_attr("total_max_threads", total_max_threads)
+		.add_attr("total_curr_threads", total_curr_threads)
+		.add_attr("total_busy_threads", total_busy_threads)
+		.add_attr("ip", var_cfg_local_ip.c_str());
 
 #if 0
 	acl::json_node& n = json_.create_node();
