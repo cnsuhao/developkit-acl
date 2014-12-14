@@ -51,6 +51,9 @@ acl::master_int64_tbl var_conf_int64_tab[] = {
 	{ 0, 0 , 0 , 0, 0 }
 };
 
+// 本机 IP 地址，优先采用内网 IP
+acl::string var_cfg_local_ip;
+;
 //////////////////////////////////////////////////////////////////////////////
 
 master_service::master_service()
@@ -102,8 +105,46 @@ bool master_service::on_accept(acl::aio_socket_stream* client)
 	return true;
 }
 
+static void get_local_ip()
+{
+	ACL_IFCONF *ifconf;	/* 网卡查询结果对象 */
+	ACL_IFADDR *ifaddr;	/* 每个网卡信息对象 */
+	ACL_ITER iter;		/* 遍历对象 */
+
+	/* 查询本机所有网卡信息 */
+	ifconf = acl_get_ifaddrs();
+
+	if (ifconf == NULL)
+	{
+		var_cfg_local_ip = "127.0.0.1";
+		return;
+	}
+
+	const char* ip = NULL;
+
+#define	EQ(x, y) strncmp((x), (y), sizeof((y)) - 1) == 0
+
+	/* 遍历所有网卡的信息 */
+	acl_foreach(iter, ifconf) {
+		ifaddr = (ACL_IFADDR*) iter.data;
+		ip = ifaddr->ip;
+		if (EQ(ifaddr->ip, "192.168.") || EQ(ifaddr->ip, "10.0."))
+			break;
+	}
+
+	if (ip)
+		var_cfg_local_ip = ip;
+	else
+		var_cfg_local_ip = "127.0.0.1";
+
+	/* 释放查询结果 */
+	acl_free_ifaddrs(ifconf);
+}
+
 void master_service::proc_on_init()
 {
+	get_local_ip();
+
 	if (var_cfg_manage_timer <= 0)
 		var_cfg_manage_timer = 1;
 

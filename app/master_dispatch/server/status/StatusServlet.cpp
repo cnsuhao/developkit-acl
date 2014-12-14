@@ -33,17 +33,25 @@ bool StatusServlet::doPost(acl::HttpServletRequest& req,
 		res.setContentType("text/json; charset=utf-8");
 	}
 
+	res.setChunkedTransferEncoding(true);
+
+	keep_alive_ = req.isKeepAlive() ? true : false;
+	res.setKeepAlive(keep_alive_);
+
 	// 调用单例服务器状态方法获得后端服务子进程实例的状态
 	acl::string buf;
 	if (use_xml)
 	{
-		buf << "?xml version=\"1 0\" encoding=\"utf-8\"";
+		buf << "<?xml version=\"1.0\"?>";
 		ServerManager::get_instance().statusToXml(buf);
 	}
 	else
 		ServerManager::get_instance().statusToJson(buf);
 
 	buf += "\r\n";
-	keep_alive_ = res.write(buf) && req.isKeepAlive();
+	//printf(">>buf: %s\r\n", buf.c_str());
+
+	if (res.write(buf) == false || res.write(0, 0) == false)
+		keep_alive_ = false;
 	return keep_alive_;
 }
