@@ -39,18 +39,26 @@ public:
 	}
 
 	/**
-	 * 统计服务器集群中的各个服务子进程实例的状态，并将之转换为 JSON 对象
+	 * 统计服务器集群中的各个服务子进程实例的状态，并将之转换为
+	 * JSON/XML 对象
 	 */
-	void statusToJson();
+	void buildStatus();
 
 	/**
-	 * 将 JSON 对象转为字符串对象
+	 * 将 json 对象转为字符串对象
 	 * @param buf {acl::string&}
 	 */
-	void statusToString(acl::string& buf);
+	void statusToJson(acl::string& buf);
+
+	/**
+	 * 将 xml 对象转为字符串对象
+	 * @param buf {acl::string&}
+	 */
+	void statusToXml(acl::string& buf);
 
 private:
 	std::vector<ServerConnection*> conns_;
-	acl::json json_;
+	acl::json   json_;
+	acl::xml    xml_;
 	acl::locker lock_;
 };
