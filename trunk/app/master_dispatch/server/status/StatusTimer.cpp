@@ -20,7 +20,7 @@ void StatusTimer::destroy()
 void StatusTimer::timer_callback(unsigned int)
 {
 	acl::string* buf = new acl::string(256);
-	ServerManager::get_instance().statusToString(*buf);
+	ServerManager::get_instance().statusToJson(*buf);
 
 	// 发起一个 HTTP 请求过程，将之将由子线程处理
 	HttpClientRpc* rpc = new HttpClientRpc(buf, var_cfg_status_server);

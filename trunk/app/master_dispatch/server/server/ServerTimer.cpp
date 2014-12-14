@@ -11,5 +11,5 @@ void ServerTimer::destroy()
 void ServerTimer::timer_callback(unsigned int)
 {
 	// 在定时器中定时统计服务端的负载情况
-	ServerManager::get_instance().statusToJson();
+	ServerManager::get_instance().buildStatus();
 }
