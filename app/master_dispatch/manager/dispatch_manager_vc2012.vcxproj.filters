@@ -27,6 +27,21 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="message_manager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="server_manager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="access_list.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="collect_client.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="message.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="http_servlet.h">
@@ -36,6 +51,24 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="message_manager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="server_manager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="access_list.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="collect_client.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="global.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="message.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
