@@ -20,19 +20,22 @@ bool StatusServlet::doGet(acl::HttpServletRequest& req,
 bool StatusServlet::doPost(acl::HttpServletRequest& req,
 	acl::HttpServletResponse& res)
 {
-	bool use_xml, xml_head = false;
+	bool use_xml, xml_meta = true;
 	const char* ptr = req.getParameter("type");
-	if (type && strcasecmp(type, "xml") == 0)
+	if (ptr && strcasecmp(ptr, "xml") == 0)
 	{
 		use_xml = true;
 		res.setContentType("text/xml; charset=utf-8");
-		ptr = req.getParameter("xml_head");
-		if (ptr && strcasecmp(ptr, "true") == 0)
-			xml_head = true;
+		ptr = req.getParameter("xml_meta");
+		if (ptr != NULL && strcasecmp(ptr, "false") == 0)
+			xml_meta = false;
+		else
+			xml_meta = true;
 	}
 	else
 	{
 		use_xml = false;
+		xml_meta = false;
 		res.setContentType("text/json; charset=utf-8");
 	}
 
@@ -45,7 +48,7 @@ bool StatusServlet::doPost(acl::HttpServletRequest& req,
 	acl::string buf;
 	if (use_xml)
 	{
-		if (xml_head)
+		if (xml_meta)
 			buf << "<?xml version=\"1.0\"?>";
 		ServerManager::get_instance().statusToXml(buf);
 	}
