@@ -1,4 +1,5 @@
 #include "acl_stdafx.hpp"
+#include "acl_cpp/stdlib/snprintf.hpp"
 
 namespace acl
 {
@@ -72,7 +73,7 @@ int snprintf(char *buf, size_t size, const char *fmt, ...)
 	va_list ap;
 
 	va_start(ap, fmt);
-	int ret = acl::vsnprintf(buf, size, fmt, ap);  // 调用 acl::vsnprintf
+	int ret = vsnprintf(buf, size, fmt, ap);  // 调用 acl::vsnprintf
 	va_end(ap);
 	return ret;
 }

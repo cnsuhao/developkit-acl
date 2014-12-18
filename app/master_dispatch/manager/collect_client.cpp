@@ -17,7 +17,7 @@ void* collect_client::run()
 	// 创建 HTTP 请求头
 	acl::http_request req(server_);
 	req.request_header()
-		.set_url("/?type=xml")
+		.set_url("/?type=xml&xml_meta=false")
 		.set_keep_alive(false)
 		.set_method(acl::HTTP_METHOD_GET);
 

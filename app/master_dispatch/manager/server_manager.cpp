@@ -5,7 +5,7 @@ bool server_manager::init(const char* server_list)
 {
 	char* buf = acl_mystrdup(server_list);
 	char* addrs = acl_mystr_trim(buf);
-	ACL_ARGV* tokens = acl_argv_split(addrs, ";,");
+	ACL_ARGV* tokens = acl_argv_split(addrs, ";, ");
 	ACL_ITER iter;
 	acl::string addr;
 	acl_foreach(iter, tokens)
