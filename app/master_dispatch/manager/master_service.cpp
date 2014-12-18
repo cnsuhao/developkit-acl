@@ -32,7 +32,9 @@ acl::master_str_tbl var_conf_str_tab[] = {
 	{ 0, 0, 0 }
 };
 
+int   var_cfg_auth_enable;
 acl::master_bool_tbl var_conf_bool_tab[] = {
+	{ "auth_enable", 0, &var_cfg_auth_enable },
 
 	{ 0, 0, 0 }
 };

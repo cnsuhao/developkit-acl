@@ -6,7 +6,7 @@ class collect_client : public acl::thread
 {
 public:
 	collect_client(message_manager& manager, const char* server);
-	~collect_client();
+	~collect_client() {}
 
 protected:
 	// 基类 acl::thread 中虚方法
