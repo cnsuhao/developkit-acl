@@ -7,12 +7,6 @@ collect_client::collect_client(message_manager& manager, const char* server)
 : manager_(manager)
 , server_(server)
 {
-
-}
-
-collect_client::~collect_client()
-{
-
 }
 
 void* collect_client::run()
@@ -34,17 +28,17 @@ void* collect_client::run()
 	{
 		logger_error("request to server: %s", server_.c_str());
 
-		message* msg = new message(server_, NULL);
+		message* msg = new message(server_);
 		manager_.put(msg);
 
 		return NULL;
 	}
 
-	acl::http_client* conn = req.get_client();
+	//acl::http_client* conn = req.get_client();
 	//int  http_status = conn->response_status();
 
 	acl::string buf(1024);
-	message* msg = new message(server_, NULL);
+	message* msg = new message(server_);
 	while (true)
 	{
 		buf.clear();
@@ -54,6 +48,7 @@ void* collect_client::run()
 		msg->add(buf.c_str(), buf.length());
 	}
 
+	// 向线程异步队列添加查询结果消息
 	manager_.put(msg);
 	return NULL;
 }

@@ -173,6 +173,7 @@ bool http_servlet::doGet(acl::HttpServletRequest& req,
 	return doPost(req, res);
 }
 
+// 使用 POP 账户进行身份认证
 bool http_servlet::doLogin(const char* user, const char* pass)
 {
 	acl::socket_stream conn;
@@ -270,6 +271,13 @@ bool http_servlet::doPost(acl::HttpServletRequest& req,
 		return reply_status(req, res, 404, "not found: %s", path);
 	}
 
+	// 如果配置中不需要身份验证，则直接进行处理
+	if (!var_cfg_auth_enable)
+		return doAction(req, res);
+
+	// 下面开始用户身份认证过程
+
+	// 先检查 session 认证信息是否存在
 	const char* user = req.getSession().getAttribute(var_cfg_session_key);
 	if (user && *user)
 	{
@@ -291,6 +299,8 @@ bool http_servlet::doPost(acl::HttpServletRequest& req,
 			ptr ? ptr : "null");
 	}
 
+	// 再检查输入的邮箱账号/密码并通过 POP 服务进行身份验证
+
 	user = req.getParameter("user");
 	if (user == NULL || *user == 0)
 		return show_login(req, res);
@@ -306,6 +316,7 @@ bool http_servlet::doPost(acl::HttpServletRequest& req,
 		return false;
 	}
 
+	// 启用 POP 身份验证过程
 	if (doLogin(user, pass) == false)
 	{
 		logger_error("login error, user: %s, pass: %s", user, pass);
@@ -314,6 +325,7 @@ bool http_servlet::doPost(acl::HttpServletRequest& req,
 
 	logger("user: %s pop login", user);
 
+	// 认证通过，则记录 session 认证信息
 	req.getSession().setMaxAge(var_cfg_session_ttl);
 
 	if (req.getSession().setAttribute(var_cfg_session_key, user) == false)
@@ -333,144 +345,113 @@ bool http_servlet::doAction(acl::HttpServletRequest& req,
 	acl::HttpServletResponse& res)
 {
 	// 设置块传输方式，则给浏览器以块传输方式回复数据
-	res.setChunkedTransferEncoding(true);
+	res.setChunkedTransferEncoding(true)
+		.setContentType("text/xml; charset=utf-8")
+		.setKeepAlive(req.isKeepAlive());
 
 	// 启动多线程，向所有日志查询服务器查询日志内容
 
 	if (get_servers() == false)
 		return reply(req, res, "get all servers's addrs failed!");
 
-	// 先写 HTML 页面开始部分
-	int ret = res.format("<html><head><meta http-equiv=\"Content-Type\" "
-		"content=\"text/html; charset=%s\" /></head><body>",
-		var_cfg_html_charset);
+	// 先写页面开始部分
+	int ret = res.format("<?xml version=\"1.0\"?><servers>");
 	if (ret < 0)
 	{
-		logger_error("write html head failed!");
+		logger_error("write head failed!");
 		return false;
 	}
 
+	// 开始启动线程池，由子线程连接所有的 TCP 分发器获得所有服务器的状态信息
 	std::vector<collect_client*> collecters;
 	message_manager* manager = new message_manager;
 	std::vector<acl::string>::const_iterator cit = servers_.begin();
 	int  nthreads = 0;
 	for (; cit != servers_.end(); ++cit)
 	{
+		// 创建单独的线程进行处理
 		collect_client* collect = new collect_client(*manager,
 			(*cit).c_str());
 		collect->set_detachable(false);
 		collecters.push_back(collect);
 		nthreads++;
+		// 启动子线程处理过程
 		collect->start();
 	}
 
-	// 异步等待所有查询线程的结果数据
-	int  n = 0, len = 0;
-	bool ok = true;
+	// 等待所有子线程的查询结果
+	bool ok = wait_result(res, *manager, nthreads);
 
-	while (nthreads > 0)
-	{
-		message* msg = manager->pop();
-		if (msg == NULL)
-		{
-			logger_error("pop message failed!");
-			break;
-		}
-		n++;
-
-		if (ok)
-		{
-			ret = reply(req, res, *msg);
-			if (ret < 0)
-				ok = false;
-			else
-				len += ret;
-		}
-
-		// 删除动态分配的日志消息对象
-		delete msg;
-
-		// 当结果数量与所启动的线程数量相等时，说明查询完毕
-		if (n == nthreads)
-		{
-			logger("All threads over");
-			break;
-		}
-	}
-
+	// 遍历并删除所有的子线程任务对象
 	std::vector<collect_client*>::iterator it = collecters.begin();
 	for (; it != collecters.end(); ++it)
 	{
 		(*it)->wait();
 		delete (*it);
 	}
-	collecters.clear();
 
 	delete manager;
 
-	if (len == 0 && res.write("empty result!") == false)
-	{
-		logger_error("write error");
+	if (!ok)
 		return false;
-	}
 
-	ret = res.write("</body></html>");
-	if (ret < 0)
+	// 输出 XML 结尾标记
+	if (res.write("</servers>") == false)
 	{
 		logger_error("write html end failed");
 		return false;
 	}
 
+	// HTTP 块传输模式下必须最后以参数为空表示传输过程结束
 	if (res.write(NULL, 0) == false)
 	{
 		logger_error("write chunked end failed");
 		return false;
 	}
 
-	return ok && req.isKeepAlive();
+	return req.isKeepAlive();
 }
 
-int http_servlet::reply(acl::HttpServletRequest&, acl::HttpServletResponse& res,
-	message& msg)
+bool http_servlet::wait_result(acl::HttpServletResponse& res,
+	message_manager& manager, int nthreads)
 {
-	const acl::string& server = msg.get_server();
-	const std::vector<acl::string*>& lines = msg.get_result();
+	bool disconnected = false;
+	int  n = 0;
 
-	if (lines.empty())
-		return 0;
-
-	size_t n = 0;
-
-	int ret = res.format("<hr><br>\r\n<b>server: %s</b><br>\r\n",
-			server.c_str());
-
-	if (ret < 0)
+	// 异步接收所有子线程的查询结果数据
+	while (n < nthreads)
 	{
-		logger_error("write error, server: %s", server.c_str());
-		return -1;
-	}
-	n += ret;
-
-	std::vector<acl::string*>::const_iterator cit = lines.begin();
-	for (int i = 0; cit != lines.end(); ++cit, i++)
-	{
-		acl::string* line = *cit;
-
-		if (!line->empty() && res.write(*line) == false)
+		// 从消息队列中弹出子线程完成的任务
+		message* msg = manager.pop();
+		if (msg == NULL)
 		{
-			logger_error("write error, server: %s", server.c_str());
-			return -1;
+			logger_error("pop message failed!");
+			return false;
 		}
-		n += line->length();
+		n++;
+
+		if (!disconnected)
+		{
+			// 向浏览器输出某个子线程的查询结果
+			if (reply(res, *msg) < 0)
+				disconnected = true;
+		}
+
+		// 删除动态分配的日志消息对象
+		delete msg;
 	}
 
-	ret = res.format("<hr><br>\r\n");
-	if (ret < 0)
-	{
-		logger_error("write error, server: %s", server.c_str());
-		return -1;
-	}
-	n += ret;
+	// 当结果数量与所启动的线程数量相等时，说明查询完毕
+	logger("All threads over!");
+	return !disconnected;
+}
 
-	return n;
+int http_servlet::reply(acl::HttpServletResponse& res, message& msg)
+{
+	//const acl::string& server = msg.get_server();
+	const acl::string& buf = msg.get_result();
+	if (buf.empty())
+		return 0;
+	else
+		return res.format("%s", buf.c_str());
 }

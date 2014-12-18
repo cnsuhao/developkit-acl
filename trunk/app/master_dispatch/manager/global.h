@@ -13,6 +13,7 @@ extern char *var_cfg_session_key;
 extern char *var_cfg_path_info;
 extern acl::master_str_tbl var_conf_str_tab[];
 
+extern int   var_cfg_auth_enable;
 extern acl::master_bool_tbl var_conf_bool_tab[];
 
 extern int   var_cfg_conn_timeout;

@@ -56,9 +56,9 @@ void ServerManager::buildStatus()
 	xml_.reset();
 
 	acl::json_node& json_servers = json_.create_array();
-	json_.get_root().add_child("servers", json_servers);
+	json_.get_root().add_child("server", json_servers);
 
-	acl::xml_node& xml_servers = xml_.create_node("servers");
+	acl::xml_node& xml_servers = xml_.create_node("server");
 	xml_.get_root().add_child(xml_servers);
 
 	long long total_conns = 0, total_used = 0, total_qlen = 0;
@@ -86,7 +86,7 @@ void ServerManager::buildStatus()
 			.add_text("type", (*cit)->get_type());
 		json_servers.add_child(json_server);
 
-		xml_servers.add_child("server", true)
+		xml_servers.add_child("proc", true)
 			.add_child("conns", (long long int)
 					(*cit)->get_conns())
 			.add_child("used", (long long int) (*cit)->get_used())

@@ -11,20 +11,26 @@ namespace acl
 int snprintf(char *buf, size_t size, const char *fmt, ...)
 {
 	va_list ap;
-	int   ret;
 
 	va_start(ap, fmt);
-	ret = _vsnprintf_s(buf, size, _TRUNCATE, fmt, ap);
+	int ret = acl::vsnprintf(buf, size, fmt, ap);  // 调用 acl::vsnprintf
 	va_end(ap);
-	return (ret);
+	return ret;
 }
 
 int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
 {
-	int   ret;
+	if (size == 0)
+	{
+		buf[0] = 0;
+		return -1;
+	}
 
-	ret = _vsnprintf_s(buf, size, _TRUNCATE, fmt, ap);
-	return (ret);
+	int ret = ::_vsnprintf_s(buf, size, _TRUNCATE, fmt, ap);
+	if (ret < 0)
+		return -1;
+	else
+		return ret;
 }
 
 # else
@@ -32,23 +38,29 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
 int snprintf(char *buf, size_t size, const char *fmt, ...)
 {
 	va_list ap;
-	int   ret;
 
 	va_start(ap, fmt);
-	ret = vsnprintf(buf, size, fmt, ap);
+	int ret = acl::vsnprintf(buf, size, fmt, ap);  // 调用 acl::vsnprintf
 	va_end(ap);
 	return ret;
 }
 
 int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
 {
-	int   ret = _vsnprintf(buf, size, fmt, ap);
-	if (ret <= (int) size)
+	if (size == 0)
+	{
+		buf[0] = 0;
+		return -1;
+	}
+
+	int   ret = ::_vsnprintf(buf, size, fmt, ap);
+	if (ret < 0 || ret >= (int) size)
 	{
 		buf[size - 1] = 0;
-		ret = (int) size - 1;
+		return -1;
 	}
-	return ret;
+	else
+		return ret;
 }
 
 # endif // __STDC_WANT_SECURE_LIB__
@@ -58,10 +70,9 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
 int snprintf(char *buf, size_t size, const char *fmt, ...)
 {
 	va_list ap;
-	int   ret;
 
 	va_start(ap, fmt);
-	ret = vsnprintf(buf, size, fmt, ap);
+	int ret = acl::vsnprintf(buf, size, fmt, ap);  // 调用 acl::vsnprintf
 	va_end(ap);
 	return ret;
 }

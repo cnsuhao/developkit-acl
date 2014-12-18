@@ -1,6 +1,7 @@
 #pragma once
 
 class message;
+class message_manager;
 
 class http_servlet : public acl::HttpServlet
 {
@@ -32,10 +33,11 @@ private:
 		acl::HttpServletResponse& res, const char* fmt, ...);
 	bool show_login(acl::HttpServletRequest& req,
 		acl::HttpServletResponse& res);
+	bool wait_result(acl::HttpServletResponse& res,
+		message_manager& manager, int nthreads);
 	bool reply(acl::HttpServletRequest& req,
 		acl::HttpServletResponse& res, const char* fmt, ...);
 	bool reply_status(acl::HttpServletRequest& req,
 		acl::HttpServletResponse& res, int status, const char* fmt, ...);
-	int reply(acl::HttpServletRequest& req, acl::HttpServletResponse& res,
-		message& msg);
+	int reply(acl::HttpServletResponse& res, message& msg);
 };
