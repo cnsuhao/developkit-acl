@@ -1,11 +1,12 @@
 #include "acl_stdafx.hpp"
-#ifdef WIN32
-#include <stdarg.h>
 
 namespace acl
 {
 
-#ifdef __STDC_WANT_SECURE_LIB__
+#ifdef WIN32
+#include <stdarg.h>
+
+# ifdef __STDC_WANT_SECURE_LIB__
 
 int snprintf(char *buf, size_t size, const char *fmt, ...)
 {
@@ -26,7 +27,7 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
 	return (ret);
 }
 
-#else
+# else
 
 int snprintf(char *buf, size_t size, const char *fmt, ...)
 {
@@ -50,8 +51,26 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
 	return ret;
 }
 
-#endif // __STDC_WANT_SECURE_LIB__
+# endif // __STDC_WANT_SECURE_LIB__
 
+#else
+
+int snprintf(char *buf, size_t size, const char *fmt, ...)
+{
+	va_list ap;
+	int   ret;
+
+	va_start(ap, fmt);
+	ret = vsnprintf(buf, size, fmt, ap);
+	va_end(ap);
+	return ret;
 }
 
-#endif // WIN32
+int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
+{
+	return ::vsnprintf(buf, size, fmt, ap);
+}
+
+#endif // !WIN32
+
+} // namespace acl
