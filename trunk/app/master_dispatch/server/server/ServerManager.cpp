@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "sysload.h"
 #include "server/ServerConnection.h"
 #include "server/ServerManager.h"
 
@@ -64,6 +65,8 @@ void ServerManager::buildStatus()
 	long long total_conns = 0, total_used = 0, total_qlen = 0;
 	long long total_max_threads = 0, total_curr_threads = 0;
 	long long total_busy_threads = 0;
+	acl::string load_s;
+	(void) sysload::get_load(&load_s);  // 获得当前系统的负载
 
 	std::vector<ServerConnection*>::const_iterator cit = conns_.begin();
 	for (; cit != conns_.end(); ++cit)
@@ -101,21 +104,23 @@ void ServerManager::buildStatus()
 			.add_child("type", (*cit)->get_type().c_str());
 	}
 
-	json_.get_root().add_number("total_conns", total_conns)
-		.add_number("total_used", total_used)
-		.add_number("total_qlen", total_qlen)
-		.add_number("total_max_threads", total_max_threads)
-		.add_number("total_curr_threads", total_curr_threads)
-		.add_number("total_busy_threads", total_busy_threads)
-		.add_text("ip", var_cfg_local_ip.c_str());
+	json_.get_root().add_number("conns", total_conns)
+		.add_number("used", total_used)
+		.add_number("qlen", total_qlen)
+		.add_number("max_threads", total_max_threads)
+		.add_number("curr_threads", total_curr_threads)
+		.add_number("busy_threads", total_busy_threads)
+		.add_text("ip", var_cfg_local_ip.c_str())
+		.add_text("load", load_s.c_str());
 
-	xml_servers.add_attr("total_conns", total_conns)
-		.add_attr("total_used", total_used)
-		.add_attr("total_qlen", total_qlen)
-		.add_attr("total_max_threads", total_max_threads)
-		.add_attr("total_curr_threads", total_curr_threads)
-		.add_attr("total_busy_threads", total_busy_threads)
-		.add_attr("ip", var_cfg_local_ip.c_str());
+	xml_servers.add_attr("conns", total_conns)
+		.add_attr("used", total_used)
+		.add_attr("qlen", total_qlen)
+		.add_attr("max_threads", total_max_threads)
+		.add_attr("curr_threads", total_curr_threads)
+		.add_attr("busy_threads", total_busy_threads)
+		.add_attr("ip", var_cfg_local_ip.c_str())
+		.add_attr("load", load_s.c_str());
 
 #if 0
 	acl::json_node& n = json_.create_node();

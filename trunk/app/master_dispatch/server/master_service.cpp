@@ -6,6 +6,7 @@
 #include "server/ServerConnection.h"
 #include "server/ServerTimer.h"
 #include "rpc_manager.h"
+#include "allow_list.h"
 #include "master_service.h"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -16,12 +17,14 @@ char *var_cfg_status_server;
 char *var_cfg_status_service;
 char *var_cfg_session_addr;  // memcache 服务器地址，以备将来使用
 char *var_cfg_rpc_addr;
+char *var_cfg_manager_allow;
 acl::master_str_tbl var_conf_str_tab[] = {
 	{ "backend_service", "dispatch.sock", &var_cfg_backend_service },
 	{ "status_server", "", &var_cfg_status_server },
 	{ "status_service", "1080", &var_cfg_status_service },
 	{ "session_addr", "127.0.0.1:11211", &var_cfg_session_addr },
 	{ "rpc_addr", "127.0.0.1:0", &var_cfg_rpc_addr },
+	{ "manager_allow", "all", &var_cfg_manager_allow },
 
 	{ 0, 0, 0 }
 };
@@ -86,6 +89,18 @@ bool master_service::on_accept(acl::aio_socket_stream* client)
 	else if (acl_strrncasecmp(local, var_cfg_status_service,
 		strlen(var_cfg_status_service)) == 0)
 	{
+		const char* ip = client->get_peer();
+		if (ip == NULL || *ip == 0)
+		{
+			logger_error("can't get peer ip");
+			return false;
+		}
+		if (allow_list::get_instance().allow_manager(ip) == false)
+		{
+			logger_warn("deny manager ip: %s", ip);
+			return false;
+		}
+
 		// 创建服务对象处理状态汇报的请求
 		IConnection* conn = new StatusConnection(client);
 
@@ -144,6 +159,10 @@ static void get_local_ip()
 void master_service::proc_on_init()
 {
 	get_local_ip();
+
+	if (var_cfg_manager_allow && *var_cfg_manager_allow)
+		allow_list::get_instance()
+			.set_allow_manager(var_cfg_manager_allow);
 
 	if (var_cfg_manage_timer <= 0)
 		var_cfg_manage_timer = 1;
