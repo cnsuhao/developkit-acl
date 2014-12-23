@@ -132,6 +132,6 @@ service dispatch_manager {
 #	是否在一个线程中连接读
 #	loop_read = 1
 #	TCP 派发器列表，格式：ip:port; ip:port ...
-	server_list = 127.0.0.1:1080, 127.0.0.1:1081, 127.0.0.1:1082
+	server_list = 127.0.0.1:1080, 127.0.0.1:1082 #, 127.0.0.1:1081
 }
 
