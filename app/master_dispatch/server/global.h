@@ -17,7 +17,7 @@ extern acl::master_int64_tbl var_conf_int64_tab[];
 
 ////////////////////////////////////////////////////////////////////////////////
 
-extern acl::string var_cfg_local_ip;
+extern acl::string var_cfg_local_addr;
 
 #define	DEBUG_MIN	100
 #define	DEBUG_SVR	(DEBUG_MIN + 1)
