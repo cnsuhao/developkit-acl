@@ -24,7 +24,8 @@ acl::master_str_tbl var_conf_str_tab[] = {
 	{ "status_service", "1080", &var_cfg_status_service },
 	{ "session_addr", "127.0.0.1:11211", &var_cfg_session_addr },
 	{ "rpc_addr", "127.0.0.1:0", &var_cfg_rpc_addr },
-	{ "manager_allow", "all", &var_cfg_manager_allow },
+	{ "manager_allow", "127.0.0.1:127.0.0.1, 192.168.0.0:192.168.255.255",
+		&var_cfg_manager_allow },
 
 	{ 0, 0, 0 }
 };
