@@ -56,7 +56,7 @@ acl::master_int64_tbl var_conf_int64_tab[] = {
 };
 
 // 本机 IP 地址，优先采用内网 IP
-acl::string var_cfg_local_ip;
+acl::string var_cfg_local_addr;
 ;
 //////////////////////////////////////////////////////////////////////////////
 
@@ -132,7 +132,7 @@ static void get_local_ip()
 
 	if (ifconf == NULL)
 	{
-		var_cfg_local_ip = "127.0.0.1";
+		var_cfg_local_addr = "127.0.0.1";
 		return;
 	}
 
@@ -149,9 +149,11 @@ static void get_local_ip()
 	}
 
 	if (ip)
-		var_cfg_local_ip = ip;
+		var_cfg_local_addr = ip;
 	else
-		var_cfg_local_ip = "127.0.0.1";
+		var_cfg_local_addr = "127.0.0.1";
+
+	var_cfg_local_addr << ":" << var_cfg_status_service;
 
 	/* 释放查询结果 */
 	acl_free_ifaddrs(ifconf);

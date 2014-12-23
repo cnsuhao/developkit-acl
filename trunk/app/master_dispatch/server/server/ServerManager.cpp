@@ -110,7 +110,7 @@ void ServerManager::buildStatus()
 		.add_number("max_threads", total_max_threads)
 		.add_number("curr_threads", total_curr_threads)
 		.add_number("busy_threads", total_busy_threads)
-		.add_text("ip", var_cfg_local_ip.c_str())
+		.add_text("addr", var_cfg_local_addr.c_str())
 		.add_text("load", load_s.c_str());
 
 	xml_servers.add_attr("conns", total_conns)
@@ -119,7 +119,7 @@ void ServerManager::buildStatus()
 		.add_attr("max_threads", total_max_threads)
 		.add_attr("curr_threads", total_curr_threads)
 		.add_attr("busy_threads", total_busy_threads)
-		.add_attr("ip", var_cfg_local_ip.c_str())
+		.add_attr("addr", var_cfg_local_addr.c_str())
 		.add_attr("load", load_s.c_str());
 
 #if 0
