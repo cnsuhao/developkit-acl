@@ -4,6 +4,7 @@
 #include "collect_client.h"
 #include "message.h"
 #include "message_manager.h"
+#include "status_manager.h"
 #include "http_servlet.h"
 
 http_servlet::http_servlet(const char* domain, int port)
@@ -281,7 +282,7 @@ bool http_servlet::doPost(acl::HttpServletRequest& req,
 	const char* user = req.getSession().getAttribute(var_cfg_session_key);
 	if (user && *user)
 	{
-		if (access_list::get_instance().check(user) == false)
+		if (access_list::get_instance().check_user(user) == false)
 		{
 			(void) reply(req, res, "Permission denied!");
 			logger_warn("user: %s was denied!", user);
@@ -309,7 +310,7 @@ bool http_servlet::doPost(acl::HttpServletRequest& req,
 	if (pass == NULL || *pass == 0)
 		return show_login(req, res);
 
-	if (access_list::get_instance().check(user) == false)
+	if (access_list::get_instance().check_user(user) == false)
 	{
 		(void) reply(req, res, "Permission denied!");
 		logger_warn("user: %s was denied!", user);
@@ -349,18 +350,59 @@ bool http_servlet::doAction(acl::HttpServletRequest& req,
 		.setContentType("text/xml; charset=utf-8")
 		.setKeepAlive(req.isKeepAlive());
 
-	// 启动多线程，向所有日志查询服务器查询日志内容
-
-	if (get_servers() == false)
-		return reply(req, res, "get all servers's addrs failed!");
-
 	// 先写页面开始部分
-	int ret = res.format("<?xml version=\"1.0\"?><servers>");
-	if (ret < 0)
+	if (res.format("<?xml version=\"1.0\"?><servers>") < 0)
 	{
 		logger_error("write head failed!");
 		return false;
 	}
+
+	bool ok;
+
+	if (var_cfg_pull_data)
+		ok = doRequest(req, res);
+	else
+		ok = doResponse(req, res);
+
+	if (!ok)
+		return false;
+
+	// 输出 XML 结尾标记
+	if (res.write("</servers>") == false)
+	{
+		logger_error("write html end failed");
+		return false;
+	}
+
+	// HTTP 块传输模式下必须最后以参数为空表示传输过程结束
+	if (res.write(NULL, 0) == false)
+	{
+		logger_error("write chunked end failed");
+		return false;
+	}
+
+	return req.isKeepAlive();
+}
+
+bool http_servlet::doResponse(acl::HttpServletRequest&,
+	acl::HttpServletResponse& res)
+{
+	acl::string buf;
+	status_manager::get_instance().get_status(buf);
+
+	if (!buf.empty() && res.write(buf) == false)
+		return false;
+
+	return true;
+}
+
+bool http_servlet::doRequest(acl::HttpServletRequest& req,
+	acl::HttpServletResponse& res)
+{
+	// 启动多线程，向所有日志查询服务器查询日志内容
+
+	if (get_servers() == false)
+		return reply(req, res, "get all servers's addrs failed!");
 
 	// 开始启动线程池，由子线程连接所有的 TCP 分发器获得所有服务器的状态信息
 	std::vector<collect_client*> collecters;
@@ -391,25 +433,7 @@ bool http_servlet::doAction(acl::HttpServletRequest& req,
 	}
 
 	delete manager;
-
-	if (!ok)
-		return false;
-
-	// 输出 XML 结尾标记
-	if (res.write("</servers>") == false)
-	{
-		logger_error("write html end failed");
-		return false;
-	}
-
-	// HTTP 块传输模式下必须最后以参数为空表示传输过程结束
-	if (res.write(NULL, 0) == false)
-	{
-		logger_error("write chunked end failed");
-		return false;
-	}
-
-	return req.isKeepAlive();
+	return ok;
 }
 
 bool http_servlet::wait_result(acl::HttpServletResponse& res,
