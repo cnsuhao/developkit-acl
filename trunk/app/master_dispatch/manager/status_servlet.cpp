@@ -85,9 +85,9 @@ bool status_servlet::doPost(acl::HttpServletRequest& req,
 		return false;
 	}
 
-	if (strcasecmp(ctype, "text/json") == 0)
+	if (strncasecmp(ctype, "text/json", sizeof("text/json") - 1) == 0)
 		return doJson(req, res) && keep_alive;
-	else if (strcasecmp(ctype, "text/xml") == 0)
+	else if (strncasecmp(ctype, "text/xml", sizeof("text/xml") - 1) == 0)
 		return doXml(req, res) && keep_alive;
 	else
 	{
@@ -176,7 +176,7 @@ bool status_servlet::doJson(acl::HttpServletRequest& req,
 		{
 			if (strcasecmp(name, "addr") == 0)
 				key = value;
-			server.add_child(name, value);
+			server.add_child(name, false, value);
 		}
 
 		child = root.next_child();
@@ -191,6 +191,7 @@ bool status_servlet::doJson(acl::HttpServletRequest& req,
 
 	acl::string data;
 	xml.build_xml(data);
+	printf(">>>>>>>%s\n", data.c_str());
 
 	// 将数据添加进状态管理器中
 	status_manager::get_instance().set_status(key.c_str(), data.c_str());

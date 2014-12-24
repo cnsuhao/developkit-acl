@@ -27,6 +27,11 @@ private:
 	bool doLogin(const char* user, const char* pass);
 	bool doAction(acl::HttpServletRequest& req,
 		acl::HttpServletResponse& res);
+	bool doRequest(acl::HttpServletRequest& req,
+		acl::HttpServletResponse& res);
+	bool doResponse(acl::HttpServletRequest& req,
+		acl::HttpServletResponse& res);
+
 	bool get_servers();
 	void lookup_dns();
 	bool show_page(acl::HttpServletRequest& req,
