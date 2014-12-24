@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "access_list.h"
 #include "http_servlet.h"
+#include "status_servlet.h"
 #include "server_manager.h"
 #include "master_service.h"
 
@@ -17,6 +18,7 @@ char *var_cfg_allow_users;
 char *var_cfg_memcache_addr;
 char *var_cfg_session_key;
 char *var_cfg_path_info;
+char *var_cfg_status_service;
 acl::master_str_tbl var_conf_str_tab[] = {
 	{ "server_list", "", &var_cfg_servers },
 	{ "index_page", "index.htm", &var_cfg_index_page },
@@ -28,6 +30,7 @@ acl::master_str_tbl var_conf_str_tab[] = {
 	{ "memcache_addr", "127.0.0.1:11211", &var_cfg_memcache_addr },
 	{ "session_key", "dispatch_manager_id", &var_cfg_session_key },
 	{ "path_info", "/dispatch_collect", &var_cfg_path_info },
+	{ "status_service", "", &var_cfg_status_service },
 
 	{ 0, 0, 0 }
 };
@@ -44,12 +47,14 @@ int   var_cfg_rw_timeout;
 int   var_cfg_dns_ttl;
 int   var_cfg_server_port;
 int   var_cfg_session_ttl;
+int   var_cfg_status_timer;
 acl::master_int_tbl var_conf_int_tab[] = {
 	{ "conn_timeout", 30, &var_cfg_conn_timeout, 0, 0 },
 	{ "rw_timeout", 300, &var_cfg_rw_timeout, 0, 0 },
 	{ "dns_ttl", 30, &var_cfg_dns_ttl, 0, 0 },
 	{ "server_port", 10081, &var_cfg_server_port, 0, 0 },
 	{ "session_ttl", 3600, &var_cfg_session_ttl, 0, 0 },
+	{ "status_timer", 1, &var_cfg_status_timer, 0, 0 },
 
 	{ 0, 0 , 0 , 0, 0 }
 };
@@ -69,20 +74,13 @@ master_service::~master_service()
 {
 }
 
-#define	STATIC_SERVLET
-
 bool master_service::thread_on_read(acl::socket_stream* conn)
 {
-#ifdef	STATIC_SERVLET
-	http_servlet servlet(var_cfg_server_domain, var_cfg_server_port);
-	return servlet.doRun(var_cfg_memcache_addr, conn);
-#else
-	http_servlet* servlet = (http_servlet*) conn->get_ctx();
+	acl::HttpServlet* servlet = (acl::HttpServlet*) conn->get_ctx();
 	if (servlet == NULL)
 		logger_fatal("servlet null!");
 
 	return servlet->doRun(var_cfg_memcache_addr, conn);
-#endif
 }
 
 bool master_service::thread_on_accept(acl::socket_stream* conn)
@@ -92,12 +90,21 @@ bool master_service::thread_on_accept(acl::socket_stream* conn)
 
 	conn->set_rw_timeout(5);
 
-#ifndef	STATIC_SERVLET
-	http_servlet* servlet = new http_servlet(var_cfg_server_domain,
-			var_cfg_server_port);
-	conn->set_ctx(servlet);
-#endif
+	acl::HttpServlet* servlet;
+	const char* local = conn->get_local(true);
 
+	if (acl_strrncasecmp(local, var_cfg_status_service,
+		strlen(var_cfg_status_service)) == 0)
+	{
+		servlet = new status_servlet();
+		// 因为请求数据体是 JSON/XML 数据，所以不要求解析
+		servlet->setParseBody(false);
+	}
+	else
+		servlet = new http_servlet(var_cfg_server_domain,
+			var_cfg_server_port);
+
+	conn->set_ctx(servlet);
 	return true;
 }
 
@@ -114,7 +121,7 @@ void master_service::thread_on_close(acl::socket_stream* conn)
 	logger_debug(DEBUG_CONN, 2, "disconnect from %s, fd: %d",
 		conn->get_peer(), conn->sock_handle());
 
-	http_servlet* servlet = (http_servlet*) conn->get_ctx();
+	acl::HttpServlet* servlet = (acl::HttpServlet*) conn->get_ctx();
 	delete servlet;
 }
 

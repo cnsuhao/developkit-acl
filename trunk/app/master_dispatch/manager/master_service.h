@@ -59,4 +59,7 @@ protected:
 	 * 当进程退出前调用的回调函数
 	 */
 	virtual void proc_on_exit();
+
+private:
+	acl::event_timer* status_timer_;
 };

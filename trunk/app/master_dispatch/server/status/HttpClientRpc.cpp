@@ -19,9 +19,13 @@ void HttpClientRpc::rpc_run()
 	// 创建  HTTP 请求客户端
 	acl::http_request req(server_addr_);
 	acl::http_header& hdr = req.request_header();
+
+	// 设置请求的 URL
 	hdr.set_url("/");
+
 	// 设置 HTTP 请求头的字段
 	hdr.set_content_type("text/json; charset=gb2312");
+	hdr.set_keep_alive(false);
 
 	// 发送数据体
 	if (req.request(buf_->c_str(), buf_->length()) == false)
