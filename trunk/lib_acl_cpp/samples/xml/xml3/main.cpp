@@ -44,7 +44,7 @@ int main(void)
 			{
 				if (strcasecmp(name, "addr") == 0)
 					key = value;
-				//server_node.add_attr(name, value);
+				server_node.add_attr(name, value);
 			}
 
 			child = root.next_child();
@@ -74,11 +74,6 @@ int main(void)
 				const char* val = status->get_text();
 				if (tag && val)
 					proc_node.add_child(tag, false, val);
-				else
-				{
-					printf("ERROR\r\n");
-					exit (0);
-				}
 				status = proc->next_child();
 			}
 			proc = server->next_child();

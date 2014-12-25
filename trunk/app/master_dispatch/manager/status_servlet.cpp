@@ -8,7 +8,6 @@ status_servlet::status_servlet()
 
 status_servlet::~status_servlet()
 {
-
 }
 
 bool status_servlet::reply(acl::HttpServletRequest& req,
@@ -160,8 +159,8 @@ bool status_servlet::doJson(acl::HttpServletRequest& req,
 	// 将 JSON 数据转为 XML 数据的过程
 
 	acl::xml xml;
-	acl::xml_node& server = xml.create_node("server");
-	xml.get_root().add_child(server);
+	acl::xml_node& server_node = xml.create_node("server");
+	xml.get_root().add_child(server_node);
 
 	acl::string key;
 
@@ -171,12 +170,51 @@ bool status_servlet::doJson(acl::HttpServletRequest& req,
 	while (child != NULL)
 	{
 		const char* name = child->tag_name();
-		const char* value = child->get_text();
-		if (name != NULL && value != NULL)
+		if (name == NULL || *name == 0)
 		{
-			if (strcasecmp(name, "addr") == 0)
-				key = value;
-			server.add_child(name, false, value);
+			child = root.next_child();
+			continue;
+		}
+
+		if (strcasecmp(name, "server") != 0)
+		{
+			const char* value = child->get_text();
+			if (value != NULL)
+			{
+				if (strcasecmp(name, "addr") == 0)
+					key = value;
+				server_node.add_attr(name, value);
+			}
+
+			child = root.next_child();
+			continue;
+		}
+
+		acl::json_node* server = child->get_obj();
+		if (server == NULL)
+		{
+			child = root.next_child();
+			continue;
+		}
+
+		acl::json_node* proc = server->first_child();
+
+		while (proc != NULL)
+		{
+			// 创建  proc XML 结点
+			acl::xml_node& proc_node = xml.create_node("proc");
+			server_node.add_child(proc_node);
+
+			acl::json_node* status = proc->first_child();
+			while (status != NULL)
+			{
+				const char* tag = status->tag_name();
+				const char* val = status->get_text();
+				if (tag && val)
+					proc_node.add_child(tag, false, val);
+				status = proc->next_child();
+			}
+			proc = server->next_child();
 		}
 
 		child = root.next_child();
@@ -191,7 +229,6 @@ bool status_servlet::doJson(acl::HttpServletRequest& req,
 
 	acl::string data;
 	xml.build_xml(data);
-	printf(">>>>>>>%s\n", data.c_str());
 
 	// 将数据添加进状态管理器中
 	status_manager::get_instance().set_status(key.c_str(), data.c_str());
@@ -296,6 +333,5 @@ bool status_servlet::doXml(acl::HttpServletRequest& req,
 
 	// 将数据添加进状态管理器中
 	status_manager::get_instance().set_status(key.c_str(), data.c_str());
-
 	return reply(req, res, "ok!");
 }
