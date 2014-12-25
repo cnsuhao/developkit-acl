@@ -60,7 +60,7 @@ bool status_servlet::doUnknown(acl::HttpServletRequest&,
 
 bool status_servlet::doError(acl::HttpServletRequest&, acl::HttpServletResponse&)
 {
-	logger_error("error happend");
+	//logger_error("error happend");
 	return false;
 }
 

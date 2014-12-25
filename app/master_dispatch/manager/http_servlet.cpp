@@ -111,7 +111,7 @@ bool http_servlet::doUnknown(acl::HttpServletRequest&,
 
 bool http_servlet::doError(acl::HttpServletRequest&, acl::HttpServletResponse&)
 {
-	logger_error("error happend");
+	//logger_error("error happend");
 	return false;
 }
 
