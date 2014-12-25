@@ -32,7 +32,7 @@ acl::string& status_manager::get_status(acl::string& out)
 	lock_.lock();
 	std::map<acl::string, server_status*>::const_iterator cit =
 		servers_status_.begin();
-	for (; cit != servers_status_.end(); ++cit++)
+	for (; cit != servers_status_.end(); ++cit)
 		out << cit->second->get_data();
 	lock_.unlock();
 
