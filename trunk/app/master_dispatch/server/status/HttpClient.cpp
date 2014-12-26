@@ -61,12 +61,15 @@ bool HttpClient::send()
 
 	long long int length = req.body_length();
 	if (length <= 0)
-		return false;
+		return true;
 
 	// 将响应数据体读完
 	acl::string buf;
 	if (req.get_body(buf) == false)
+	{
 		logger_error("read response body failed!");
+		return false;
+	}
 
 	return true;
 }
