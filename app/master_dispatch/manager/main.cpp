@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
 	if (argc >= 2 && strcmp(argv[1], "alone") == 0)
 	{
 		acl::log::stdout_open(true);  // 日志输出至标准输出
-		const char* addr = "10080, 10081";
+		const char* addr = "20080, 20081";
 		printf("listen on: %s\r\n", addr);
 		if (argc >= 3)
 			ms.run_alone(addr, argv[2], 0, 100);  // 单独运行方式
