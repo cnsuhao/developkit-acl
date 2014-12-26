@@ -102,7 +102,7 @@ service master_dispatch {
 #	客户端连接未被后端子进程接收的超时时间(秒)
 	conn_expired = 10
 #	接收状态汇报的多个管理服务器地址，格式：ip:port; ip:port ...
-	status_servers = 127.0.0.1:10081; 127.0.0.1:20081
+	status_servers = 127.0.0.1:10081
 #	定时向接收服务器汇报状态的定时器时间间隔(秒)
 	status_timer = 2
 #	接收状态请求的本地服务
