@@ -13,14 +13,14 @@
 // 配置内容项
 
 char *var_cfg_backend_service;
-char *var_cfg_status_server;
+char *var_cfg_status_servers;
 char *var_cfg_status_service;
 char *var_cfg_session_addr;  // memcache 服务器地址，以备将来使用
 char *var_cfg_rpc_addr;
 char *var_cfg_manager_allow;
 acl::master_str_tbl var_conf_str_tab[] = {
 	{ "backend_service", "dispatch.sock", &var_cfg_backend_service },
-	{ "status_server", "", &var_cfg_status_server },
+	{ "status_servers", "", &var_cfg_status_servers },
 	{ "status_service", "1080", &var_cfg_status_service },
 	{ "session_addr", "127.0.0.1:11211", &var_cfg_session_addr },
 	{ "rpc_addr", "127.0.0.1:0", &var_cfg_rpc_addr },
@@ -180,7 +180,7 @@ void master_service::proc_on_init()
 
 	// 如果配置了状态服务器，则启动状态汇报定时器，定时向状态服务器
 	// 汇报进程状态
-	if (var_cfg_status_server && *var_cfg_status_server
+	if (var_cfg_status_servers && *var_cfg_status_servers
 		&& var_cfg_status_timer > 0)
 	{
 		// 启动服务器状态汇报定时器
