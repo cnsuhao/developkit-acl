@@ -1,6 +1,6 @@
 #include "stdafx.h"
-#include "status_manager.h"
-#include "server_servlet.h"
+#include "push_mode/status_manager.h"
+#include "push_mode/server_servlet.h"
 
 server_servlet::server_servlet()
 {

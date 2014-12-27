@@ -1,7 +1,7 @@
 #include "stdafx.h"
-#include "message.h"
-#include "message_manager.h"
-#include "collect_client.h"
+#include "pull_mode/message.h"
+#include "pull_mode/message_manager.h"
+#include "pull_mode/collect_client.h"
 
 collect_client::collect_client(message_manager& manager, const char* server)
 : manager_(manager)

@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "access_list.h"
 #include "client_servlet.h"
-#include "server_servlet.h"
-#include "server_manager.h"
+#include "pull_mode/server_manager.h"
+#include "push_mode/server_servlet.h"
 #include "master_service.h"
 
 //////////////////////////////////////////////////////////////////////////////

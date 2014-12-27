@@ -72,10 +72,13 @@ ifneq ($(SYSPATH),)
 endif
 ###########################################################
 
-CFLAGS += -I../../../lib_acl/include -I../../../lib_protocol/include -I../../../lib_acl_cpp/include
+CFLAGS += -I../../../lib_acl/include -I../../../lib_protocol/include \
+	  -I../../../lib_acl_cpp/include -I.
 EXTLIBS =
-LDFLAGS = -L../../../lib_acl_cpp/lib -l_acl_cpp -L../../../lib_protocol/lib -l_protocol -L../../../lib_acl/lib -l_acl \
-	$(EXTLIBS) $(SYSLIB) -rdynamic
+LDFLAGS = -L../../../lib_acl_cpp/lib -l_acl_cpp \
+	  -L../../../lib_protocol/lib -l_protocol \
+	  -L../../../lib_acl/lib -l_acl \
+	  $(EXTLIBS) $(SYSLIB) -rdynamic
 
 COMPILE = $(CC) $(CFLAGS)
 LINK = $(CC) $(OBJ) $(LDFLAGS)
@@ -83,10 +86,14 @@ LINK = $(CC) $(OBJ) $(LDFLAGS)
 OBJ_PATH = .
 
 #Project's objs
-SRC = $(wildcard *.cpp)
+SRC = $(wildcard *.cpp) $(wildcard pull_mode/*.cpp) $(wildcard push_mode/*.cpp)
 OBJ = $(patsubst %.cpp, $(OBJ_PATH)/%.o, $(notdir $(SRC)))
 
 $(OBJ_PATH)/%.o: %.cpp
+	$(COMPILE) $< -o $@
+$(OBJ_PATH)/%.o: pull_mode/%.cpp
+	$(COMPILE) $< -o $@
+$(OBJ_PATH)/%.o: push_mode/%.cpp
 	$(COMPILE) $< -o $@
 
 .PHONY = all clean
