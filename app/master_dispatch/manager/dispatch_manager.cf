@@ -110,29 +110,33 @@ service dispatch_manager {
 ############################################################################
 #	应用自己的配置选项
 
-#	mysql 服务地址
-#	mysql_dbaddr = /tmp/mysql.sock
-#	mysql_dbaddr = 10.0.250.199:3306
-#	连接 mysql 数据库的连接池的最大值
-#	mysql_dbmax  = 200
-#	ping mysql 连接的间隔时间, 以秒为单位
-#	mysql_dbping = 10
-#	mysql 连接空闲的时间间隔, 以秒为单位
-#	mysql_dbtimeout = 30
+##	是否对前端访问者进行 POP 方式的身份验证
+#	auth_enable = 0
+#	如果打开了身份验证开关，则此项配置了 POP 服务器地址，格式: ip:port
+#	pop_server =
+#	允许前端访问的邮箱账户，当 auth_enable 打开时有效，格式：xxx@xxx.xxx.xxx; @xxx.xxx
+#	或填写 all 表示都允许
+#	allow_users = all
+#
+##	IP 访问权限配置
+#
+#	允许前端访问的 IP 地址范围，格式：from_ip:to_ip, from_ip:to_ip ...
+#	allow_clients = all
+#	允许后端访问的 IP 地址范围，格式：from_ip:to_ip, from_ip:to_ip ...
+#	allow_servers = 127.0.0.1:127.0.0.1, 192.168.0.0:192.168.255.255
 
-#	数据库名称
-#	mysql_dbname = ioctl_db
-#	数据库访问用户
-#	mysql_dbuser = ioctl_user
-#	数据库用户访问密码
-#	mysql_dbpass = 111111
-
-#	是否输出当前内存的状态信息
-#	debug_mem = 1
-#	是否在一个线程中连接读
-#	loop_read = 1
+#	数据的获取是采用拉的模式还是推的模式：当采用拉的模式时，每次都要从
+#	后端的 TCP 派发器拉数据；当采用推的模式时，则后端 TCP 派发器主动将
+#	数据推送至本管理服务器，当前端页面访问数据时直接将数据返回
+#	pull_data = 0
+#
+##	采用拉数据模式下的配置选项：
+#
 #	TCP 派发器列表，格式：ip:port; ip:port ...
-	server_list = 127.0.0.1:1080, 127.0.0.1:1082 #, 127.0.0.1:1081
+#	server_list = 127.0.0.1:1080, 127.0.0.1:1082
+#
+##	采用推数据模式下的配置选项：
+#
 #	接收后端服务器程序的数据推送请求
 	status_service = 10081
 }
