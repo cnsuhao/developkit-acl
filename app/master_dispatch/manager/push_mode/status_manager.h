@@ -1,14 +1,52 @@
 #pragma once
 #include <vector>
+#include <set>
+
+class server_ttl
+{
+public:
+	server_ttl(const char* key)
+		: key_(key)
+	{
+		when_ = time(NULL) + var_cfg_status_ttl;
+	}
+
+	~server_ttl() {}
+
+	time_t get_when() const
+	{
+		return when_;
+	}
+
+	const char* get_key() const
+	{
+		return key_.c_str();
+	}
+
+private:
+	time_t when_;
+	acl::string key_;
+};
+
+class server_ttl_comp
+{
+public:
+	bool operator()(const server_ttl* left, const server_ttl* right)
+	{
+		return left->get_when() < right->get_when();
+	}
+};
 
 class server_status
 {
 public:
-	server_status(const char* key, const char* data)
-		: key_(key)
+	server_status(server_ttl& ttl, const char* key, const char* data)
+		: ttl_(ttl)
+		, key_(key)
 		, data_(data)
 	{
 	}
+
 	~server_status() {}
 
 	const char* get_data() const
@@ -16,8 +54,18 @@ public:
 		return data_.c_str();
 	}
 
+	const char* get_key() const
+	{
+		return key_.c_str();
+	}
+
+	server_ttl& get_ttl() const
+	{
+		return ttl_;
+	}
+
 private:
-	time_t when_;
+	server_ttl& ttl_;
 	acl::string key_;
 	acl::string data_;
 };
@@ -44,6 +92,12 @@ public:
 	void set_status(const char* key, const char* data);
 
 	/**
+	 * 删除某个服务器结点的状态数据
+	 * @param key {const char*} 标识某个服务结点
+	 */
+	void del_status(const char* key);
+
+	/**
 	 * 将过期的数据清除
 	 * @return {int} 被清除的数据数量
 	 */
@@ -52,4 +106,7 @@ public:
 private:
 	acl::locker lock_;
 	std::map<acl::string, server_status*> servers_status_;
+	std::multiset<server_ttl*, server_ttl_comp> servers_ttl_;
+
+	void del_server_ttl(server_ttl& ttl);
 };
