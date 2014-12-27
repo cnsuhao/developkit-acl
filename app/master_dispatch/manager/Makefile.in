@@ -83,7 +83,7 @@ LDFLAGS = -L../../../lib_acl_cpp/lib -l_acl_cpp \
 COMPILE = $(CC) $(CFLAGS)
 LINK = $(CC) $(OBJ) $(LDFLAGS)
 ###########################################################
-OBJ_PATH = .
+OBJ_PATH = ./debug
 
 #Project's objs
 SRC = $(wildcard *.cpp) $(wildcard pull_mode/*.cpp) $(wildcard push_mode/*.cpp)
