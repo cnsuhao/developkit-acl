@@ -108,8 +108,10 @@ bool master_service::thread_on_accept(acl::socket_stream* conn)
 	logger_debug(DEBUG_CONN, 2, "connect from %s, fd: %d",
 		conn->get_peer(true), conn->sock_handle());
 
-	acl::HttpServlet* servlet;
+	// 设置读写超时时间
 	conn->set_rw_timeout(var_cfg_rw_timeout);
+
+	acl::HttpServlet* servlet;
 
 	// 根据所访问的服务地址区分访问的数据类型
 
@@ -135,6 +137,7 @@ bool master_service::thread_on_accept(acl::socket_stream* conn)
 		logger_warn("Denied from client ip: %s", peer);
 		return false;
 	}
+	// 创建为前端客户端提供服务的服务对象
 	else
 		servlet = new client_servlet(var_cfg_server_domain,
 			var_cfg_server_port);
