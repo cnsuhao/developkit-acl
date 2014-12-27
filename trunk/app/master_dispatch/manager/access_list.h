@@ -9,14 +9,13 @@ public:
 	access_list();
 	~access_list();
 
-	void init_users(const char* whitelist);
-	void add_user(const char* user);
+	void set_allow_users(const char* whitelist);
 	bool check_user(const char* user);
 
 	void set_allow_clients(const char* iplist);
-	void set_allow_servers(const char* iplist);
-
 	bool check_client(const char* ip);
+
+	void set_allow_servers(const char* iplist);
 	bool check_server(const char* ip);
 
 private:
@@ -24,4 +23,6 @@ private:
 	std::vector<acl::string> white_list_;
 	ACL_IPLINK* allow_clients_;
 	ACL_IPLINK* allow_servers_;
+
+	void add_user(const char* user);
 };

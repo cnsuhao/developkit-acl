@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "access_list.h"
-#include "http_servlet.h"
-#include "status_servlet.h"
+#include "client_servlet.h"
+#include "server_servlet.h"
 #include "server_manager.h"
 #include "master_service.h"
 
@@ -14,6 +14,7 @@ char *var_cfg_login_page;
 char *var_cfg_server_domain;
 char *var_cfg_html_charset;
 char *var_cfg_pop_server;
+char *var_cfg_allow_users;
 char *var_cfg_allow_clients;
 char *var_cfg_allow_servers;
 char *var_cfg_memcache_addr;
@@ -21,18 +22,22 @@ char *var_cfg_session_key;
 char *var_cfg_path_info;
 char *var_cfg_status_service;
 acl::master_str_tbl var_conf_str_tab[] = {
-	{ "server_list", "", &var_cfg_servers },
 	{ "index_page", "index.htm", &var_cfg_index_page },
 	{ "login_page", "login.htm", &var_cfg_login_page },
 	{ "server_domain", "", &var_cfg_server_domain },
 	{ "html_charset", "utf-8", &var_cfg_html_charset },
-	{ "pop_server", "pop.263.net:110", &var_cfg_pop_server },
+	{ "session_key", "dispatch_manager_id", &var_cfg_session_key },
+	{ "memcache_addr", "127.0.0.1:11211", &var_cfg_memcache_addr },
+	{ "path_info", "/dispatch_collect", &var_cfg_path_info },
+
+	{ "pop_server", "", &var_cfg_pop_server },
+
+	{ "allow_users", "all", &var_cfg_allow_users },
 	{ "allow_clients", "all", &var_cfg_allow_clients },
 	{ "allow_servers", "127.0.0.1:127.0.0.1, 192.168.0.0:192.168.255.255",
 		&var_cfg_allow_servers },
-	{ "memcache_addr", "127.0.0.1:11211", &var_cfg_memcache_addr },
-	{ "session_key", "dispatch_manager_id", &var_cfg_session_key },
-	{ "path_info", "/dispatch_collect", &var_cfg_path_info },
+
+	{ "server_list", "", &var_cfg_servers },
 	{ "status_service", "", &var_cfg_status_service },
 
 	{ 0, 0, 0 }
@@ -106,6 +111,9 @@ bool master_service::thread_on_accept(acl::socket_stream* conn)
 	acl::HttpServlet* servlet;
 	conn->set_rw_timeout(var_cfg_rw_timeout);
 
+	// 根据所访问的服务地址区分访问的数据类型
+
+	// 当访问者来自于后端服务器集群时
 	if (acl_strrncasecmp(local, var_cfg_status_service,
 		strlen(var_cfg_status_service)) == 0)
 	{
@@ -116,22 +124,20 @@ bool master_service::thread_on_accept(acl::socket_stream* conn)
 			return false;
 		}
 
-		servlet = new status_servlet();
+		servlet = new server_servlet();
 		// 因为请求数据体是 JSON/XML 数据，所以不要求解析
 		servlet->setParseBody(false);
 	}
-	else
-	{
-		// 检查客户端 IP 访问权限
-		if (access_list::get_instance().check_client(peer) == false)
-		{
-			logger_warn("Denied from client ip: %s", peer);
-			return false;
-		}
 
-		servlet = new http_servlet(var_cfg_server_domain,
-			var_cfg_server_port);
+	// 当访问者来自于前端时，检查客户端 IP 访问权限
+	else if (access_list::get_instance().check_client(peer) == false)
+	{
+		logger_warn("Denied from client ip: %s", peer);
+		return false;
 	}
+	else
+		servlet = new client_servlet(var_cfg_server_domain,
+			var_cfg_server_port);
 
 	conn->set_ctx(servlet);
 	return true;
@@ -164,25 +170,39 @@ void master_service::thread_on_exit()
 
 void master_service::proc_on_init()
 {
-	// 先使用配置文件中的服务器项
-	if (server_manager::get_instance().init(var_cfg_servers) == false)
-		logger("Add static server: none!");
+	// 初始化用户端 IP 访问白名单
+	if (var_cfg_allow_clients && *var_cfg_allow_clients)
+	{
+		access_list::get_instance()
+			.set_allow_clients(var_cfg_allow_clients);
+	}
+
+	/*----------------- 拉数据模式下的配置选项 ------------------------*/
 
 	// 初始化 DNS 查询的在 acl 库中的缓存时间
 	acl_netdb_cache_init(var_cfg_dns_ttl, 1);
 
+	// 先使用配置文件中的服务器项
+	if (var_cfg_servers && *var_cfg_servers && server_manager
+		::get_instance().init(var_cfg_servers) == false)
+	{
+		logger("Add static server: none!");
+	}
+
 	// 初始化用户访问白名单
-	access_list::get_instance().init_users(var_cfg_allow_clients);
-
-	// 初始化用户端 IP 访问白名单
-	if (var_cfg_allow_clients && *var_cfg_allow_clients)
+	if (var_cfg_allow_users && *var_cfg_allow_users)
+	{
 		access_list::get_instance()
-			.set_allow_clients(var_cfg_allow_clients);
+			.set_allow_users(var_cfg_allow_users);
+	}
 
+	/*----------------- 推数据模式下的配置选项 ------------------------*/
 	// 初始化后端服务 IP 访问白名单
 	if (var_cfg_allow_servers && *var_cfg_allow_servers)
+	{
 		access_list::get_instance()
 			.set_allow_servers(var_cfg_allow_servers);
+	}
 }
 
 void master_service::proc_on_exit()

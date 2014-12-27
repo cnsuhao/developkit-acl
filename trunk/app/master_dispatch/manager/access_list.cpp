@@ -14,7 +14,7 @@ access_list::~access_list()
 	acl_iplink_free(allow_servers_);
 }
 
-void access_list::init_users(const char* whitelist)
+void access_list::set_allow_users(const char* whitelist)
 {
 	if (strcasecmp(whitelist, "all") == 0)
 	{
