@@ -3,11 +3,11 @@
 class message;
 class message_manager;
 
-class http_servlet : public acl::HttpServlet
+class client_servlet : public acl::HttpServlet
 {
 public:
-	http_servlet(const char* domain, int port);
-	~http_servlet();
+	client_servlet(const char* domain, int port);
+	~client_servlet();
 
 protected:
 	virtual bool doUnknown(acl::HttpServletRequest&,

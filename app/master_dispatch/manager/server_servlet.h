@@ -3,11 +3,11 @@
 class message;
 class message_manager;
 
-class status_servlet : public acl::HttpServlet
+class server_servlet : public acl::HttpServlet
 {
 public:
-	status_servlet();
-	~status_servlet();
+	server_servlet();
+	~server_servlet();
 
 protected:
 	virtual bool doUnknown(acl::HttpServletRequest&,

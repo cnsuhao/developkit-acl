@@ -1,16 +1,16 @@
 #include "stdafx.h"
 #include "status_manager.h"
-#include "status_servlet.h"
+#include "server_servlet.h"
 
-status_servlet::status_servlet()
+server_servlet::server_servlet()
 {
 }
 
-status_servlet::~status_servlet()
+server_servlet::~server_servlet()
 {
 }
 
-bool status_servlet::reply(acl::HttpServletRequest& req,
+bool server_servlet::reply(acl::HttpServletRequest& req,
 	acl::HttpServletResponse& res, const char* fmt, ...)
 {
 	acl::string buf;
@@ -27,7 +27,7 @@ bool status_servlet::reply(acl::HttpServletRequest& req,
 	return res.write(buf) && req.isKeepAlive();
 }
 
-bool status_servlet::reply_status(acl::HttpServletRequest& req,
+bool server_servlet::reply_status(acl::HttpServletRequest& req,
 	acl::HttpServletResponse& res, int status, const char* fmt, ...)
 {
 	acl::string buf;
@@ -44,7 +44,7 @@ bool status_servlet::reply_status(acl::HttpServletRequest& req,
 	return res.write(buf) && req.isKeepAlive();
 }
 
-bool status_servlet::doUnknown(acl::HttpServletRequest&,
+bool server_servlet::doUnknown(acl::HttpServletRequest&,
 	acl::HttpServletResponse& res)
 {
 	res.setStatus(400);
@@ -58,19 +58,19 @@ bool status_servlet::doUnknown(acl::HttpServletRequest&,
 	return false;
 }
 
-bool status_servlet::doError(acl::HttpServletRequest&, acl::HttpServletResponse&)
+bool server_servlet::doError(acl::HttpServletRequest&, acl::HttpServletResponse&)
 {
 	//logger_error("error happend");
 	return false;
 }
 
-bool status_servlet::doGet(acl::HttpServletRequest& req,
+bool server_servlet::doGet(acl::HttpServletRequest& req,
 	acl::HttpServletResponse& res)
 {
 	return doPost(req, res);
 }
 
-bool status_servlet::doPost(acl::HttpServletRequest& req,
+bool server_servlet::doPost(acl::HttpServletRequest& req,
 	acl::HttpServletResponse& res)
 {
 	bool keep_alive = req.isKeepAlive();
@@ -95,7 +95,7 @@ bool status_servlet::doPost(acl::HttpServletRequest& req,
 	}
 }
 
-bool status_servlet::doJson(acl::HttpServletRequest& req,
+bool server_servlet::doJson(acl::HttpServletRequest& req,
 	acl::HttpServletResponse& res)
 {
 	long long int length = req.getContentLength();
@@ -236,7 +236,7 @@ bool status_servlet::doJson(acl::HttpServletRequest& req,
 	return reply(req, res, "ok!");
 }
 
-bool status_servlet::doXml(acl::HttpServletRequest& req,
+bool server_servlet::doXml(acl::HttpServletRequest& req,
 	acl::HttpServletResponse& res)
 {
 	long long int length = req.getContentLength();

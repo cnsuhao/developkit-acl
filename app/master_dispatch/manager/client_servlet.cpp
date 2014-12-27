@@ -5,21 +5,21 @@
 #include "message.h"
 #include "message_manager.h"
 #include "status_manager.h"
-#include "http_servlet.h"
+#include "client_servlet.h"
 
-http_servlet::http_servlet(const char* domain, int port)
+client_servlet::client_servlet(const char* domain, int port)
 : port_(port)
 {
 	if (domain && *domain)
 		domain_ = domain;
 }
 
-http_servlet::~http_servlet(void)
+client_servlet::~client_servlet(void)
 {
 
 }
 
-bool http_servlet::reply(acl::HttpServletRequest& req,
+bool client_servlet::reply(acl::HttpServletRequest& req,
 	acl::HttpServletResponse& res, const char* fmt, ...)
 {
 	acl::string buf;
@@ -36,7 +36,7 @@ bool http_servlet::reply(acl::HttpServletRequest& req,
 	return res.write(buf) && req.isKeepAlive();
 }
 
-bool http_servlet::reply_status(acl::HttpServletRequest& req,
+bool client_servlet::reply_status(acl::HttpServletRequest& req,
 	acl::HttpServletResponse& res, int status, const char* fmt, ...)
 {
 	acl::string buf;
@@ -53,7 +53,7 @@ bool http_servlet::reply_status(acl::HttpServletRequest& req,
 	return res.write(buf) && req.isKeepAlive();
 }
 
-bool http_servlet::show_page(acl::HttpServletRequest& req,
+bool client_servlet::show_page(acl::HttpServletRequest& req,
 	acl::HttpServletResponse& res, const char* fmt, ...)
 {
 	acl::string buf;
@@ -78,7 +78,7 @@ bool http_servlet::show_page(acl::HttpServletRequest& req,
 	return res.write(page_buf) && req.isKeepAlive();
 }
 
-bool http_servlet::show_login(acl::HttpServletRequest& req,
+bool client_servlet::show_login(acl::HttpServletRequest& req,
 	acl::HttpServletResponse& res)
 {
 	acl::string page_buf;
@@ -95,7 +95,7 @@ bool http_servlet::show_login(acl::HttpServletRequest& req,
 	return res.write(page_buf) && req.isKeepAlive();
 }
 
-bool http_servlet::doUnknown(acl::HttpServletRequest&,
+bool client_servlet::doUnknown(acl::HttpServletRequest&,
 	acl::HttpServletResponse& res)
 {
 	res.setStatus(400);
@@ -109,13 +109,13 @@ bool http_servlet::doUnknown(acl::HttpServletRequest&,
 	return false;
 }
 
-bool http_servlet::doError(acl::HttpServletRequest&, acl::HttpServletResponse&)
+bool client_servlet::doError(acl::HttpServletRequest&, acl::HttpServletResponse&)
 {
 	//logger_error("error happend");
 	return false;
 }
 
-bool http_servlet::get_servers()
+bool client_servlet::get_servers()
 {
 	servers_.clear();
 
@@ -138,7 +138,7 @@ bool http_servlet::get_servers()
 		return true;
 }
 
-void http_servlet::lookup_dns()
+void client_servlet::lookup_dns()
 {
 	if (domain_.empty())
 	{
@@ -168,14 +168,14 @@ void http_servlet::lookup_dns()
 	acl_netdb_free(res);
 }
 
-bool http_servlet::doGet(acl::HttpServletRequest& req,
+bool client_servlet::doGet(acl::HttpServletRequest& req,
 	acl::HttpServletResponse& res)
 {
 	return doPost(req, res);
 }
 
 // 使用 POP 账户进行身份认证
-bool http_servlet::doLogin(const char* user, const char* pass)
+bool client_servlet::doLogin(const char* user, const char* pass)
 {
 	acl::socket_stream conn;
 	if (conn.open(var_cfg_pop_server, var_cfg_conn_timeout,
@@ -251,7 +251,7 @@ bool http_servlet::doLogin(const char* user, const char* pass)
 	return true;
 }
 
-bool http_servlet::doPost(acl::HttpServletRequest& req,
+bool client_servlet::doPost(acl::HttpServletRequest& req,
 	acl::HttpServletResponse& res)
 {
 	bool keep_alive = req.isKeepAlive();
@@ -342,7 +342,7 @@ bool http_servlet::doPost(acl::HttpServletRequest& req,
 	return doAction(req, res);
 }
 
-bool http_servlet::doAction(acl::HttpServletRequest& req,
+bool client_servlet::doAction(acl::HttpServletRequest& req,
 	acl::HttpServletResponse& res)
 {
 	// 设置块传输方式，则给浏览器以块传输方式回复数据
@@ -384,7 +384,7 @@ bool http_servlet::doAction(acl::HttpServletRequest& req,
 	return req.isKeepAlive();
 }
 
-bool http_servlet::doResponse(acl::HttpServletRequest&,
+bool client_servlet::doResponse(acl::HttpServletRequest&,
 	acl::HttpServletResponse& res)
 {
 	acl::string buf;
@@ -396,7 +396,7 @@ bool http_servlet::doResponse(acl::HttpServletRequest&,
 	return true;
 }
 
-bool http_servlet::doRequest(acl::HttpServletRequest& req,
+bool client_servlet::doRequest(acl::HttpServletRequest& req,
 	acl::HttpServletResponse& res)
 {
 	// 启动多线程，向所有日志查询服务器查询日志内容
@@ -436,7 +436,7 @@ bool http_servlet::doRequest(acl::HttpServletRequest& req,
 	return ok;
 }
 
-bool http_servlet::wait_result(acl::HttpServletResponse& res,
+bool client_servlet::wait_result(acl::HttpServletResponse& res,
 	message_manager& manager, int nthreads)
 {
 	bool disconnected = false;
@@ -470,7 +470,7 @@ bool http_servlet::wait_result(acl::HttpServletResponse& res,
 	return !disconnected;
 }
 
-int http_servlet::reply(acl::HttpServletResponse& res, message& msg)
+int client_servlet::reply(acl::HttpServletResponse& res, message& msg)
 {
 	//const acl::string& server = msg.get_server();
 	const acl::string& buf = msg.get_result();
