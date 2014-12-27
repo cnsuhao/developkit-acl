@@ -3,6 +3,7 @@
 #include "client_servlet.h"
 #include "pull_mode/server_manager.h"
 #include "push_mode/server_servlet.h"
+#include "push_mode/status_timer.h"
 #include "master_service.h"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -58,6 +59,7 @@ int   var_cfg_dns_ttl;
 int   var_cfg_server_port;
 int   var_cfg_session_ttl;
 int   var_cfg_status_timer;
+int   var_cfg_status_ttl;
 acl::master_int_tbl var_conf_int_tab[] = {
 	{ "conn_timeout", 30, &var_cfg_conn_timeout, 0, 0 },
 	{ "rw_timeout", 30, &var_cfg_rw_timeout, 0, 0 },
@@ -65,6 +67,7 @@ acl::master_int_tbl var_conf_int_tab[] = {
 	{ "server_port", 10081, &var_cfg_server_port, 0, 0 },
 	{ "session_ttl", 3600, &var_cfg_session_ttl, 0, 0 },
 	{ "status_timer", 1, &var_cfg_status_timer, 0, 0 },
+	{ "status_ttl", 10, &var_cfg_status_ttl, 0, 0 },
 
 	{ 0, 0 , 0 , 0, 0 }
 };
@@ -77,11 +80,13 @@ acl::master_int64_tbl var_conf_int64_tab[] = {
 //////////////////////////////////////////////////////////////////////////
 
 master_service::master_service()
+: status_timer_(NULL)
 {
 }
 
 master_service::~master_service()
 {
+	status_timer_->destroy();
 }
 
 bool master_service::thread_on_read(acl::socket_stream* conn)
@@ -183,7 +188,7 @@ void master_service::proc_on_init()
 	/*----------------- 拉数据模式下的配置选项 ------------------------*/
 
 	// 初始化 DNS 查询的在 acl 库中的缓存时间
-	acl_netdb_cache_init(var_cfg_dns_ttl, 1);
+	// acl_netdb_cache_init(var_cfg_dns_ttl, 1);
 
 	// 先使用配置文件中的服务器项
 	if (var_cfg_servers && *var_cfg_servers && server_manager
@@ -205,6 +210,15 @@ void master_service::proc_on_init()
 	{
 		access_list::get_instance()
 			.set_allow_servers(var_cfg_allow_servers);
+	}
+
+	// 采用定时器用来清理长时间未汇报状态的服务器信息
+	if (var_cfg_status_ttl > 0)
+	{
+		status_timer_ = new status_timer();
+		status_timer_->keep_timer(true);
+		status_timer_->set_task(1, 1000000);
+		proc_set_timer(status_timer_);
 	}
 }
 
