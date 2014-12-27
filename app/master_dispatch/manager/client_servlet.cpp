@@ -1,10 +1,10 @@
 #include "stdafx.h"
 #include "access_list.h"
-#include "server_manager.h"
-#include "collect_client.h"
-#include "message.h"
-#include "message_manager.h"
-#include "status_manager.h"
+#include "pull_mode/server_manager.h"
+#include "pull_mode/collect_client.h"
+#include "pull_mode/message.h"
+#include "pull_mode/message_manager.h"
+#include "push_mode/status_manager.h"
 #include "client_servlet.h"
 
 client_servlet::client_servlet(const char* domain, int port)

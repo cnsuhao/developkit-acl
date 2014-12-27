@@ -1,6 +1,6 @@
 #include "stdafx.h"
-#include "message.h"
-#include "message_manager.h"
+#include "pull_mode/message.h"
+#include "pull_mode/message_manager.h"
 
 message_manager::message_manager(void)
 {

@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "message.h"
+#include "pull_mode/message.h"
 
 message::message(const acl::string& server)
 : server_(server)

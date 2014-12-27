@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "server_manager.h"
+#include "pull_mode/server_manager.h"
 
 bool server_manager::init(const char* server_list)
 {
