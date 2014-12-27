@@ -86,12 +86,12 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\lib_acl_cpp\include;..\..\..\lib_acl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\lib_acl_cpp\include;..\..\..\lib_acl\include;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
@@ -179,34 +179,35 @@ copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir) /Y</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="access_list.cpp" />
-    <ClCompile Include="collect_client.cpp" />
-    <ClCompile Include="http_servlet.cpp" />
+    <ClCompile Include="client_servlet.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="master_service.cpp" />
-    <ClCompile Include="message.cpp" />
-    <ClCompile Include="message_manager.cpp" />
-    <ClCompile Include="server_manager.cpp" />
-    <ClCompile Include="stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugDll|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseDll|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="pull_mode\collect_client.cpp" />
+    <ClCompile Include="pull_mode\message.cpp" />
+    <ClCompile Include="pull_mode\message_manager.cpp" />
+    <ClCompile Include="pull_mode\server_manager.cpp" />
+    <ClCompile Include="push_mode\server_servlet.cpp" />
+    <ClCompile Include="push_mode\status_manager.cpp" />
+    <ClCompile Include="push_mode\status_timer.cpp" />
+    <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="access_list.h" />
-    <ClInclude Include="collect_client.h" />
+    <ClInclude Include="client_servlet.h" />
     <ClInclude Include="global.h" />
-    <ClInclude Include="http_servlet.h" />
     <ClInclude Include="master_service.h" />
-    <ClInclude Include="message.h" />
-    <ClInclude Include="message_manager.h" />
-    <ClInclude Include="server_manager.h" />
+    <ClInclude Include="pull_mode\collect_client.h" />
+    <ClInclude Include="pull_mode\message.h" />
+    <ClInclude Include="pull_mode\message_manager.h" />
+    <ClInclude Include="pull_mode\server_manager.h" />
+    <ClInclude Include="push_mode\server_servlet.h" />
+    <ClInclude Include="push_mode\status_manager.h" />
+    <ClInclude Include="push_mode\status_timer.h" />
     <ClInclude Include="stdafx.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="ReadMe.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

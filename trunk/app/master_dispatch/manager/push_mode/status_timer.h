@@ -6,12 +6,12 @@ public:
 	status_timer();
 
 	/**
-	 * é”€æ¯åŠ¨æ€å¯¹è±¡
+	 * ¶¨Ê±Æ÷±»Ïú»ÙÊ±µÄ»Øµ÷º¯Êı 
 	 */
 	virtual void destroy();
 
 protected:
-	// åŸºç±»è™šå‡½æ•°
+	// ¶¨Ê±Æ÷Ê±¼äµ½µ½´ïÊ±µÄ»Øµ÷º¯Êı 
 	virtual void timer_callback(unsigned int id);
 
 private:
