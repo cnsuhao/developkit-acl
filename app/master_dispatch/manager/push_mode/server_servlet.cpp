@@ -113,8 +113,8 @@ bool server_servlet::doJson(acl::HttpServletRequest& req,
 
 	while (length > 0)
 	{
-		n = length > (long long int) sizeof(buf) - 1
-			? (long long int) sizeof(buf) -1 : length;
+		n = (size_t) length > sizeof(buf) - 1
+			? sizeof(buf) -1 : (size_t) length;
 		ret = in.read(buf, n, false);
 		if (ret == -1)
 		{
@@ -251,12 +251,12 @@ bool server_servlet::doXml(acl::HttpServletRequest& req,
 	int   ret;
 	size_t n;
 
-	acl::string data(length);
+	acl::string data((size_t) length);
 
 	while (length > 0)
 	{
-		n = length > (long long int) sizeof(buf)
-			? (long long int) sizeof(buf) : length;
+		n = (size_t) length > sizeof(buf)
+			? sizeof(buf) : (size_t) length;
 		ret = in.read(buf, n, false);
 		if (ret == -1)
 		{
