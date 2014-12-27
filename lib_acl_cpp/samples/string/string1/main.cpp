@@ -368,7 +368,7 @@ static void test31(void)
 {
 	char buf[1];
 	const char* s = "01234567890123456789";
-	int ret = acl::snprintf(buf, sizeof(buf), "%s", s);
+	int ret = acl::safe_snprintf(buf, sizeof(buf), "%s", s);
 	printf(">>ret: %d, buf: %s, len: %d\r\n", ret, buf, (int) strlen(buf));
 }
 
