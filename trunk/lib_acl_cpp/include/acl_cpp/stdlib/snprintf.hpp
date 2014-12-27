@@ -14,7 +14,7 @@ namespace acl {
  *     >= size；需要注意该返回值的含义与 WIN32 下的不同
  *  2) WIN32 平台下返回 -1
  */
-ACL_CPP_API int ACL_CPP_PRINTF(3, 4) snprintf(char *buf, size_t size,
+ACL_CPP_API int ACL_CPP_PRINTF(3, 4) safe_snprintf(char *buf, size_t size,
 	const char *fmt, ...);
 
 /**
@@ -28,6 +28,6 @@ ACL_CPP_API int ACL_CPP_PRINTF(3, 4) snprintf(char *buf, size_t size,
  *     >= size；需要注意该返回值的含义与 WIN32 下的不同
  *  2) WIN32 平台下返回 -1
  */
-ACL_CPP_API int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap);
+ACL_CPP_API int safe_vsnprintf(char *buf, size_t size, const char *fmt, va_list ap);
 
 }  // namespace acl

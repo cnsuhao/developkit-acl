@@ -9,7 +9,7 @@ namespace acl
 
 # ifdef __STDC_WANT_SECURE_LIB__
 
-int snprintf(char *buf, size_t size, const char *fmt, ...)
+int safe_snprintf(char *buf, size_t size, const char *fmt, ...)
 {
 	va_list ap;
 
@@ -19,7 +19,7 @@ int snprintf(char *buf, size_t size, const char *fmt, ...)
 	return ret;
 }
 
-int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
+int safe_vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
 {
 	if (size == 0)
 	{
@@ -36,7 +36,7 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
 
 # else
 
-int snprintf(char *buf, size_t size, const char *fmt, ...)
+int safe_snprintf(char *buf, size_t size, const char *fmt, ...)
 {
 	va_list ap;
 
@@ -46,7 +46,7 @@ int snprintf(char *buf, size_t size, const char *fmt, ...)
 	return ret;
 }
 
-int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
+int safe_vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
 {
 	if (size == 0)
 	{
@@ -68,7 +68,7 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
 
 #else
 
-int snprintf(char *buf, size_t size, const char *fmt, ...)
+int safe_snprintf(char *buf, size_t size, const char *fmt, ...)
 {
 	va_list ap;
 
@@ -78,7 +78,7 @@ int snprintf(char *buf, size_t size, const char *fmt, ...)
 	return ret;
 }
 
-int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
+int safe_vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
 {
 	return ::vsnprintf(buf, size, fmt, ap);
 }
