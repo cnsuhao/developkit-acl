@@ -155,11 +155,9 @@ ACL_EVENT *acl_event_new_kernel(int delay_sec, int delay_usec)
 	ACL_EVENT *eventp;
 	int   fdsize;
 
-	/* 在 WIN32 下的 iocp 可以支撑更大的连接，考虑到兼容客户端和服务端模式，
-	 * 将此值设为 50000，因为在客户端模式下最大端口号是 65535；
-	 * 在服务器模式下，使用者可以把此值设得更大
+	/* 在 WIN32 下的 iocp 可以支撑更大的连接，默认设为 102400 个连接
 	 */
-	fdsize = 50000;
+	fdsize = 102400;
 	eventp = event_new_iocp(fdsize);
 	event_init(eventp, fdsize, delay_sec, delay_usec);
 	return eventp;
