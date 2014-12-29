@@ -294,7 +294,7 @@ void mime_code::create_decode_tab(const unsigned char *toTab,
 		if (i++ % 16 == 0) {
 			out->append("\r\n");
 		}
-		snprintf(buf, sizeof(buf), "%d, ", *cp);
+		safe_snprintf(buf, sizeof(buf), "%d, ", *cp);
 		out->append((char*) buf);
 	}
 }

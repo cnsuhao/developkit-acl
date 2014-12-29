@@ -37,7 +37,7 @@ queue_manager::queue_manager(const char* home, const char* queueName,
 	for (unsigned i = 0; i < sub_width_; i++)
 	{
 		buf.clear();
-		snprintf(node, sizeof(node), "%d", i);
+		safe_snprintf(node, sizeof(node), "%d", i);
 		buf << home << PATH_SEP << queueName
 			<< PATH_SEP << node;
 		// 创建队列下子目录

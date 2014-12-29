@@ -107,7 +107,7 @@ const char* aio_stream::get_local(bool full /* = false */) const
 
 const char* aio_stream::get_ip(const char* addr, char* buf, size_t size)
 {
-	snprintf(buf, size, "%s", addr);
+	safe_snprintf(buf, size, "%s", addr);
 	char* ptr = strchr(buf, ':');
 	if (ptr)
 		*ptr = 0;

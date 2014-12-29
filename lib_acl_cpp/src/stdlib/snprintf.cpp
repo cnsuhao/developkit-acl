@@ -14,7 +14,7 @@ int safe_snprintf(char *buf, size_t size, const char *fmt, ...)
 	va_list ap;
 
 	va_start(ap, fmt);
-	int ret = acl::vsnprintf(buf, size, fmt, ap);  // 调用 acl::vsnprintf
+	int ret = safe_vsnprintf(buf, size, fmt, ap);  // 调用 acl::vsnprintf
 	va_end(ap);
 	return ret;
 }
@@ -41,7 +41,7 @@ int safe_snprintf(char *buf, size_t size, const char *fmt, ...)
 	va_list ap;
 
 	va_start(ap, fmt);
-	int ret = acl::vsnprintf(buf, size, fmt, ap);  // 调用 acl::vsnprintf
+	int ret = acl::safe_vsnprintf(buf, size, fmt, ap);  // 调用 acl::vsnprintf
 	va_end(ap);
 	return ret;
 }
@@ -73,7 +73,7 @@ int safe_snprintf(char *buf, size_t size, const char *fmt, ...)
 	va_list ap;
 
 	va_start(ap, fmt);
-	int ret = vsnprintf(buf, size, fmt, ap);  // 调用 acl::vsnprintf
+	int ret = safe_vsnprintf(buf, size, fmt, ap);  // 调用 acl::vsnprintf
 	va_end(ap);
 	return ret;
 }

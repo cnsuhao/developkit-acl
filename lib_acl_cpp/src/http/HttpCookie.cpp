@@ -154,7 +154,7 @@ HttpCookie& HttpCookie::setExpires(const char* expires)
 HttpCookie& HttpCookie::setMaxAge(int max_age)
 {
 	char tmp[20];
-	snprintf(tmp, sizeof(tmp), "%d", max_age);
+	safe_snprintf(tmp, sizeof(tmp), "%d", max_age);
 	add("Max-Age", tmp);
 	return *this;
 }

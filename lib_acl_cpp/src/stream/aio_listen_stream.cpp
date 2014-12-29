@@ -41,7 +41,7 @@ bool aio_listen_stream::open(const char* addr)
 	if (sstream == NULL)
 		return false;
 
-	snprintf(addr_, sizeof(addr_), "%s", ACL_VSTREAM_LOCAL(sstream));
+	safe_snprintf(addr_, sizeof(addr_), "%s", ACL_VSTREAM_LOCAL(sstream));
 
 	stream_ = acl_aio_open(handle_->get_handle(), sstream);
 

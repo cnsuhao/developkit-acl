@@ -26,7 +26,8 @@ HttpServlet::~HttpServlet(void)
 HttpServlet& HttpServlet::setLocalCharset(const char* charset)
 {
 	if (charset && *charset)
-		snprintf(local_charset_, sizeof(local_charset_), "%s", charset);
+		safe_snprintf(local_charset_, sizeof(local_charset_),
+			"%s", charset);
 	else
 		local_charset_[0] =0;
 	return *this;

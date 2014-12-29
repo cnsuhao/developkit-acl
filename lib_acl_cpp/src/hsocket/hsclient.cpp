@@ -178,7 +178,7 @@ const std::vector<hsrow*>& hsclient::get(const char* values[], int num,
 	char buf[32], *limit_offset = NULL;
 	if (nlimit > 1)
 	{
-		snprintf(buf, sizeof(buf), "%d\t%d", nlimit, noffset);
+		safe_snprintf(buf, sizeof(buf), "%d\t%d", nlimit, noffset);
 		limit_offset = buf;
 	}
 
@@ -263,7 +263,7 @@ bool hsclient::mod(const char* values[], int num,
 	if (noffset < 0)
 		noffset = 0;
 	char buf[32];
-	snprintf(buf, sizeof(buf), "%d\t%d", nlimit, noffset);
+	safe_snprintf(buf, sizeof(buf), "%d\t%d", nlimit, noffset);
 	return (query(cond, values, num, buf, 'U', to_values, to_num));
 }
 
@@ -303,7 +303,7 @@ bool hsclient::del(const char* values[], int num,
 	char buf[32], *limit_offset = NULL;
 	if (nlimit > 1)
 	{
-		snprintf(buf, sizeof(buf), "%d\t%d", nlimit, noffset);
+		safe_snprintf(buf, sizeof(buf), "%d\t%d", nlimit, noffset);
 		limit_offset = buf;
 	}
 

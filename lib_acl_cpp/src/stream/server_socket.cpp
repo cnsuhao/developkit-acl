@@ -22,7 +22,7 @@ server_socket::~server_socket()
 
 bool server_socket::open(const char* addr)
 {
-	snprintf(addr_, sizeof(addr_), "%s", addr);
+	safe_snprintf(addr_, sizeof(addr_), "%s", addr);
 
 #ifndef WIN32
 	if (strchr(addr, '/') != NULL)

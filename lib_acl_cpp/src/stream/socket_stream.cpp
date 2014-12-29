@@ -201,7 +201,7 @@ bool socket_stream::set_local(const char* addr)
 
 const char* socket_stream::get_ip(const char* addr, char* buf, size_t size)
 {
-	snprintf(buf, size, "%s", addr);
+	safe_snprintf(buf, size, "%s", addr);
 	char* ptr = strchr(buf, ':');
 	if (ptr)
 		*ptr = 0;
