@@ -151,7 +151,7 @@ http_mime::http_mime(const char* boundary,
 	boundary_ = acl_mystrdup(boundary);
 
 	if (local_charset && *local_charset)
-		snprintf(local_charset_, sizeof(local_charset_),
+		safe_snprintf(local_charset_, sizeof(local_charset_),
 			"%s", local_charset);
 	else
 		local_charset_[0] = 0;

@@ -56,8 +56,8 @@ session::session(time_t ttl /* = 0 */, const char* sid /* = NULL */)
 	if (sid == NULL || *sid == 0)
 	{
 		char buf[128];
-		snprintf(buf, sizeof(buf), "acl.%d.%d.%d", (int) tv.tv_sec,
-			(int) tv.tv_usec, rand());
+		safe_snprintf(buf, sizeof(buf), "acl.%d.%d.%d",
+			(int) tv.tv_sec, (int) tv.tv_usec, rand());
 		sid_ = vbuf_new(buf, strlen(buf), TODO_NUL);
 		sid_saved_ = false;
 	}

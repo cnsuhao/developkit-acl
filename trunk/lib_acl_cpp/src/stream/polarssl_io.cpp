@@ -130,7 +130,7 @@ bool polarssl_io::open(ACL_VSTREAM* s)
 	rnd_ = acl_mymalloc(sizeof(ctr_drbg_context));
 
 	char pers[50];
-	snprintf(pers, sizeof(pers), "SSL Pthread Thread %lu",
+	safe_snprintf(pers, sizeof(pers), "SSL Pthread Thread %lu",
 		(unsigned long) acl_pthread_self());
 
 	ret = ::ctr_drbg_init((ctr_drbg_context*) rnd_, entropy_func,
