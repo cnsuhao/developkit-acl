@@ -1,5 +1,6 @@
 #include "acl_stdafx.hpp"
 #include <assert.h>
+#include "acl_cpp/stdlib/snprintf.hpp"
 #include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/stdlib/util.hpp"
 #include "acl_cpp/stdlib/thread.hpp"

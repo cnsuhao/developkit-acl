@@ -1,6 +1,7 @@
 #include "acl_stdafx.hpp"
 #include "../mime/internal/mime_state.hpp"
 #include "../mime/internal/header_opts.hpp"
+#include "acl_cpp/stdlib/snprintf.hpp"
 #include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/stdlib/util.hpp"
 #include "acl_cpp/stdlib/charset_conv.hpp"

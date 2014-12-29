@@ -1,5 +1,6 @@
 #include "acl_stdafx.hpp"
 #include <string.h>
+#include "acl_cpp/stdlib/snprintf.hpp"
 #include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/stdlib/string.hpp"
 #include "acl_cpp/mime/rfc2047.hpp"

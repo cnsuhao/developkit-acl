@@ -18,6 +18,7 @@ char *var_cfg_status_service;
 char *var_cfg_session_addr;  // memcache 服务器地址，以备将来使用
 char *var_cfg_rpc_addr;
 char *var_cfg_manager_allow;
+char *var_cfg_service_name;
 acl::master_str_tbl var_conf_str_tab[] = {
 	{ "backend_service", "dispatch.sock", &var_cfg_backend_service },
 	{ "status_servers", "", &var_cfg_status_servers },
@@ -26,6 +27,7 @@ acl::master_str_tbl var_conf_str_tab[] = {
 	{ "rpc_addr", "127.0.0.1:0", &var_cfg_rpc_addr },
 	{ "manager_allow", "127.0.0.1:127.0.0.1, 192.168.0.0:192.168.255.255",
 		&var_cfg_manager_allow },
+	{ "service_name", "dispatch_service", &var_cfg_service_name },
 
 	{ 0, 0, 0 }
 };
@@ -153,7 +155,7 @@ static void get_local_ip()
 	else
 		var_cfg_local_addr = "127.0.0.1";
 
-	var_cfg_local_addr << ":" << var_cfg_status_service;
+	var_cfg_local_addr << ":" << var_cfg_service_name;
 
 	/* 释放查询结果 */
 	acl_free_ifaddrs(ifconf);

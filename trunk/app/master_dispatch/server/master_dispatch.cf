@@ -109,4 +109,6 @@ service master_dispatch {
 	status_service = 1080
 #	定时统计服务器状态的定时器时间间隔(秒)
 	server_timer = 1
+#	本派发器所代理的服务名称
+	service_name = test_service
 }

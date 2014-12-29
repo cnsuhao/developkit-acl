@@ -5,6 +5,7 @@
 # include "polarssl/ctr_drbg.h"
 # include "polarssl/entropy.h"
 #endif
+#include "acl_cpp/stdlib/snprintf.hpp"
 #include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/stdlib/util.hpp"
 #include "acl_cpp/stream/stream.hpp"
