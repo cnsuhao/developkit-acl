@@ -114,8 +114,8 @@ ACL_EVENT *acl_event_new_poll(int delay_sec, int delay_usec)
 #else
 	const char *myname = "acl_event_new_poll";
 
-	delay_sec = delay_sec;
-	delay_usec = delay_usec;
+	(void) delay_sec;
+	(void) delay_usec;
 	acl_msg_fatal("%s(%d): not support!", myname, __LINE__);
 	return NULL;
 #endif
@@ -134,8 +134,8 @@ ACL_EVENT *acl_event_new_poll_thr(int delay_sec, int delay_usec)
 #else
 	const char *myname = "acl_event_new_poll_thr";
 
-	delay_sec = delay_sec;
-	delay_usec = delay_usec;
+	(void) delay_sec;
+	(void) delay_usec;
 	acl_msg_fatal("%s(%d): not support!", myname, __LINE__);
 	return NULL;
 #endif
@@ -164,8 +164,8 @@ ACL_EVENT *acl_event_new_kernel(int delay_sec, int delay_usec)
 #else
 	const char *myname = "acl_event_new_kernel";
 
-	delay_sec = delay_sec;
-	delay_usec = delay_usec;
+	(void) delay_sec;
+	(void) delay_usec;
 	acl_msg_fatal("%s(%d): not support!", myname, __LINE__);
 	return NULL;
 #endif
@@ -188,8 +188,8 @@ ACL_EVENT *acl_event_new_kernel_thr(int delay_sec, int delay_usec)
 #else
 	const char *myname = "acl_event_new_kernel_thr";
 
-	delay_sec = delay_sec;
-	delay_usec = delay_usec;
+	(void) delay_sec;
+	(void) delay_usec;
 	acl_msg_fatal("%s(%d): not support!", myname, __LINE__);
 	return NULL;
 #endif
