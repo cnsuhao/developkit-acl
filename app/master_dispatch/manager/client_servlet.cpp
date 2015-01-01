@@ -161,7 +161,7 @@ void client_servlet::lookup_dns()
 	acl_foreach(iter, res)
 	{
 		const ACL_HOST_INFO* info = (const ACL_HOST_INFO*) iter.data;
-		acl::snprintf(addr, sizeof(addr), "%s:%d", info->ip, port_);
+		acl::safe_snprintf(addr, sizeof(addr), "%s:%d", info->ip, port_);
 		servers_.push_back(addr);
 	}
 

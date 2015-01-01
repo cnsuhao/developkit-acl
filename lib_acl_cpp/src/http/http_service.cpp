@@ -253,7 +253,7 @@ private:
 	HTTP_IPC_DAT data_;
 	socket_stream client_;
 	ACL_VSTREAM* vstream_;
-	char  addr_[64];
+	//char  addr_[64];
 	HTTP_HDR_RES* hdr_res_;
 	HTTP_RES* res_;
 	bool respond_over_;
@@ -558,7 +558,7 @@ protected:
 		delete this;
 	}
 private:
-	HTTP_HDR_RES* hdr_res_;
+	//HTTP_HDR_RES* hdr_res_;
 };
 
 //////////////////////////////////////////////////////////////////////////
