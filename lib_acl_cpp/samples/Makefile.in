@@ -31,6 +31,12 @@ ifeq ($(findstring FreeBSD, $(OSNAME)), FreeBSD)
 	SYSLIB = -lcrypt -lpthread
 endif
 
+# For Darwin
+ifeq ($(findstring Darwin, $(UNIXNAME)), Darwin)
+	CFLAGS += -DMACOSX -D_REENTRANT
+	UNIXTYPE = MACOSX
+endif
+
 #Path for Linux
 ifeq ($(findstring Linux, $(OSNAME)), Linux)
 	ifeq ($CC, "gcc")
