@@ -33,18 +33,18 @@ endif
 
 # For FreeBSD
 ifeq ($(findstring FreeBSD, $(UNIXNAME)), FreeBSD)
-	ifeq ($(findstring gcc, $(CC)), gcc)
-		CFLAGS += -Wstrict-prototypes
-	endif
 	CFLAGS += -DFREEBSD -D_REENTRANT
 	UNIXTYPE = FREEBSD
 endif
 
+# For Darwin
+ifeq ($(findstring Darwin, $(UNIXNAME)), Darwin)
+	CFLAGS += -DMACOSX -D_REENTRANT
+	UNIXTYPE = MACOSX
+endif
+
 # For Linux
 ifeq ($(findstring Linux, $(UNIXNAME)), Linux)
-	ifeq ($CC, "gcc")
-		CFLAGS += -Wstrict-prototypes
-	endif
 	CFLAGS += -DLINUX2 -D_REENTRANT
 	UNIXTYPE = LINUX
 endif
@@ -66,10 +66,7 @@ endif
 
 # For HP-UX
 ifeq ($(findstring HP-UX, $(UNIXNAME)), HP-UX)
-	ifeq ($CC, "gcc")
-		CFLAGS += -Wstrict-prototypes
-	endif
-	CFLAGS += -DHP_UX -DHPUX11
+	CFLAGS += -DHP_UX -DHPUX11 -D_REENTRANT
 	UNIXTYPE = HPUX
 endif
 
