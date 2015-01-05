@@ -57,9 +57,6 @@ ifeq ($(findstring SunOS, $(UNIXNAME)), SunOS)
 	ifeq ($(findstring sun4u, $(UNIXNAME)), sun4u)
 		SYSLIB = -lsocket -lnsl -lrt
 	endif
-	ifeq ($CC, "gcc")
-		CFLAGS += -Wstrict-prototypes
-	endif
 	CFLAGS += -DSUNOS5 -D_REENTRANT
 	UNIXTYPE = SUNOS5
 endif
