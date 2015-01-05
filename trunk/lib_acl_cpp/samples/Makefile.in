@@ -24,9 +24,6 @@ endif
 
 # For FreeBSD
 ifeq ($(findstring FreeBSD, $(OSNAME)), FreeBSD)
-	ifeq ($(findstring gcc, $(CC)), gcc)
-		CFLAGS += -Wstrict-prototypes
-	endif
 	CFLAGS += -DFREEBSD -D_REENTRANT -Wshadow
 	SYSLIB = -lcrypt -lpthread
 endif
