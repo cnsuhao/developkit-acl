@@ -95,5 +95,5 @@ int acl_is_blocking(ACL_SOCKET fd)
 	acl_msg_error("%s(%d), %s: unsport in win32",
 		__FUNCTION__, __LINE__, myname);
 	return -1;
-#endif // ACL_UNIX
+#endif /* ACL_UNIX */
 }
