@@ -20,11 +20,11 @@ void redis_request::reset()
 	buf_.clear();
 }
 
-const string& redis_request::build(int argc, const char* argv[],
+const string& redis_request::build(size_t argc, const char* argv[],
 	const size_t lens[])
 {
 	buf_.append("*%d\r\n", argc);
-	for (int i = 0; i < argc; i++)
+	for (size_t i = 0; i < argc; i++)
 	{
 		buf_.append("$%u\r\n", (unsigned) lens[i]);
 		buf_.append(argv[i], lens[i]);

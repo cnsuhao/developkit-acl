@@ -12,7 +12,8 @@ public:
 	redis_request(dbuf_pool* pool);
 	~redis_request();
 
-	const string& build(int argc, const char* argv[], const size_t lens[]);
+	const string& build(size_t argc, const char* argv[],
+		const size_t lens[]);
 	void reset();
 
 private:

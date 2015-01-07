@@ -9,6 +9,7 @@
 namespace acl
 {
 
+class dbuf_pool;
 class redis_result;
 
 class ACL_CPP_API redis_client : public connect_client
@@ -19,13 +20,13 @@ public:
 	~redis_client();
 
 	void close();
-	const std::vector<redis_response*>& request(const char* cmd,
-		const void* data, size_t len);
+	
 	void clear();
 
-	bool hmset(const char* key, const std::map<string, string>& value,
+	bool hmset(const char* key, const std::map<string, string>& attrs,
 		int ttl = 0);
-	bool hmget(const char* key, redis_result& result);
+	bool hmget(const char* key, const std::map<string, string>& attrs,
+		redis_result& result);
 	bool delete_keys(const std::list<string>& keys);
 	bool delete_keys(const char* key1, ...);
 
@@ -34,12 +35,24 @@ protected:
 	virtual bool open();
 
 private:
+	dbuf_pool* pool_;
 	socket_stream conn_;
 	char* addr_;
 	int   conn_timeout_;
 	int   rw_timeout_;
 	bool  retry_;
 	std::vector<redis_response*> res_;
+	size_t  argv_size_;
+	const char**  argv_;
+	size_t  argc_;
+	size_t* argv_lens_;
+	string  request_;
+
+	void argv_space(size_t n);
+	void build_request();
+	void build_attrs(const char* cmd, const char* key,
+		const std::map<string, string>& value);
+	bool send_request();
 };
 
 } // end namespace acl
