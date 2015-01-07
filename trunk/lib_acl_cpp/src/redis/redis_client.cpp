@@ -115,4 +115,25 @@ const std::vector<redis_response*>& redis_client::request(const char* cmd,
 	//return tokens;
 }
 
+bool redis_client::hmset(const char* key,
+	const std::map<string, string>& value, int ttl /* = 0 */)
+{
+	return true;
+}
+
+bool redis_client::hmget(const char* key, redis_result& result)
+{
+	return true;
+}
+
+bool redis_client::delete_keys(const std::list<string>& keys)
+{
+	return true;
+}
+
+bool redis_client::delete_keys(const char* key1, ...)
+{
+	return true;
+}
+
 } // end namespace acl
