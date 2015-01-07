@@ -421,9 +421,6 @@
     <ClCompile Include="src\redis\redis_client.cpp">
       <Filter>src\redis</Filter>
     </ClCompile>
-    <ClCompile Include="src\redis\redis_request.cpp">
-      <Filter>src\redis</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\acl_stdafx.hpp">
@@ -937,9 +934,6 @@
       <Filter>include\redis</Filter>
     </ClInclude>
     <ClInclude Include="include\acl_cpp\redis\redis_result.hpp">
-      <Filter>include\redis</Filter>
-    </ClInclude>
-    <ClInclude Include="include\acl_cpp\redis\redis_request.hpp">
       <Filter>include\redis</Filter>
     </ClInclude>
   </ItemGroup>

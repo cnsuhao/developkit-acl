@@ -12,13 +12,18 @@ redis_client::redis_client(const char* addr, int conn_timeout /* = 60 */,
 : conn_timeout_(conn_timeout)
 , rw_timeout_(rw_timeout)
 , retry_(retry)
+, argv_size_(0)
+, argv_(NULL)
+, argv_lens_(NULL)
 {
 	addr_ = acl_mystrdup(addr);
+	pool_ = NEW dbuf_pool();
 }
 
 redis_client::~redis_client()
 {
 	acl_myfree(addr_);
+	delete pool_;
 }
 
 bool redis_client::open()
@@ -47,10 +52,8 @@ void redis_client::clear()
 	res_.clear();
 }
 
-const std::vector<redis_response*>& redis_client::request(const char* cmd,
-	const void* data, size_t len)
+bool redis_client::send_request()
 {
-	string line(128);
 	bool retried = false;
 
 	clear();
@@ -62,11 +65,10 @@ const std::vector<redis_response*>& redis_client::request(const char* cmd,
 		{
 			logger_error("connect server: %s error: %s",
 				addr_, last_serror());
-			return res_;
+			return false;
 		}
 
-		// 先写入数据头
-		if (conn_.write(cmd) == -1)
+		if (conn_.write(request_) == -1)
 		{
 			conn_.close();
 			if (retry_ && !retried)
@@ -76,53 +78,77 @@ const std::vector<redis_response*>& redis_client::request(const char* cmd,
 			}
 			logger_error("write to redis(%s) error: %s",
 				addr_, last_serror());
-			return res_;
+			return false;
 		}
 
-		// 如果有数据体，则写入数据体
-		if (data && len > 0 && (conn_.write(data, len) == -1
-			|| conn_.write("\r\n", 2) == -1))
-		{
-			conn_.close();
-			if (retry_ && !retried)
-			{
-				retried = true;
-				continue;
-			}
-			logger_error("write to redis(%s) error: %s",
-				addr_, last_serror());
-			return res_;
-		}
-
-		line.clear();
-		if (conn_.gets(line) == false || line.empty())
-		{
-			conn_.close();
-			if (retry_ && !retried)
-			{
-				retried = true;
-				continue;
-			}
-			logger_error("gets from redis(%s) error: %s",
-				addr_, last_serror());
-			return res_;
-		}
 		break;
 	}
 
-	return res_;
-	//ACL_ARGV* tokens = acl_argv_split(line.c_str(), "\t ");
-	//return tokens;
-}
-
-bool redis_client::hmset(const char* key,
-	const std::map<string, string>& value, int ttl /* = 0 */)
-{
 	return true;
 }
 
-bool redis_client::hmget(const char* key, redis_result& result)
+void redis_client::argv_space(size_t n)
 {
+	if (argv_size_ >= n)
+		return;
+	argv_size_ = n;
+	argv_ = (const char**) pool_->dbuf_alloc(n * sizeof(char*));
+	argv_lens_ = (size_t*) pool_->dbuf_alloc(n * sizeof(size_t));
+}
+
+void redis_client::build_request()
+{
+	request_.clear();
+	request_.append("*%d\r\n", argc_);
+	for (size_t i = 0; i < argc_; i++)
+	{
+		request_.append("$%lu\r\n", (unsigned long) argv_lens_[i]);
+		request_.append(argv_[i], argv_lens_[i]);
+		request_.append("\r\n");
+	}
+}
+
+void redis_client::build_attrs(const char* cmd, const char* key,
+	const std::map<string, string>& value)
+{
+	argc_ = 2 + value.size() * 2;
+	argv_space(argc_);
+
+	size_t i = 0;
+	argv_[i] = cmd;
+	argv_lens_[i] = strlen(cmd);
+	i++;
+
+	argv_[i] = key;
+	argv_lens_[i] = strlen(key);
+	i++;
+
+	std::map<string, string>::const_iterator cit = value.begin();
+	for (; cit != value.end(); ++cit)
+	{
+		argv_[i] = cit->first.c_str();
+		argv_lens_[i] = strlen(argv_[i]);
+		i++;
+
+		argv_[i] = cit->second.c_str();
+		argv_lens_[i] = strlen(argv_[i]);
+		i++;
+	}
+}
+
+bool redis_client::hmset(const char* key,
+	const std::map<string, string>& attrs, int ttl /* = 0 */)
+{
+	build_attrs("HMSET", key, attrs);
+	build_request();
+	return true;
+}
+
+bool redis_client::hmget(const char* key,
+	const std::map<string, string>& attrs, redis_result& result)
+{
+	build_attrs("HMGET", key, attrs);
+	build_request();
 	return true;
 }
 
