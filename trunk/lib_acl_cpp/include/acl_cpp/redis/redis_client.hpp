@@ -20,6 +20,7 @@ public:
 	~redis_client();
 
 	void close();
+	void reset();
 	
 	redis_result* run(const string& request);
 
@@ -33,11 +34,25 @@ public:
 	const string& build_set(const char* cmd, const char* key,
 		const std::map<string, string>& attrs, string* buf = NULL);
 	const string& build_set(const char* cmd, const char* key,
+		const std::map<string, char*>& attrs, string* buf = NULL);
+	const string& build_set(const char* cmd, const char* key,
+		const std::map<string, const char*>& attrs, string* buf = NULL);
+	const string& build_set(const char* cmd, const char* key,
+		const std::map<int, string>& attrs, string* buf = NULL);
+	const string& build_set(const char* cmd, const char* key,
+		const std::map<int, char*>& attrs, string* buf = NULL);
+	const string& build_set(const char* cmd, const char* key,
+		const std::map<int, const char*>& attrs, string* buf = NULL);
+
+	const string& build_set(const char* cmd, const char* key,
 		const std::vector<string>& names,
 		const std::vector<string>& values, string* buf = NULL);
 	const string& build_set(const char* cmd, const char* key,
 		const std::vector<char*>& names,
 		const std::vector<char*>& values, string* buf = NULL);
+	const string& build_set(const char* cmd, const char* key,
+		const std::vector<const char*>& names,
+		const std::vector<const char*>& values, string* buf = NULL);
 	const string& build_set(const char* cmd, const char* key,
 		const char* names[], const char* values[], size_t argc,
 		string* buf = NULL);
@@ -56,6 +71,8 @@ public:
 		const std::vector<char*>& names, string* buf = NULL);
 	const string& build_get(const char* cmd, const char* key,
 		const std::vector<const char*>& names, string* buf = NULL);
+	const string& build_get(const char* cmd, const char* key,
+		const std::vector<int>& names, string* buf = NULL);
 	const string& build_get(const char* cmd, const char* key,
 		const char* names[], size_t argc, string* buf = NULL);
 	const string& build_get(const char* cmd, const char* key,

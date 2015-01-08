@@ -15,18 +15,21 @@ redis_result::redis_result(dbuf_pool* pool)
 , lens_(NULL)
 , children_(NULL)
 {
-	if (pool_ == NULL)
-	{
-		pool_internal_ = NEW dbuf_pool();
-		pool_ = pool_internal_;
-	}
-	else
-		pool_internal_ = NULL;
+	acl_assert(pool_ != NULL);
 }
 
 redis_result::~redis_result()
 {
 	reset();
+}
+
+void *redis_result::operator new(size_t size, dbuf_pool* pool)
+{
+	return pool->dbuf_alloc(size);
+}
+
+void redis_result::operator delete(void* ptr, dbuf_pool* pool)
+{
 }
 
 void redis_result::reset()
@@ -36,18 +39,11 @@ void redis_result::reset()
 	argv_ = NULL;
 	lens_ = NULL;
 
-	if (pool_ == pool_internal_)
-	{
-		delete pool_internal_;
-		pool_internal_ = NEW dbuf_pool();
-		pool_ = pool_internal_;
-	}
-
 	if (children_ != NULL)
 	{
 		std::vector<redis_result*>::iterator it = children_->begin();
 		for (; it != children_->end(); ++it)
-			delete (*it);
+			delete (*it, pool_);
 		delete children_;
 		children_ = NULL;
 	}
@@ -92,16 +88,13 @@ redis_result& redis_result::put(const char* buf, size_t len)
 	return *this;
 }
 
-const char* redis_result::get(size_t i) const
+const char* redis_result::get(size_t i, size_t* len /* = NULL */) const
 {
 	if (i >= idx_)
 		return NULL;
+	if (len)
+		*len = lens_[i];
 	return argv_[i];
-}
-
-const char* redis_result::operator [](size_t i) const
-{
-	return get(i);
 }
 
 size_t redis_result::get_length() const
@@ -115,7 +108,7 @@ size_t redis_result::get_length() const
 	return len;
 }
 
-size_t redis_result::argv_to_string(string& buf)
+size_t redis_result::argv_to_string(string& buf) const
 {
 	if (idx_ == 0)
 		return 0;
@@ -136,6 +129,15 @@ redis_result& redis_result::put(redis_result* rr)
 		children_ = NEW std::vector<redis_result*>;
 	children_->push_back(rr);
 	return *this;
+}
+
+const redis_result* redis_result::get_child(size_t i) const
+{
+	if (children_ == NULL)
+		return NULL;
+	if (i >= children_->size())
+		return NULL;
+	return (*children_)[i];
 }
 
 } // namespace acl
