@@ -21,12 +21,47 @@ public:
 
 	void close();
 	
-	void clear();
+	redis_result* run(const string& request);
 
-	bool hmset(const char* key, const std::map<string, string>& attrs,
-		int ttl = 0);
-	bool hmget(const char* key, const std::map<string, string>& attrs,
-		redis_result& result);
+	const string& build_request(size_t argc, const char* argv[],
+		size_t argv_lens[], string* buf = NULL);
+
+	/*******************************************************************/
+	/*                   for set request                               */
+	/*******************************************************************/
+
+	const string& build_set(const char* cmd, const char* key,
+		const std::map<string, string>& attrs, string* buf = NULL);
+	const string& build_set(const char* cmd, const char* key,
+		const std::vector<string>& names,
+		const std::vector<string>& values, string* buf = NULL);
+	const string& build_set(const char* cmd, const char* key,
+		const std::vector<char*>& names,
+		const std::vector<char*>& values, string* buf = NULL);
+	const string& build_set(const char* cmd, const char* key,
+		const char* names[], const char* values[], size_t argc,
+		string* buf = NULL);
+	const string& build_set(const char* cmd, const char* key,
+		const char* names[], size_t names_len[],
+		const char* values[], size_t values_len[],
+		size_t argc, string* buf = NULL);
+
+	/*******************************************************************/
+	/*                   for get request                               */
+	/*******************************************************************/
+
+	const string& build_get(const char* cmd, const char* key,
+		const std::vector<string>& names, string* buf = NULL);
+	const string& build_get(const char* cmd, const char* key,
+		const std::vector<char*>& names, string* buf = NULL);
+	const string& build_get(const char* cmd, const char* key,
+		const std::vector<const char*>& names, string* buf = NULL);
+	const string& build_get(const char* cmd, const char* key,
+		const char* names[], size_t argc, string* buf = NULL);
+	const string& build_get(const char* cmd, const char* key,
+		const char* names[], const size_t lens[],
+		size_t argc, string* buf = NULL);
+
 	bool delete_keys(const std::list<string>& keys);
 	bool delete_keys(const char* key1, ...);
 
@@ -41,18 +76,21 @@ private:
 	int   conn_timeout_;
 	int   rw_timeout_;
 	bool  retry_;
-	std::vector<redis_response*> res_;
 	size_t  argv_size_;
 	const char**  argv_;
 	size_t  argc_;
 	size_t* argv_lens_;
 	string  request_;
+	string  buf_;
 
 	void argv_space(size_t n);
-	void build_request();
-	void build_attrs(const char* cmd, const char* key,
-		const std::map<string, string>& value);
-	bool send_request();
+
+	redis_result* get_object();
+	redis_result* get_error();
+	redis_result* get_status();
+	redis_result* get_integer();
+	redis_result* get_string();
+	redis_result* get_array();
 };
 
 } // end namespace acl
