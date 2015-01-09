@@ -29,74 +29,91 @@ public:
 	/*                   for set request                               */
 	/*******************************************************************/
 
-	const string& build_set(const char* cmd, const char* key,
+	const string& build(const char* cmd, const char* key,
 		const std::map<string, string>& attrs, string* buf = NULL);
-	const string& build_set(const char* cmd, const char* key,
+	const string& build(const char* cmd, const char* key,
 		const std::map<string, char*>& attrs, string* buf = NULL);
-	const string& build_set(const char* cmd, const char* key,
+	const string& build(const char* cmd, const char* key,
 		const std::map<string, const char*>& attrs, string* buf = NULL);
 
-	const string& build_set(const char* cmd, const char* key,
+	const string& build(const char* cmd, const char* key,
 		const std::map<int, string>& attrs, string* buf = NULL);
-	const string& build_set(const char* cmd, const char* key,
+	const string& build(const char* cmd, const char* key,
 		const std::map<int, char*>& attrs, string* buf = NULL);
-	const string& build_set(const char* cmd, const char* key,
+	const string& build(const char* cmd, const char* key,
 		const std::map<int, const char*>& attrs, string* buf = NULL);
 
-	const string& build_set(const char* cmd, const char* key,
+	const string& build(const char* cmd, const char* key,
 		const std::vector<string>& names,
 		const std::vector<string>& values, string* buf = NULL);
-	const string& build_set(const char* cmd, const char* key,
+	const string& build(const char* cmd, const char* key,
 		const std::vector<char*>& names,
 		const std::vector<char*>& values, string* buf = NULL);
-	const string& build_set(const char* cmd, const char* key,
+	const string& build(const char* cmd, const char* key,
 		const std::vector<const char*>& names,
 		const std::vector<const char*>& values, string* buf = NULL);
 
-	const string& build_set(const char* cmd, const char* key,
+	const string& build(const char* cmd, const char* key,
 		const std::vector<int>& names,
 		const std::vector<string>& values, string* buf = NULL);
-	const string& build_set(const char* cmd, const char* key,
+	const string& build(const char* cmd, const char* key,
 		const std::vector<int>& names,
 		const std::vector<char*>& values, string* buf = NULL);
-	const string& build_set(const char* cmd, const char* key,
+	const string& build(const char* cmd, const char* key,
 		const std::vector<int>& names,
 		const std::vector<const char*>& values, string* buf = NULL);
 
-	const string& build_set(const char* cmd, const char* key,
+	const string& build(const char* cmd, const char* key,
 		const char* names[], const char* values[], size_t argc,
 		string* buf = NULL);
-	const string& build_set(const char* cmd, const char* key,
+	const string& build(const char* cmd, const char* key,
 		const int names[], const char* values[], size_t argc,
 		string* buf = NULL);
-	const string& build_set(const char* cmd, const char* key,
+	const string& build(const char* cmd, const char* key,
 		const char* names[], size_t names_len[],
 		const char* values[], size_t values_len[],
 		size_t argc, string* buf = NULL);
 
 	/*******************************************************************/
-	/*                   for get request                               */
+	/*                   for other request                             */
 	/*******************************************************************/
 
-	const string& build_get(const char* cmd, const char* key,
+	const string& build(const char* cmd, const char* key,
 		const std::vector<string>& names, string* buf = NULL);
-	const string& build_get(const char* cmd, const char* key,
+	const string& build(const char* cmd, const char* key,
 		const std::vector<char*>& names, string* buf = NULL);
-	const string& build_get(const char* cmd, const char* key,
+	const string& build(const char* cmd, const char* key,
 		const std::vector<const char*>& names, string* buf = NULL);
-	const string& build_get(const char* cmd, const char* key,
+	const string& build(const char* cmd, const char* key,
 		const std::vector<int>& names, string* buf = NULL);
 
-	const string& build_get(const char* cmd, const char* key,
+	const string& build(const char* cmd, const char* key,
 		const char* names[], size_t argc, string* buf = NULL);
-	const string& build_get(const char* cmd, const char* key,
+	const string& build(const char* cmd, const char* key,
 		const int names[], size_t argc, string* buf = NULL);
-	const string& build_get(const char* cmd, const char* key,
+	const string& build(const char* cmd, const char* key,
 		const char* names[], const size_t lens[],
 		size_t argc, string* buf = NULL);
 
-	bool delete_keys(const std::list<string>& keys);
-	bool delete_keys(const char* key1, ...);
+	/*******************************************************************/
+	/*                   for other request                             */
+	/*******************************************************************/
+
+	const string& build(const char* cmd, const std::vector<string>& keys,
+		string* buf = NULL);
+	const string& build(const char* cmd, const std::vector<char*>& keys,
+		string* buf = NULL);
+	const string& build(const char* cmd,
+		const std::vector<const char*>& keys, string* buf = NULL);
+	const string& build(const char* cmd, const std::vector<int>& keys,
+		string* buf = NULL);
+
+	const string& build(const char* cmd, const char* keys[],
+		size_t argc, string* buf = NULL);
+	const string& build(const char* cmd, const int keys[],
+		size_t argc, string* buf = NULL);
+	const string& build(const char* cmd, const char* keys[],
+		const size_t lens[], size_t argc, string* buf = NULL);
 
 protected:
 	// »ùÀàÐéº¯Êý

@@ -70,10 +70,73 @@ redis_result& redis_result::put(const char* buf, size_t len)
 	return *this;
 }
 
+size_t redis_result::get_size() const
+{
+	if (result_type_ == REDIS_RESULT_ARRAY)
+	{
+		if (children_ == NULL)
+		{
+			logger_error("children_ null");
+			return 0;
+		}
+		return children_->size();
+	}
+	else if (result_type_ == REDIS_RESULT_STRING)
+	{
+		if (argv_ == NULL || lens_ == NULL)
+		{
+			logger_error("argv_ null");
+			return 0;
+		}
+		return size_;
+	}
+	else
+		return size_;
+}
+
+int redis_result::get_integer(bool* success /* = NULL */) const
+{
+	if (success)
+		*success = false;
+	if (result_type_ != REDIS_RESULT_INTEGER)
+		return -1;
+	const char* ptr = get(0);
+	if (ptr == NULL)
+		return -1;
+	if (success)
+		*success = true;
+	return atoi(ptr);
+}
+
+long long int redis_result::get_integer64(bool* success /* = NULL */) const
+{
+	if (success)
+		*success = false;
+	if (result_type_ != REDIS_RESULT_INTEGER)
+		return -1;
+	const char* ptr = get(0);
+	if (ptr == NULL)
+		return -1;
+	if (success)
+		*success = true;
+	return acl_atoi64(ptr);
+}
+
+const char* redis_result::get_status() const
+{
+	if (result_type_ != REDIS_RESULT_STATUS)
+		return NULL;
+	return get(0);
+}
+
 const char* redis_result::get(size_t i, size_t* len /* = NULL */) const
 {
 	if (i >= idx_)
+	{
+		if (len)
+			*len = 0;
 		return NULL;
+	}
 	if (len)
 		*len = lens_[i];
 	return argv_[i];

@@ -141,6 +141,8 @@ redis_result* redis_client::get_array()
 	if (count <= 0)
 		return rr;
 
+	rr->set_size((size_t) count);
+
 	for (int i = 0; i < count; i++)
 	{
 		redis_result* child = get_object();
@@ -255,7 +257,7 @@ const string& redis_client::build_request(size_t argc, const char* argv[],
 /*                           for set request                               */
 /***************************************************************************/
 
-const string& redis_client::build_set(const char* cmd, const char* key,
+const string& redis_client::build(const char* cmd, const char* key,
 	const std::map<string, string>& attrs, string* buf /* = NULL */)
 {
 	argc_ = 2 + attrs.size() * 2;
@@ -285,7 +287,7 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 	return build_request(argc_, argv_, argv_lens_, buf);
 }
 
-const string& redis_client::build_set(const char* cmd, const char* key,
+const string& redis_client::build(const char* cmd, const char* key,
 	const std::map<string, char*>& attrs, string* buf /* = NULL */)
 {
 	argc_ = 2 + attrs.size() * 2;
@@ -315,7 +317,7 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 	return build_request(argc_, argv_, argv_lens_, buf);
 }
 
-const string& redis_client::build_set(const char* cmd, const char* key,
+const string& redis_client::build(const char* cmd, const char* key,
 	const std::map<string, const char*>& attrs, string* buf /* = NULL */)
 {
 	argc_ = 2 + attrs.size() * 2;
@@ -347,7 +349,7 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 
 /////////////////////////////////////////////////////////////////////////////
 
-const string& redis_client::build_set(const char* cmd, const char* key,
+const string& redis_client::build(const char* cmd, const char* key,
 	const std::map<int, string>& attrs, string* buf /* = NULL */)
 {
 	argc_ = 2 + attrs.size() * 2;
@@ -379,7 +381,7 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 	return build_request(argc_, argv_, argv_lens_, buf);
 }
 
-const string& redis_client::build_set(const char* cmd, const char* key,
+const string& redis_client::build(const char* cmd, const char* key,
 	const std::map<int, char*>& attrs, string* buf /* = NULL */)
 {
 	argc_ = 2 + attrs.size() * 2;
@@ -411,7 +413,7 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 	return build_request(argc_, argv_, argv_lens_, buf);
 }
 
-const string& redis_client::build_set(const char* cmd, const char* key,
+const string& redis_client::build(const char* cmd, const char* key,
 	const std::map<int, const char*>& attrs, string* buf /* = NULL */)
 {
 	argc_ = 2 + attrs.size() * 2;
@@ -445,7 +447,7 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 
 /////////////////////////////////////////////////////////////////////////////
 
-const string& redis_client::build_set(const char* cmd, const char* key,
+const string& redis_client::build(const char* cmd, const char* key,
 	const std::vector<string>& names, const std::vector<string>& values,
 	string* buf /* = NULL */)
 {
@@ -483,7 +485,7 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 	return build_request(argc_, argv_, argv_lens_, buf);
 }
 
-const string& redis_client::build_set(const char* cmd, const char* key,
+const string& redis_client::build(const char* cmd, const char* key,
 	const std::vector<char*>& names, const std::vector<char*>& values,
 	string* buf /* = NULL */)
 {
@@ -521,7 +523,7 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 	return build_request(argc_, argv_, argv_lens_, buf);
 }
 
-const string& redis_client::build_set(const char* cmd, const char* key,
+const string& redis_client::build(const char* cmd, const char* key,
 	const std::vector<const char*>& names,
 	const std::vector<const char*>& values, string* buf /* = NULL */)
 {
@@ -561,7 +563,7 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 
 /////////////////////////////////////////////////////////////////////////////
 
-const string& redis_client::build_set(const char* cmd, const char* key,
+const string& redis_client::build(const char* cmd, const char* key,
 	const std::vector<int>& names, const std::vector<string>& values,
 	string* buf /* = NULL */)
 {
@@ -602,7 +604,7 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 	return build_request(argc_, argv_, argv_lens_, buf);
 }
 
-const string& redis_client::build_set(const char* cmd, const char* key,
+const string& redis_client::build(const char* cmd, const char* key,
 	const std::vector<int>& names, const std::vector<char*>& values,
 	string* buf /* = NULL */)
 {
@@ -643,7 +645,7 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 	return build_request(argc_, argv_, argv_lens_, buf);
 }
 
-const string& redis_client::build_set(const char* cmd, const char* key,
+const string& redis_client::build(const char* cmd, const char* key,
 	const std::vector<int>& names, const std::vector<const char*>& values,
 	string* buf /* = NULL */)
 {
@@ -686,7 +688,7 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 
 /////////////////////////////////////////////////////////////////////////////
 
-const string& redis_client::build_set(const char* cmd, const char* key,
+const string& redis_client::build(const char* cmd, const char* key,
 	const char* names[], const char* values[], size_t argc,
 	string* buf /* = NULL */)
 {
@@ -716,7 +718,7 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 	return build_request(argc_, argv_, argv_lens_, buf);
 }
 
-const string& redis_client::build_set(const char* cmd, const char* key,
+const string& redis_client::build(const char* cmd, const char* key,
 	const int names[], const char* values[], size_t argc,
 	string* buf /* = NULL */)
 {
@@ -749,7 +751,7 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 	return build_request(argc_, argv_, argv_lens_, buf);
 }
 
-const string& redis_client::build_set(const char* cmd, const char* key,
+const string& redis_client::build(const char* cmd, const char* key,
 	const char* names[], size_t names_len[],
 	const char* values[], size_t values_len[],
 	size_t argc, string* buf /* = NULL */)
@@ -783,10 +785,10 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 /////////////////////////////////////////////////////////////////////////////
 
 /***************************************************************************/
-/*                           for get request                               */
+/*                        for other request                                */
 /***************************************************************************/
 
-const string& redis_client::build_get(const char* cmd, const char* key,
+const string& redis_client::build(const char* cmd, const char* key,
 	const std::vector<string>& names, string* buf /* = NULL */)
 {
 	size_t argc = names.size();
@@ -812,7 +814,7 @@ const string& redis_client::build_get(const char* cmd, const char* key,
 	return build_request(argc_, argv_, argv_lens_, buf);
 }
 
-const string& redis_client::build_get(const char* cmd, const char* key,
+const string& redis_client::build(const char* cmd, const char* key,
 	const std::vector<char*>& names, string* buf /* = NULL */)
 {
 	size_t argc = names.size();
@@ -838,7 +840,7 @@ const string& redis_client::build_get(const char* cmd, const char* key,
 	return build_request(argc_, argv_, argv_lens_, buf);
 }
 
-const string& redis_client::build_get(const char* cmd, const char* key,
+const string& redis_client::build(const char* cmd, const char* key,
 	const std::vector<const char*>& names, string* buf /* = NULL */)
 {
 	size_t argc = names.size();
@@ -864,7 +866,7 @@ const string& redis_client::build_get(const char* cmd, const char* key,
 	return build_request(argc_, argv_, argv_lens_, buf);
 }
 
-const string& redis_client::build_get(const char* cmd, const char* key,
+const string& redis_client::build(const char* cmd, const char* key,
 	const std::vector<int>& names, string* buf /* = NULL */)
 {
 	size_t argc = names.size();
@@ -893,7 +895,7 @@ const string& redis_client::build_get(const char* cmd, const char* key,
 	return build_request(argc_, argv_, argv_lens_, buf);
 }
 
-const string& redis_client::build_get(const char* cmd, const char* key,
+const string& redis_client::build(const char* cmd, const char* key,
 	const char* names[], size_t argc, string* buf /* = NULL */)
 {
 	argc_ = 2 + argc;
@@ -918,7 +920,7 @@ const string& redis_client::build_get(const char* cmd, const char* key,
 	return build_request(argc_, argv_, argv_lens_, buf);
 }
 
-const string& redis_client::build_get(const char* cmd, const char* key,
+const string& redis_client::build(const char* cmd, const char* key,
 	const int names[], size_t argc, string* buf /* = NULL */)
 {
 	argc_ = 2 + argc;
@@ -946,7 +948,7 @@ const string& redis_client::build_get(const char* cmd, const char* key,
 	return build_request(argc_, argv_, argv_lens_, buf);
 }
 
-const string& redis_client::build_get(const char* cmd, const char* key,
+const string& redis_client::build(const char* cmd, const char* key,
 	const char* names[], const size_t lens[],
 	size_t argc, string* buf /* = NULL */)
 {
@@ -972,14 +974,169 @@ const string& redis_client::build_get(const char* cmd, const char* key,
 	return build_request(argc_, argv_, argv_lens_, buf);
 }
 
-bool redis_client::delete_keys(const std::list<string>& keys)
+/////////////////////////////////////////////////////////////////////////////
+
+/***************************************************************************/
+/*                        for other request                                */
+/***************************************************************************/
+
+const string& redis_client::build(const char* cmd,
+	const std::vector<string>& keys, string* buf /* = NULL */)
 {
-	return true;
+	size_t argc = keys.size();
+	argc_ = 1 + argc;
+	argv_space(argc_);
+
+	size_t i = 0;
+	argv_[i] = cmd;
+	argv_lens_[i] = strlen(cmd);
+	i++;
+
+	for (size_t j = 0; j < argc; j++)
+	{
+		argv_[i] = keys[j].c_str();
+		argv_lens_[i] = keys[j].length();
+		i++;
+	}
+
+	return build_request(argc_, argv_, argv_lens_, buf);
 }
 
-bool redis_client::delete_keys(const char* key1, ...)
+const string& redis_client::build(const char* cmd,
+	const std::vector<char*>& keys, string* buf /* = NULL */)
 {
-	return true;
+	size_t argc = keys.size();
+	argc_ = 1 + argc;
+	argv_space(argc_);
+
+	size_t i = 0;
+	argv_[i] = cmd;
+	argv_lens_[i] = strlen(cmd);
+	i++;
+
+	for (size_t j = 0; j < argc; j++)
+	{
+		argv_[i] = keys[j];
+		argv_lens_[i] = strlen(argv_[i]);
+		i++;
+	}
+
+	return build_request(argc_, argv_, argv_lens_, buf);
+}
+
+const string& redis_client::build(const char* cmd,
+	const std::vector<const char*>& keys, string* buf /* = NULL */)
+{
+	size_t argc = keys.size();
+	argc_ = 1 + argc;
+	argv_space(argc_);
+
+	size_t i = 0;
+	argv_[i] = cmd;
+	argv_lens_[i] = strlen(cmd);
+	i++;
+
+	for (size_t j = 0; j < argc; j++)
+	{
+		argv_[i] = keys[j];
+		argv_lens_[i] = strlen(argv_[i]);
+		i++;
+	}
+
+	return build_request(argc_, argv_, argv_lens_, buf);
+}
+
+const string& redis_client::build(const char* cmd,
+	const std::vector<int>& keys, string* buf /* = NULL */)
+{
+	size_t argc = keys.size();
+	argc_ = 1 + argc;
+	argv_space(argc_);
+
+	size_t i = 0;
+	argv_[i] = cmd;
+	argv_lens_[i] = strlen(cmd);
+	i++;
+
+	char* buf4int;
+
+	for (size_t j = 0; j < argc; j++)
+	{
+		buf4int = (char*) pool_->dbuf_alloc(INT_LEN);
+		(void) safe_snprintf(buf4int, INT_LEN, "%d", keys[j]);
+		argv_[i] = buf4int;
+		argv_lens_[i] = strlen(argv_[i]);
+		i++;
+	}
+
+	return build_request(argc_, argv_, argv_lens_, buf);
+}
+
+const string& redis_client::build(const char* cmd, const char* keys[],
+	size_t argc, string* buf /* = NULL */)
+{
+	argc_ = 1 + argc;
+	argv_space(argc_);
+
+	size_t i = 0;
+	argv_[i] = cmd;
+	argv_lens_[i] = strlen(cmd);
+	i++;
+
+	for (size_t j = 0; j < argc; j++)
+	{
+		argv_[i] = keys[j];
+		argv_lens_[i] = strlen(argv_[i]);
+		i++;
+	}
+
+	return build_request(argc_, argv_, argv_lens_, buf);
+}
+
+const string& redis_client::build(const char* cmd, const int keys[],
+	size_t argc, string* buf /* = NULL */)
+{
+	argc_ = 1 + argc;
+	argv_space(argc_);
+
+	size_t i = 0;
+	argv_[i] = cmd;
+	argv_lens_[i] = strlen(cmd);
+	i++;
+
+	char* buf4int;
+
+	for (size_t j = 0; j < argc; j++)
+	{
+		buf4int = (char*) pool_->dbuf_alloc(INT_LEN);
+		(void) safe_snprintf(buf4int, INT_LEN, "%d", keys[j]);
+		argv_[i] = buf4int;
+		argv_lens_[i] = strlen(argv_[i]);
+		i++;
+	}
+
+	return build_request(argc_, argv_, argv_lens_, buf);
+}
+
+const string& redis_client::build(const char* cmd, const char* keys[],
+	const size_t lens[], size_t argc, string* buf /* = NULL */)
+{
+	argc_ = 1 + argc;
+	argv_space(argc_);
+
+	size_t i = 0;
+	argv_[i] = cmd;
+	argv_lens_[i] = strlen(cmd);
+	i++;
+
+	for (size_t j = 0; j < argc; j++)
+	{
+		argv_[i] = keys[j];
+		argv_lens_[i] = lens[j];
+		i++;
+	}
+
+	return build_request(argc_, argv_, argv_lens_, buf);
 }
 
 } // end namespace acl

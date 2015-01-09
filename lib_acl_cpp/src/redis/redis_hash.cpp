@@ -21,7 +21,7 @@ redis_hash::~redis_hash()
 
 bool redis_hash::hmset(const char* key, const std::map<string, string>& attrs)
 {
-	const string& req = conn_.build_set("HMSET", key, attrs);
+	const string& req = conn_.build("HMSET", key, attrs);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
 		return false;
@@ -33,7 +33,7 @@ bool redis_hash::hmset(const char* key, const std::map<string, string>& attrs)
 
 bool redis_hash::hmset(const char* key, const std::map<string, char*>& attrs)
 {
-	const string& req = conn_.build_set("HMSET", key, attrs);
+	const string& req = conn_.build("HMSET", key, attrs);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
 		return false;
@@ -45,7 +45,7 @@ bool redis_hash::hmset(const char* key, const std::map<string, char*>& attrs)
 
 bool redis_hash::hmset(const char* key, const std::map<string, const char*>& attrs)
 {
-	const string& req = conn_.build_set("HMSET", key, attrs);
+	const string& req = conn_.build("HMSET", key, attrs);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
 		return false;
@@ -57,7 +57,7 @@ bool redis_hash::hmset(const char* key, const std::map<string, const char*>& att
 
 bool redis_hash::hmset(const char* key, const std::map<int, string>& attrs)
 {
-	const string& req = conn_.build_set("HMSET", key, attrs);
+	const string& req = conn_.build("HMSET", key, attrs);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
 		return false;
@@ -69,7 +69,7 @@ bool redis_hash::hmset(const char* key, const std::map<int, string>& attrs)
 
 bool redis_hash::hmset(const char* key, const std::map<int, char*>& attrs)
 {
-	const string& req = conn_.build_set("HMSET", key, attrs);
+	const string& req = conn_.build("HMSET", key, attrs);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
 		return false;
@@ -81,7 +81,7 @@ bool redis_hash::hmset(const char* key, const std::map<int, char*>& attrs)
 
 bool redis_hash::hmset(const char* key, const std::map<int, const char*>& attrs)
 {
-	const string& req = conn_.build_set("HMSET", key, attrs);
+	const string& req = conn_.build("HMSET", key, attrs);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
 		return false;
@@ -95,54 +95,66 @@ bool redis_hash::hmset(const char* key, const std::map<int, const char*>& attrs)
 
 bool redis_hash::hmget(const char* key, const std::vector<string>& names)
 {
-	const string& req = conn_.build_get("HMGET", key, names);
+	const string& req = conn_.build("HMGET", key, names);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
+		return false;
+	if (result_->get_type() != REDIS_RESULT_ARRAY)
 		return false;
 	return true;
 }
 
 bool redis_hash::hmget(const char* key, const std::vector<char*>& names)
 {
-	const string& req = conn_.build_get("HMGET", key, names);
+	const string& req = conn_.build("HMGET", key, names);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
+		return false;
+	if (result_->get_type() != REDIS_RESULT_ARRAY)
 		return false;
 	return true;
 }
 
 bool redis_hash::hmget(const char* key, const std::vector<const char*>& names)
 {
-	const string& req = conn_.build_get("HMGET", key, names);
+	const string& req = conn_.build("HMGET", key, names);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
+		return false;
+	if (result_->get_type() != REDIS_RESULT_ARRAY)
 		return false;
 	return true;
 }
 
 bool redis_hash::hmget(const char* key, const std::vector<int>& names)
 {
-	const string& req = conn_.build_get("HMGET", key, names);
+	const string& req = conn_.build("HMGET", key, names);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
+		return false;
+	if (result_->get_type() != REDIS_RESULT_ARRAY)
 		return false;
 	return true;
 }
 
 bool redis_hash::hmget(const char* key, const char* names[], size_t argc)
 {
-	const string& req = conn_.build_get("HMGET", key, names, argc);
+	const string& req = conn_.build("HMGET", key, names, argc);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
+		return false;
+	if (result_->get_type() != REDIS_RESULT_ARRAY)
 		return false;
 	return true;
 }
 
 bool redis_hash::hmget(const char* key, const int names[], size_t argc)
 {
-	const string& req = conn_.build_get("HMGET", key, names, argc);
+	const string& req = conn_.build("HMGET", key, names, argc);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
+		return false;
+	if (result_->get_type() != REDIS_RESULT_ARRAY)
 		return false;
 	return true;
 }
@@ -150,10 +162,11 @@ bool redis_hash::hmget(const char* key, const int names[], size_t argc)
 bool redis_hash::hmget(const char* key, const char* names[],
 	const size_t lens[], size_t argc)
 {
-	const string& req = conn_.build_get("HMGET", key,
-		names, lens, argc);
+	const string& req = conn_.build("HMGET", key, names, lens, argc);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
+		return false;
+	if (result_->get_type() != REDIS_RESULT_ARRAY)
 		return false;
 	return true;
 }
@@ -161,6 +174,8 @@ bool redis_hash::hmget(const char* key, const char* names[],
 const char* redis_hash::hmget_result(size_t i, size_t* len /* = NULL */) const
 {
 	if (result_ == NULL)
+		return NULL;
+	if (result_->get_type() != REDIS_RESULT_ARRAY)
 		return NULL;
 	const redis_result* rr = result_->get_child(i);
 	if (rr == NULL)
