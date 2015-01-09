@@ -70,7 +70,7 @@ public:
 	const char* get_status() const;
 
 	/**
-	 * 返回对应下标的数据
+	 * 返回对应下标的数据(当数据类型非 REDIS_RESULT_ARRAY 时）
 	 * @param i {size_t} 数组下标
 	 * @param len {size_t*} 当为非 NULL 指针时存储所返回数据的长度
 	 * @return {const char*}
@@ -78,7 +78,7 @@ public:
 	const char* get(size_t i, size_t* len = NULL) const;
 
 	/**
-	 * 返回所有的数据数组
+	 * 返回所有的数据数组(当数据类型非 REDIS_RESULT_ARRAY 时）地址
 	 * @return {const char**}
 	 */
 	const char** gets_argv() const
@@ -86,20 +86,50 @@ public:
 		return (const char**) argv_;
 	}
 
-	size_t* get_lens() const
+	/**
+	 * 返回所有的数据长度数组(当数据类型非 REDIS_RESULT_ARRAY 时）地址
+	 * @return {const size_t*}
+	 */
+	const size_t* get_lens() const
 	{
 		return lens_;
 	}
-	size_t get_length() const;
-	size_t argv_to_string(string& buf) const;
 
+	/**
+	 * 返回所有数据的总长度(当数据类型非 REDIS_RESULT_ARRAY 时）
+	 * @return {size_t}
+	 */
+	size_t get_length() const;
+
+	/**
+	 * 当数据类型为 REDIS_RESULT_STRING 类型时，该函数将按内存块存放的数据存储至
+	 * 连接内存中，但需要注意防止内存溢出
+	 * @param buf {string&} 存储结果数据
+	 * @return {size_t} 数据的总长度
+	 */
+	size_t argv_to_string(string& buf) const;
+	size_t argv_to_string(char* buf, size_t size) const;
+
+	/**
+	 * 当数据类型为 REDIS_RESULT_ARRAY 类型时，该函数返回所有的数组对象
+	 * @return {const std::vector<const redis_result*>*}
+	 */
 	const std::vector<const redis_result*>* get_children() const
 	{
 		return children_;
 	}
 
+	/**
+	 * 当数据类型为 REDIS_RESULT_ARRAY 类型时，该函数返回对应下标的结果对象
+	 * @param i {size_t} 下标值
+	 * @return {const redis_result*} 当下标值越界或结果不存在时，则返回 NULL
+	 */
 	const redis_result* get_child(size_t i) const;
 
+	/**
+	 * 返回构造函数传入的内存池对象
+	 * @return {dbuf_pool*}
+	 */
 	dbuf_pool* get_pool()
 	{
 		return pool_;

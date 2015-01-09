@@ -18,6 +18,11 @@ public:
 		int rw_timeout = 30, bool retry = true);
 	~redis_client();
 
+	dbuf_pool* get_pool() const
+	{
+		return pool_;
+	}
+
 	void close();
 	
 	const redis_result* run(const string& request);

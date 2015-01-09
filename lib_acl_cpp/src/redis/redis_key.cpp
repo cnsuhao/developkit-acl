@@ -89,13 +89,13 @@ int redis_key::del_keys(const char* keys[], const size_t lens[], size_t argc)
 
 int redis_key::set_ttl(const char* key, int n)
 {
-	const char* keys[2];
-	keys[0]  = key;
+	const char* argv[2];
+	argv[0]  = key;
 	char ttl[INT_LEN];
 	(void) safe_snprintf(ttl, INT_LEN, "%d", n);
-	keys[1] = ttl;
+	argv[1] = ttl;
 
-	const string& req = conn_.build("EXPIRE", keys, 2);
+	const string& req = conn_.build("EXPIRE", argv, 2);
 	const redis_result* rr = conn_.run(req);
 	if (rr == NULL)
 		return -1;
@@ -104,10 +104,10 @@ int redis_key::set_ttl(const char* key, int n)
 
 int redis_key::get_ttl(const char* key)
 {
-	const char* keys[1];
-	keys[0] = key;
+	const char* argv[1];
+	argv[0] = key;
 
-	const string& req = conn_.build("TTL", keys, 1);
+	const string& req = conn_.build("TTL", argv, 1);
 	const redis_result* rr = conn_.run(req);
 	if (rr == NULL)
 		return -1;

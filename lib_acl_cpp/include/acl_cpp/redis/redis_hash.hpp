@@ -1,6 +1,7 @@
 #pragma once
 #include "acl_cpp/acl_cpp_define.hpp"
 #include <map>
+#include <vector>
 #include "acl_cpp/stdlib/string.hpp"
 
 namespace acl
@@ -34,6 +35,7 @@ public:
 	bool hmset(const char* key, const std::map<int, string>& attrs);
 	bool hmset(const char* key, const std::map<int, char*>& attrs);
 	bool hmset(const char* key, const std::map<int, const char*>& attrs);
+	bool hmset(const string& req);
 
 	/////////////////////////////////////////////////////////////////////
 
@@ -52,6 +54,7 @@ public:
 	bool hmget(const char* key, const int names[], size_t argc);
 	bool hmget(const char* key, const char* names[],
 		const size_t lens[], size_t argc);
+	bool hmget(const string& req);
 
 	/**
 	 * 当 hmget 获得 true 时调用本方法来获得对应下标的值，下标顺序与 hmget 中的数组
@@ -62,6 +65,52 @@ public:
 	 * @return {const char*} 返回对应下标的值，当返回 NULL 时表示该下标没有值
 	 */
 	const char* hmget_result(size_t i, size_t* len = NULL) const;
+
+	/////////////////////////////////////////////////////////////////////
+
+	int hset(const char* key, const char* name, const char* value);
+	int hset(const char* key, const char* name,
+		const char* value, size_t value_len);
+	int hset(const char* key, const char* name, size_t name_len,
+		const char* value, size_t value_len);
+	int hset(const string& req);
+
+	int hsetnx(const char* key, const char* name, const char* value);
+	int hsetnx(const char* key, const char* name,
+		const char* value, size_t value_len);
+	int hsetnx(const char* key, const char* name, size_t name_len,
+		const char* value, size_t value_len);
+	int hsetnx(const string& req);
+
+	bool hget(const char* key, const char* name, string& result);
+	bool hget(const char* key, const char* name,
+		size_t name_len, string& result);
+	bool hgetall(const char* key, std::map<string, string>& result);
+	bool hgetall(const char* key, std::vector<string>& names,
+		std::vector<string>& values);
+	bool hgetall(const char* key, std::vector<const char*>& names,
+		std::vector<const char*>& values);
+
+	int hdel(const char* key, const char* first_name, ...);
+	int hdel(const char* key, const char* names[], size_t argc);
+	int hdel(const char* key, const char* names[],
+		const size_t names_len[], size_t argc);
+	int hdel(const char* key, const std::vector<string>& names);
+	int hdel(const char* key, const std::vector<char*>& names);
+	int hdel(const char* key, const std::vector<const char*>& names);
+	int hdel(const string& req);
+
+	bool hincrby(const char* key, const char* name,
+		int inc, int* result = NULL);
+	bool hincrbyfloat(const char* key, const char* name,
+		double inc, double* result = NULL);
+
+	bool hkeys(const char* key, std::vector<string>& names);
+
+	bool hexists(const char* key, const char* name);
+	bool hexists(const char* key, const char* name, size_t name_len);
+
+	int hlen(const char* key);
 
 	/////////////////////////////////////////////////////////////////////
 

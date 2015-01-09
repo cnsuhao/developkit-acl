@@ -302,7 +302,9 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClCompile Include="src\redis\redis_client.cpp" />
     <ClCompile Include="src\redis\redis_hash.cpp" />
     <ClCompile Include="src\redis\redis_key.cpp" />
+    <ClCompile Include="src\redis\redis_list.cpp" />
     <ClCompile Include="src\redis\redis_result.cpp" />
+    <ClCompile Include="src\redis\redis_string.cpp" />
     <ClCompile Include="src\session\memcache_session.cpp" />
     <ClCompile Include="src\session\session.cpp" />
     <ClCompile Include="src\stdlib\charset_conv.cpp" />
@@ -453,7 +455,9 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include="include\acl_cpp\redis\redis_client.hpp" />
     <ClInclude Include="include\acl_cpp\redis\redis_hash.hpp" />
     <ClInclude Include="include\acl_cpp\redis\redis_key.hpp" />
+    <ClInclude Include="include\acl_cpp\redis\redis_list.hpp" />
     <ClInclude Include="include\acl_cpp\redis\redis_result.hpp" />
+    <ClInclude Include="include\acl_cpp\redis\redis_string.hpp" />
     <ClInclude Include="include\acl_cpp\session\memcache_session.hpp" />
     <ClInclude Include="include\acl_cpp\session\session.hpp" />
     <ClInclude Include="include\acl_cpp\stdlib\charset_conv.hpp" />
