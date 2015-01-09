@@ -20,7 +20,7 @@ redis_result::redis_result(dbuf_pool* pool)
 
 redis_result::~redis_result()
 {
-	reset();
+	delete children_;
 }
 
 void *redis_result::operator new(size_t size, dbuf_pool* pool)
@@ -30,23 +30,6 @@ void *redis_result::operator new(size_t size, dbuf_pool* pool)
 
 void redis_result::operator delete(void* ptr, dbuf_pool* pool)
 {
-}
-
-void redis_result::reset()
-{
-	size_ = 0;
-	idx_  = 0;
-	argv_ = NULL;
-	lens_ = NULL;
-
-	if (children_ != NULL)
-	{
-		std::vector<redis_result*>::iterator it = children_->begin();
-		for (; it != children_->end(); ++it)
-			delete (*it, pool_);
-		delete children_;
-		children_ = NULL;
-	}
 }
 
 redis_result& redis_result::set_size(size_t size)
@@ -76,12 +59,11 @@ redis_result& redis_result::put(const char* buf, size_t len)
 
 	if (argv_ == NULL)
 	{
-		argv_ = (char**) pool_->dbuf_alloc(sizeof(char*) * size_);
+		argv_ = (const char**) pool_->dbuf_alloc(sizeof(char*) * size_);
 		lens_ = (size_t*) pool_->dbuf_alloc(sizeof(size_t*) * size_);
 	}
 
-	argv_[idx_] = (char*) pool_->dbuf_memdup(buf, len + 1);
-	argv_[idx_][len] = 0;
+	argv_[idx_] = buf;
 	lens_[idx_] = len;
 	idx_++;
 
@@ -123,10 +105,12 @@ size_t redis_result::argv_to_string(string& buf) const
 	return length;
 }
 
-redis_result& redis_result::put(redis_result* rr)
+redis_result& redis_result::put(const redis_result* rr, size_t idx)
 {
 	if (children_ == NULL)
-		children_ = NEW std::vector<redis_result*>;
+		children_ = NEW std::vector<const redis_result*>;
+	else if (idx == 0)
+		children_->clear();
 	children_->push_back(rr);
 	return *this;
 }

@@ -15,19 +15,12 @@ redis_hash::redis_hash(redis_client& conn)
 
 redis_hash::~redis_hash()
 {
-	reset();
 }
 
-void redis_hash::reset()
-{
-	delete (result_, result_->get_pool());
-	result_ = NULL;
-}
+/////////////////////////////////////////////////////////////////////////////
 
 bool redis_hash::hmset(const char* key, const std::map<string, string>& attrs)
 {
-	reset();
-
 	const string& req = conn_.build_set("HMSET", key, attrs);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
@@ -40,8 +33,6 @@ bool redis_hash::hmset(const char* key, const std::map<string, string>& attrs)
 
 bool redis_hash::hmset(const char* key, const std::map<string, char*>& attrs)
 {
-	reset();
-
 	const string& req = conn_.build_set("HMSET", key, attrs);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
@@ -54,8 +45,6 @@ bool redis_hash::hmset(const char* key, const std::map<string, char*>& attrs)
 
 bool redis_hash::hmset(const char* key, const std::map<string, const char*>& attrs)
 {
-	reset();
-
 	const string& req = conn_.build_set("HMSET", key, attrs);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
@@ -68,8 +57,6 @@ bool redis_hash::hmset(const char* key, const std::map<string, const char*>& att
 
 bool redis_hash::hmset(const char* key, const std::map<int, string>& attrs)
 {
-	reset();
-
 	const string& req = conn_.build_set("HMSET", key, attrs);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
@@ -82,8 +69,6 @@ bool redis_hash::hmset(const char* key, const std::map<int, string>& attrs)
 
 bool redis_hash::hmset(const char* key, const std::map<int, char*>& attrs)
 {
-	reset();
-
 	const string& req = conn_.build_set("HMSET", key, attrs);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
@@ -96,8 +81,6 @@ bool redis_hash::hmset(const char* key, const std::map<int, char*>& attrs)
 
 bool redis_hash::hmset(const char* key, const std::map<int, const char*>& attrs)
 {
-	reset();
-
 	const string& req = conn_.build_set("HMSET", key, attrs);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
@@ -108,10 +91,10 @@ bool redis_hash::hmset(const char* key, const std::map<int, const char*>& attrs)
 	return true;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+
 bool redis_hash::hmget(const char* key, const std::vector<string>& names)
 {
-	reset();
-
 	const string& req = conn_.build_get("HMGET", key, names);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
@@ -121,8 +104,6 @@ bool redis_hash::hmget(const char* key, const std::vector<string>& names)
 
 bool redis_hash::hmget(const char* key, const std::vector<char*>& names)
 {
-	reset();
-
 	const string& req = conn_.build_get("HMGET", key, names);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
@@ -132,8 +113,6 @@ bool redis_hash::hmget(const char* key, const std::vector<char*>& names)
 
 bool redis_hash::hmget(const char* key, const std::vector<const char*>& names)
 {
-	reset();
-
 	const string& req = conn_.build_get("HMGET", key, names);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
@@ -143,8 +122,6 @@ bool redis_hash::hmget(const char* key, const std::vector<const char*>& names)
 
 bool redis_hash::hmget(const char* key, const std::vector<int>& names)
 {
-	reset();
-
 	const string& req = conn_.build_get("HMGET", key, names);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
@@ -154,8 +131,15 @@ bool redis_hash::hmget(const char* key, const std::vector<int>& names)
 
 bool redis_hash::hmget(const char* key, const char* names[], size_t argc)
 {
-	reset();
+	const string& req = conn_.build_get("HMGET", key, names, argc);
+	result_ = conn_.run(req);
+	if (result_ == NULL)
+		return false;
+	return true;
+}
 
+bool redis_hash::hmget(const char* key, const int names[], size_t argc)
+{
 	const string& req = conn_.build_get("HMGET", key, names, argc);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
@@ -166,8 +150,6 @@ bool redis_hash::hmget(const char* key, const char* names[], size_t argc)
 bool redis_hash::hmget(const char* key, const char* names[],
 	const size_t lens[], size_t argc)
 {
-	reset();
-
 	const string& req = conn_.build_get("HMGET", key,
 		names, lens, argc);
 	result_ = conn_.run(req);
@@ -185,5 +167,7 @@ const char* redis_hash::hmget_result(size_t i, size_t* len /* = NULL */) const
 		return NULL;
 	return rr->get(0, len);
 }
+
+/////////////////////////////////////////////////////////////////////////////
 
 } // namespace acl
