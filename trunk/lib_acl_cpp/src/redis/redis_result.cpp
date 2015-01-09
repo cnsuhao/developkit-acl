@@ -168,6 +168,32 @@ size_t redis_result::argv_to_string(string& buf) const
 	return length;
 }
 
+size_t redis_result::argv_to_string(char* buf, size_t size) const
+{
+	if (idx_ == 0 || size == 0)
+		return 0;
+
+	size--;
+	if (size == 0)
+		return 0;
+
+	char* ptr = buf;
+	size_t length = 0, n;
+	for (size_t i = 0; i < idx_; i++)
+	{
+		n = size > lens_[i] ? lens_[i] : size;
+		memcpy(ptr, argv_[i], n);
+		ptr += n;
+		size -= n;
+		length += n;
+		if (size == 0)
+			break;
+	}
+
+	*ptr = 0;
+	return length;
+}
+
 redis_result& redis_result::put(const redis_result* rr, size_t idx)
 {
 	if (children_ == NULL)

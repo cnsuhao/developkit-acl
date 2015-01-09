@@ -5,15 +5,16 @@
 
 namespace acl {
 
+// redis 服务支持的数据类型分类
 typedef enum
 {
 	REDIS_KEY_UNKNOWN,
 	REDIS_KEY_NONE,
-	REDIS_KEY_STRING,
-	REDIS_KEY_HASH,
-	REDIS_KEY_LIST,
-	REDIS_KEY_SET,
-	REDIS_KEY_ZSET
+	REDIS_KEY_STRING,	// string
+	REDIS_KEY_HASH,		// hash
+	REDIS_KEY_LIST,		// list
+	REDIS_KEY_SET,		// set
+	REDIS_KEY_ZSET		// sorted set
 } redis_key_t;
 
 class redis_key
