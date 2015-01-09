@@ -19,9 +19,8 @@ public:
 	~redis_client();
 
 	void close();
-	void reset();
 	
-	redis_result* run(const string& request);
+	const redis_result* run(const string& request);
 
 	const string& build_request(size_t argc, const char* argv[],
 		size_t argv_lens[], string* buf = NULL);
@@ -36,6 +35,7 @@ public:
 		const std::map<string, char*>& attrs, string* buf = NULL);
 	const string& build_set(const char* cmd, const char* key,
 		const std::map<string, const char*>& attrs, string* buf = NULL);
+
 	const string& build_set(const char* cmd, const char* key,
 		const std::map<int, string>& attrs, string* buf = NULL);
 	const string& build_set(const char* cmd, const char* key,
@@ -52,8 +52,22 @@ public:
 	const string& build_set(const char* cmd, const char* key,
 		const std::vector<const char*>& names,
 		const std::vector<const char*>& values, string* buf = NULL);
+
+	const string& build_set(const char* cmd, const char* key,
+		const std::vector<int>& names,
+		const std::vector<string>& values, string* buf = NULL);
+	const string& build_set(const char* cmd, const char* key,
+		const std::vector<int>& names,
+		const std::vector<char*>& values, string* buf = NULL);
+	const string& build_set(const char* cmd, const char* key,
+		const std::vector<int>& names,
+		const std::vector<const char*>& values, string* buf = NULL);
+
 	const string& build_set(const char* cmd, const char* key,
 		const char* names[], const char* values[], size_t argc,
+		string* buf = NULL);
+	const string& build_set(const char* cmd, const char* key,
+		const int names[], const char* values[], size_t argc,
 		string* buf = NULL);
 	const string& build_set(const char* cmd, const char* key,
 		const char* names[], size_t names_len[],
@@ -72,8 +86,11 @@ public:
 		const std::vector<const char*>& names, string* buf = NULL);
 	const string& build_get(const char* cmd, const char* key,
 		const std::vector<int>& names, string* buf = NULL);
+
 	const string& build_get(const char* cmd, const char* key,
 		const char* names[], size_t argc, string* buf = NULL);
+	const string& build_get(const char* cmd, const char* key,
+		const int names[], size_t argc, string* buf = NULL);
 	const string& build_get(const char* cmd, const char* key,
 		const char* names[], const size_t lens[],
 		size_t argc, string* buf = NULL);
@@ -99,6 +116,7 @@ private:
 	string  request_;
 	string  buf_;
 
+	void reset();
 	void argv_space(size_t n);
 
 	redis_result* get_object();

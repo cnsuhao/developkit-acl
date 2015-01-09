@@ -22,7 +22,6 @@ class ACL_CPP_API redis_result
 {
 public:
 	redis_result(dbuf_pool* pool);
-	~redis_result();
 
 	static void *operator new(size_t size, dbuf_pool* pool);
 	static void operator delete(void* ptr, dbuf_pool* pool);
@@ -49,7 +48,7 @@ public:
 	}
 	size_t get_length() const;
 
-	const std::vector<redis_result*>* get_children() const
+	const std::vector<const redis_result*>* get_children() const
 	{
 		return children_;
 	}
@@ -61,14 +60,14 @@ public:
 		return pool_;
 	}
 
-	void reset();
-
 private:
+	~redis_result();
+
 	friend class redis_client;
 	redis_result& set_type(redis_result_t type);
 	redis_result& set_size(size_t size);
 	redis_result& put(const char* buf, size_t len);
-	redis_result& put(redis_result* rr);
+	redis_result& put(const redis_result* rr, size_t idx);
 
 private:
 	redis_result_t result_type_;
@@ -76,10 +75,10 @@ private:
 
 	size_t  size_;
 	size_t  idx_;
-	char**  argv_;
+	const char** argv_;
 	size_t* lens_;
 
-	std::vector<redis_result*>* children_;
+	std::vector<const redis_result*>* children_;
 };
 
 } // namespace acl

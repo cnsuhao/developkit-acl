@@ -9,6 +9,8 @@
 namespace acl
 {
 
+#define INT_LEN	11
+
 redis_client::redis_client(const char* addr, int conn_timeout /* = 60 */,
 	int rw_timeout /* = 30 */, bool retry /* = true */)
 : conn_timeout_(conn_timeout)
@@ -104,22 +106,23 @@ redis_result* redis_client::get_string()
 
 	// 将可能返回的大内存分成不连接的内存链存储
 
-	char buf[8192];
-	size_t size = len / (int) sizeof(buf);
-	if (len % (int) sizeof(buf) != 0)
+#define CHUNK_LENGTH	8192
+
+	size_t size = (size_t) len / CHUNK_LENGTH;
+	if ((size_t) len % CHUNK_LENGTH != 0)
 		size++;
 	rr->set_size(size);
-	int n;
+	char*  buf;
+	int    n;
+
 	while (len > 0)
 	{
-		n = len > sizeof(buf) - 1 ? sizeof(buf) - 1 : len;
-		if (conn_.read(buf, n) == -1)
-		{
-			delete (rr, pool_);
+		n = len > CHUNK_LENGTH - 1 ? CHUNK_LENGTH - 1 : len;
+		buf = (char*) pool_->dbuf_alloc((size_t) n);
+		if (conn_.read(buf, (size_t) n) == -1)
 			return NULL;
-		}
 		buf[n] = 0;
-		rr->put(buf, n);
+		rr->put(buf, (size_t) n);
 		len -= n;
 	}
 	
@@ -143,7 +146,7 @@ redis_result* redis_client::get_array()
 		redis_result* child = get_object();
 		if (child == NULL)
 			return NULL;
-		rr->put(child);
+		rr->put(child, 0);
 	}
 
 	return rr;
@@ -176,8 +179,11 @@ redis_result* redis_client::get_object()
 	}
 }
 
-redis_result* redis_client::run(const string& request)
+const redis_result* redis_client::run(const string& request)
 {
+	// 重置协议处理状态
+	reset();
+
 	bool retried = false;
 
 	while (true)
@@ -242,6 +248,12 @@ const string& redis_client::build_request(size_t argc, const char* argv[],
 	}
 	return *buf;
 }
+
+/////////////////////////////////////////////////////////////////////////////
+
+/***************************************************************************/
+/*                           for set request                               */
+/***************************************************************************/
 
 const string& redis_client::build_set(const char* cmd, const char* key,
 	const std::map<string, string>& attrs, string* buf /* = NULL */)
@@ -333,6 +345,8 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 	return build_request(argc_, argv_, argv_lens_, buf);
 }
 
+/////////////////////////////////////////////////////////////////////////////
+
 const string& redis_client::build_set(const char* cmd, const char* key,
 	const std::map<int, string>& attrs, string* buf /* = NULL */)
 {
@@ -351,8 +365,8 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 	std::map<int, string>::const_iterator cit = attrs.begin();
 	for (; cit != attrs.end(); ++cit)
 	{
-		char* buf = (char*) pool_->dbuf_alloc(16);
-		(void) safe_snprintf(buf, 16, "%d", cit->first);
+		char* buf = (char*) pool_->dbuf_alloc(INT_LEN);
+		(void) safe_snprintf(buf, INT_LEN, "%d", cit->first);
 		argv_[i] = buf;
 		argv_lens_[i] = strlen(argv_[i]);
 		i++;
@@ -383,8 +397,8 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 	std::map<int, char*>::const_iterator cit = attrs.begin();
 	for (; cit != attrs.end(); ++cit)
 	{
-		char* buf = (char*) pool_->dbuf_alloc(16);
-		(void) safe_snprintf(buf, 16, "%d", cit->first);
+		char* buf = (char*) pool_->dbuf_alloc(INT_LEN);
+		(void) safe_snprintf(buf, INT_LEN, "%d", cit->first);
 		argv_[i] = buf;
 		argv_lens_[i] = strlen(argv_[i]);
 		i++;
@@ -415,8 +429,8 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 	std::map<int, const char*>::const_iterator cit = attrs.begin();
 	for (; cit != attrs.end(); ++cit)
 	{
-		char* buf = (char*) pool_->dbuf_alloc(16);
-		(void) safe_snprintf(buf, 16, "%d", cit->first);
+		char* buf = (char*) pool_->dbuf_alloc(INT_LEN);
+		(void) safe_snprintf(buf, INT_LEN, "%d", cit->first);
 		argv_[i] = buf;
 		argv_lens_[i] = strlen(argv_[i]);
 		i++;
@@ -428,6 +442,8 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 
 	return build_request(argc_, argv_, argv_lens_, buf);
 }
+
+/////////////////////////////////////////////////////////////////////////////
 
 const string& redis_client::build_set(const char* cmd, const char* key,
 	const std::vector<string>& names, const std::vector<string>& values,
@@ -543,6 +559,133 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 	return build_request(argc_, argv_, argv_lens_, buf);
 }
 
+/////////////////////////////////////////////////////////////////////////////
+
+const string& redis_client::build_set(const char* cmd, const char* key,
+	const std::vector<int>& names, const std::vector<string>& values,
+	string* buf /* = NULL */)
+{
+	if (names.size() != values.size())
+	{
+		logger_fatal("names's size: %lu, values's size: %lu",
+			(unsigned long) names.size(),
+			(unsigned long) values.size());
+	}
+
+	argc_ = 2 + names.size() * 2;
+	argv_space(argc_);
+
+	size_t i = 0;
+	argv_[i] = cmd;
+	argv_lens_[i] = strlen(cmd);
+	i++;
+
+	argv_[i] = key;
+	argv_lens_[i] = strlen(key);
+	i++;
+
+	char* buf4int;
+	size_t size = names.size();
+	for (size_t j = 0; j < size; j++)
+	{
+		buf4int = (char*) pool_->dbuf_alloc(INT_LEN);
+		(void) safe_snprintf(buf4int, INT_LEN, "%d", names[j]);
+		argv_[i] = buf4int;
+		argv_lens_[i] = strlen(argv_[i]);
+		i++;
+
+		argv_[i] = values[j].c_str();
+		argv_lens_[i] = strlen(argv_[i]);
+		i++;
+	}
+
+	return build_request(argc_, argv_, argv_lens_, buf);
+}
+
+const string& redis_client::build_set(const char* cmd, const char* key,
+	const std::vector<int>& names, const std::vector<char*>& values,
+	string* buf /* = NULL */)
+{
+	if (names.size() != values.size())
+	{
+		logger_fatal("names's size: %lu, values's size: %lu",
+			(unsigned long) names.size(),
+			(unsigned long) values.size());
+	}
+
+	argc_ = 2 + names.size() * 2;
+	argv_space(argc_);
+
+	size_t i = 0;
+	argv_[i] = cmd;
+	argv_lens_[i] = strlen(cmd);
+	i++;
+
+	argv_[i] = key;
+	argv_lens_[i] = strlen(key);
+	i++;
+
+	char* buf4int;
+	size_t size = names.size();
+	for (size_t j = 0; j < size; j++)
+	{
+		buf4int = (char*) pool_->dbuf_alloc(INT_LEN);
+		(void) safe_snprintf(buf4int, INT_LEN, "%d", names[j]);
+		argv_[i] = buf4int;
+		argv_lens_[i] = strlen(argv_[i]);
+		i++;
+
+		argv_[i] = values[j];
+		argv_lens_[i] = strlen(argv_[i]);
+		i++;
+	}
+
+	return build_request(argc_, argv_, argv_lens_, buf);
+}
+
+const string& redis_client::build_set(const char* cmd, const char* key,
+	const std::vector<int>& names, const std::vector<const char*>& values,
+	string* buf /* = NULL */)
+{
+	if (names.size() != values.size())
+	{
+		logger_fatal("names's size: %lu, values's size: %lu",
+			(unsigned long) names.size(),
+			(unsigned long) values.size());
+	}
+
+	argc_ = 2 + names.size() * 2;
+	argv_space(argc_);
+
+	size_t i = 0;
+	argv_[i] = cmd;
+	argv_lens_[i] = strlen(cmd);
+	i++;
+
+	argv_[i] = key;
+	argv_lens_[i] = strlen(key);
+	i++;
+
+	char* buf4int;
+	size_t size = names.size();
+	for (size_t j = 0; j < size; j++)
+	{
+		buf4int = (char*) pool_->dbuf_alloc(INT_LEN);
+		(void) safe_snprintf(buf4int, INT_LEN, "%d", names[j]);
+		argv_[i] = buf4int;
+		argv_lens_[i] = strlen(argv_[i]);
+		i++;
+
+		argv_[i] = values[j];
+		argv_lens_[i] = strlen(argv_[i]);
+		i++;
+	}
+
+	return build_request(argc_, argv_, argv_lens_, buf);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 const string& redis_client::build_set(const char* cmd, const char* key,
 	const char* names[], const char* values[], size_t argc,
 	string* buf /* = NULL */)
@@ -574,6 +717,39 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 }
 
 const string& redis_client::build_set(const char* cmd, const char* key,
+	const int names[], const char* values[], size_t argc,
+	string* buf /* = NULL */)
+{
+	argc_ = 2 + argc * 2;
+	argv_space(argc_);
+
+	size_t i = 0;
+	argv_[i] = cmd;
+	argv_lens_[i] = strlen(cmd);
+	i++;
+
+	argv_[i] = key;
+	argv_lens_[i] = strlen(key);
+	i++;
+
+	char* buf4int;
+	for (size_t j = 0; j < argc; j++)
+	{
+		buf4int = (char*) pool_->dbuf_alloc(INT_LEN);
+		(void) safe_snprintf(buf4int, INT_LEN, "%d", names[j]);
+		argv_[i] = buf4int;
+		argv_lens_[i] = strlen(argv_[i]);
+		i++;
+
+		argv_[i] = values[j];
+		argv_lens_[i] = strlen(argv_[i]);
+		i++;
+	}
+
+	return build_request(argc_, argv_, argv_lens_, buf);
+}
+
+const string& redis_client::build_set(const char* cmd, const char* key,
 	const char* names[], size_t names_len[],
 	const char* values[], size_t values_len[],
 	size_t argc, string* buf /* = NULL */)
@@ -593,16 +769,22 @@ const string& redis_client::build_set(const char* cmd, const char* key,
 	for (size_t j = 0; j < argc; j++)
 	{
 		argv_[i] = names[j];
-		argv_lens_[i] = names_len[i];
+		argv_lens_[i] = names_len[j];
 		i++;
 
 		argv_[i] = values[j];
-		argv_lens_[i] = values_len[i];
+		argv_lens_[i] = values_len[j];
 		i++;
 	}
 
 	return build_request(argc_, argv_, argv_lens_, buf);
 }
+
+/////////////////////////////////////////////////////////////////////////////
+
+/***************************************************************************/
+/*                           for get request                               */
+/***************************************************************************/
 
 const string& redis_client::build_get(const char* cmd, const char* key,
 	const std::vector<string>& names, string* buf /* = NULL */)
@@ -622,7 +804,7 @@ const string& redis_client::build_get(const char* cmd, const char* key,
 
 	for (size_t j = 0; j < argc; j++)
 	{
-		argv_[i] = names[i].c_str();
+		argv_[i] = names[j].c_str();
 		argv_lens_[i] = strlen(argv_[i]);
 		i++;
 	}
@@ -648,7 +830,7 @@ const string& redis_client::build_get(const char* cmd, const char* key,
 
 	for (size_t j = 0; j < argc; j++)
 	{
-		argv_[i] = names[i];
+		argv_[i] = names[j];
 		argv_lens_[i] = strlen(argv_[i]);
 		i++;
 	}
@@ -674,7 +856,7 @@ const string& redis_client::build_get(const char* cmd, const char* key,
 
 	for (size_t j = 0; j < argc; j++)
 	{
-		argv_[i] = names[i];
+		argv_[i] = names[j];
 		argv_lens_[i] = strlen(argv_[i]);
 		i++;
 	}
@@ -698,11 +880,12 @@ const string& redis_client::build_get(const char* cmd, const char* key,
 	argv_lens_[i] = strlen(key);
 	i++;
 
+	char* buf4int;
 	for (size_t j = 0; j < argc; j++)
 	{
-		char* buf = (char*) pool_->dbuf_alloc(16);
-		safe_snprintf(buf, 16, "%d", names[j]);
-		argv_[i] = buf;
+		buf4int = (char*) pool_->dbuf_alloc(INT_LEN);
+		safe_snprintf(buf4int, INT_LEN, "%d", names[j]);
+		argv_[i] = buf4int;
 		argv_lens_[i] = strlen(argv_[i]);
 		i++;
 	}
@@ -727,7 +910,35 @@ const string& redis_client::build_get(const char* cmd, const char* key,
 
 	for (size_t j = 0; j < argc; j++)
 	{
-		argv_[i] = names[i];
+		argv_[i] = names[j];
+		argv_lens_[i] = strlen(argv_[i]);
+		i++;
+	}
+
+	return build_request(argc_, argv_, argv_lens_, buf);
+}
+
+const string& redis_client::build_get(const char* cmd, const char* key,
+	const int names[], size_t argc, string* buf /* = NULL */)
+{
+	argc_ = 2 + argc;
+	argv_space(argc_);
+
+	size_t i = 0;
+	argv_[i] = cmd;
+	argv_lens_[i] = strlen(cmd);
+	i++;
+
+	argv_[i] = key;
+	argv_lens_[i] = strlen(key);
+	i++;
+
+	char* buf4int;
+	for (size_t j = 0; j < argc; j++)
+	{
+		buf4int = (char*) pool_->dbuf_alloc(INT_LEN);
+		safe_snprintf(buf4int, INT_LEN, "%d", names[j]);
+		argv_[i] = buf4int;
 		argv_lens_[i] = strlen(argv_[i]);
 		i++;
 	}
@@ -753,8 +964,8 @@ const string& redis_client::build_get(const char* cmd, const char* key,
 
 	for (size_t j = 0; j < argc; j++)
 	{
-		argv_[i] = names[i];
-		argv_lens_[i] = lens[i];
+		argv_[i] = names[j];
+		argv_lens_[i] = lens[j];
 		i++;
 	}
 
