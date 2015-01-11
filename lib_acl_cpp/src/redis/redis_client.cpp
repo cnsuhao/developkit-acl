@@ -101,7 +101,7 @@ redis_result* redis_client::get_string()
 	redis_result* rr = new(pool_) redis_result(pool_);
 	rr->set_type(REDIS_RESULT_STRING);
 	int len = atoi(buf_.c_str());
-	if (len <= 0)
+	if (len < 0)
 		return rr;
 
 	// 将可能返回的大内存分成不连接的内存链存储
@@ -126,6 +126,9 @@ redis_result* redis_client::get_string()
 		len -= n;
 	}
 	
+	buf_.clear();
+	if (conn_.gets(buf_) == false)
+		return NULL;
 	return rr;
 }
 
@@ -822,8 +825,8 @@ const string& redis_client::build(const char* cmd, const char* key,
 }
 
 const string& redis_client::build(const char* cmd, const char* key,
-	const char* names[], size_t names_len[],
-	const char* values[], size_t values_len[],
+	const char* names[], const size_t names_len[],
+	const char* values[], const size_t values_len[],
 	size_t argc, string* buf /* = NULL */)
 {
 	argc_ = 1 + argc * 2;

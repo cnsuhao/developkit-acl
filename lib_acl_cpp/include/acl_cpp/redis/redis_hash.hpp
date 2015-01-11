@@ -94,7 +94,8 @@ public:
 	bool hgetall(const char* key, std::vector<const char*>& names,
 		std::vector<const char*>& values);
 
-	int hdel(const char* key, const char* first_name, ...);
+	int hdel(const char* key, const char* first_name, ...)
+		ACL_CPP_PRINTF(3, 4);;
 	int hdel(const char* key, const char* names[], size_t argc);
 	int hdel(const char* key, const char* names[],
 		const size_t names_len[], size_t argc);
