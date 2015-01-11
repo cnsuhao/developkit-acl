@@ -31,7 +31,6 @@ public:
 		size_t argv_lens[], string* buf = NULL);
 
 	/*******************************************************************/
-	/*                   for set request                               */
 	/*******************************************************************/
 
 	const string& build(const char* cmd, const char* key,
@@ -80,7 +79,6 @@ public:
 		size_t argc, string* buf = NULL);
 
 	/*******************************************************************/
-	/*                   for other request                             */
 	/*******************************************************************/
 
 	const string& build(const char* cmd, const char* key,
@@ -99,26 +97,6 @@ public:
 	const string& build(const char* cmd, const char* key,
 		const char* names[], const size_t lens[],
 		size_t argc, string* buf = NULL);
-
-	/*******************************************************************/
-	/*                   for other request                             */
-	/*******************************************************************/
-
-	const string& build(const char* cmd, const std::vector<string>& keys,
-		string* buf = NULL);
-	const string& build(const char* cmd, const std::vector<char*>& keys,
-		string* buf = NULL);
-	const string& build(const char* cmd,
-		const std::vector<const char*>& keys, string* buf = NULL);
-	const string& build(const char* cmd, const std::vector<int>& keys,
-		string* buf = NULL);
-
-	const string& build(const char* cmd, const char* keys[],
-		size_t argc, string* buf = NULL);
-	const string& build(const char* cmd, const int keys[],
-		size_t argc, string* buf = NULL);
-	const string& build(const char* cmd, const char* keys[],
-		const size_t lens[], size_t argc, string* buf = NULL);
 
 protected:
 	// »ùÀàÐéº¯Êý

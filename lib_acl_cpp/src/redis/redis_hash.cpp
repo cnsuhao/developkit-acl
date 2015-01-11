@@ -7,7 +7,8 @@
 namespace acl
 {
 
-#define INT_LEN	11
+#define INT64_LEN	21
+#define FLOAT_LEN	32
 
 redis_hash::redis_hash(redis_client& conn)
 : conn_(conn)
@@ -133,7 +134,20 @@ const char* redis_hash::hmget_result(size_t i, size_t* len /* = NULL */) const
 	const redis_result* rr = result_->get_child(i);
 	if (rr == NULL)
 		return NULL;
-	return rr->get(0, len);
+	size_t size = rr->get_size();
+	if (size == 0)
+		return NULL;
+	if (size == 1)
+		return rr->get(0, len);
+
+	// 大内存有可能被切片成多个不连续的小内存
+	size = rr->get_length();
+	size++;
+	char* buf = (char*) conn_.get_pool()->dbuf_alloc(size);
+	size = rr->argv_to_string(buf, size);
+	if (len)
+		*len = size;
+	return buf;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -253,7 +267,7 @@ bool redis_hash::hgetall(const char* key, std::map<string, string>& result)
 {
 	const char* keys[1];
 	keys[0] = key;
-	const string& req = conn_.build("HGETALL", keys, 1);
+	const string& req = conn_.build("HGETALL", NULL, keys, 1);
 	const redis_result* rr = conn_.run(req);
 	if (rr == NULL)
 		return false;
@@ -292,7 +306,7 @@ bool redis_hash::hgetall(const char* key, std::vector<string>& names,
 {
 	const char* keys[1];
 	keys[0] = key;
-	const string& req = conn_.build("HGETALL", keys, 1);
+	const string& req = conn_.build("HGETALL", NULL, keys, 1);
 	const redis_result* rr = conn_.run(req);
 	if (rr == NULL)
 		return false;
@@ -333,7 +347,7 @@ bool redis_hash::hgetall(const char* key, std::vector<const char*>& names,
 {
 	const char* keys[1];
 	keys[0] = key;
-	const string& req = conn_.build("HGETALL", keys, 1);
+	const string& req = conn_.build("HGETALL", NULL, keys, 1);
 	const redis_result* rr = conn_.run(req);
 	if (rr == NULL)
 		return false;
@@ -407,43 +421,43 @@ int redis_hash::hdel(const char* key, const std::vector<string>& names)
 
 int redis_hash::hdel(const char* key, const std::vector<char*>& names)
 {
-	const string& req = conn_.build(key, names);
+	const string& req = conn_.build("HDEL", key, names);
 	return hdel(req);
 }
 
 int redis_hash::hdel(const char* key, const std::vector<const char*>& names)
 {
-	const string& req = conn_.build(key, names);
+	const string& req = conn_.build("HDEL", key, names);
 	return hdel(req);
 }
 
 int redis_hash::hdel(const string& req)
 {
-	const redis_result* rr = conn_.run(req);
-	if (rr == NULL)
+	result_ = conn_.run(req);
+	if (result_ == NULL)
 		return -1;
-	if (rr->get_type() != REDIS_RESULT_INTEGER)
+	if (result_->get_type() != REDIS_RESULT_INTEGER)
 		return -1;
-	return rr->get_integer();
+	return result_->get_integer();
 }
 
 bool redis_hash::hincrby(const char* key, const char* name,
-	int inc, int* result /* = NULL */)
+	long long int inc, long long int* result /* = NULL */)
 {
 	const char* names[1];
 	names[0] = name;
-	char buf[INT_LEN];
-	(void) safe_snprintf(buf, INT_LEN, "%d", inc);
+	char buf[INT64_LEN];
+	(void) acl_i64toa(inc, buf, sizeof(buf));
 	const char* values[1];
 	values[0] = buf;
 	const string& req = conn_.build("HINCRBY", key, names, values, 1);
-	const redis_result* rr = conn_.run(req);
-	if (rr == NULL)
+	result_ = conn_.run(req);
+	if (result_ == NULL)
 		return false;
-	if (rr->get_type() != REDIS_RESULT_INTEGER)
+	if (result_->get_type() != REDIS_RESULT_INTEGER)
 		return false;
 	if (result != NULL)
-		*result = rr->get_integer();
+		*result = result_->get_integer64();
 	return true;
 }
 
@@ -452,21 +466,20 @@ bool redis_hash::hincrbyfloat(const char* key, const char* name,
 {
 	const char* names[1];
 	names[0] = name;
-	char buf[INT_LEN];
-	(void) safe_snprintf(buf, INT_LEN, "%d", inc);
+	char buf[FLOAT_LEN];
+	(void) safe_snprintf(buf, sizeof(buf), "%f", inc);
 	const char* values[1];
 	values[0] = buf;
 	const string& req = conn_.build("HINCRBY", key, names, values, 1);
-	const redis_result* rr = conn_.run(req);
-	if (rr == NULL)
+	result_ = conn_.run(req);
+	if (result_ == NULL)
 		return false;
-	if (rr->get_type() != REDIS_RESULT_STRING)
+	if (result_->get_type() != REDIS_RESULT_STRING)
 		return false;
 	if (result != NULL)
 	{
-		string buf;
-		(void) rr->argv_to_string(buf);
-		*result = atof(buf.c_str());
+		(void) result_->argv_to_string(buf, sizeof(buf));
+		*result = atof(buf);
 	}
 	return true;
 }
@@ -477,7 +490,7 @@ bool redis_hash::hkeys(const char* key, std::vector<string>& names)
 {
 	const char* keys[1];
 	keys[0] = key;
-	const string& req = conn_.build("HKEYS", keys, 1);
+	const string& req = conn_.build("HKEYS", NULL, keys, 1);
 	result_ = conn_.run(req);
 	if (result_ == NULL)
 		return false;
@@ -532,7 +545,7 @@ int redis_hash::hlen(const char* key)
 {
 	const char* keys[1];
 	keys[0] = key;
-	const string& req = conn_.build("HLEN", keys, 1);
+	const string& req = conn_.build("HLEN", NULL, keys, 1);
 	const redis_result* rr = conn_.run(req);
 	if (rr == NULL)
 		return -1;
