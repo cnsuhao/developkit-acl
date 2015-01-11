@@ -74,8 +74,8 @@ public:
 		const int names[], const char* values[], size_t argc,
 		string* buf = NULL);
 	const string& build(const char* cmd, const char* key,
-		const char* names[], size_t names_len[],
-		const char* values[], size_t values_len[],
+		const char* names[], const size_t names_len[],
+		const char* values[], const size_t values_len[],
 		size_t argc, string* buf = NULL);
 
 	/*******************************************************************/
@@ -97,6 +97,9 @@ public:
 	const string& build(const char* cmd, const char* key,
 		const char* names[], const size_t lens[],
 		size_t argc, string* buf = NULL);
+
+	/*******************************************************************/
+	/*******************************************************************/
 
 protected:
 	// »ùÀàÐéº¯Êý
