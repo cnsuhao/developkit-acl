@@ -62,7 +62,9 @@ public:
 	 * @param i {size_t} 下标（从 0 开始）
 	 * @param len {size_t*} 若该指针非空，则存储所返回结果的长度（仅当该方法返回非
 	 *  空指针时有效）
-	 * @return {const char*} 返回对应下标的值，当返回 NULL 时表示该下标没有值
+	 * @return {const char*} 返回对应下标的值，当返回 NULL 时表示该下标没有值，
+	 *  为了保证使用上的安全性，返回的数据总能保证最后是以 \0 结尾，在计算数据长度时
+	 *  不包含该结尾符
 	 */
 	const char* hmget_result(size_t i, size_t* len = NULL) const;
 
@@ -85,6 +87,7 @@ public:
 	bool hget(const char* key, const char* name, string& result);
 	bool hget(const char* key, const char* name,
 		size_t name_len, string& result);
+
 	bool hgetall(const char* key, std::map<string, string>& result);
 	bool hgetall(const char* key, std::vector<string>& names,
 		std::vector<string>& values);
@@ -101,7 +104,7 @@ public:
 	int hdel(const string& req);
 
 	bool hincrby(const char* key, const char* name,
-		int inc, int* result = NULL);
+		long long int inc, long long int* result = NULL);
 	bool hincrbyfloat(const char* key, const char* name,
 		double inc, double* result = NULL);
 

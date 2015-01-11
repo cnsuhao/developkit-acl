@@ -5,6 +5,8 @@
 
 namespace acl {
 
+class redis_result;
+
 // redis 服务支持的数据类型分类
 typedef enum
 {
@@ -30,14 +32,15 @@ public:
 	 *  -1: 出错
 	 *  >0: 真正删除的 KEY 的个数，该值有可能少于输入的 KEY 的个数
 	 */
-	int del_keys(const char* first_key, ...) ACL_CPP_PRINTF(2, 3);
-	int del_keys(const std::vector<string>& keys);
-	int del_keys(const std::vector<char*>& keys);
-	int del_keys(const std::vector<const char*>& keys);
-	int del_keys(const std::vector<int>& keys);
-	int del_keys(const char* keys[], size_t argc);
-	int del_keys(const int keys[], size_t argc);
-	int del_keys(const char* keys[], const size_t lens[], size_t argc);
+	int del(const char* first_key, ...) ACL_CPP_PRINTF(2, 3);
+	int del(const std::vector<string>& keys);
+	int del(const std::vector<char*>& keys);
+	int del(const std::vector<const char*>& keys);
+	int del(const std::vector<int>& keys);
+	int del(const char* keys[], size_t argc);
+	int del(const int keys[], size_t argc);
+	int del(const char* keys[], const size_t lens[], size_t argc);
+	int del(const string& req);
 
 	/**
 	 * 设置 KEY 的生存周期，单位（秒）
@@ -48,7 +51,7 @@ public:
 	 *  0：该 key 不存在或该键未设置生存周期
 	 *  < 0: 出错
 	 */
-	int set_ttl(const char* key, int n);
+	int expire(const char* key, int n);
 
 	/**
 	 * 获得 KEY 的剩余生存周期，单位（秒）
@@ -58,24 +61,25 @@ public:
 	 *  0：该 key 不存在或该键未设置生存周期
 	 *  < 0: 出错
 	 */
-	int get_ttl(const char* key);
+	int ttl(const char* key);
 
 	/**
 	 * 判断 KEY 是否存在
 	 * @param key {const char*} KEY 值
 	 * @return {bool} 返回 true 表示存在，否则表示出错或不存在
 	 */
-	bool key_exists(const char* key);
+	bool exists(const char* key);
 
 	/**
 	 * 获得 KEY 的存储类型
 	 * @para key {const char*} KEY 值
 	 * @return {redis_key_t} 返回 KEY 的存储类型
 	 */
-	redis_key_t get_key_type(const char* key);
+	redis_key_t type(const char* key);
 
 private:
 	redis_client& conn_;
+	const redis_result* result_;
 };
 
 } // namespace acl
