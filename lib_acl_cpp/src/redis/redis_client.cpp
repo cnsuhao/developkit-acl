@@ -245,10 +245,10 @@ const string& redis_client::build_request(size_t argc, const char* argv[],
 		buf->clear();
 	}
 
-	buf->append("*%d\r\n", argc);
+	buf->format_append("*%d\r\n", argc);
 	for (size_t i = 0; i < argc; i++)
 	{
-		buf->append("$%lu\r\n", (unsigned long) argv_lens[i]);
+		buf->format_append("$%lu\r\n", (unsigned long) argv_lens[i]);
 		buf->append(argv[i], argv_lens[i]);
 		buf->append("\r\n");
 	}
