@@ -1,4 +1,5 @@
 #include "acl_stdafx.hpp"
+#include "acl_cpp/stdlib/snprintf.hpp"
 #include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/redis/redis_client.hpp"
 #include "acl_cpp/redis/redis_result.hpp"
@@ -90,9 +91,9 @@ int redis_key::expire(const char* key, int n)
 {
 	const char* argv[2];
 	argv[0]  = key;
-	char ttl[INT_LEN];
-	(void) safe_snprintf(ttl, INT_LEN, "%d", n);
-	argv[1] = ttl;
+	char buf[INT_LEN];
+	(void) safe_snprintf(buf, INT_LEN, "%d", n);
+	argv[1] = buf;
 
 	const string& req = conn_.build("EXPIRE", NULL, argv, 2);
 	const redis_result* rr = conn_.run(req);

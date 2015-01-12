@@ -1,4 +1,6 @@
 #include "acl_stdafx.hpp"
+#include "acl_cpp/stdlib/snprintf.hpp"
+#include "acl_cpp/stdlib/dbuf_pool.hpp"
 #include "acl_cpp/stdlib/string.hpp"
 #include "acl_cpp/redis/redis_client.hpp"
 #include "acl_cpp/redis/redis_result.hpp"
@@ -73,7 +75,7 @@ bool redis_string::setex(const char* key, size_t key_len, const char* value,
 	lens[1] = strlen(buf);
 
 	names[2] = value;
-	lens[2] = strlen(value);
+	lens[2] = value_len;
 
 	const string& req = conn_.build("SETEX", NULL, names, lens, 3);
 	result_ = conn_.run(req);

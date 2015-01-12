@@ -1,4 +1,5 @@
 #include "acl_stdafx.hpp"
+#include "acl_cpp/stdlib/string.hpp"
 #include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/stdlib/dbuf_pool.hpp"
 #include "acl_cpp/redis/redis_result.hpp"
@@ -28,7 +29,8 @@ void *redis_result::operator new(size_t size, dbuf_pool* pool)
 	return pool->dbuf_alloc(size);
 }
 
-void redis_result::operator delete(void* ptr, dbuf_pool* pool)
+void redis_result::operator delete(void* ptr acl_unused,
+	dbuf_pool* pool acl_unused)
 {
 }
 
