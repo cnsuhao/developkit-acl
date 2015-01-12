@@ -33,6 +33,10 @@ redis_client::~redis_client()
 
 void redis_client::reset()
 {
+	argv_size_ = 0;
+	argv_ = NULL;
+	argv_lens_ = NULL;
+
 	delete pool_;
 	pool_ = NEW dbuf_pool();
 }
