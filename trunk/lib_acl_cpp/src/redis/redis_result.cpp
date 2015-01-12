@@ -32,6 +32,7 @@ void *redis_result::operator new(size_t size, dbuf_pool* pool)
 void redis_result::operator delete(void* ptr acl_unused,
 	dbuf_pool* pool acl_unused)
 {
+	printf("delete now\n");
 }
 
 redis_result& redis_result::set_size(size_t size)

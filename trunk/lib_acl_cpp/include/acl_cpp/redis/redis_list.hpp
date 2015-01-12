@@ -12,6 +12,11 @@ public:
 	redis_list(redis_client& conn);
 	~redis_list();
 
+	redis_client& get_client() const
+	{
+		return conn_;
+	}
+
 private:
 	redis_client& conn_;
 };

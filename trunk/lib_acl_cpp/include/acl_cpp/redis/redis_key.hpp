@@ -25,6 +25,11 @@ public:
 	redis_key(redis_client& conn);
 	~redis_key();
 
+	redis_client& get_client() const
+	{
+		return conn_;
+	}
+
 	/**
 	 * 删除一组 KEY
 	 * @return {int} 返回所删除的 KEY 的个数，如下：

@@ -10,13 +10,16 @@ static void test_set(acl::redis_string& option, int n)
 	for (int i = 0; i < n; i++)
 	{
 		key.format("%s_%d", __keypre.c_str(), i);
-		value.format("value_%s_%d", key.c_str());
+		value.format("value_%s", key.c_str());
 
 		if (option.set(key.c_str(), value.c_str()) == false)
 		{
 			printf("set key: %s error\r\n", key.c_str());
 			break;
 		}
+		else if (i < 10)
+			printf("set key: %s ok\r\n", key.c_str());
+		option.get_client().reset();
 	}
 }
 
@@ -32,6 +35,7 @@ static void test_setex(acl::redis_string& option, int n)
 			printf("setex key: %s error\r\n", key.c_str());
 			break;
 		}
+		option.get_client().reset();
 	}
 }
 
@@ -50,6 +54,7 @@ static void test_setnx(acl::redis_string& option, int n)
 			printf("setnx key: %s error\r\n", key.c_str());
 			break;
 		}
+		option.get_client().reset();
 	}
 }
 
@@ -68,6 +73,7 @@ static void test_append(acl::redis_string& option, int n)
 			printf("append key: %s\r\n", key.c_str());
 			break;
 		}
+		option.get_client().reset();
 	}
 }
 
@@ -86,6 +92,7 @@ static void test_get(acl::redis_string& option, int n)
 			printf("get key: %s\r\n", key.c_str());
 			break;
 		}
+		option.get_client().reset();
 	}
 }
 

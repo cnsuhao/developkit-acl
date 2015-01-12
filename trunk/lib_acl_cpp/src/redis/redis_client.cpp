@@ -188,7 +188,6 @@ redis_result* redis_client::get_object()
 const redis_result* redis_client::run(const string& request)
 {
 	// 重置协议处理状态
-	reset();
 
 	bool retried = false;
 
