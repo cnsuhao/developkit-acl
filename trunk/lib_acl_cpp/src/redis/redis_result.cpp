@@ -45,6 +45,12 @@ redis_result& redis_result::set_size(size_t size)
 	return *this;
 }
 
+redis_result& redis_result::set_type(redis_result_t type)
+{
+	result_type_ = type;
+	return *this;
+}
+
 redis_result& redis_result::put(const char* buf, size_t len)
 {
 	if (size_ == 0)
