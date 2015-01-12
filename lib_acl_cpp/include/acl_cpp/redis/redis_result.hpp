@@ -26,8 +26,8 @@ public:
 	/**
 	 * 重载了 new/delete 操作符，在 new 新对象时，使内存的分配在内存池进行分配
 	 */
-	static void *operator new(size_t size, dbuf_pool* pool);
-	static void operator delete(void* ptr, dbuf_pool* pool);
+	void *operator new(size_t size, dbuf_pool* pool);
+	void operator delete(void* ptr, dbuf_pool* pool);
 
 	/**
 	 * 获得当前结果结点的数据类型

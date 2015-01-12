@@ -21,6 +21,11 @@ public:
 		return result_;
 	}
 
+	redis_client& get_client() const
+	{
+		return conn_;
+	}
+
 	/////////////////////////////////////////////////////////////////////
 
 	bool set(const char* key, const char* value);

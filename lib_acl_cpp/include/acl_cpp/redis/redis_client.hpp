@@ -23,6 +23,8 @@ public:
 		return pool_;
 	}
 
+	void reset();
+
 	void close();
 	
 	const redis_result* run(const string& request);
@@ -119,7 +121,6 @@ private:
 	string  request_;
 	string  buf_;
 
-	void reset();
 	void argv_space(size_t n);
 
 	redis_result* get_object();

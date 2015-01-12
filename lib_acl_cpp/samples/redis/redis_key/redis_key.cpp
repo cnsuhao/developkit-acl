@@ -15,6 +15,7 @@ static void test_del(acl::redis_key& option, int n)
 			printf("del key: %s error\r\n", key.c_str());
 			break;
 		}
+		option.get_client().reset();
 	}
 }
 
@@ -30,6 +31,7 @@ static void test_expire(acl::redis_key& option, int n)
 			printf("expire key: %s error\r\n", key.c_str());
 			break;
 		}
+		option.get_client().reset();
 	}
 }
 
@@ -45,6 +47,7 @@ static void test_ttl(acl::redis_key& option, int n)
 			printf("get ttl key: %s error\r\n", key.c_str());
 			break;
 		}
+		option.get_client().reset();
 	}
 }
 
@@ -57,6 +60,7 @@ static void test_exists(acl::redis_key& option, int n)
 		key.format("%s_%d", __keypre.c_str(), i);
 		if (option.exists(key.c_str()) == false)
 			printf("no exists key: %s\r\n", key.c_str());
+		option.get_client().reset();
 	}
 }
 
@@ -73,6 +77,7 @@ static void test_type(acl::redis_key& option, int n)
 			printf("unknown type key: %s\r\n", key.c_str());
 			break;
 		}
+		option.get_client().reset();
 	}
 }
 
