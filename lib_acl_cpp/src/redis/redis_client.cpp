@@ -1,4 +1,5 @@
 #include "acl_stdafx.hpp"
+#include "acl_cpp/stdlib/dbuf_pool.hpp"
 #include "acl_cpp/stdlib/util.hpp"
 #include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/stdlib/snprintf.hpp"
@@ -390,9 +391,9 @@ const string& redis_client::build(const char* cmd, const char* key,
 	std::map<int, string>::const_iterator cit = attrs.begin();
 	for (; cit != attrs.end(); ++cit)
 	{
-		char* buf = (char*) pool_->dbuf_alloc(INT_LEN);
-		(void) safe_snprintf(buf, INT_LEN, "%d", cit->first);
-		argv_[i] = buf;
+		char* tmp = (char*) pool_->dbuf_alloc(INT_LEN);
+		(void) safe_snprintf(tmp, INT_LEN, "%d", cit->first);
+		argv_[i] = tmp;
 		argv_lens_[i] = strlen(argv_[i]);
 		i++;
 
@@ -427,9 +428,9 @@ const string& redis_client::build(const char* cmd, const char* key,
 	std::map<int, char*>::const_iterator cit = attrs.begin();
 	for (; cit != attrs.end(); ++cit)
 	{
-		char* buf = (char*) pool_->dbuf_alloc(INT_LEN);
-		(void) safe_snprintf(buf, INT_LEN, "%d", cit->first);
-		argv_[i] = buf;
+		char* tmp = (char*) pool_->dbuf_alloc(INT_LEN);
+		(void) safe_snprintf(tmp, INT_LEN, "%d", cit->first);
+		argv_[i] = tmp;
 		argv_lens_[i] = strlen(argv_[i]);
 		i++;
 
@@ -464,9 +465,9 @@ const string& redis_client::build(const char* cmd, const char* key,
 	std::map<int, const char*>::const_iterator cit = attrs.begin();
 	for (; cit != attrs.end(); ++cit)
 	{
-		char* buf = (char*) pool_->dbuf_alloc(INT_LEN);
-		(void) safe_snprintf(buf, INT_LEN, "%d", cit->first);
-		argv_[i] = buf;
+		char* tmp = (char*) pool_->dbuf_alloc(INT_LEN);
+		(void) safe_snprintf(tmp, INT_LEN, "%d", cit->first);
+		argv_[i] = tmp;
 		argv_lens_[i] = strlen(argv_[i]);
 		i++;
 
