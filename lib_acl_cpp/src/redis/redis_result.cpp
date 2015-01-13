@@ -65,15 +65,26 @@ redis_result& redis_result::put(const char* buf, size_t len)
 			(int) idx_, (int) size_);
 		return *this;
 	}
-
+	printf("afeter1 buf: %s, len: %d, len: %d\n", buf, strlen(buf), len);
 	if (argv_ == NULL)
 	{
+#if 1
 		argv_ = (const char**) pool_->dbuf_alloc(sizeof(char*) * size_);
-		lens_ = (size_t*) pool_->dbuf_alloc(sizeof(size_t*) * size_);
+		lens_ = (size_t*) pool_->dbuf_alloc(sizeof(size_t) * size_);
+#else
+		argv_ = (const char**) malloc(sizeof(char*) * size_);
+		lens_ = (size_t *) malloc(sizeof(size_t) * size_);
+#endif
 	}
 
-	argv_[idx_] = buf;
+	printf("afeter2 buf: %s, len: %d, len: %d, char* size: %d\n",
+		buf, strlen(buf), len, sizeof(char*));
 	lens_[idx_] = len;
+	printf("afeter4 buf: %s, len: %d, len: %d\n", buf, strlen(buf), len);
+
+	argv_[idx_] = buf;
+	printf("afeter3 buf: %s, size: %d, %d\n", buf, sizeof(char*), strlen(buf));
+
 	idx_++;
 
 	return *this;
