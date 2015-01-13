@@ -123,7 +123,7 @@ redis_result* redis_client::get_string()
 	while (len > 0)
 	{
 		n = len > CHUNK_LENGTH - 1 ? CHUNK_LENGTH - 1 : len;
-		buf = (char*) pool_->dbuf_alloc((size_t) n);
+		buf = (char*) pool_->dbuf_alloc((size_t) (n + 1));
 		if (conn_.read(buf, (size_t) n) == -1)
 			return NULL;
 		buf[n] = 0;
@@ -156,7 +156,7 @@ redis_result* redis_client::get_array()
 		redis_result* child = get_object();
 		if (child == NULL)
 			return NULL;
-		rr->put(child, 0);
+		rr->put(child, i);
 	}
 
 	return rr;
@@ -255,7 +255,6 @@ const string& redis_client::build_request(size_t argc, const char* argv[],
 		buf->append(argv[i], argv_lens[i]);
 		buf->append("\r\n");
 	}
-	printf(">>>req: %s\r\n", buf->c_str());
 	return *buf;
 }
 

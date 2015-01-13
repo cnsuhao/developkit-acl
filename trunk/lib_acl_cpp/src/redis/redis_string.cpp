@@ -646,31 +646,36 @@ int redis_string::msetnx(const string& req)
 
 /////////////////////////////////////////////////////////////////////////////
 
-bool redis_string::mget(const std::vector<string>& keys)
+bool redis_string::mget(const std::vector<string>& keys,
+	std::vector<string>* result /* = NULL */)
 {
 	const string& req = conn_.build("MGET", NULL, keys);
-	return mget(req);
+	return mget(req, result);
 }
 
-bool redis_string::mget(const std::vector<const char*>& keys)
+bool redis_string::mget(const std::vector<const char*>& keys,
+	std::vector<string>* result /* = NULL */)
 {
 	const string& req = conn_.build("MGET", NULL, keys);
-	return mget(req);
+	return mget(req, result);
 }
 
-bool redis_string::mget(const std::vector<char*>& keys)
+bool redis_string::mget(const std::vector<char*>& keys,
+	std::vector<string>* result /* = NULL */)
 {
 	const string& req = conn_.build("MGET", NULL, keys);
-	return mget(req);
+	return mget(req, result);
 }
 
-bool redis_string::mget(const std::vector<int>& keys)
+bool redis_string::mget(const std::vector<int>& keys,
+	std::vector<string>* result /* = NULL */)
 {
 	const string& req = conn_.build("MGET", NULL, keys);
-	return mget(req);
+	return mget(req, result);
 }
 
-bool redis_string::mget(const char* first_key, ...)
+bool redis_string::mget(std::vector<string>* result,
+	const char* first_key, ...)
 {
 	std::vector<const char*> keys;
 	keys.push_back(first_key);
@@ -681,35 +686,66 @@ bool redis_string::mget(const char* first_key, ...)
 		keys.push_back(key);
 	va_end(ap);
 
-	return mget(keys);
+	return mget(keys, result);
 }
 
-bool redis_string::mget(const char* keys[], size_t argc)
+bool redis_string::mget(const char* keys[], size_t argc,
+	std::vector<string>* result /* = NULL */)
 {
 	const string& req = conn_.build("MGET", NULL, keys, argc);
-	return mget(req);
+	return mget(req, result);
 }
 
-bool redis_string::mget(const int keys[], size_t argc)
+bool redis_string::mget(const int keys[], size_t argc,
+	std::vector<string>* result /* = NULL */)
 {
 	const string& req = conn_.build("MGET", NULL, keys, argc);
-	return mget(req);
+	return mget(req, result);
 }
 
 bool redis_string::mget(const char* keys[], const size_t keys_len[],
-	size_t argc)
+	size_t argc, std::vector<string>* result /* = NULL */)
 {
 	const string& req = conn_.build("MGET", NULL, keys, keys_len, argc);
-	return mget(req);
+	return mget(req, result);
 }
 
-bool redis_string::mget(const string& req)
+bool redis_string::mget(const string& req,
+	std::vector<string>* result /* = NULL */)
 {
 	result_ = conn_.run(req);
 	if (result_ == NULL)
 		return false;
 	if (result_->get_type() != REDIS_RESULT_ARRAY)
 		return false;
+	if (result == NULL)
+		return true;
+
+	size_t size = mget_size();
+	string buf;
+	const redis_result*  rr;
+	size_t nslice, len;
+	const char* ptr;
+
+	for (size_t i = 0; i < size; i++)
+	{
+		rr = mget_result(i);
+		if (rr == NULL || (nslice = rr->get_size()) == 0)
+			result->push_back("");
+		else if (nslice == 1)
+		{
+			ptr = rr->get(0, &len);
+			buf.copy(ptr, len);
+			result->push_back(buf);
+		}
+		else
+		{
+			buf.clear();
+			rr->argv_to_string(buf);
+			result->push_back(buf);
+		}
+	}
+
 	return true;
 }
 

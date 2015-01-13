@@ -132,17 +132,25 @@ public:
 
 	/////////////////////////////////////////////////////////////////////
 
-	bool mget(const std::vector<string>& keys);
-	bool mget(const std::vector<const char*>& keys);
-	bool mget(const std::vector<char*>& keys);
-	bool mget(const std::vector<int>& keys);
+	bool mget(const std::vector<string>& keys,
+		std::vector<string>* result = NULL);
+	bool mget(const std::vector<const char*>& keys,
+		std::vector<string>* result = NULL);
+	bool mget(const std::vector<char*>& keys,
+		std::vector<string>* result = NULL);
+	bool mget(const std::vector<int>& keys,
+		std::vector<string>* result = NULL);
 
-	bool mget(const char* first_key, ...) ACL_CPP_PRINTF(2, 3);;
-	bool mget(const char* keys[], size_t argc);
-	bool mget(const int keys[], size_t argc);
-	bool mget(const char* keys[], const size_t keys_len[], size_t argc);
+	bool mget(std::vector<string>* result, const char* first_key, ...)
+		ACL_CPP_PRINTF(3, 4);;
+	bool mget(const char* keys[], size_t argc,
+		std::vector<string>* result = NULL);
+	bool mget(const int keys[], size_t argc,
+		std::vector<string>* result = NULL);
+	bool mget(const char* keys[], const size_t keys_len[], size_t argc,
+		std::vector<string>* result = NULL);
 
-	bool mget(const string& req);
+	bool mget(const string& req, std::vector<string>* result = NULL);
 	size_t mget_size() const;
 	const char* mget_value(size_t i, size_t* len = NULL) const;
 	const redis_result* mget_result(size_t i) const;

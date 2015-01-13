@@ -116,7 +116,7 @@ public:
 	 */
 	const std::vector<const redis_result*>* get_children() const
 	{
-		return children_;
+		return &children_;
 	}
 
 	/**
@@ -153,7 +153,7 @@ private:
 	const char** argv_;
 	size_t* lens_;
 
-	std::vector<const redis_result*>* children_;
+	std::vector<const redis_result*> children_;
 };
 
 } // namespace acl
