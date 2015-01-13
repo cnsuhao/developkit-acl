@@ -255,6 +255,7 @@ const string& redis_client::build_request(size_t argc, const char* argv[],
 		buf->append(argv[i], argv_lens[i]);
 		buf->append("\r\n");
 	}
+	printf(">>>req: %s\r\n", buf->c_str());
 	return *buf;
 }
 
