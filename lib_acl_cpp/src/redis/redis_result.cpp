@@ -14,14 +14,12 @@ redis_result::redis_result(dbuf_pool* pool)
 , idx_(0)
 , argv_(NULL)
 , lens_(NULL)
-, children_(NULL)
 {
 	acl_assert(pool_ != NULL);
 }
 
 redis_result::~redis_result()
 {
-	delete children_;
 }
 
 void *redis_result::operator new(size_t size, dbuf_pool* pool)
@@ -32,7 +30,7 @@ void *redis_result::operator new(size_t size, dbuf_pool* pool)
 void redis_result::operator delete(void* ptr acl_unused,
 	dbuf_pool* pool acl_unused)
 {
-	printf("delete now\n");
+	logger_error("DELETE NOW!");
 }
 
 redis_result& redis_result::set_size(size_t size)
@@ -65,26 +63,14 @@ redis_result& redis_result::put(const char* buf, size_t len)
 			(int) idx_, (int) size_);
 		return *this;
 	}
-	printf("afeter1 buf: %s, len: %d, len: %d\n", buf, strlen(buf), len);
 	if (argv_ == NULL)
 	{
-#if 1
 		argv_ = (const char**) pool_->dbuf_alloc(sizeof(char*) * size_);
 		lens_ = (size_t*) pool_->dbuf_alloc(sizeof(size_t) * size_);
-#else
-		argv_ = (const char**) malloc(sizeof(char*) * size_);
-		lens_ = (size_t *) malloc(sizeof(size_t) * size_);
-#endif
 	}
 
-	printf("afeter2 buf: %s, len: %d, len: %d, char* size: %d\n",
-		buf, strlen(buf), len, sizeof(char*));
-	lens_[idx_] = len;
-	printf("afeter4 buf: %s, len: %d, len: %d\n", buf, strlen(buf), len);
-
 	argv_[idx_] = buf;
-	printf("afeter3 buf: %s, size: %d, %d\n", buf, sizeof(char*), strlen(buf));
-
+	lens_[idx_] = len;
 	idx_++;
 
 	return *this;
@@ -93,21 +79,11 @@ redis_result& redis_result::put(const char* buf, size_t len)
 size_t redis_result::get_size() const
 {
 	if (result_type_ == REDIS_RESULT_ARRAY)
-	{
-		if (children_ == NULL)
-		{
-			logger_error("children_ null");
-			return 0;
-		}
-		return children_->size();
-	}
+		return children_.size();
 	else if (result_type_ == REDIS_RESULT_STRING)
 	{
 		if (argv_ == NULL || lens_ == NULL)
-		{
-			logger_error("argv_ null");
 			return 0;
-		}
 		return size_;
 	}
 	else
@@ -216,21 +192,17 @@ size_t redis_result::argv_to_string(char* buf, size_t size) const
 
 redis_result& redis_result::put(const redis_result* rr, size_t idx)
 {
-	if (children_ == NULL)
-		children_ = NEW std::vector<const redis_result*>;
-	else if (idx == 0)
-		children_->clear();
-	children_->push_back(rr);
+	if (idx == 0)
+		children_.clear();
+	children_.push_back(rr);
 	return *this;
 }
 
 const redis_result* redis_result::get_child(size_t i) const
 {
-	if (children_ == NULL)
+	if (i >= children_.size())
 		return NULL;
-	if (i >= children_->size())
-		return NULL;
-	return (*children_)[i];
+	return children_[i];
 }
 
 } // namespace acl
