@@ -21,6 +21,7 @@ redis_client::redis_client(const char* addr, int conn_timeout /* = 60 */,
 , argv_size_(0)
 , argv_(NULL)
 , argv_lens_(NULL)
+, result_(NULL)
 {
 	addr_ = acl_mystrdup(addr);
 	pool_ = NEW dbuf_pool();
@@ -29,7 +30,11 @@ redis_client::redis_client(const char* addr, int conn_timeout /* = 60 */,
 redis_client::~redis_client()
 {
 	acl_myfree(addr_);
+	if (result_)
+		result_->reset();
 	delete pool_;
+	acl_myfree(argv_);
+	acl_myfree(argv_lens_);
 }
 
 void redis_client::reset()
@@ -37,8 +42,8 @@ void redis_client::reset()
 	// 只有当本连接对象被重复使用时才需要状态重置
 	if (used_ > 0)
 	{
-		argv_size_ = 0;
-
+		if (result_)
+			result_->reset();
 		delete pool_;
 		pool_ = NEW dbuf_pool();
 	}
@@ -232,9 +237,9 @@ const redis_result* redis_client::run(const string& request)
 			return NULL;
 		}
 
-		redis_result* rr = get_object();
-		if (rr != NULL)
-			return rr;
+		result_ = get_object();
+		if (result_ != NULL)
+			return result_;
 		conn_.close();
 
 		if (!retry_ || retried)
