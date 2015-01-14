@@ -108,6 +108,7 @@ protected:
 	virtual bool open();
 
 private:
+	unsigned long long used_;
 	dbuf_pool* pool_;
 	socket_stream conn_;
 	char* addr_;
