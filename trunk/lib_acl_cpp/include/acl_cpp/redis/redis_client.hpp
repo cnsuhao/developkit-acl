@@ -121,6 +121,7 @@ private:
 	size_t* argv_lens_;
 	string  request_;
 	string  buf_;
+	redis_result* result_;
 
 	void argv_space(size_t n);
 
