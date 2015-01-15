@@ -191,16 +191,19 @@ static void test_mget(acl::redis_string& option, int n)
 {
 	acl::string key1, key2, key3;
 	std::vector<acl::string> result;
+	const char* keys[3];
 
 	for (int i = 0; i < n; i++)
 	{
 		key1.format("key1_%s_%d", __keypre.c_str(), i);
 		key2.format("key2_%s_%d", __keypre.c_str(), i);
 		key3.format("key3_%s_%d", __keypre.c_str(), i);
+		keys[0] = key1.c_str();
+		keys[1] = key2.c_str();
+		keys[2] = key3.c_str();
 
 		result.clear();
-		if (option.mget(&result, key1.c_str(), key2.c_str(),
-			key3.c_str(), NULL) == false)
+		if (option.mget(keys, 3, &result) == false)
 		{
 			printf("mset error\r\n");
 			break;
@@ -209,19 +212,17 @@ static void test_mget(acl::redis_string& option, int n)
 		{
 			size_t size = option.mget_size();
 			printf("size: %lu\r\n", (unsigned long) size);
-			printf("key1: %s\r\n", key1.c_str());
-			printf("key2: %s\r\n", key2.c_str());
-			printf("key3: %s\r\n", key3.c_str());
 
-			for (size_t j = 0; j < size; j++)
+			size_t j;
+			for (j = 0; j < size; j++)
 			{
 				const char* val = option.mget_value(j);
-				printf("mget ok, %s\r\n", val ? val : "null");
+				printf("mget ok, %s=%s\r\n", keys[j], val ? val : "null");
 			}
 
 			std::vector<acl::string>::const_iterator it;
-			for (it = result.begin(); it != result.end(); ++it)
-				printf("mget %s\r\n", (*it).c_str());
+			for (j = 0, it = result.begin(); it != result.end(); ++it, j++)
+				printf("mget %s=%s\r\n", keys[j], (*it).c_str());
 		}
 		// option.get_client().reset();
 	}
