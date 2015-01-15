@@ -186,7 +186,7 @@ bool redis_string::getset(const char* key, size_t key_len,
 	if (result_ == NULL)
 		return false;
 	if (result_->get_type() != REDIS_RESULT_STRING)
-		return NULL;
+		return false;
 	(void) result_->argv_to_string(buf);
 	return true;
 }
