@@ -146,6 +146,14 @@ int main(int argc, char* argv[])
 		test_exists(option, n);
 	else if (cmd == "type")
 		test_type(option, n);
+	else if (cmd == "all")
+	{
+		test_expire(option, n);
+		test_ttl(option, n);
+		test_exists(option, n);
+		test_type(option, n);
+		test_del(option, n);
+	}
 	else
 		printf("unknown cmd: %s\r\n", cmd.c_str());
 
