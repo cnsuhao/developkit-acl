@@ -722,8 +722,8 @@ bool redis_string::mget(const string& req,
 		return true;
 
 	size_t size = mget_size();
-	string buf;
-	const redis_result*  rr;
+	string buf(4096);
+	const redis_result* rr;
 	size_t nslice, len;
 	const char* ptr;
 
