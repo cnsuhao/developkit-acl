@@ -645,6 +645,32 @@ int main(int argc, char* argv[])
 		test_decr(option, n);
 	else if (cmd == "decrby")
 		test_decrby(option, n);
+	else if (cmd == "all")
+	{
+		test_set(option, n);
+		test_setex(option, n, ttl);
+		test_setnx(option, n);
+		test_append(option, n);
+		test_get(option, n);
+		test_getset(option, n);
+		test_strlen(option, n);
+		test_mset(option, n);
+		test_mget(option, n);
+		test_msetnx(option, n);
+		test_setrange(option, n);
+		test_getrange(option, n);
+		test_setbit(option, n);
+		test_getbit(option, n);
+		test_bitcount(option, n);
+		test_bitop_and(option, n);
+		test_bitop_or(option, n);
+		test_bitop_xor(option, n);
+		test_incr(option, n);
+		test_incrby(option, n);
+		test_incrbyfloat(option, n);
+		test_decr(option, n);
+		test_decrby(option, n);
+	}
 	else
 		printf("unknown cmd: %s\r\n", cmd.c_str());
 

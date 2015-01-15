@@ -64,7 +64,8 @@ void redis_client::argv_space(size_t n)
 	else
 	{
 		argv_ = (const char**) acl_myrealloc(argv_, n * sizeof(char*));
-		argv_lens_ = (size_t*) acl_myrealloc(argv_, n * sizeof(size_t));
+		argv_lens_ = (size_t*) acl_myrealloc(argv_lens_,
+				n * sizeof(size_t));
 	}
 }
 
