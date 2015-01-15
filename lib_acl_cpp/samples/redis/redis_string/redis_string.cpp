@@ -376,7 +376,7 @@ static void test_bitop_and(acl::redis_string& option, int n)
 
 	for (int i = 0; i < n; i++)
 	{
-		key.format("bit_%s_d", __keypre.c_str(), i);
+		key.format("bit_%s_%d", __keypre.c_str(), i);
 		key1.format("bit_%s_%d", __keypre.c_str(), i % 1);
 		key2.format("bit_%s_%d", __keypre.c_str(), i % 2);
 		key3.format("bit_%s_%d", __keypre.c_str(), i % 3);
@@ -404,7 +404,7 @@ static void test_bitop_or(acl::redis_string& option, int n)
 
 	for (int i = 0; i < n; i++)
 	{
-		key.format("bit_%s_d", __keypre.c_str(), i);
+		key.format("bit_%s_%d", __keypre.c_str(), i);
 		key1.format("bit_%s_%d", __keypre.c_str(), i % 1);
 		key2.format("bit_%s_%d", __keypre.c_str(), i % 2);
 		key3.format("bit_%s_%d", __keypre.c_str(), i % 3);
@@ -432,7 +432,7 @@ static void test_bitop_xor(acl::redis_string& option, int n)
 
 	for (int i = 0; i < n; i++)
 	{
-		key.format("bit_%s_d", __keypre.c_str(), i);
+		key.format("bit_%s_%d", __keypre.c_str(), i);
 		key1.format("bit_%s_%d", __keypre.c_str(), i % 1);
 		key2.format("bit_%s_%d", __keypre.c_str(), i % 2);
 		key3.format("bit_%s_%d", __keypre.c_str(), i % 3);
