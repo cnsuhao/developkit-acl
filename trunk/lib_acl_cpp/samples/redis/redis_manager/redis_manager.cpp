@@ -55,9 +55,15 @@ static bool test_exists(acl::redis_key& option, int i)
 
 	key.format("%s_%d", __keypre.c_str(), i);
 	if (option.exists(key.c_str()) == false)
-		printf("no exists key: %s\r\n", key.c_str());
+	{
+		if (i < 10)
+			printf("no exists key: %s\r\n", key.c_str());
+	}
 	else
-		printf("exists key: %s\r\n", key.c_str());
+	{
+		if (i < 10)
+			printf("exists key: %s\r\n", key.c_str());
+	}
 	return true;
 }
 
@@ -72,7 +78,7 @@ static bool test_type(acl::redis_key& option, int i)
 		printf("unknown type key: %s\r\n", key.c_str());
 		return false;
 	}
-	else
+	else if (i < 10)
 		printf("type ok, key: %s, ret: %d\r\n", key.c_str(), ret);
 	return true;
 }
@@ -140,7 +146,9 @@ protected:
 				printf("unknown cmd: %s\r\n", cmd_.c_str());
 				break;
 			}
+
 			pool->put(conn, ret);
+
 			if (ret == false)
 				break;
 		}
@@ -204,7 +212,7 @@ int main(int argc, char* argv[])
 
 	acl::acl_cpp_init();
 
-	acl::redis_manager manager;
+	acl::redis_manager manager(conn_timeout, rw_timeout);
 	manager.set(addr.c_str(), max_threads);
 
 	std::vector<test_thread*> threads;

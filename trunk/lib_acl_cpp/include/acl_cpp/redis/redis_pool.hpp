@@ -23,7 +23,7 @@ public:
 	 * @param rw_timeout {int} ÍøÂç IO ¶ÁĞ´³¬Ê±Ê±¼ä(Ãë)
 	 * @return {redis_pool&}
 	 */
-	redis_pool& set_timeout(int conn_timeout = 30, int rw_timeout = 60);
+	redis_pool& set_timeout(int conn_timeout, int rw_timeout);
 
 protected:
 	/**
