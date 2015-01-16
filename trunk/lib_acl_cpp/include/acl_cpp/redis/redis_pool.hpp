@@ -26,7 +26,10 @@ public:
 	redis_pool& set_timeout(int conn_timeout = 30, int rw_timeout = 60);
 
 protected:
-	// 基类纯虚函数
+	/**
+	 * 基类纯虚函数: 调用此函数用来创建一个新的连接
+	 * @return {connect_client*}
+	 */
 	virtual connect_client* create_connect();
 
 private:
