@@ -7,6 +7,8 @@ namespace acl
 
 redis_pool::redis_pool(const char* addr, int count, size_t idx /* = 0 */)
 : connect_pool(addr, count, idx)
+, conn_timeout_(30)
+, rw_timeout_(60)
 {
 
 }
