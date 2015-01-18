@@ -21,6 +21,12 @@ redis_key::~redis_key()
 
 }
 
+void redis_key::reset()
+{
+	if (conn_)
+		conn_->reset();
+}
+
 void redis_key::set_client(redis_client* conn)
 {
 	conn_ = conn;
