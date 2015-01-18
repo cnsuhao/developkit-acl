@@ -97,7 +97,7 @@ static void test_type(acl::redis_key& option, int n)
 static void usage(const char* procname)
 {
 	printf("usage: %s -h[help]\r\n"
-		"-s redis_addr[127.0.0.1:6380]\r\n"
+		"-s redis_addr[127.0.0.1:6379]\r\n"
 		"-n count\r\n"
 		"-C connect_timeout[default: 10]\r\n"
 		"-T rw_timeout[default: 10]\r\n"
@@ -108,7 +108,7 @@ static void usage(const char* procname)
 int main(int argc, char* argv[])
 {
 	int  ch, n = 1, conn_timeout = 10, rw_timeout = 10;
-	acl::string addr("127.0.0.1:6380"), cmd;
+	acl::string addr("127.0.0.1:6379"), cmd;
 
 	while ((ch = getopt(argc, argv, "hs:n:C:T:a:")) > 0)
 	{

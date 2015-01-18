@@ -3,6 +3,7 @@
 #include "acl_cpp/stdlib/dbuf_pool.hpp"
 #include "acl_cpp/stdlib/snprintf.hpp"
 #include "acl_cpp/redis/redis_client.hpp"
+#include "acl_cpp/redis/redis_result.hpp"
 #include "acl_cpp/redis/redis_list.hpp"
 
 namespace acl

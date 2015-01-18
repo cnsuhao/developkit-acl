@@ -24,7 +24,7 @@ public:
 
 	const redis_result* get_result() const
 	{
-		result_;
+		return result_;
 	}
 
 	/////////////////////////////////////////////////////////////////////
