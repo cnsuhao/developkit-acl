@@ -179,7 +179,7 @@ const redis_result* redis_string::get(const char* key, size_t len)
 	argv[0] = "GET";
 	lens[0] = sizeof("GET") - 1;
 	argv[1] = key;
-	lens[1] = strlen(key);
+	lens[1] = len;
 
 	const string& req = conn_->build_request(2, argv, lens);
 	result_ = conn_->run(req);
@@ -534,7 +534,7 @@ int redis_string::bitop(const char* op, const char* destkey,
 	argv[2] = destkey;
 	lens[2] = strlen(argv[2]);
 
-	std::vector<string>::const_iterator cit = cit = keys.begin();
+	std::vector<string>::const_iterator cit = keys.begin();
 	for (size_t i = 3; cit != keys.end(); ++cit, i++)
 	{
 		argv[i] = (*cit).c_str();
@@ -562,7 +562,7 @@ int redis_string::bitop(const char* op, const char* destkey,
 	argv[2] = destkey;
 	lens[2] = strlen(argv[2]);
 
-	std::vector<const char*>::const_iterator cit = cit = keys.begin();
+	std::vector<const char*>::const_iterator cit = keys.begin();
 	for (size_t i = 3; cit != keys.end(); ++cit, i++)
 	{
 		argv[i] = *cit;

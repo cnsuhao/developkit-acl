@@ -314,7 +314,7 @@ const string& redis_client::build_request(const std::vector<string>& args,
 		buf->clear();
 	}
 
-	buf->format("*lu\r\n", (unsigned long) args.size());
+	buf->format("*%lu\r\n", (unsigned long) args.size());
 	std::vector<string>::const_iterator cit = args.begin();
 	for (; cit != args.end(); ++cit)
 	{
@@ -336,7 +336,7 @@ const string& redis_client::build_request(const std::vector<const char*>& args,
 		buf->clear();
 	}
 
-	buf->format("*lu\r\n", (unsigned long) args.size());
+	buf->format("*%lu\r\n", (unsigned long) args.size());
 	std::vector<const char*>::const_iterator args_cit = args.begin();
 	std::vector<size_t>::const_iterator lens_cit = lens.begin();
 	for (; args_cit != args.end(); ++args_cit, ++lens_cit)
