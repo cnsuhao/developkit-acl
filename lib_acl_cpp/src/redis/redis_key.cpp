@@ -178,7 +178,7 @@ redis_key_t redis_key::type(const char* key)
 }
 
 bool redis_key::migrate(const char* key, const char* addr, unsigned dest_db,
-	unsigned timeout, const char* option = NULL)
+	unsigned timeout, const char* option /* = NULL */)
 {
 	char addrbuf[64];
 	safe_snprintf(addrbuf, sizeof(addrbuf), "%s", addr);
