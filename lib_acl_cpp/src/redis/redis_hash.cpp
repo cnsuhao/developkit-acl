@@ -12,8 +12,7 @@ namespace acl
 #define FLOAT_LEN	32
 
 redis_hash::redis_hash(redis_client* conn /* = NULL */)
-: conn_(conn)
-, result_(NULL)
+: redis_command(conn)
 {
 
 }
@@ -22,64 +21,42 @@ redis_hash::~redis_hash()
 {
 }
 
-void redis_hash::reset()
-{
-	if (conn_ != NULL)
-		conn_->reset();
-}
-
-void redis_hash::set_client(redis_client* conn)
-{
-	conn_ = conn;
-}
-
 /////////////////////////////////////////////////////////////////////////////
 
 bool redis_hash::hmset(const char* key, const std::map<string, string>& attrs)
 {
 	const string& req = conn_->build("HMSET", key, attrs);
-	return hmset(req);
+	return get_status(req);
 }
 
 bool redis_hash::hmset(const char* key, const std::map<string, char*>& attrs)
 {
 	const string& req = conn_->build("HMSET", key, attrs);
-	return hmset(req);
+	return get_status(req);
 }
 
 bool redis_hash::hmset(const char* key, const std::map<string, const char*>& attrs)
 {
 	const string& req = conn_->build("HMSET", key, attrs);
-	return hmset(req);
+	return get_status(req);
 }
 
 bool redis_hash::hmset(const char* key, const std::map<int, string>& attrs)
 {
 	const string& req = conn_->build("HMSET", key, attrs);
-	return hmset(req);
+	return get_status(req);
 }
 
 bool redis_hash::hmset(const char* key, const std::map<int, char*>& attrs)
 {
 	const string& req = conn_->build("HMSET", key, attrs);
-	return hmset(req);
+	return get_status(req);
 }
 
 bool redis_hash::hmset(const char* key, const std::map<int, const char*>& attrs)
 {
 	const string& req = conn_->build("HMSET", key, attrs);
-	return hmset(req);
-}
-
-bool redis_hash::hmset(const string& req)
-{
-	result_ = conn_->run(req);
-	if (result_ == NULL)
-		return false;
-	const char* res = result_->get(0);
-	if (res == NULL || strcasecmp(res, "ok") != 0)
-		return false;
-	return true;
+	return get_status(req);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -243,23 +220,7 @@ int redis_hash::hset(const char* key, const char* name, size_t name_len,
 	lens[3] = value_len;
 
 	const string& req = conn_->build_request(4, argv, lens);
-	return hset(req);
-}
-
-int redis_hash::hset(const string& req)
-{
-	result_ = conn_->run(req);
-	if (result_ == NULL)
-		return -1;
-	if (result_->get_type() != REDIS_RESULT_INTEGER)
-		return -1;
-	bool success;
-	int ret = result_->get_integer(&success);
-	if (!success)
-		return -1;
-	if (ret != 0 && ret != 1)
-		return -1;
-	return ret;
+	return get_number(req);
 }
 
 int redis_hash::hsetnx(const char* key, const char* name, const char* value)
@@ -289,21 +250,7 @@ int redis_hash::hsetnx(const char* key, const char* name, size_t name_len,
 	lens[3] = value_len;
 
 	const string& req = conn_->build_request(4, argv, lens);
-	return hsetnx(req);
-}
-
-int redis_hash::hsetnx(const string& req)
-{
-	result_ = conn_->run(req);
-	if (result_ == NULL)
-		return -1;
-	if (result_->get_type() != REDIS_RESULT_INTEGER)
-		return -1;
-	bool success;
-	int ret = result_->get_integer(&success);
-	if (!success)
-		return -1;
-	return ret;
+	return get_number(req);
 }
 
 bool redis_hash::hget(const char* key, const char* name, string& result)
@@ -325,13 +272,7 @@ bool redis_hash::hget(const char* key, const char* name,
 	lens[2] = name_len;
 
 	const string& req = conn_->build_request(3, argv, lens);
-	const redis_result* rr = conn_->run(req);
-	if (rr == NULL)
-		return false;
-	if (rr->get_type() != REDIS_RESULT_STRING)
-		return false;
-	rr->argv_to_string(result);
-	return true;
+	return get_string(req, result) >= 0 ? true : false;
 }
 
 bool redis_hash::hgetall(const char* key, std::map<string, string>& result)
@@ -339,40 +280,7 @@ bool redis_hash::hgetall(const char* key, std::map<string, string>& result)
 	const char* keys[1];
 	keys[0] = key;
 	const string& req = conn_->build("HGETALL", NULL, keys, 1);
-	const redis_result* rr = conn_->run(req);
-	if (rr == NULL)
-		return false;
-	if (rr->get_type() != REDIS_RESULT_ARRAY)
-		return false;
-	if (rr->get_size() == 0)
-		return true;
-
-	size_t size;
-	const redis_result** children = rr->get_children(&size);
-	if (children == NULL)
-		return false;
-	if (size % 2 != 0)
-		return false;
-
-	string name_buf, value_buf;
-
-	for (size_t i = 0; i < size;)
-	{
-		rr = children[i];
-		if (rr->get_type() != REDIS_RESULT_STRING)
-		{
-			i += 2;
-			continue;
-		}
-		name_buf.clear();
-		value_buf.clear();
-		rr->argv_to_string(name_buf);
-		i++;
-		rr->argv_to_string(value_buf);
-		i++;
-		result[name_buf] = value_buf;
-	}
-	return true;
+	return get_strings(req, result) < 0 ? false : true;
 }
 
 bool redis_hash::hgetall(const char* key, std::vector<string>& names,
@@ -381,43 +289,7 @@ bool redis_hash::hgetall(const char* key, std::vector<string>& names,
 	const char* keys[1];
 	keys[0] = key;
 	const string& req = conn_->build("HGETALL", NULL, keys, 1);
-	const redis_result* rr = conn_->run(req);
-	if (rr == NULL)
-		return false;
-	if (rr->get_type() != REDIS_RESULT_ARRAY)
-		return false;
-	if (rr->get_size() == 0)
-		return true;
-
-	size_t size;
-	const redis_result** children = rr->get_children(&size);
-
-	if (children == NULL)
-		return false;
-	if (size % 2 != 0)
-		return false;
-
-	string buf;
-
-	for (size_t i = 0; i < size;)
-	{
-		rr = children[i];
-		if (rr->get_type() != REDIS_RESULT_STRING)
-		{
-			i += 2;
-			continue;
-		}
-		buf.clear();
-		rr->argv_to_string(buf);
-		i++;
-		names.push_back(buf);
-
-		buf.clear();
-		rr->argv_to_string(buf);
-		i++;
-		values.push_back(buf);
-	}
-	return true;
+	return get_strings(req, names, values) < 0 ? false : true;
 }
 
 bool redis_hash::hgetall(const char* key, std::vector<const char*>& names,
@@ -426,48 +298,7 @@ bool redis_hash::hgetall(const char* key, std::vector<const char*>& names,
 	const char* keys[1];
 	keys[0] = key;
 	const string& req = conn_->build("HGETALL", NULL, keys, 1);
-	const redis_result* rr = conn_->run(req);
-	if (rr == NULL)
-		return false;
-	if (rr->get_type() != REDIS_RESULT_ARRAY)
-		return false;
-	if (rr->get_size() == 0)
-		return true;
-
-	size_t size;
-	const redis_result** children = rr->get_children(&size);
-
-	if (children == NULL)
-		return false;
-	if (size % 2 != 0)
-		return false;
-
-	char* buf;
-	size_t len;
-	dbuf_pool* pool = conn_->get_pool();
-	std::vector<const redis_result*>::const_iterator cit;
-	for (size_t i = 0; i < size;)
-	{
-		rr = children[i];
-		if (rr->get_type() != REDIS_RESULT_STRING)
-		{
-			i += 2;
-			continue;
-		}
-
-		len = rr->get_length() + 1;
-		buf = (char*) pool->dbuf_alloc(len);
-		rr->argv_to_string(buf, len);
-		i++;
-		names.push_back(buf);
-
-		len = rr->get_length() + 1;
-		buf = (char*) pool->dbuf_alloc(len);
-		rr->argv_to_string(buf, len);
-		i++;
-		values.push_back(buf);
-	}
-	return true;
+	return get_strings(req, names, values) < 0 ? false : true;
 }
 
 int redis_hash::hdel(const char* key, const char* first_name, ...)
@@ -485,79 +316,72 @@ int redis_hash::hdel(const char* key, const char* first_name, ...)
 int redis_hash::hdel(const char* key, const char* names[], size_t argc)
 {
 	const string& req = conn_->build("HDEL", key, names, argc);
-	return hdel(req);
+	return get_number(req);
 }
 
 int redis_hash::hdel(const char* key, const char* names[],
 	const size_t names_len[], size_t argc)
 {
 	const string& req = conn_->build("HDEL", key, names, names_len, argc);
-	return hdel(req);;
+	return get_number(req);;
 }
 
 int redis_hash::hdel(const char* key, const std::vector<string>& names)
 {
 	const string& req = conn_->build("HDEL", key, names);
-	return hdel(req);
+	return get_number(req);
 }
 
 int redis_hash::hdel(const char* key, const std::vector<char*>& names)
 {
 	const string& req = conn_->build("HDEL", key, names);
-	return hdel(req);
+	return get_number(req);
 }
 
 int redis_hash::hdel(const char* key, const std::vector<const char*>& names)
 {
 	const string& req = conn_->build("HDEL", key, names);
-	return hdel(req);
-}
-
-int redis_hash::hdel(const string& req)
-{
-	result_ = conn_->run(req);
-	if (result_ == NULL)
-		return -1;
-	if (result_->get_type() != REDIS_RESULT_INTEGER)
-		return -1;
-	return result_->get_integer();
+	return get_number(req);
 }
 
 bool redis_hash::hincrby(const char* key, const char* name,
 	long long int inc, long long int* result /* = NULL */)
 {
 	const char* names[1];
+
 	names[0] = name;
 	char buf[INT64_LEN];
 	(void) acl_i64toa(inc, buf, sizeof(buf));
 	const char* values[1];
 	values[0] = buf;
+
 	const string& req = conn_->build("HINCRBY", key, names, values, 1);
-	result_ = conn_->run(req);
-	if (result_ == NULL)
-		return false;
-	if (result_->get_type() != REDIS_RESULT_INTEGER)
-		return false;
+
+	bool success;
 	if (result != NULL)
-		*result = result_->get_integer64();
-	return true;
+		*result = get_number64(req, &success);
+	else
+		(void) get_number64(req, &success);
+	return success;
 }
 
 bool redis_hash::hincrbyfloat(const char* key, const char* name,
 	double inc, double* result /* = NULL */)
 {
 	const char* names[1];
+	const char* values[1];
+
 	names[0] = name;
 	char buf[FLOAT_LEN];
 	(void) safe_snprintf(buf, sizeof(buf), "%f", inc);
-	const char* values[1];
 	values[0] = buf;
-	const string& req = conn_->build("HINCRBYFLOAT", key, names, values, 1);
-	result_ = conn_->run(req);
-	if (result_ == NULL)
+
+	const string& req = conn_->build("HINCRBYFLOAT", key, names,
+		values, 1);
+
+	if (get_string(req, buf, sizeof(buf)) == false)
 		return false;
-	if (result_->get_type() != REDIS_RESULT_STRING)
-		return false;
+
 	if (result != NULL)
 	{
 		(void) result_->argv_to_string(buf, sizeof(buf));
@@ -572,33 +396,9 @@ bool redis_hash::hkeys(const char* key, std::vector<string>& names)
 {
 	const char* keys[1];
 	keys[0] = key;
+
 	const string& req = conn_->build("HKEYS", NULL, keys, 1);
-	result_ = conn_->run(req);
-	if (result_ == NULL)
-		return false;
-	if (result_->get_type() != REDIS_RESULT_ARRAY)
-		return false;
-
-	size_t size;
-	const redis_result** children = result_->get_children(&size);
-
-	if (children == NULL)
-		return false;
-
-	string buf;
-	const redis_result* rr;
-
-	for (size_t i = 0; i < size; i++)
-	{
-		rr = children[i];
-		if (rr->get_type() != REDIS_RESULT_STRING)
-			continue;
-		buf.clear();
-		rr->argv_to_string(buf);
-		names.push_back(buf);
-	}
-
-	return true;
+	return get_strings(req, names) < 0 ? false : true;
 }
 
 bool redis_hash::hexists(const char* key, const char* name)
@@ -614,29 +414,16 @@ bool redis_hash::hexists(const char* key, const char* name, size_t name_len)
 	names_len[0] = name_len;
 
 	const string& req = conn_->build("HEXISTS", key, names, names_len, 1);
-	const redis_result* rr = conn_->run(req);
-	if (rr == NULL)
-		return false;
-	if (rr->get_type() != REDIS_RESULT_INTEGER)
-		return false;
-	int ret = rr->get_integer();
-	if (ret == 1)
-		return true;
-	else
-		return false;
+	return get_number(req) < 0 ? false : true;
 }
 
 int redis_hash::hlen(const char* key)
 {
 	const char* keys[1];
 	keys[0] = key;
+
 	const string& req = conn_->build("HLEN", NULL, keys, 1);
-	const redis_result* rr = conn_->run(req);
-	if (rr == NULL)
-		return -1;
-	if (rr->get_type() != REDIS_RESULT_INTEGER)
-		return -1;
-	return rr->get_integer();
+	return get_number(req);
 }
 
 /////////////////////////////////////////////////////////////////////////////
