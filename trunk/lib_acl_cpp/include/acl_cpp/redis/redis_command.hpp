@@ -20,27 +20,10 @@ public:
 		return conn_;
 	}
 
-	const redis_result* get_result() const
-	{
-		return result_;
-	}
+	const redis_result* get_result() const;
 
 protected:
 	redis_client* conn_;
-	const redis_result* result_;
-
-	int get_number(const string& req, bool* success = NULL);
-	long long int get_number64(const string& req, bool* success = NULL);
-	bool get_status(const string& req, const char* success = "OK");
-	long get_string(const string& req, string& buf);
-	long get_string(const string& req, string* buf);
-	long get_string(const string& req, char* buf, size_t size);
-	long get_strings(const string& req, std::vector<string>& result);
-	long get_strings(const string& req, std::map<string, string>& result);
-	long get_strings(const string& req, std::vector<string>& names,
-		std::vector<string>& values);
-	long get_strings(const string& req, std::vector<const char*>& names,
-		std::vector<const char*>& values);
 };
 
 } // namespace acl

@@ -1,6 +1,5 @@
 #include "acl_stdafx.hpp"
 #include "acl_cpp/redis/redis_client.hpp"
-#include "acl_cpp/redis/redis_result.hpp"
 #include "acl_cpp/redis/redis_set.hpp"
 
 namespace acl
@@ -33,27 +32,27 @@ int redis_set::sadd(const char* key, const char* first_member, ...)
 int redis_set::sadd(const char* key, const std::vector<const char*>& memsbers)
 {
 	const string& req = conn_->build("SADD", key, memsbers);
-	return get_number(req);
+	return conn_->get_number(req);
 
 }
 
 int redis_set::sadd(const char* key, const std::vector<string>& members)
 {
 	const string& req = conn_->build("SADD", key, members);
-	return get_number(req);
+	return conn_->get_number(req);
 }
 
 int redis_set::sadd(const char* key, const char* argv[], size_t argc)
 {
 	const string& req = conn_->build("SADD", key, argv, argc);
-	return get_number(req);
+	return conn_->get_number(req);
 }
 
 int redis_set::sadd(const char* key, const char* argv[],
 	const size_t lens[], size_t argc)
 {
 	const string& req = conn_->build("SADD", key, argv, lens, argc);
-	return get_number(req);
+	return conn_->get_number(req);
 }
 
 bool redis_set::spop(const char* key, string& buf)
@@ -67,7 +66,7 @@ bool redis_set::spop(const char* key, string& buf)
 	lens[1] = strlen(key);
 
 	const string& req = conn_->build_request(2, argv, lens);
-	return get_string(req, buf) < 0 ? false : true;
+	return conn_->get_string(req, buf) < 0 ? false : true;
 }
 
 int redis_set::scard(const char* key)
@@ -81,7 +80,7 @@ int redis_set::scard(const char* key)
 	lens[1] = strlen(key);
 
 	const string& req = conn_->build_request(2, argv, lens);
-	return get_number(req);
+	return conn_->get_number(req);
 }
 
 int redis_set::smembers(const char* key, std::vector<string>& members)
@@ -95,7 +94,7 @@ int redis_set::smembers(const char* key, std::vector<string>& members)
 	lens[1] = strlen(key);
 
 	const string& req = conn_->build_request(2, argv, lens);
-	return get_strings(req, members);
+	return conn_->get_strings(req, members);
 }
 
 int redis_set::smove(const char* src, const char* dst, const char* member)
@@ -124,7 +123,7 @@ int redis_set::smove(const char* src, const char* dst, const char* member,
 	lens[3] = len;
 
 	const string& req = conn_->build_request(4, argv, lens);
-	return get_number(req);
+	return conn_->get_number(req);
 }
 
 int redis_set::sinter(std::vector<string>& members, const char* first_key, ...)
@@ -146,14 +145,14 @@ int redis_set::sinter(const std::vector<const char*>& keys,
 	std::vector<string>& members)
 {
 	const string& req = conn_->build("SINTER", NULL, keys);
-	return get_strings(req, members);
+	return conn_->get_strings(req, members);
 }
 
 int redis_set::sinter(const std::vector<string>& keys,
 	std::vector<string>& members)
 {
 	const string& req = conn_->build("SINTER", NULL, keys);
-	return get_strings(req, members);
+	return conn_->get_strings(req, members);
 }
 
 int redis_set::sdiff(std::vector<string>& members, const char* first_key, ...)
@@ -175,14 +174,14 @@ int redis_set::sdiff(const std::vector<const char*>& keys,
 	std::vector<string>& members)
 {
 	const string& req = conn_->build("SDIFF", NULL, keys);
-	return get_strings(req, members);
+	return conn_->get_strings(req, members);
 }
 
 int redis_set::sdiff(const std::vector<string>& keys,
 	std::vector<string>& members)
 {
 	const string& req = conn_->build("SDIFF", NULL, keys);
-	return get_strings(req, members);
+	return conn_->get_strings(req, members);
 }
 
 int redis_set::sdiffstore(const char* dst, const char* first_key, ...)
@@ -201,13 +200,13 @@ int redis_set::sdiffstore(const char* dst, const char* first_key, ...)
 int redis_set::sdiffstore(const char* dst, const std::vector<const char*>& keys)
 {
 	const string& req = conn_->build("SDIFFSTORE", dst, keys);
-	return get_number(req);
+	return conn_->get_number(req);
 }
 
 int redis_set::sdiffstore(const char* dst, const std::vector<string>& keys)
 {
 	const string& req = conn_->build("SDIFFSTORE", dst, keys);
-	return get_number(req);
+	return conn_->get_number(req);
 }
 
 } // namespace acl
