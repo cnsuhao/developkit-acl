@@ -86,9 +86,6 @@ public:
 	bool ltrim(const char* key, size_t start, size_t end);
 
 private:
-	redis_client* conn_;
-	const redis_result* result_;
-
 	int linsert(const char* key, const char* pos, const char* pivot,
 		size_t pivot_len, const char* value, size_t value_len);
 	int pushx(const char* cmd, const char* key,

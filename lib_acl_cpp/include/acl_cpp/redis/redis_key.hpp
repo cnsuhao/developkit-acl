@@ -81,10 +81,6 @@ public:
 		unsigned timeout, const char* option = NULL);
 
 	int move(const char* key, unsigned dest_db);
-
-private:
-	redis_client* conn_;
-	const redis_result* result_;
 };
 
 } // namespace acl
