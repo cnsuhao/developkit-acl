@@ -41,6 +41,7 @@ public:
 	int get_string(const string& req, string* buf);
 	int get_string(const string& req, char* buf, size_t size);
 	int get_strings(const string& req, std::vector<string>& result);
+	int get_strings(const string& req, std::vector<string>* result);
 	int get_strings(const string& req, std::map<string, string>& result);
 	int get_strings(const string& req, std::vector<string>& names,
 		std::vector<string>& values);

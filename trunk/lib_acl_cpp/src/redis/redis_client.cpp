@@ -374,22 +374,61 @@ int redis_client::get_strings(const string& req, std::vector<string>& out)
 		return 0;
 
 	const redis_result* rr;
-	string buf;
+	string buf(4096);
+
 	for (size_t i = 0; i < size; i++)
 	{
 		rr = children[i];
-		if (rr->get_type() != REDIS_RESULT_STRING)
-			continue;
-		rr->argv_to_string(buf);
-		out.push_back(buf);
-		buf.clear();
+		if (rr == NULL || rr->get_type() != REDIS_RESULT_STRING)
+			out.push_back("");
+		else if (rr->get_size() == 0)
+			out.push_back("");
+		else 
+		{
+			rr->argv_to_string(buf);
+			out.push_back(buf);
+			buf.clear();
+		}
 	}
 
 	return (int) size;
 }
 
-int redis_client::get_strings(const string& req,
-	std::map<string, string>& out)
+int redis_client::get_strings(const string& req, std::vector<string>* out)
+{
+	const redis_result* result = run(req);
+	if (result == NULL || result->get_type() != REDIS_RESULT_ARRAY)
+		return -1;
+	if (out == NULL)
+		return result->get_size();
+
+	size_t size;
+	const redis_result** children = result->get_children(&size);
+	if (children == NULL)
+		return 0;
+
+	const redis_result* rr;
+	string buf(4096);
+
+	for (size_t i = 0; i < size; i++)
+	{
+		rr = children[i];
+		if (rr == NULL || rr->get_type() != REDIS_RESULT_STRING)
+			out->push_back("");
+		else if (rr->get_size() == 0)
+			out->push_back("");
+		else 
+		{
+			rr->argv_to_string(buf);
+			out->push_back(buf);
+			buf.clear();
+		}
+	}
+
+	return (int) size;
+}
+
+int redis_client::get_strings(const string& req, std::map<string, string>& out)
 {
 	const redis_result* result = run(req);
 	if (result == NULL || result->get_type() != REDIS_RESULT_ARRAY)
