@@ -373,6 +373,9 @@ int redis_client::get_strings(const string& req, std::vector<string>& out)
 	if (children == NULL)
 		return 0;
 
+	if (size > 0)
+		out.reserve(size);
+
 	const redis_result* rr;
 	string buf(4096);
 
@@ -406,6 +409,9 @@ int redis_client::get_strings(const string& req, std::vector<string>* out)
 	const redis_result** children = result->get_children(&size);
 	if (children == NULL)
 		return 0;
+
+	if (size > 0)
+		out->reserve(size);
 
 	const redis_result* rr;
 	string buf(4096);
