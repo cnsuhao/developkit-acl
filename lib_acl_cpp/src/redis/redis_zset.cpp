@@ -1,6 +1,8 @@
 #include "acl_stdafx.hpp"
+#include "acl_cpp/stdlib/snprintf.hpp"
 #include "acl_cpp/stdlib/dbuf_pool.hpp"
 #include "acl_cpp/redis/redis_client.hpp"
+#include "acl_cpp/redis/redis_result.hpp"
 #include "acl_cpp/redis/redis_zset.hpp"
 
 namespace acl
@@ -368,7 +370,7 @@ int redis_zset::zrangebyscore(const char* key, double min,
 	if (offset && count)
 	{
 		safe_snprintf(offset_s, sizeof(offset_s), "%d", *offset);
-		safe_snprintf(count_s, sizeof(count_s), "%d", count);
+		safe_snprintf(count_s, sizeof(count_s), "%d", *count);
 
 		argv[4] = "LIMIT";
 		lens[4] = sizeof("LIMIT") - 1;
@@ -417,7 +419,7 @@ int redis_zset::zrangebyscore_with_scores(const char* key, double min,
 	if (offset && count)
 	{
 		safe_snprintf(offset_s, sizeof(offset_s), "%d", *offset);
-		safe_snprintf(count_s, sizeof(count_s), "%d", count);
+		safe_snprintf(count_s, sizeof(count_s), "%d", *count);
 
 		argv[5] = "LIMIT";
 		lens[5] = sizeof("LIMIT") - 1;
@@ -449,7 +451,7 @@ int redis_zset::zrangebyscore_with_scores(const char* key, double min,
 	const redis_result* child;
 	string buf(128);
 
-	for (size_t i = 0, j = 0; i < size; i++)
+	for (size_t i = 0; i < size; i++)
 	{
 		child = children[i * 2];
 		if (child == NULL)
