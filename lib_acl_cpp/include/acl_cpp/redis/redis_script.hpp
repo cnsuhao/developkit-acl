@@ -8,14 +8,11 @@ namespace acl
 class redis_client;
 class redis_result;
 
-class ACL_CPP_API redis_zset : public redis_command
+class ACL_CPP_API redis_script : public redis_command
 {
 public:
-	redis_zset(redis_client* conn = NULL);
-	~redis_zset();
-
-	/////////////////////////////////////////////////////////////////////
-
+	redis_script(redis_client* conn = NULL);
+	~redis_script();
 };
 
 } // namespace acl

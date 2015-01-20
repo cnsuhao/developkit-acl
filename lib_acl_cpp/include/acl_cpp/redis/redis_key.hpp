@@ -27,7 +27,7 @@ public:
 	~redis_key();
 
 	/**
-	 * 删除一组 KEY
+	 * 删除一组 KEY，对于变参的接口，则要求最后一个参数必须以 NULL 结束
 	 * @return {int} 返回所删除的 KEY 的个数，如下：
 	 *  0: 未删除任何 KEY
 	 *  -1: 出错
@@ -48,7 +48,7 @@ public:
 	 * @param n {int} 生存周期（秒）
 	 * @return {int} 返回值含义如下：
 	 *  > 0: 成功设置了生存周期
-	 *  0：该 key 不存在或该键未设置生存周期
+	 *  0：该 key 不存在
 	 *  < 0: 出错
 	 */
 	int expire(const char* key, int n);
@@ -58,8 +58,10 @@ public:
 	 * @param key {const char*} 键值
 	 * @return {int} 返回对应键值的生存周期
 	 *  > 0: 该 key 剩余的生存周期（秒）
-	 *  0：该 key 不存在或该键未设置生存周期
-	 *  < 0: 出错
+	 * -3：出错
+	 * -2：key 不存在
+	 * -1：当 key 存在但没有设置剩余时间
+	 * 注：对于 redis-server 2.8 以前版本，key 不存在或存在但未设置生存期则返回 -1
 	 */
 	int ttl(const char* key);
 
@@ -77,9 +79,25 @@ public:
 	 */
 	redis_key_t type(const char* key);
 
+	/**
+	 * 将数据从一个 redis-server 迁移至另一个 redis-server
+	 * @param key {const char*} 数据对应的键值
+	 * @param addr {const char*} 目标 redis-server 服务器地址，格式：ip:port
+	 * @param dest_db {unsigned} 目标 redis-server 服务器的数据库 ID 号
+	 * @param timeout {unsigned} 迁移过程的超时时间(毫秒级)
+	 * @param option {const char*} COPY 或 REPLACE
+	 * @return {bool} 迁移是否成功
+	 */
 	bool migrate(const char* key, const char* addr, unsigned dest_db,
 		unsigned timeout, const char* option = NULL);
 
+	/**
+	 * 将数据移至本 redis-server 中的另一个数据库中
+	 * @param key {const char*} 数据键值
+	 * @param dest_db {unsigned} 目标数据库 ID 号
+	 * @return {int} 迁移是否成功。-1: 表示出错，0：迁移失败，因为目标数据库中存在
+	 *  相同键值，1：迁移成功
+	 */
 	int move(const char* key, unsigned dest_db);
 };
 

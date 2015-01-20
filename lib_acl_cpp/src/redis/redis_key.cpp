@@ -102,7 +102,7 @@ int redis_key::ttl(const char* key)
 	bool success;
 	int ret = conn_->get_number(req, &success);
 	if (success == false)
-		return -1;
+		return -3;
 	else
 		return ret;
 }
