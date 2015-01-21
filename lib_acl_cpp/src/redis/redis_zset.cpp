@@ -598,7 +598,7 @@ int redis_zset::zrangebyscore_with_scores(const char* key, const char* min,
 	const int* offset /* = NULL */, const int* count /* = NULL */)
 {
 	return zrangebyscore_get_with_scores("ZRANGEBYSCORE", key, min,
-		max, out, offset);
+		max, out, offset, count);
 }
 
 int redis_zset::zrangebyscore_with_scores(const char* key, double min,
@@ -740,7 +740,7 @@ int redis_zset::zrevrangebyscore_with_scores(const char* key, const char* min,
 	const int* offset /* = NULL */, const int* count /* = NULL */)
 {
 	return zrangebyscore_get_with_scores("ZREVRANGEBYSCORE", key, min,
-		max, out, offset);
+		max, out, offset, count);
 }
 
 int redis_zset::zrevrangebyscore_with_scores(const char* key, double min,
@@ -829,7 +829,7 @@ int redis_zset::zstore(const char* cmd, const char* dst,
 	lens[1] = strlen(dst);
 
 	char num_s[BUFLEN];
-	safe_snprintf(num_s, sizeof(num_s), "%d", num);
+	safe_snprintf(num_s, sizeof(num_s), "%d", (int) num);
 	argv[2] = num_s;
 	lens[2] = strlen(num_s);
 
@@ -911,7 +911,7 @@ int redis_zset::zstore(const char* cmd, const char* dst,
 	lens[1] = strlen(dst);
 
 	char num_s[INTLEN];
-	safe_snprintf(num_s, sizeof(num_s), "%d", keys.size());
+	safe_snprintf(num_s, sizeof(num_s), "%d", (int) keys.size());
 	argv[2] = num_s;
 	lens[2] = strlen(num_s);
 

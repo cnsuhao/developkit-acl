@@ -23,6 +23,8 @@ public:
 		return pool_;
 	}
 
+	socket_stream* get_stream();
+
 	void reset();
 	void close();
 	
@@ -31,7 +33,7 @@ public:
 		return result_;
 	}
 
-	const redis_result* run(const string& request, size_t nobjs = 1);
+	const redis_result* run(const string& request, size_t nchildren = 0);
 
 	int get_number(const string& req, bool* success = NULL);
 	long long int get_number64(const string& req, bool* success = NULL);
@@ -138,6 +140,7 @@ private:
 	unsigned long long used_;
 	dbuf_pool* pool_;
 	socket_stream conn_;
+	socket_stream* p;
 	char* addr_;
 	int   conn_timeout_;
 	int   rw_timeout_;
@@ -159,6 +162,8 @@ private:
 	redis_result* get_integer();
 	redis_result* get_string();
 	redis_result* get_array();
+
+	void put_data(redis_result* rr, const char* data, size_t len);
 };
 
 } // end namespace acl

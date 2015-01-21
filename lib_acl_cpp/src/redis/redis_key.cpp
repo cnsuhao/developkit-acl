@@ -102,7 +102,7 @@ bool redis_key::exists(const char* key)
 	return conn_->get_number(req) > 0 ? true : false;
 }
 
-int redis_key::expire(const char* key, int n)
+int redis_key::set_expire(const char* key, int n)
 {
 	const char* argv[2];
 	argv[0]  = key;
@@ -114,7 +114,7 @@ int redis_key::expire(const char* key, int n)
 	return conn_->get_number(req);
 }
 
-int redis_key::keys(const char* pattern, std::vector<string>& out)
+int redis_key::keys_pattern(const char* pattern, std::vector<string>& out)
 {
 	const char* argv[2];
 	size_t lens[2];
@@ -197,7 +197,7 @@ bool redis_key::restore(const char* key, const char* value, size_t len,
 	return conn_->get_status(req);
 }
 
-int redis_key::ttl(const char* key)
+int redis_key::get_ttl(const char* key)
 {
 	const char* argv[1];
 	argv[0] = key;

@@ -71,6 +71,16 @@ void redis_client::argv_space(size_t n)
 	}
 }
 
+socket_stream* redis_client::get_stream()
+{
+	if (conn_.opened())
+		return &conn_;
+	else if (open())
+		return &conn_;
+	else
+		return NULL;
+}
+
 bool redis_client::open()
 {
 	if (conn_.opened())
@@ -92,6 +102,15 @@ void redis_client::close()
 
 /////////////////////////////////////////////////////////////////////////////
 
+void redis_client::put_data(redis_result* rr, const char* data, size_t len)
+{
+	char* buf = (char*) pool_->dbuf_alloc(len + 1);
+	if (len > 0)
+		memcpy(buf, data, len);
+	buf[len] = 0;
+	rr->put(buf, len);
+}
+
 redis_result* redis_client::get_error()
 {
 	buf_.clear();
@@ -101,7 +120,8 @@ redis_result* redis_client::get_error()
 	redis_result* rr = new(pool_) redis_result(pool_);
 	rr->set_type(REDIS_RESULT_ERROR);
 	rr->set_size(1);
-	rr->put(buf_.c_str(), buf_.length());
+
+	put_data(rr, buf_.c_str(), buf_.length());
 	return rr;
 }
 
@@ -114,7 +134,8 @@ redis_result* redis_client::get_status()
 	redis_result* rr = new(pool_) redis_result(pool_);
 	rr->set_type(REDIS_RESULT_STATUS);
 	rr->set_size(1);
-	rr->put(buf_.c_str(), buf_.length());
+
+	put_data(rr, buf_.c_str(), buf_.length());
 	return rr;
 }
 
@@ -127,7 +148,8 @@ redis_result* redis_client::get_integer()
 	redis_result* rr = new(pool_) redis_result(pool_);
 	rr->set_type(REDIS_RESULT_INTEGER);
 	rr->set_size(1);
-	rr->put(buf_.c_str(), buf_.length());
+
+	put_data(rr, buf_.c_str(), buf_.length());
 	return rr;
 }
 
@@ -224,7 +246,7 @@ redis_result* redis_client::get_object()
 
 redis_result* redis_client::get_objects(size_t nobjs)
 {
-	acl_assert(nobjs > 1);
+	acl_assert(nobjs >= 1);
 
 	redis_result* objs = new(pool_) redis_result(pool_);
 	objs->set_type(REDIS_RESULT_ARRAY);
@@ -241,7 +263,7 @@ redis_result* redis_client::get_objects(size_t nobjs)
 }
 
 const redis_result* redis_client::run(const string& request,
-	size_t nobjs /* = 1 */)
+	size_t nchildren /* = 0 */)
 {
 	// 本连接使用次数递增
 	used_++;
@@ -272,8 +294,8 @@ const redis_result* redis_client::run(const string& request,
 			return NULL;
 		}
 
-		if (nobjs > 1)
-			result_ = get_objects(nobjs);
+		if (nchildren >= 1)
+			result_ = get_objects(nchildren);
 		else
 			result_ = get_object();
 
@@ -616,6 +638,7 @@ const string& redis_client::build_request(size_t argc, const char* argv[],
 		buf->append(argv[i], argv_lens[i]);
 		buf->append("\r\n");
 	}
+	//printf("%s", buf->c_str());
 	return *buf;
 }
 
