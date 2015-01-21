@@ -67,7 +67,7 @@ public:
 	 *  0：该 key 不存在
 	 *  < 0: 出错
 	 */
-	int expire(const char* key, int n);
+	int set_expire(const char* key, int n);
 
 	/**
 	 * 查找所有符合给定模式 pattern 的 key
@@ -80,7 +80,7 @@ public:
 	 *   KEYS h*llo 匹配 hllo 和 heeeeello 等。
 	 *   KEYS h[ae]llo 匹配 hello 和 hallo ，但不匹配 hillo 。
 	 */
-	int keys(const char* pattern, std::vector<string>& out);
+	int keys_pattern(const char* pattern, std::vector<string>& out);
 
 	/**
 	 * 将 key 改名为 newkey
@@ -115,7 +115,7 @@ public:
 	 * -1：当 key 存在但没有设置剩余时间
 	 * 注：对于 redis-server 2.8 以前版本，key 不存在或存在但未设置生存期则返回 -1
 	 */
-	int ttl(const char* key);
+	int get_ttl(const char* key);
 
 	/**
 	 * 获得 KEY 的存储类型
