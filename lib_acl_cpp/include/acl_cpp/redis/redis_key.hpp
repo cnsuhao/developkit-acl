@@ -43,6 +43,22 @@ public:
 	int del(const char* keys[], const size_t lens[], size_t argc);
 
 	/**
+	 * 序列化给定 key ，并返回被序列化的值，使用 RESTORE 命令可以将这个值反序列化
+	 * 为 Redis 键
+	 * @param key {const char*} 键值
+	 * @param out {string&} 存储序列化的二进制数据
+	 * @return {int} 序列化后数据长度
+	 */
+	int dump(const char* key, string& out);
+
+	/**
+	 * 判断 KEY 是否存在
+	 * @param key {const char*} KEY 值
+	 * @return {bool} 返回 true 表示存在，否则表示出错或不存在
+	 */
+	bool exists(const char* key);
+
+	/**
 	 * 设置 KEY 的生存周期，单位（秒）
 	 * @param key {const char*} 键值
 	 * @param n {int} 生存周期（秒）
@@ -52,6 +68,42 @@ public:
 	 *  < 0: 出错
 	 */
 	int expire(const char* key, int n);
+
+	/**
+	 * 查找所有符合给定模式 pattern 的 key
+	 * @param pattern {const char*} 匹配模式
+	 * @param out {std::vector<string>&} 存储结果集
+	 * @return {int} 结果集的数量，0--为空，<0 -- 表示出错
+	 *  匹配模式举例：
+	 *   KEYS * 匹配数据库中所有 key 。
+	 *   KEYS h?llo 匹配 hello ， hallo 和 hxllo 等。
+	 *   KEYS h*llo 匹配 hllo 和 heeeeello 等。
+	 *   KEYS h[ae]llo 匹配 hello 和 hallo ，但不匹配 hillo 。
+	 */
+	int keys(const char* pattern, std::vector<string>& out);
+
+	/**
+	 * 将 key 改名为 newkey
+	 * @return {bool}
+	 */
+	bool rename_key(const char* key, const char* newkey);
+
+	/**
+	 * 当且仅当 newkey 不存在时，将 key 改名为 newkey
+	 * @param key {const char*} 旧 key
+	 * @param newkey {const char*} 新 key
+	 * @return {bool} 是否成功
+	 */
+	bool renamenx(const char* key, const char* newkey);
+
+	/**
+	 * 反序列化给定的序列化值，并将它和给定的 key 关联
+	 * @param ttl {int} 以毫秒为单位为 key 设置生存时间，如果 ttl 为 0，
+	 *  那么不设置生存时间
+	 * @return {bool}
+	 */
+	bool restore(const char* key, const char* value, size_t len,
+		int ttl, bool replace = false);
 
 	/**
 	 * 获得 KEY 的剩余生存周期，单位（秒）
@@ -64,13 +116,6 @@ public:
 	 * 注：对于 redis-server 2.8 以前版本，key 不存在或存在但未设置生存期则返回 -1
 	 */
 	int ttl(const char* key);
-
-	/**
-	 * 判断 KEY 是否存在
-	 * @param key {const char*} KEY 值
-	 * @return {bool} 返回 true 表示存在，否则表示出错或不存在
-	 */
-	bool exists(const char* key);
 
 	/**
 	 * 获得 KEY 的存储类型
