@@ -70,6 +70,14 @@ public:
 	int set_expire(const char* key, int n);
 
 	/**
+	 * 用 UNIX 时间截设置 KEY 的生存周期
+	 * @param key {const char*} 对象键值
+	 * @param stamp {time_t} UNIX 时间截，即自 1970 年以来的秒数
+	 * @return {int} 返回值的含义：1 -- 设置成功，0 -- 该 key 不存在，-1 -- 出错
+	 */
+	int expireat(const char* key, time_t stamp);
+
+	/**
 	 * 查找所有符合给定模式 pattern 的 key
 	 * @param pattern {const char*} 匹配模式
 	 * @param out {std::vector<string>&} 存储结果集
@@ -81,6 +89,14 @@ public:
 	 *   KEYS h[ae]llo 匹配 hello 和 hallo ，但不匹配 hillo 。
 	 */
 	int keys_pattern(const char* pattern, std::vector<string>& out);
+
+	/**
+	 * 移除给定 key 的生存时间，将这个 key 从"易失的"(带生存时间 key )转换成
+	 * "持久的"(一个不带生存时间、永不过期的 key )
+	 * @param key {const char*} 对象键值
+	 * @return {int}
+	 */
+	bool persist(const char* key);
 
 	/**
 	 * 将 key 改名为 newkey

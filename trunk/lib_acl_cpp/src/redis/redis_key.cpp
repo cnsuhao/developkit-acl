@@ -7,7 +7,8 @@
 namespace acl
 {
 
-#define INT_LEN	11
+#define INT_LEN		11
+#define LONG_LEN	21
 
 redis_key::redis_key(redis_client* conn /* = NULL */)
 : redis_command(conn)
@@ -114,6 +115,27 @@ int redis_key::set_expire(const char* key, int n)
 	return conn_->get_number(req);
 }
 
+int redis_key::expireat(const char* key, time_t stamp)
+{
+	const char* argv[3];
+	size_t lens[3];
+
+	argv[0] = "EXPIREAT";
+	lens[0] = sizeof("EXPIREAT") - 1;
+
+	argv[1] = key;
+	lens[1] = strlen(key);
+
+	char stamp_s[LONG_LEN];
+	safe_snprintf(stamp_s, sizeof(stamp_s), "%lu", (unsigned long) stamp);
+
+	argv[2] = stamp_s;
+	lens[2] = strlen(stamp_s);
+
+	const string& req = conn_->build_request(3, argv, lens);
+	return conn_->get_number(req);
+}
+
 int redis_key::keys_pattern(const char* pattern, std::vector<string>& out)
 {
 	const char* argv[2];
@@ -127,6 +149,21 @@ int redis_key::keys_pattern(const char* pattern, std::vector<string>& out)
 
 	const string& req = conn_->build_request(2, argv, lens);
 	return conn_->get_strings(req, out);
+}
+
+bool redis_key::persist(const char* key)
+{
+	const char* argv[2];
+	size_t lens[2];
+
+	argv[0] = "PERSIST";
+	lens[0] = sizeof("PERSIST") - 1;
+
+	argv[1] = key;
+	lens[1] = strlen(key);
+
+	const string& req = conn_->build_request(2, argv, lens);
+	return conn_->get_status(req);
 }
 
 bool redis_key::rename_key(const char* key, const char* newkey)
