@@ -6,7 +6,8 @@
 直接返回时没有释放流对象，导致描述字和内存泄漏
 277.2) feature: redis 客户端库的 redis_key, redis_hash, redis_set, redis_zset
 类方法增加了 scan 遍历方法
-277.3) feature: 完成 了 redis 客户端命令中 pubsub 的所有功能
+277.3) feature: 完成了 redis 客户端命令中 pubsub 的所有功能
+277.4) feature: 完成了 redis 客户端命令中 server 的几乎全部功能
 
 276) 2015.1.21
 276.1) feature: 实现 了redis_zset 全部接口

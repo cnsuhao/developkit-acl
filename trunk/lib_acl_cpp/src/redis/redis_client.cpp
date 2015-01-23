@@ -347,9 +347,12 @@ bool redis_client::get_status(const string& req, const char* success /* = "OK" *
 	if (result == NULL || result->get_type() != REDIS_RESULT_STATUS)
 		return false;
 	const char* status = result->get_status();
-	if (status == NULL || strcasecmp(status, success) != 0)
+	if (status == NULL)
 		return false;
-	return true;
+	else if (success == NULL || strcasecmp(status, success) == 0)
+		return true;
+	else
+		return false;
 }
 
 const char* redis_client::get_status_string(const char* req)
