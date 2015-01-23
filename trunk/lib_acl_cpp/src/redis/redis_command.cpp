@@ -1,5 +1,7 @@
 #include "acl_stdafx.hpp"
 #include "acl_cpp/redis/redis_client.hpp"
+#include "acl_cpp/stdlib/snprintf.hpp"
+#include "acl_cpp/redis/redis_result.hpp"
 #include "acl_cpp/redis/redis_command.hpp"
 
 namespace acl
@@ -58,7 +60,7 @@ const redis_result** redis_command::scan_keys(const char* cmd, const char* key,
 	}
 
 	char cursor_s[INT_LEN];
-	safe_snprintf(cursor_s, sizeof(cursor_s), "%d", (unsigned long) cursor);
+	safe_snprintf(cursor_s, sizeof(cursor_s), "%d", cursor);
 	argv[argc] = cursor_s;
 	lens[argc] = strlen(cursor_s);
 	argc++;

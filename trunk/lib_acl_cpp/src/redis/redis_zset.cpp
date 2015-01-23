@@ -431,16 +431,18 @@ int redis_zset::zrange_get_with_scores(const char* cmd, const char* key,
 		child = children[i * 2];
 		if (child == NULL)
 			continue;
+
 		child->argv_to_string(buf);
 		score = atof(buf.c_str());
+		buf.clear();
 
 		child = children[(i + 1) * 2];
 		if (child == NULL)
 			continue;
-		buf.clear();
-		child->argv_to_string(buf);
 
+		child->argv_to_string(buf);
 		out.push_back(std::make_pair(buf, score));
+		buf.clear();
 	}
 
 	return size;
@@ -578,16 +580,18 @@ int redis_zset::zrangebyscore_get_with_scores(const char* cmd,
 		child = children[i * 2];
 		if (child == NULL)
 			continue;
+
 		child->argv_to_string(buf);
 		score = atof(buf.c_str());
+		buf.clear();
 
 		child = children[(i + 1) * 2];
 		if (child == NULL)
 			continue;
-		buf.clear();
 		child->argv_to_string(buf);
 
 		out.push_back(std::make_pair(buf, score));
+		buf.clear();
 	}
 
 	return size;

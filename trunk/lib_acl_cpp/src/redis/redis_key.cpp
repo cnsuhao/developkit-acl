@@ -1,6 +1,7 @@
 #include "acl_stdafx.hpp"
 #include "acl_cpp/stdlib/snprintf.hpp"
 #include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/redis/redis_result.hpp"
 #include "acl_cpp/redis/redis_client.hpp"
 #include "acl_cpp/redis/redis_key.hpp"
 
@@ -291,7 +292,7 @@ bool redis_key::renamenx(const char* key, const char* newkey)
 }
 
 bool redis_key::restore(const char* key, const char* value, size_t len,
-	int ttl, bool replace /* = false */)
+	int nttl, bool replace /* = false */)
 {
 	const char* argv[5];
 	size_t lens[5];
@@ -303,7 +304,7 @@ bool redis_key::restore(const char* key, const char* value, size_t len,
 	lens[1] = strlen(key);
 
 	char ttl_s[INT_LEN];
-	safe_snprintf(ttl_s, sizeof(ttl_s), "%d", ttl);
+	safe_snprintf(ttl_s, sizeof(ttl_s), "%d", nttl);
 	argv[2] = ttl_s;
 	lens[2] = strlen(ttl_s);
 
