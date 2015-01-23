@@ -1,5 +1,7 @@
 #include "acl_stdafx.hpp"
 #include "acl_cpp/stdlib/snprintf.hpp"
+#include "acl_cpp/stdlib/string.hpp"
+#include "acl_cpp/redis/redis_result.hpp"
 #include "acl_cpp/redis/redis_client.hpp"
 #include "acl_cpp/redis/redis_set.hpp"
 

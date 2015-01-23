@@ -360,6 +360,7 @@ int redis_pubsub::pubsub_numsub(const string& req, std::map<string, int>& out)
 
 		rr = children[i];
 		out[buf] = rr->get_integer();
+		buf.clear();
 	}
 
 	return size / 2;
