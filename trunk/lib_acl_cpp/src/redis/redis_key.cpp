@@ -189,7 +189,7 @@ int redis_key::pexpire(const char* key, int n)
 	lens[0] = sizeof("PEXPIRE") - 1;
 
 	argv[1] = key;
-	lens[1] = strlen(key)
+	lens[1] = strlen(key);
 
 	char buf[INT_LEN];
 	(void) safe_snprintf(buf, INT_LEN, "%d", n);
