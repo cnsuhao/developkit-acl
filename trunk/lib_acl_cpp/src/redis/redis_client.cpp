@@ -341,6 +341,51 @@ long long int redis_client::get_number64(const string& req,
 	return result->get_integer64();
 }
 
+int redis_client::get_number(const string& req, std::vector<int>& out)
+{
+	const redis_result* result = run(req);
+	if (result == NULL || result->get_type() != REDIS_RESULT_ARRAY)
+		return -1;
+
+	size_t size;
+	const redis_result** children = result->get_children(&size);
+	if (children == NULL || size == 0)
+		return 0;
+	out.reserve(size);
+
+	const redis_result* rr;
+	for (size_t i = 0; i < size; i++)
+	{
+		rr = children[i];
+		out.push_back(rr->get_integer());
+	}
+
+	return size;
+}
+
+int redis_client::get_number64(const string& req,
+	std::vector<long long int>& out)
+{
+	const redis_result* result = run(req);
+	if (result == NULL || result->get_type() != REDIS_RESULT_ARRAY)
+		return -1;
+
+	size_t size;
+	const redis_result** children = result->get_children(&size);
+	if (children == NULL || size == 0)
+		return 0;
+	out.reserve(size);
+
+	const redis_result* rr;
+	for (size_t i = 0; i < size; i++)
+	{
+		rr = children[i];
+		out.push_back(rr->get_integer64());
+	}
+
+	return size;
+}
+
 bool redis_client::get_status(const string& req, const char* success /* = "OK" */)
 {
 	const redis_result* result = run(req);
@@ -353,6 +398,29 @@ bool redis_client::get_status(const string& req, const char* success /* = "OK" *
 		return true;
 	else
 		return false;
+}
+
+int redis_client::get_status(const string& req, std::vector<bool>& out)
+{
+	const redis_result* result = run(req);
+	if (result == NULL || result->get_type() != REDIS_RESULT_ARRAY)
+		return -1;
+
+	size_t size;
+	const redis_result** children = result->get_children(&size);
+	if (children == NULL || size == 0)
+		return 0;
+
+	out.reserve(size);
+
+	const redis_result* rr;
+	for (size_t i = 0; i < size; i++)
+	{
+		rr = children[i];
+		out.push_back(rr->get_integer() > 0 ? true : false);
+	}
+
+	return (int) size;
 }
 
 const char* redis_client::get_status_string(const char* req)
