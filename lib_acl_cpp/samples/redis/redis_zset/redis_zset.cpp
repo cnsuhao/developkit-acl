@@ -421,6 +421,16 @@ int main(int argc, char* argv[])
 #endif
 	else if (cmd == "all")
 	{
+		test_zadd(option, n);
+		test_zcard(option, n);
+		test_zcount(option, n);
+		test_zincrby(option, n);
+		test_zrange(option, n);
+		test_zrangebyscore(option, n);
+		test_zrank(option, n);
+		test_zrem(option, n);
+
+		test_zscore(option, n);
 	}
 	else
 		printf("unknown cmd: %s\r\n", cmd.c_str());
