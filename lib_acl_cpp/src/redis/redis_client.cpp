@@ -26,6 +26,7 @@ redis_client::redis_client(const char* addr, int conn_timeout /* = 60 */,
 , result_(NULL)
 {
 	addr_ = acl_mystrdup(addr);
+//	pool_ = NEW dbuf_pool(40960);
 	pool_ = NEW dbuf_pool();
 	req_ = NEW redis_request();
 }
