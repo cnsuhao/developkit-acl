@@ -779,7 +779,7 @@ void redis_client::build_request1(size_t argc, const char* argv[], size_t lens[]
 		request_.append(argv[i], lens[i]);
 		request_.append("\r\n");
 	}
-
+	// printf("%s", request_.c_str());
 }
 
 void redis_client::build_request2(size_t argc, const char* argv[], size_t lens[])

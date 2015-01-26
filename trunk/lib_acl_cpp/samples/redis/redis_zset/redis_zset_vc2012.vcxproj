@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9D97ED04-8BE4-4321-9B27-DD798CD3878C}</ProjectGuid>
+    <ProjectGuid>{16F4C9E2-2988-4729-8836-CB2D2A17942B}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <ProjectName>redis_zset</ProjectName>
   </PropertyGroup>
