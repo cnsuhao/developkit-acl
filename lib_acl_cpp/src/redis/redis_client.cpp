@@ -15,7 +15,8 @@ namespace acl
 
 redis_client::redis_client(const char* addr, int conn_timeout /* = 60 */,
 	int rw_timeout /* = 30 */, bool retry /* = true */)
-: used_(0)
+: slice_req_(false)
+, used_(0)
 , conn_timeout_(conn_timeout)
 , rw_timeout_(rw_timeout)
 , retry_(retry)
@@ -42,6 +43,11 @@ redis_client::~redis_client()
 	if (conn_.opened())
 		conn_.close();
 	delete req_;
+}
+
+void redis_client::set_slice_request(bool on)
+{
+	slice_req_ = on;
 }
 
 void redis_client::reset()
@@ -270,6 +276,59 @@ const redis_result* redis_client::run(size_t nchildren /* = 0 */)
 	// 本连接使用次数递增
 	used_++;
 
+	if (slice_req_)
+		return run2(nchildren);
+	else
+		return run1(nchildren);
+}
+
+const redis_result* redis_client::run1(size_t nchildren /* = 0 */)
+{
+	// 重置协议处理状态
+	bool retried = false;
+
+	while (true)
+	{
+		if (!conn_.opened() && conn_.open(addr_, conn_timeout_,
+			rw_timeout_) == false)
+		{
+			logger_error("connect server: %s error: %s",
+				addr_, last_serror());
+			return NULL;
+		}
+
+		if (!request_.empty() && conn_.write(request_) == -1)
+		{
+			conn_.close();
+			if (retry_ && !retried)
+			{
+				retried = true;
+				continue;
+			}
+			logger_error("write to redis(%s) error: %s",
+				addr_, last_serror());
+			return NULL;
+		}
+
+		if (nchildren >= 1)
+			result_ = get_redis_objects(nchildren);
+		else
+			result_ = get_redis_object();
+
+		if (result_ != NULL)
+			return result_;
+		conn_.close();
+
+		if (!retry_ || retried)
+			break;
+	}
+
+	return NULL;
+
+}
+
+const redis_result* redis_client::run2(size_t nchildren /* = 0 */)
+{
 	// 重置协议处理状态
 	bool retried = false;
 
@@ -696,7 +755,34 @@ size_t redis_client::get_size() const
 
 //////////////////////////////////////////////////////////////////////////
 
+void redis_client::reset_request()
+{
+	request_.clear();
+	if (req_)
+		req_->reset();
+}
+
 void redis_client::build_request(size_t argc, const char* argv[], size_t lens[])
+{
+	if (slice_req_)
+		build_request2(argc, argv, lens);
+	else
+		build_request1(argc, argv, lens);
+}
+
+void redis_client::build_request1(size_t argc, const char* argv[], size_t lens[])
+{
+	request_.format("*%lu\r\n", (unsigned long) argc);
+	for (size_t i = 0; i < argc; i++)
+	{
+		request_.format_append("$%lu\r\n", (unsigned long) lens[i]);
+		request_.append(argv[i], lens[i]);
+		request_.append("\r\n");
+	}
+
+}
+
+void redis_client::build_request2(size_t argc, const char* argv[], size_t lens[])
 {
 	size_t size = 1 + argc * 3;
 	req_->reserve(size);
@@ -722,42 +808,6 @@ void redis_client::build_request(size_t argc, const char* argv[], size_t lens[])
 	}
 }
 
-#if 0
-void redis_client::build_request(const std::vector<string>& args)
-{
-	string* buf = &request_;
-	buf->clear();
-
-	buf->format("*%lu\r\n", (unsigned long) args.size());
-	std::vector<string>::const_iterator cit = args.begin();
-	for (; cit != args.end(); ++cit)
-	{
-		buf->format_append("$%lu\r\n", (unsigned long) (*cit).size());
-		buf->append(*cit);
-		buf->append("\r\n");
-	}
-}
-
-void redis_client::build_request(const std::vector<const char*>& args,
-	const std::vector<size_t>& lens)
-{
-	acl_assert(args.size() == lens.size());
-
-	string* buf = &request_;
-	buf->clear();
-
-	buf->format("*%lu\r\n", (unsigned long) args.size());
-	std::vector<const char*>::const_iterator args_cit = args.begin();
-	std::vector<size_t>::const_iterator lens_cit = lens.begin();
-	for (; args_cit != args.end(); ++args_cit, ++lens_cit)
-	{
-		buf->format_append("$%lu\r\n", (unsigned long) *lens_cit);
-		buf->append(*args_cit, *lens_cit);
-		buf->append("\r\n");
-	}
-	return *buf;
-}
-#endif
 /////////////////////////////////////////////////////////////////////////////
 
 void redis_client::build(const char* cmd, const char* key,
