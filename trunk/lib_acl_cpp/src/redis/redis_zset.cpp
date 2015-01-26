@@ -8,7 +8,7 @@
 namespace acl
 {
 
-#define BUFLEN	64
+#define BUFLEN	32
 #define INTLEN	11
 
 redis_zset::redis_zset(redis_client* conn /* = NULL */)

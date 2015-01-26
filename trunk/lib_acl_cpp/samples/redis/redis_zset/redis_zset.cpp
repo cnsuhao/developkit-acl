@@ -12,7 +12,7 @@ static void test_zadd(acl::redis_zset& option, int n)
 	{
 		key.format("%s_%d", __keypre.c_str(), i);
 
-		for (int j = 0; j < 1000; j++)
+		for (int j = 0; j < 512; j++)
 		{
 			member.format("member_%d", j);
 			members[member] = j;
