@@ -3,7 +3,6 @@
 #include "acl_cpp/redis/redis_client.hpp"
 #include "acl_cpp/redis/redis_result.hpp"
 #include "acl_cpp/redis/redis_pubsub.hpp"
-#include "redis_request.hpp"
 
 namespace acl
 {
@@ -242,9 +241,7 @@ int redis_pubsub::check_channel(const redis_result* obj, const char* cmd,
 
 bool redis_pubsub::get_message(string& channel, string& msg)
 {
-	redis_request* req = conn_->get_request();
-	if (req != NULL)
-		req->reset();
+	conn_->reset_request();
 	const redis_result* result = conn_->run();
 	if (result == NULL)
 		return false;

@@ -3,7 +3,6 @@
 #include "acl_cpp/redis/redis_client.hpp"
 #include "acl_cpp/redis/redis_result.hpp"
 #include "acl_cpp/redis/redis_server.hpp"
-#include "redis_request.hpp"
 
 namespace acl
 {
@@ -243,9 +242,7 @@ bool redis_server::monitor()
 
 bool redis_server::get_command(string& buf)
 {
-	redis_request* req = conn_->get_request();
-	if (req != NULL)
-		req->reset();
+	conn_->reset_request();
 	const redis_result* result = conn_->run();
 	if (result == NULL || result->get_type() != REDIS_RESULT_STATUS)
 		return false;

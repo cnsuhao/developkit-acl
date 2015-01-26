@@ -19,6 +19,8 @@ public:
 		int rw_timeout = 30, bool retry = true);
 	~redis_client();
 
+	void set_slice_request(bool on);
+
 	dbuf_pool* get_pool() const
 	{
 		return pool_;
@@ -29,10 +31,7 @@ public:
 	void reset();
 	void close();
 	
-	redis_request* get_request() const
-	{
-		return req_;
-	}
+	void reset_request();
 
 	const redis_result* get_result() const
 	{
@@ -67,12 +66,6 @@ public:
 	/*******************************************************************/
 
 	void build_request(size_t argc, const char* argv[], size_t lens[]);
-
-#if 0
-	void build_request(const std::vector<string>& args);
-	void build_request(const std::vector<const char*>& args,
-		const std::vector<size_t>& lens);
-#endif
 
 	/*******************************************************************/
 
@@ -143,6 +136,7 @@ protected:
 	virtual bool open();
 
 private:
+	bool slice_req_;
 	unsigned long long used_;
 	dbuf_pool* pool_;
 	socket_stream conn_;
@@ -170,6 +164,11 @@ private:
 	redis_result* get_redis_array();
 
 	void put_data(redis_result* rr, const char* data, size_t len);
+
+	void build_request1(size_t argc, const char* argv[], size_t lens[]);
+	void build_request2(size_t argc, const char* argv[], size_t lens[]);
+	const redis_result* run1(size_t nchildren);
+	const redis_result* run2(size_t nchildren);
 };
 
 } // end namespace acl

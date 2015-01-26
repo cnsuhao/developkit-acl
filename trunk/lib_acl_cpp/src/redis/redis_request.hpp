@@ -27,9 +27,9 @@ public:
 	}
 
 private:
+	struct iovec* iov_;
 	size_t  argc_;
 	size_t  size_;
-	struct iovec* iov_;
 };
 
 } // namespace acl
