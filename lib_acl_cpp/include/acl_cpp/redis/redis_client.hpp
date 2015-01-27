@@ -72,8 +72,6 @@ public:
 	void build(const char* cmd, const char* key,
 		const std::map<string, string>& attrs);
 	void build(const char* cmd, const char* key,
-		const std::map<string, char*>& attrs);
-	void build(const char* cmd, const char* key,
 		const std::map<string, const char*>& attrs);
 
 	void build(const char* cmd, const char* key,
