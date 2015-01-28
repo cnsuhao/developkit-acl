@@ -129,7 +129,7 @@ public:
 	int lpush(const char* key, const char* values[], size_t argc);
 	int lpush(const char* key, const std::vector<string>& values);
 	int lpush(const char* key, const std::vector<const char*>& values);
-	int lpush(const char* key, const char* values[], size_t lens[],
+	int lpush(const char* key, const char* values[], const size_t lens[],
 		size_t argc);
 
 	/**
@@ -232,7 +232,7 @@ public:
 	int rpush(const char* key, const char* values[], size_t argc);
 	int rpush(const char* key, const std::vector<string>& values);
 	int rpush(const char* key, const std::vector<const char*>& values);
-	int rpush(const char* key, const char* values[], size_t lens[],
+	int rpush(const char* key, const char* values[], const size_t lens[],
 		size_t argc);
 
 	/**

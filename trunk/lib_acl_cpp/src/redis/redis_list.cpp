@@ -165,7 +165,7 @@ int redis_list::lpush(const char* key, const std::vector<const char*>& values)
 }
 
 int redis_list::lpush(const char* key, const char* values[],
-	size_t lens[], size_t argc)
+	const size_t lens[], size_t argc)
 {
 	conn_->build("LPUSH", key, values, lens, argc);
 	return conn_->get_number();
@@ -206,7 +206,7 @@ int redis_list::rpush(const char* key, const std::vector<const char*>& values)
 }
 
 int redis_list::rpush(const char* key, const char* values[],
-	size_t lens[], size_t argc)
+	const size_t lens[], size_t argc)
 {
 	conn_->build("RPUSH", key, values, lens, argc);
 	return conn_->get_number();

@@ -26,6 +26,8 @@ public:
 		return pool_;
 	}
 
+	bool eof() const;
+
 	socket_stream* get_stream();
 
 	void reset();
