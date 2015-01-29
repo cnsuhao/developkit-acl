@@ -155,8 +155,7 @@ public:
 	 * @param first_name {const char*} 第一个域字段名，最后一个字段必须是 NULL
 	 * @return {int} 成功删除的域字段个数，返回 -1 表示出错或该 key 对象非哈希对象
 	 */
-	int hdel(const char* key, const char* first_name, ...)
-		ACL_CPP_PRINTF(3, 4);;
+	int hdel(const char* key, const char* first_name, ...);
 	int hdel(const char* key, const char* names[], size_t argc);
 	int hdel(const char* key, const char* names[],
 		const size_t names_len[], size_t argc);

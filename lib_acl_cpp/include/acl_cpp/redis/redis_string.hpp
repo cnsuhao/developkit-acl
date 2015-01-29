@@ -270,8 +270,7 @@ public:
 	bool mget(const std::vector<int>& keys,
 		std::vector<string>* out = NULL);
 
-	bool mget(std::vector<string>* result, const char* first_key, ...)
-		ACL_CPP_PRINTF(3, 4);;
+	bool mget(std::vector<string>* result, const char* first_key, ...);
 	bool mget(const char* keys[], size_t argc,
 		std::vector<string>* out = NULL);
 	bool mget(const int keys[], size_t argc,
