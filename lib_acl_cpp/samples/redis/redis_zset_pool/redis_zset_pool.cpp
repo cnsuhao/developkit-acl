@@ -21,15 +21,28 @@ static bool test_zadd(acl::redis_zset& option, int i, const char* key,
 	// 将大数据切分成小数据，置入数据块数组中，使用递增的整数做为分值
 	size_t len;
 	const char* ptr = big_data;
+	char* buf, id[64];
+	int n;
+
 	for (size_t j = 0; j < nmember; j++)
 	{
-		members[j] = ptr;
 		len = length > base_length ? base_length : length;
-		lens[j] = len;
+
+		// 在每个原始数据前面加唯一前缀，从而可以保证有序集合中对象中的每个成员
+		// 数据都是不同的
+		n = acl::safe_snprintf(id, sizeof(id),
+			"%lu:", (unsigned long) j);
+		buf = (char*) pool->dbuf_alloc(len + n);
+		memcpy(buf, id, n);
+		memcpy(buf + n, ptr, len);
+		members[j] = buf;
+
+		lens[j] = len + n; // 该数据块的总长度：唯一前缀+数据
 		scores[j] = j;
 
 		// 剩余数据块长度
 		length -= len;
+		ptr += len;
 	}
 
 	// 要求 redis 连接对象采用内存链协议组装方式，避免内部组装请求协议时
@@ -69,21 +82,69 @@ static bool test_zcard(acl::redis_zset& option, int i, const char* key)
 static bool test_zrange(acl::redis_zset& option, int i, const char* key,
 	const char* hmac)
 {
-	int start = 0, end = 100;
-	std::vector<acl::string> result;
+	int start = 0, end = -1;
 
 	// 请求的数据量比较小，所以在组装请求协议时不必采用分片方式
 	option.get_client()->set_slice_request(false);
 
-	int ret = option.zrange(key, start, end, result);
+	// 对服务器返回的数据也不分片
+	option.get_client()->set_slice_respond(false);
+
+	int ret = option.zrange(key, start, end, NULL);
 	if (ret <= 0)
+		return false;
+
+	// 获得数组元素结果集
+	const acl::redis_result* result = option.get_result();
+	if (result == NULL)
+		return false;
+
+	size_t size;
+	// 直接获得数组集合
+	const acl::redis_result** children = result->get_children(&size);
+	if (children == NULL || size == 0)
 		return false;
 
 	// 校验获得的所有数据片的 MD5 值，与传入的进行比较
 	acl::md5 md5;
-	std::vector<acl::string>::const_iterator cit;
-	for (cit = result.begin(); cit != result.end(); ++cit)
-		md5.update((*cit).c_str(), (*cit).length());
+	const acl::redis_result* child;
+	size_t len, argc, n;
+
+	// 先遍历所有数组元素对象
+	for (size_t j = 0; j < size; j++)
+	{
+		child = children[j];
+		if (child == NULL)
+			continue;
+
+		// 因为每个元素对象存储数据时有可能发生了数据分片，所以需要遍历
+		// 该元素对象内的所有数据元素
+		argc = child->get_size();
+		for (size_t k = 0; k < argc; k++)
+		{
+			const char* ptr = child->get(k, &len);
+			if (ptr == NULL)
+				continue;
+			const char* dat = strchr(ptr, ':');
+			if (dat == NULL)
+			{
+				printf("invalid data, k: %d\n", (int) k);
+				continue;
+			}
+			dat++;
+			n = dat - ptr;
+			if (len < n)
+			{
+				printf("invalid data, k: %d\n", (int) k);
+				continue;
+			}
+
+			len -= n;
+			// 取出数据计算 md5 值
+			md5.update(dat, len);
+		}
+	}
+
 	md5.finish();
 
 	// 获得字符串方式的 MD5 值
@@ -210,10 +271,10 @@ static void init()
 	for (size_t i = 0; i < __big_data_length; i++)
 	{
 		ch = (unsigned char) i % 255;
-		__big_data[i] = (char) ch;
-		md5.update(&ch, 1);
+		__big_data[i] = (char) 'A';
 	}
 
+	md5.update(__big_data, __big_data_length);
 	md5.finish();
 	acl::safe_snprintf(__hmac, sizeof(__hmac), "%s", md5.get_string());
 
@@ -222,6 +283,13 @@ static void init()
 		(unsigned long) __base_length,
 		(int) __big_data_length / __base_length
 			+ __big_data_length % __base_length == 0 ? 0 : 1);
+
+	md5.reset();
+	const char* s = "AAAAAAAAAA";
+	md5.update(s, strlen(s));
+	md5.finish();
+	printf(">>md5: %s\r\n", md5.get_string());
+	printf("\r\n");
 }
 
 static void end()
