@@ -1,22 +1,45 @@
 #include "stdafx.h"
 
-static acl::string __keypre("zset_key");
-
-static bool test_zadd(acl::redis_zset& option, int i, size_t length)
+static bool test_zadd(acl::redis_zset& option, int i, const char* keypre,
+	const char* big_data, size_t length, size_t base_length)
 {
 	acl::string key;
-	std::map<acl::string, double> members;
-	acl::string member;
+	key.format("%s_%d", keypre, i);
 
-	key.format("%s_%d", __keypre.c_str(), i);
+	// 将大数据进行分割，计算出分割后的数据块个数
+	size_t nmember = length / base_length;
+	if (length % base_length != 0)
+		nmember++;
 
-	for (int j = 0; j < 1000; j++)
+	// 从连接对象中获得统一的内存池分配对象，分配小内存块
+	acl::dbuf_pool* pool = option.get_client()->get_pool();
+	// 动态分配数据块指针数组内存
+	const char** members = (const char**)
+		pool->dbuf_alloc(nmember * sizeof(char*));
+	// 动态分配数据块长度数组内存
+	size_t* lens = (size_t*) pool->dbuf_alloc(nmember * sizeof(size_t));
+	// 动态分配数据块分值数组内存
+	double* scores = (double*) pool->dbuf_alloc(nmember * sizeof(double));
+
+	// 将大数据切分成小数据，置入数据块数组中，使用递增的整数做为分值
+	size_t len;
+	const char* ptr = big_data;
+	for (int j = 0; j < nmember; j++)
 	{
-		member.format("member_%d", j);
-		members[member] = j;
+		members[j] = ptr;
+		len = length > __base_length ? __base_length : length;
+		lens[j] = len;
+		scores[j] = j;
+
+		// 剩余数据块长度
+		length -= len;
 	}
 
-	int ret = option.zadd(key, members);
+	// 要求 redis 连接对象采用内存链协议组装方式，避免内部组装请求协议时再组装成大内存
+	option.get_client()->set_slice_request(true);
+
+	// 开始向 redis 添加数据
+	int ret = option.zadd(key, members, lens, scores, nmember);
 	if (ret < 0)
 	{
 		printf("add key: %s error\r\n", key.c_str());
@@ -28,11 +51,15 @@ static bool test_zadd(acl::redis_zset& option, int i, size_t length)
 	return true;
 }
 
-static bool test_zcard(acl::redis_zset& option, int i)
+static bool test_zcard(acl::redis_zset& option, int i, const char* keypre)
 {
 	acl::string key;
 
-	key.format("%s_%d", __keypre.c_str(), i);
+	key.format("%s_%d", keypre, i);
+
+	// 因为该协议数据比较小，所以在组装请求数据时不必采用分片方式
+	option.get_client()->set_slice_request(false);
+
 	int ret = option.zcard(key.c_str());
 	if (ret < 0)
 	{
@@ -45,21 +72,51 @@ static bool test_zcard(acl::redis_zset& option, int i)
 	return true;
 }
 
-static bool test_zrange(acl::redis_zset& option, int i)
+static bool test_zrange(acl::redis_zset& option, int i, const char* keypre,
+	const char* hmac)
 {
 	acl::string key;
 	int start = 0, end = 100;
 	std::vector<acl::string> result;
 
-	key.format("%s_%d", __keypre.c_str(), i);
+	key.format("%s_%d", keypre, i);
+
+	// 请求的数据量比较小，所以在组装请求协议时不必采用分片方式
+	option.get_client()->set_slice_request(false);
+
 	int ret = option.zrange(key, start, end, result);
 	if (ret <= 0)
 		return false;
+
+	// 校验获得的所有数据片的 MD5 值，与传入的进行比较
+	acl::md5 md5;
+	std::vector<acl::string>::const_iterator cit;
+	for (cit = result.begin(); cit != result.end(); ++cit)
+		md5.update((*cit).c_str(), (*cit).length());
+	md5.finish();
+
+	// 获得字符串方式的 MD5 值
+	const char* ptr = md5.get_string();
+	if (strcmp(ptr, hmac) != 0)
+	{
+		printf("md5 error, hmac: %s, %s, key: %s\r\n",
+			hmac, ptr, key.c_str());
+		return false;
+	}
+	else if (i < 10)
+		printf("md5 ok, hmac: %s, %s, key: %s\r\n",
+			hmac, ptr, key.c_str());
 	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
+static acl::string __keypre("zset_key");
+static size_t __base_length = 8192;  // 基准数据块长度
+static char* __big_data;
+static size_t __big_data_length = 10240000;  // 大数据块长度，默认是 10MB
+
+// 子线程类，每个线程对象与 redis-server 之间建立一个连接
 class test_thread : public acl::thread
 {
 public:
@@ -78,6 +135,7 @@ protected:
 
 		for (int i = 0; i < n_; i++)
 		{
+			// 从全局线程池中获取一个 redis 连接对象
 			conn = (acl::redis_client*) pool_.peek();
 			
 			if (conn == NULL)
@@ -86,32 +144,32 @@ protected:
 				break;
 			}
 
+			// 将 redis 连接对象与 redis 命令操作类对象进行绑定关联
 			option.set_client(conn);
 
-			if (cmd_ == "del")
+			if (cmd_ == "zadd")
 				ret = test_zadd(option, i, length_);
-			else if (cmd_ == "expire")
+			else if (cmd_ == "zcard")
 				ret = test_zcard(option, i);
-			else if (cmd_ == "ttl")
+			else if (cmd_ == "zrange")
 				ret = test_zrange(option, i);
-			else if (cmd_ == "all")
-			{
-				if (test_zadd(option, i, length_) == false
-					|| test_zcard(option, i) == false
-					|| test_zrange(option, i) == false)
-				{
-					ret = false;
-				}
-				else
-					ret = true;
-			}
-			else
+			else if (cmd_ != "all")
 			{
 				printf("unknown cmd: %s\r\n", cmd_.c_str());
-				break;
+				ret = false;
 			}
+			else if (test_zadd(option, i, length_) == false
+				|| test_zcard(option, i) == false
+				|| test_zrange(option, i) == false)
+			{
+				ret = false;
+			}
+			else
+				ret = true;
 
-			pool_.put(conn, ret && !conn->eof());
+			// 将 redis 连接对象归还给连接池，是否保持该连接，通过判断
+			// 该连接是否断开决定
+			pool_.put(conn, !conn->eof());
 
 			if (ret == false)
 				break;
@@ -185,18 +243,23 @@ int main(int argc, char* argv[])
 	pool.set_timeout(conn_timeout, rw_timeout);
 
 	std::vector<test_thread*> threads;
+
+	// 创建一组线程，每一个线程与 redis-server 建立一个连接
 	for (int i = 0; i < max_threads; i++)
 	{
 		test_thread* thread = new test_thread(pool, cmd.c_str(),
 			n, length);
 		threads.push_back(thread);
+		// 取消线程的分离模式，以便于下面回收线程，等待线程退出
 		thread->set_detachable(false);
 		thread->start();
 	}
 
+	// 回收所有线程
 	std::vector<test_thread*>::iterator it = threads.begin();
 	for (; it != threads.end(); ++it)
 	{
+		// 等待某个线程退出
 		(*it)->wait();
 		delete (*it);
 	}
