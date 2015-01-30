@@ -336,7 +336,7 @@ static void usage(const char* procname)
 		"-C connect_timeout[default: 10]\r\n"
 		"-I rw_timeout[default: 10]\r\n"
 		"-S [if slice request, default: no]\r\n"
-		"-a cmd\r\n",
+		"-a cmd[hmset|hmget|hset|hsetnx|hget|hgetall|hincrby|hincrybyFloat|hkeys|hexists|hlen|hdel]\r\n",
 		procname);
 }
 

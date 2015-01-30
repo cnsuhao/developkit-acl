@@ -531,7 +531,7 @@ static void usage(const char* procname)
 		"-C connect_timeout[default: 10]\r\n"
 		"-I rw_timeout[default: 10]\r\n"
 		"-S [if slice request, default: no]\r\n"
-		"-a cmd\r\n",
+		"-a cmd[lpush|rpush|lpushx|rpushx|lrange|rpop|lpop|blpop|brpop|rpoplpush|brpoplpush|lrem|ltrim|llen|lindex|lset|linsert_before|linsert_after]\r\n",
 		procname);
 }
 
