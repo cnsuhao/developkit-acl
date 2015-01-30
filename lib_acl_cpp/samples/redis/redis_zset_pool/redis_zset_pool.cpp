@@ -32,7 +32,8 @@ static bool test_zadd(acl::redis_zset& option, int i, const char* key,
 		length -= len;
 	}
 
-	// 要求 redis 连接对象采用内存链协议组装方式，避免内部组装请求协议时再组装成大内存
+	// 要求 redis 连接对象采用内存链协议组装方式，避免内部组装请求协议时
+	// 再组装成大内存
 	option.get_client()->set_slice_request(true);
 
 	// 开始向 redis 添加数据
@@ -98,6 +99,16 @@ static bool test_zrange(acl::redis_zset& option, int i, const char* key,
 	return true;
 }
 
+static bool test_del(acl::redis_key& option, int i, const char* key)
+{
+	int ret = option.del(key, NULL) < 0 ? false : true;
+	if (ret < 0)
+		printf("del %s error, i: %d\r\n", key, i);
+	else if (i < 10)
+		printf("del %s ok, i: %d\r\n", key, i);
+	return ret >= 0 ? true : false;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 static acl::string __keypre("zset_key");
@@ -121,6 +132,7 @@ protected:
 		bool ret;
 		acl::redis_client* conn;
 		acl::redis_zset option;
+		acl::redis_key key_option;
 		acl::string key;
 
 		for (int i = 0; i < n_; i++)
@@ -137,6 +149,8 @@ protected:
 			// 每个线程一个 ID 号，做为键值组成部分
 			key.format("%s_%d_%d", __keypre.c_str(), id_, i);
 
+			conn->reset();
+
 			// 将 redis 连接对象与 redis 命令操作类对象进行绑定关联
 			option.set_client(conn);
 
@@ -148,6 +162,11 @@ protected:
 				ret = test_zcard(option, i, key);
 			else if (cmd_ == "zrange")
 				ret = test_zrange(option, i, key, __hmac);
+			else if (cmd_ == "del")
+			{
+				key_option.set_client(conn);
+				ret = test_del(key_option, i, key);
+			}
 			else if (cmd_ != "all")
 			{
 				printf("unknown cmd: %s\r\n", cmd_.c_str());
@@ -197,6 +216,12 @@ static void init()
 
 	md5.finish();
 	acl::safe_snprintf(__hmac, sizeof(__hmac), "%s", md5.get_string());
+
+	printf("init ok, hmac: %s, length: %lu, base: %lu, slice: %d\r\n",
+		__hmac, (unsigned long) __big_data_length,
+		(unsigned long) __base_length,
+		(int) __big_data_length / __base_length
+			+ __big_data_length % __base_length == 0 ? 0 : 1);
 }
 
 static void end()
@@ -214,7 +239,7 @@ static void usage(const char* procname)
 		"-c max_threads[default: 10]\r\n"
 		"-l max_data_length\r\n"
 		"-b base_length\r\n"
-		"-a cmd\r\n",
+		"-a cmd[zadd|zcard|zrange|del]\r\n",
 		procname);
 }
 
