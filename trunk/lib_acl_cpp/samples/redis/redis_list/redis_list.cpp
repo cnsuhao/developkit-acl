@@ -336,7 +336,7 @@ static void test_lrange(acl::redis_list& option)
 {
 	std::vector<acl::string> result;
 
-	bool ret = option.lrange(__key, 0, 1000, result);
+	bool ret = option.lrange(__key, 0, 1000, &result);
 	if (ret == false) {
 		printf("lrang key: %s error\r\n",__key);
 		return;

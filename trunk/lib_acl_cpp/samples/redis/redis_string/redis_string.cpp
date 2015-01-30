@@ -215,13 +215,13 @@ static void test_mget(acl::redis_string& option, int n)
 		else if (i >= 10)
 			continue;
 
-		size_t size = option.mget_size();
+		size_t size = option.get_size();
 		printf("size: %lu\r\n", (unsigned long) size);
 
 		size_t j;
 		for (j = 0; j < size; j++)
 		{
-			const char* val = option.mget_value(j);
+			const char* val = option.get_value(j);
 			printf("mget ok, %s=%s\r\n",
 				keys[j], val ? val : "null");
 		}
