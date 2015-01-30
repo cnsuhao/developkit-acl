@@ -591,7 +591,7 @@ static void usage(const char* procname)
 		"-C connect_timeout[default: 10]\r\n"
 		"-I rw_timeout[default: 10]\r\n"
 		"-t object timeout[default: 10]\r\n"
-		"-a cmd\r\n",
+		"-a cmd[set|setex|setnx|append|get|getset|strlen|mset|mget|msetnx|setrange|getrange|setbit|getbit|bitcount|bitop_and|bitop_or|bitop_xor|incr|incrby|incrybfloat|decr|decrby]\r\n",
 		procname);
 }
 

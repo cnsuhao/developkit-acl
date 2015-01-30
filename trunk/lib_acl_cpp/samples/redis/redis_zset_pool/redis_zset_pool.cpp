@@ -28,8 +28,8 @@ static bool test_zadd(acl::redis_zset& option, int i, const char* key,
 	{
 		len = length > base_length ? base_length : length;
 
-		// 在每个原始数据前面加唯一前缀，从而可以保证有序集合中对象中的每个成员
-		// 数据都是不同的
+		// 在每个原始数据前面加唯一前缀，从而可以保证有序集合中对象中
+		// 的每个成员数据都是不同的
 		n = acl::safe_snprintf(id, sizeof(id),
 			"%lu:", (unsigned long) j);
 		buf = (char*) pool->dbuf_alloc(len + n);
@@ -92,21 +92,36 @@ static bool test_zrange(acl::redis_zset& option, int i, const char* key,
 
 	int ret = option.zrange(key, start, end, NULL);
 	if (ret <= 0)
+	{
+		printf("zrange return: %d\r\n", ret);
 		return false;
+	}
 
 	// 获得数组元素结果集
 	const acl::redis_result* result = option.get_result();
 	if (result == NULL)
+	{
+		printf("result null\r\n");
 		return false;
+	}
 
 	size_t size;
 	// 直接获得数组集合
 	const acl::redis_result** children = result->get_children(&size);
 	if (children == NULL || size == 0)
+	{
+		printf("no children: %s, size: %d\r\n",
+			children ? "no" : "yes", (int) size);
 		return false;
+	}
 
 	// 校验获得的所有数据片的 MD5 值，与传入的进行比较
-	acl::md5 md5;
+	acl::md5* md5;
+	if (hmac != NULL)
+		md5 = new acl::md5;
+	else
+		md5 = NULL;
+
 	const acl::redis_result* child;
 	size_t len, argc, n;
 
@@ -117,45 +132,58 @@ static bool test_zrange(acl::redis_zset& option, int i, const char* key,
 		if (child == NULL)
 			continue;
 
-		// 因为每个元素对象存储数据时有可能发生了数据分片，所以需要遍历
-		// 该元素对象内的所有数据元素
+		// 因为前面设置了禁止对响应数据进行分片，所以只需取第一个元素
 		argc = child->get_size();
-		for (size_t k = 0; k < argc; k++)
-		{
-			const char* ptr = child->get(k, &len);
-			if (ptr == NULL)
-				continue;
-			const char* dat = strchr(ptr, ':');
-			if (dat == NULL)
-			{
-				printf("invalid data, k: %d\n", (int) k);
-				continue;
-			}
-			dat++;
-			n = dat - ptr;
-			if (len < n)
-			{
-				printf("invalid data, k: %d\n", (int) k);
-				continue;
-			}
+		assert(argc == 1);
 
-			len -= n;
-			// 取出数据计算 md5 值
-			md5.update(dat, len);
+		const char* ptr = child->get(0, &len);
+		if (ptr == NULL)
+		{
+			printf("first is null\r\n");
+			continue;
 		}
+
+		const char* dat = strchr(ptr, ':');
+		if (dat == NULL)
+		{
+			printf("invalid data, j: %d\n", (int) j);
+			continue;
+		}
+		dat++;
+		n = dat - ptr;
+		if (len < n)
+		{
+			printf("invalid data, j: %d\n", (int) j);
+			continue;
+		}
+
+		len -= n;
+
+		// 取出数据计算 md5 值
+		if (md5 != NULL)
+			md5->update(dat, len);
 	}
 
-	md5.finish();
+	if (md5 != NULL)
+		md5->finish();
 
 	// 获得字符串方式的 MD5 值
-	const char* ptr = md5.get_string();
-	if (strcmp(ptr, hmac) != 0)
+	if (md5 != NULL)
 	{
-		printf("md5 error, hmac: %s, %s, key: %s\r\n", hmac, ptr, key);
-		return false;
+		const char* ptr = md5->get_string();
+		if (strcmp(ptr, hmac) != 0)
+		{
+			printf("md5 error, hmac: %s, %s, key: %s\r\n",
+				hmac, ptr, key);
+			return false;
+		}
+		else if (i < 10)
+			printf("md5 ok, hmac: %s, %s, key: %s\r\n",
+				hmac, ptr, key);
+		delete md5;
 	}
 	else if (i < 10)
-		printf("md5 ok, hmac: %s, %s, key: %s\r\n", hmac, ptr, key);
+		printf("ok, key: %s\r\n", key);
 
 	return true;
 }
@@ -176,7 +204,7 @@ static acl::string __keypre("zset_key");
 static size_t __base_length = 8192;  // 基准数据块长度
 static char* __big_data;
 static size_t __big_data_length = 10240000;  // 大数据块长度，默认是 10 MB
-static char __hmac[33];
+static char* __hmac;
 
 // 子线程类，每个线程对象与 redis-server 之间建立一个连接
 class test_thread : public acl::thread
@@ -244,8 +272,8 @@ protected:
 			else
 				ret = true;
 
-			// 将 redis 连接对象归还给连接池，是否保持该连接，通过判断
-			// 该连接是否断开决定
+			// 将 redis 连接对象归还给连接池，是否保持该连接，
+			// 通过判断该连接是否断开决定
 			pool_.put(conn, !conn->eof());
 
 			if (ret == false)
@@ -262,21 +290,27 @@ private:
 	int id_;
 };
 
-static void init()
+static void init(const char* cmd, bool check)
 {
+	if (strcasecmp(cmd, "zrange") == 0 && check == false)
+		return;
+
 	acl::md5 md5;
-	unsigned ch;
+	char ch;
 
 	__big_data = (char*) malloc(__big_data_length);
 	for (size_t i = 0; i < __big_data_length; i++)
 	{
-		ch = (unsigned char) i % 255;
-		__big_data[i] = (char) 'A';
+		ch = i % 255;
+		__big_data[i] = ch;
+		md5.update(&ch, 1);
 	}
 
-	md5.update(__big_data, __big_data_length);
+	//md5.update(__big_data, __big_data_length);
 	md5.finish();
-	acl::safe_snprintf(__hmac, sizeof(__hmac), "%s", md5.get_string());
+
+	__hmac = (char*) malloc(33);
+	acl::safe_snprintf(__hmac, 33, "%s", md5.get_string());
 
 	printf("init ok, hmac: %s, length: %lu, base: %lu, slice: %d\r\n",
 		__hmac, (unsigned long) __big_data_length,
@@ -285,16 +319,17 @@ static void init()
 			+ __big_data_length % __base_length == 0 ? 0 : 1);
 
 	md5.reset();
-	const char* s = "AAAAAAAAAA";
-	md5.update(s, strlen(s));
+	md5.update(__big_data, __big_data_length);
 	md5.finish();
-	printf(">>md5: %s\r\n", md5.get_string());
-	printf("\r\n");
+	printf("md5 once: %s\r\n", md5.get_string());
 }
 
 static void end()
 {
-	free(__big_data);
+	if (__big_data)
+		free(__big_data);
+	if (__hmac)
+		free(__hmac);
 }
 
 static void usage(const char* procname)
@@ -307,6 +342,7 @@ static void usage(const char* procname)
 		"-c max_threads[default: 10]\r\n"
 		"-l max_data_length\r\n"
 		"-b base_length\r\n"
+		"-S [if check data when cmd is zrange]\r\n"
 		"-a cmd[zadd|zcard|zrange|del]\r\n",
 		procname);
 }
@@ -315,9 +351,10 @@ int main(int argc, char* argv[])
 {
 	int  ch, n = 1, conn_timeout = 10, rw_timeout = 10;
 	int  max_threads = 10;
+	bool check = false;
 	acl::string addr("127.0.0.1:6379"), cmd;
 
-	while ((ch = getopt(argc, argv, "hs:n:C:I:c:a:l:b:")) > 0)
+	while ((ch = getopt(argc, argv, "hs:n:C:I:c:a:l:b:S")) > 0)
 	{
 		switch (ch)
 		{
@@ -348,6 +385,9 @@ int main(int argc, char* argv[])
 		case 'b':
 			__base_length = (size_t) atol(optarg);
 			break;
+		case 'S':
+			check = true;
+			break;
 		default:
 			break;
 		}
@@ -355,7 +395,7 @@ int main(int argc, char* argv[])
 
 	acl::acl_cpp_init();
 
-	init();
+	init(cmd, check);
 
 	acl::redis_pool pool(addr.c_str(), max_threads);
 	pool.set_timeout(conn_timeout, rw_timeout);
