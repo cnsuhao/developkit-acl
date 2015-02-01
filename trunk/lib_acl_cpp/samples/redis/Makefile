@@ -9,6 +9,8 @@ all:
 	@(cd redis_list; make)
 	@(cd redis_zset_pool; make)
 	@(cd redis_set; make)
+	@(cd redis_connection; make)
+	@(cd redis_trans; make)
 
 clean:
 	@(cd redis_key; make clean)
@@ -21,3 +23,5 @@ clean:
 	@(cd redis_list; make clean)
 	@(cd redis_zset_pool; make clean)
 	@(cd redis_set; make clean)
+	@(cd redis_connection; make clean)
+	@(cd redis_trans; make clean)
