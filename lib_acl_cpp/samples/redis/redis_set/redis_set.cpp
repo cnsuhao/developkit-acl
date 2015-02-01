@@ -8,17 +8,17 @@ static void test_sadd(acl::redis_set& option, int n)
 	std::vector<acl::string> members;
 	acl::string member;
 
-	members.reserve(n);
+	members.reserve(1000);
+
+	for (int j = 0; j < 1000; j++)
+	{
+		member.format("member_%d", j);
+		members.push_back(member);
+	}
 
 	for (int i = 0; i < n; i++)
 	{
 		key.format("%s_%d", __keypre.c_str(), i);
-
-		for (int j = 0; j < 1000; j++)
-		{
-			member.format("member_%d", j);
-			members.push_back(member);
-		}
 
 		option.reset();
 		int ret = option.sadd(key, members);
@@ -27,10 +27,10 @@ static void test_sadd(acl::redis_set& option, int n)
 			printf("sadd key: %s error\r\n", key.c_str());
 			break;
 		}
-		else if (i < 10)
-			printf("sadd ok, key: %s, ret: %d\r\n",
-				key.c_str(), ret);
-		members.clear();
+		else if (i >= 10)
+			continue;
+
+		printf("sadd ok, key: %s, ret: %d\r\n", key.c_str(), ret);
 	}
 }
 
@@ -48,9 +48,10 @@ static void test_scard(acl::redis_set& option, int n)
 			printf("scard key: %s error\r\n", key.c_str());
 			break;
 		}
-		else if (i < 10)
-			printf("scard ok, key: %s, count: %d\r\n",
-				key.c_str(), ret);
+		else if (i >= 10)
+			continue;
+
+		printf("scard ok, key: %s, count: %d\r\n", key.c_str(), ret);
 	}
 }
 
@@ -101,9 +102,11 @@ static void test_sdiffstore(acl::redis_set& option, int n)
 				dest_key.c_str());
 			break;
 		}
-		else if (i < 10)
-			printf("sdiffstore ok, dest: %s, count: %d\r\n",
-				dest_key.c_str(), ret);
+		else if (i >= 10)
+			continue;
+
+		printf("sdiffstore ok, dest: %s, count: %d\r\n",
+			dest_key.c_str(), ret);
 	}
 }
 
@@ -155,8 +158,7 @@ static void test_smembers(acl::redis_set& option, int n)
 		else if (i >= 10)
 			continue;
 
-		printf("smembers ok, key: %s, count: %d\r\n",
-			key.c_str(), ret);
+		printf("smembers ok, key: %s, count: %d\r\n", key.c_str(), ret);
 	}
 }
 
@@ -164,6 +166,7 @@ static void test_smove(acl::redis_set& option, int n)
 {
 	acl::string src_key, dst_key;
 	acl::string member;
+	int ret;
 
 	for (int i = 0; i < n; i++)
 	{
@@ -174,8 +177,8 @@ static void test_smove(acl::redis_set& option, int n)
 		{
 			member.format("member_%d", j);
 			option.reset();
-			int ret = option.smove(src_key.c_str(), dst_key.c_str(),
-				member.c_str());
+			ret = option.smove(src_key.c_str(), dst_key.c_str(),
+					member.c_str());
 
 			if (ret < 0)
 			{
@@ -204,12 +207,16 @@ static void test_spop(acl::redis_set& option, int n)
 		option.reset();
 		bool ret = option.spop(key.c_str(), member);
 		if (option.eof())
+		{
+			printf("spop eof, key: %s\r\n", key.c_str());
 			break;
+		}
 		if (i >= 10)
 			continue;
 
-		printf("spop %s, key: %s, member: %s\r\n", ret ? "ok" : "empty",
-			key.c_str(), ret ? member.c_str() : "");
+		printf("spop %s, key: %s, member: %s\r\n",
+			ret ? "ok" : "empty", key.c_str(),
+			ret ? member.c_str() : "");
 	}
 }
 
@@ -238,11 +245,24 @@ static void test_srandmember(acl::redis_set& option, int n)
 static void test_srem(acl::redis_set& option, int n)
 {
 	acl::string key;
+	acl::string member;
+	std::vector<acl::string> members;
+
+	members.reserve(1000);
+
+	for (int j = 0; j < 1000; j++)
+	{
+		member.format("member_%d", j);
+		members.push_back(member);
+	}
+
 	for (int i = 0; i < n; i++)
 	{
 		key.format("%s_%d", __keypre.c_str(), i);
+
 		option.reset();
-		int ret = option.srem(key.c_str(), NULL);
+		int ret = option.srem(key.c_str(), members);
+
 		if (ret < 0)
 		{
 			printf("srem error, key: %s\r\n", key.c_str());
@@ -311,7 +331,7 @@ static void test_sunionstore(acl::redis_set& option, int n)
 static void test_sscan(acl::redis_set& option, int n)
 {
 	acl::string key;
-	int   ret = 0, j;
+	int   ret = 0;
 	std::vector<acl::string> result;
 	std::vector<acl::string>::const_iterator cit;
 
@@ -328,22 +348,19 @@ static void test_sscan(acl::redis_set& option, int n)
 					key.c_str());
 				break;
 			}
+			if (i < 10)
+			{
+				cit = result.begin();
+				for (; cit != result.end(); ++cit)
+					printf("%s: %s\r\n", key.c_str(),
+						(*cit).c_str());
+			}
 			if (ret == 0)
 			{
 				printf("sscan over, key: %s\r\n",
 					key.c_str());
 				break;
 			}
-			if (i >= 10)
-				continue;
-
-			j = 0;
-			for (cit = result.begin(); cit != result.end(); ++cit)
-			{
-				printf("%s: %s\r\n", key.c_str(), (*cit).c_str());
-				j++;
-			}
-			printf("\r\n");
 		}
 	}
 }
@@ -355,7 +372,7 @@ static void usage(const char* procname)
 		"-n count\r\n"
 		"-C connect_timeout[default: 10]\r\n"
 		"-T rw_timeout[default: 10]\r\n"
-		"-a cmd\r\n",
+		"-a cmd[sadd|scard|sdiffstore|sismember|smembers|smove|spop|srandmember|sunion|sunionstore|sscan|srem\r\n",
 		procname);
 }
 
@@ -432,10 +449,10 @@ int main(int argc, char* argv[])
 		test_smove(option, n);
 		test_spop(option, n);
 		test_srandmember(option, n);
-		test_srem(option, n);
 		test_sunion(option, n);
 		test_sunionstore(option, n);
 		test_sscan(option, n);
+		test_srem(option, n);
 	}
 	else
 		printf("unknown cmd: %s\r\n", cmd.c_str());
