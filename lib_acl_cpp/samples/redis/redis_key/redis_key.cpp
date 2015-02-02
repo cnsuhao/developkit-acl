@@ -172,7 +172,10 @@ int main(int argc, char* argv[])
 			&& test_del(option, n);
 	}
 	else
+	{
+		ret = false;
 		printf("unknown cmd: %s\r\n", cmd.c_str());
+	}
 
 	if (ret == true)
 		printf("test OK!\r\n");
