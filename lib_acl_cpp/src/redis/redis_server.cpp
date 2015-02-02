@@ -237,7 +237,7 @@ time_t redis_server::lastsave()
 	lens[0] = sizeof("LASTSAVE") - 1;
 
 	conn_->build_request(1, argv, lens);
-	return conn_->get_number64();
+	return (time_t) conn_->get_number64();
 }
 
 bool redis_server::monitor()
