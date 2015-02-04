@@ -105,28 +105,28 @@
 -    2.22 http_client: HTTP 客户端程序
 -    2.23 http_client2: HTTP 客户端程序
 -    2.24 http_mime: HTTP 协议的 MIME 格式处理程序
--    2.25 http_request: 使用 http_request 类的 HTTP 客户端程序
+-    2.25 htttp/http_request: 使用 http_request 类的 HTTP 客户端程序
 -    2.26 http_request_manager: HTTP 客户端连接池集群程序
 -    2.27 http_request_pool: HTTP 客户端连接池程序
 -    2.28 http_request2: 使用 http_request 类的 HTTP 客户端程序
--    2.29 http_response: 使用 http_reponse 类响应 HTTP 客户端请求的程序
+-    2.29 http/http_response: 使用 http_reponse 类响应 HTTP 客户端请求的程序
 -    2.30 http_server: 简单的 HTTP 服务器程序
 -    2.31 http_servlet: 类似于 JAVA HttpServlet 的程序
 -    2.32 http_servlet2: 类似于 JAVA HttpServlet 的程序
 -    2.33 HttpClient: 简单的 HTTP 客户端程序
--    2.34 json: json 字符串对象解析程序
+-    2.34 json/json0 - json7: json 字符串对象解析程序
 -    2.35 logger: 日志程序
--    2.36 master_aio: 非阻塞服务器程序
+-    2.36 master/master_aio: 非阻塞服务器程序
 -    2.37 master_aio_proxy: 非阻塞 TCP 代理服务器程序
--    2.38 master_http_aio: 简单的非阻塞 HTTP 服务器程序
--    2.39 master_http_rpc: 阻塞/非阻塞整合的 HTTP 服务器程序
--    2.40 master_http_threads: 多线程 HTTP 服务器程序
--    2.40 master_http_threads2: 多线程 HTTP 服务器程序
--    2.41 maser_proc: 进程池服务器程序
--    2.42 master_threads: 多线程服务器程序
--    2.43 master_trigger: 触发器服务器程序
--    2.44 master_udp: UDP 通信服务器程序
--    2.45 master_udp_threads: 多线程 UDP 通信服务器程序
+-    2.38 master/master_http_aio: 简单的非阻塞 HTTP 服务器程序
+-    2.39 master/master_http_rpc: 阻塞/非阻塞整合的 HTTP 服务器程序
+-    2.40 master/master_http_threads: 多线程 HTTP 服务器程序
+-    2.40 master/master_http_threads2: 多线程 HTTP 服务器程序
+-    2.41 master/maser_proc: 进程池服务器程序
+-    2.42 master/master_threads: 多线程服务器程序
+-    2.43 master/master_trigger: 触发器服务器程序
+-    2.44 master/master_udp: UDP 通信服务器程序
+-    2.45 master/master_udp_threads: 多线程 UDP 通信服务器程序
 -    2.46 md5: md5 处理程序
 -    2.47 mem_cache: memcached 客户端程序
 -    2.47 memcache_pool: memcached 支持连接池的客户端程序
@@ -158,6 +158,20 @@
 -    2.73 winaio: 基于 WIN32 图形界面的非阻塞客户端程序
 -    2.74 xml: XML 对象解析处理程序
 -    2.75 zlib: 压缩格式处理程序
+-    2.75 redis/redis_connection: redis Connection 客户端程序
+-    2.76 redis/redis_hash: redis 哈希表类客户端程序
+-    2.77 redis/redis_hyperloglog: redis hyperloglog 客户端程序
+-    2.78 redis/redis_key: redis 键类客户端程序
+-    2.79 redis/redis_list: redis 列表客户端程序
+-    2.80 redis/redis_manager: redis 连接池集群管理客户端程序
+-    2.81 redis/redis_pool: redis 连接池客户端程序
+-    2.82 redis/redis_pubsub: redis 发布订阅客户端程序
+-    2.83 redis/redis_server: redis 服务器管理的客户端程序
+-    2.84 redis/redis_set: redis 集合客户端程序
+-    2.85 redis/redis_string: redis 字符串客户端程序
+-    2.86 redis/redis_trans: redis 事务客户端程序
+-    2.87 redis/redis_zset: redis 有序集客户端程序
+-    2.88 redis/redis_zset_pool: redis 有序集客户端程序，使用有序集对象存储大数据块，支持连接池方式
 
 ### 3、acl/app：该目录下的例子主要是一些比较实用的例子
 -    **3.1 wizard: 用来生成基于 acl 服务器框架的程序模板的程序**
