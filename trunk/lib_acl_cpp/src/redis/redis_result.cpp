@@ -130,6 +130,13 @@ long long int redis_result::get_integer64(bool* success /* = NULL */) const
 const char* redis_result::get_status() const
 {
 	if (result_type_ != REDIS_RESULT_STATUS)
+		return "";
+	return get(0);
+}
+
+const char* redis_result::get_error() const
+{
+	if (result_type_ != REDIS_RESULT_ERROR)
 		return NULL;
 	return get(0);
 }
