@@ -79,7 +79,7 @@ public:
 	 * 返回对应下标的数据(当数据类型非 REDIS_RESULT_ARRAY 时）
 	 * @param i {size_t} 数组下标
 	 * @param len {size_t*} 当为非 NULL 指针时存储所返回数据的长度
-	 * @return {const char*}
+	 * @return {const char*} 返回 NULL 表示下标越界
 	 */
 	const char* get(size_t i, size_t* len = NULL) const;
 
