@@ -65,7 +65,7 @@ public:
 
 	/**
 	 * 当返回值为 REDIS_RESULT_STATUS 类型时，本方法返回状态信息
-	 * @return {const char*} 返回 NULL 表示出错
+	 * @return {const char*} 返回 "" 表示出错
 	 */
 	const char* get_status() const;
 

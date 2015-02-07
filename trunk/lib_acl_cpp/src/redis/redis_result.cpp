@@ -137,7 +137,7 @@ const char* redis_result::get_status() const
 const char* redis_result::get_error() const
 {
 	if (result_type_ != REDIS_RESULT_ERROR)
-		return NULL;
+		return "";
 	return get(0);
 }
 
