@@ -1075,7 +1075,7 @@ int redis_zset::zscan(const char* key, int cursor,
 		return -1;
 
 	// out.clear();
-	out.reserve(out.size + size);
+	out.reserve(out.size() + size);
 
 	const redis_result* rr;
 	string name(128), value(128);
