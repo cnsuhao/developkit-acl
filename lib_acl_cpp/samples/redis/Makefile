@@ -11,8 +11,8 @@ all:
 	@(cd redis_set; make)
 	@(cd redis_connection; make)
 	@(cd redis_hyperloglog; make)
-	@(cd redis_server; make)
 	@(cd redis_trans; make)
+#	@(cd redis_server; make)
 
 clean:
 	@(cd redis_key; make clean)
@@ -27,5 +27,5 @@ clean:
 	@(cd redis_set; make clean)
 	@(cd redis_connection; make clean)
 	@(cd redis_hyperloglog; make clean)
-	@(cd redis_server; make clean)
 	@(cd redis_trans; make clean)
+#	@(cd redis_server; make clean)
