@@ -91,7 +91,7 @@ static bool test_type(acl::redis_key& option, int i)
 class test_thread : public acl::thread
 {
 public:
-	test_thread(acl::redis_manager& manager, const char* cmd, int n)
+	test_thread(acl::redis_cluster& manager, const char* cmd, int n)
 		: manager_(manager), cmd_(cmd), n_(n) {}
 
 	~test_thread() {}
@@ -162,7 +162,7 @@ protected:
 	}
 
 private:
-	acl::redis_manager& manager_;
+	acl::redis_cluster& manager_;
 	acl::string cmd_;
 	int n_;
 };
@@ -217,7 +217,7 @@ int main(int argc, char* argv[])
 
 	acl::acl_cpp_init();
 
-	acl::redis_manager manager(conn_timeout, rw_timeout);
+	acl::redis_cluster manager(conn_timeout, rw_timeout);
 	manager.set(addr.c_str(), max_threads);
 
 	std::vector<test_thread*> threads;
