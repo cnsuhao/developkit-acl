@@ -97,7 +97,7 @@ public:
 	 * @param len {size_t*} 当为非 NULL 指针时存储所返回数据的长度
 	 * @return {const char*} 返回 NULL 表示下标越界
 	 */
-	const char* result(size_t i, size_t* len = NULL) const;
+	const char* get_result(size_t i, size_t* len = NULL) const;
 
 	/**
 	 * 判断当前所绑定的 redis 连接流对象(redis_client) 连接是否已经关闭；

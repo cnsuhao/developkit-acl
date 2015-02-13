@@ -1,4 +1,6 @@
 #include "acl_stdafx.hpp"
+#include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/dbuf_pool.hpp"
 #include "acl_cpp/redis/redis_client.hpp"
 #include "acl_cpp/stdlib/snprintf.hpp"
 #include "acl_cpp/redis/redis_result.hpp"
@@ -107,7 +109,7 @@ long long int redis_command::result_number64(bool* success /* = NULL */) const
 	return result_ ? result_->get_integer64(success) : 0;
 }
 
-const char* redis_command::result(size_t i, size_t* len /* = NULL */) const
+const char* redis_command::get_result(size_t i, size_t* len /* = NULL */) const
 {
 	return result_ ? result_->get(i, len) : NULL;
 }
