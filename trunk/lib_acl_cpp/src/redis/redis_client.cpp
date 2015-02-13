@@ -97,7 +97,7 @@ redis_result* redis_client::get_redis_error(dbuf_pool* pool)
 	rr->set_type(REDIS_RESULT_ERROR);
 	rr->set_size(1);
 
-	put_data(rr, buf_.c_str(), buf_.length());
+	put_data(pool, rr, buf_.c_str(), buf_.length());
 	return rr;
 }
 
@@ -201,7 +201,7 @@ redis_result* redis_client::get_redis_array(dbuf_pool* pool)
 
 	for (int i = 0; i < count; i++)
 	{
-		redis_result* child = get_redis_object();
+		redis_result* child = get_redis_object(pool);
 		if (child == NULL)
 			return NULL;
 		rr->put(child, i);
@@ -304,15 +304,15 @@ const redis_result* redis_client::run(dbuf_pool* pool, const string& req,
 	return NULL;
 }
 
-const redis_result* redis_client::run(dbuf_pool* pool, redis_request& req,
+const redis_result* redis_client::run(dbuf_pool* pool, const redis_request& req,
 	size_t nchildren)
 {
 	// 重置协议处理状态
 	bool retried = false;
 	redis_result* result;
 
-	struct iovec* iov = req->get_iovec();
-	size_t size = req->get_size();
+	struct iovec* iov = req.get_iovec();
+	size_t size = req.get_size();
 
 	while (true)
 	{

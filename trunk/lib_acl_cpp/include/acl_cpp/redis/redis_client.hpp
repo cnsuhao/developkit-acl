@@ -29,7 +29,7 @@ public:
 
 	const redis_result* run(dbuf_pool* pool, const string& req,
 		size_t nchildren);
-	const redis_result* run(dbuf_pool* pool, redis_request& req,
+	const redis_result* run(dbuf_pool* pool, const redis_request& req,
 		size_t nchildren);
 
 protected:
@@ -46,7 +46,7 @@ private:
 	bool slice_req_;
 	bool slice_res_;
 
-	redis_result* get_redis_objects(size_t nobjs);
+	redis_result* get_redis_objects(dbuf_pool* pool, size_t nobjs);
 	redis_result* get_redis_object(dbuf_pool* pool);
 	redis_result* get_redis_error(dbuf_pool* pool);
 	redis_result* get_redis_status(dbuf_pool* pool);

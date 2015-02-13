@@ -91,14 +91,14 @@ bool redis_hyperloglog::pfmerge(const char* dst,
 	const std::vector<const char*>& keys)
 {
 	build("PFMERGE", dst, keys);
-	return get_status();
+	return check_status();
 }
 
 bool redis_hyperloglog::pfmerge(const char* dst,
 	const std::vector<string>& keys)
 {
 	build("PFMERGE", dst, keys);
-	return get_status();
+	return check_status();
 }
 
 } //namespace acl

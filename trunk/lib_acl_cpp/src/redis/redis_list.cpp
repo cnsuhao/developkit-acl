@@ -82,7 +82,7 @@ bool redis_list::lset(const char* key, int idx, const char* value, size_t len)
 	lens[3] = len;
 
 	build_request(4, argv, lens);
-	return get_status();
+	return check_status();
 }
 
 int redis_list::linsert_before(const char* key, const char* pivot,
@@ -335,10 +335,8 @@ bool redis_list::bpop(const char* cmd, const std::vector<const char*>& keys,
 	size_t timeout, std::pair<string, string>& result)
 {
 	size_t argc = 2 + keys.size();
-	dbuf_pool* pool = conn_->get_pool();
-	const char** args = (const char**)
-		pool->dbuf_alloc(argc * sizeof(char*));
-	size_t* lens = (size_t*) pool->dbuf_alloc(argc * sizeof(size_t));
+	const char** args = (const char**) pool_->dbuf_alloc(argc * sizeof(char*));
+	size_t* lens = (size_t*) pool_->dbuf_alloc(argc * sizeof(size_t));
 
 	args[0] = cmd;
 	lens[0] = strlen(cmd);
@@ -365,10 +363,8 @@ bool redis_list::bpop(const char* cmd, const std::vector<string>& keys,
 	size_t timeout, std::pair<string, string>& result)
 {
 	size_t argc = 2 + keys.size();
-	dbuf_pool* pool = conn_->get_pool();
-	const char** args = (const char**)
-		pool->dbuf_alloc(argc * sizeof(char*));
-	size_t* lens = (size_t*) pool->dbuf_alloc(argc * sizeof(size_t));
+	const char** args = (const char**) pool_->dbuf_alloc(argc * sizeof(char*));
+	size_t* lens = (size_t*) pool_->dbuf_alloc(argc * sizeof(size_t));
 
 	args[0] = cmd;
 	lens[0] = strlen(cmd);
@@ -532,7 +528,7 @@ bool redis_list::ltrim(const char* key, int start, int end)
 	lens[3] = strlen(end_s);
 
 	build_request(4, argv, lens);
-	return get_status();
+	return check_status();
 }
 
 //////////////////////////////////////////////////////////////////////////

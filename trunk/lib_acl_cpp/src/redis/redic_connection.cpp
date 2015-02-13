@@ -30,7 +30,7 @@ bool redis_connection::auth(const char* passwd)
 	lens[1] = strlen(passwd);
 
 	build_request(2, argv, lens);
-	return get_status();
+	return check_status();
 }
 
 bool redis_connection::select(int dbnum)
@@ -47,7 +47,7 @@ bool redis_connection::select(int dbnum)
 	lens[1] = strlen(argv[1]);
 
 	build_request(2, argv, lens);
-	return get_status();
+	return check_status();
 }
 
 bool redis_connection::ping()
@@ -59,7 +59,7 @@ bool redis_connection::ping()
 	lens[0] = strlen(argv[0]);
 
 	build_request(1, argv, lens);
-	return get_status("PONG");
+	return check_status("PONG");
 }
 
 bool redis_connection::echo(const char* s)
@@ -87,8 +87,7 @@ bool redis_connection::quit()
 	lens[0] = strlen(argv[0]);
 
 	build_request(1, argv, lens);
-	bool ret = get_status();
-	return ret;
+	return check_status();
 }
 
 } // namespace acl
