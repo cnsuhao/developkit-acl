@@ -24,26 +24,26 @@ redis_hash::~redis_hash()
 
 bool redis_hash::hmset(const char* key, const std::map<string, string>& attrs)
 {
-	conn_->build("HMSET", key, attrs);
-	return conn_->get_status();
+	build("HMSET", key, attrs);
+	return check_status();
 }
 
 bool redis_hash::hmset(const char* key, const std::map<string, const char*>& attrs)
 {
 	build("HMSET", key, attrs);
-	return get_status();
+	return check_status();
 }
 
 bool redis_hash::hmset(const char* key, const std::map<int, string>& attrs)
 {
 	build("HMSET", key, attrs);
-	return get_status();
+	return check_status();
 }
 
 bool redis_hash::hmset(const char* key, const std::map<int, const char*>& attrs)
 {
 	build("HMSET", key, attrs);
-	return get_status();
+	return check_status();
 }
 
 /////////////////////////////////////////////////////////////////////////////

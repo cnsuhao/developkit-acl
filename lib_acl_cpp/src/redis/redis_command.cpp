@@ -3,6 +3,7 @@
 #include "acl_cpp/stdlib/snprintf.hpp"
 #include "acl_cpp/redis/redis_result.hpp"
 #include "acl_cpp/redis/redis_command.hpp"
+#include "redis_request.hpp"
 
 namespace acl
 {
@@ -12,7 +13,10 @@ namespace acl
 
 redis_command::redis_command(redis_client* conn /* = NULL */)
 : conn_(conn)
+, used_(0)
 , slice_req_(false)
+, request_buf_(NULL)
+, request_obj_(NULL)
 , argv_size_(0)
 , argv_(NULL)
 , argv_lens_(NULL)
@@ -20,7 +24,6 @@ redis_command::redis_command(redis_client* conn /* = NULL */)
 , result_(NULL)
 {
 	pool_ = NEW dbuf_pool(128000);
-	req_ = NEW redis_request();
 }
 
 redis_command::~redis_command()
@@ -30,14 +33,18 @@ redis_command::~redis_command()
 		acl_myfree(argv_);
 	if (argv_lens_ != NULL)
 		acl_myfree(argv_lens_);
-	delete req_;
+	delete request_buf_;
+	delete request_obj_;
 }
 
 void redis_command::reset()
 {
-	delete pool_;
-	pool_ = NEW dbuf_pool();
-	result_ = NULL;
+	if (used_ > 0)
+	{
+		delete pool_;
+		pool_ = NEW dbuf_pool();
+		result_ = NULL;
+	}
 }
 
 void redis_command::set_slice_request(bool on)
@@ -115,11 +122,6 @@ const char* redis_command::result_error() const
 	return result_ ? result_->get_error() : "";
 }
 
-size_t redis_command::result_size() const
-{
-	return result_ ? result_->get_size() : 0;
-}
-
 const redis_result* redis_command::result_child(size_t i) const
 {
 	return result_ ? result_->get_child(i) : NULL;
@@ -155,10 +157,11 @@ const redis_result* redis_command::get_result() const
 
 const redis_result* redis_command::run(size_t nchildren /* = 0 */)
 {
+	used_++;
 	if (slice_req_)
-		result_ = conn_->run(pool_, req_, nchildren);
+		result_ = conn_->run(pool_, *request_obj_, nchildren);
 	else
-		result_ = conn_->run(pool_, request_, nchildren);
+		result_ = conn_->run(pool_, *request_buf_, nchildren);
 	return result_;
 }
 
@@ -240,7 +243,7 @@ int redis_command::get_number64(std::vector<long long int>& out)
 	return size;
 }
 
-bool redis_command::get_status(const char* success /* = "OK" */)
+bool redis_command::check_status(const char* success /* = "OK" */)
 {
 	const redis_result* result = run();
 	if (result == NULL || result->get_type() != REDIS_RESULT_STATUS)
@@ -577,8 +580,8 @@ const redis_result** redis_command::scan_keys(const char* cmd, const char* key,
 		argc++;
 	}
 
-	conn_->build_request(argc, argv, lens);
-	const redis_result* result = conn_->run();
+	build_request(argc, argv, lens);
+	const redis_result* result = run();
 	if (result == NULL)
 	{
 		cursor = -1;
@@ -629,9 +632,10 @@ const redis_result** redis_command::scan_keys(const char* cmd, const char* key,
 
 void redis_command::reset_request()
 {
-	request_.clear();
-	if (req_)
-		req_->reset();
+	if (request_buf_)
+		request_buf_->clear();
+	if (request_obj_)
+		request_obj_->reset();
 }
 
 void redis_command::build_request(size_t argc, const char* argv[], size_t lens[])
@@ -644,39 +648,46 @@ void redis_command::build_request(size_t argc, const char* argv[], size_t lens[]
 
 void redis_command::build_request1(size_t argc, const char* argv[], size_t lens[])
 {
-	request_.format("*%lu\r\n", (unsigned long) argc);
+	if (request_buf_ == NULL)
+		request_buf_ = NEW string(256);
+	else
+		request_buf_->clear();
+	request_buf_->format("*%lu\r\n", (unsigned long) argc);
 	for (size_t i = 0; i < argc; i++)
 	{
-		request_.format_append("$%lu\r\n", (unsigned long) lens[i]);
-		request_.append(argv[i], lens[i]);
-		request_.append("\r\n");
+		request_buf_->format_append("$%lu\r\n", (unsigned long) lens[i]);
+		request_buf_->append(argv[i], lens[i]);
+		request_buf_->append("\r\n");
 	}
-	//printf("%s", request_.c_str());
+	//printf("%s", request_buf_->c_str());
 }
 
 void redis_command::build_request2(size_t argc, const char* argv[], size_t lens[])
 {
 	size_t size = 1 + argc * 3;
-	req_->reserve(size);
-	req_->reset();
+	if (request_obj_ == NULL)
+		request_obj_ = NEW redis_request();
+	else
+		request_obj_->reset();
+	request_obj_->reserve(size);
 
 #define BLEN	32
 
 	char* buf = (char*) pool_->dbuf_alloc(BLEN);
 	int  len = safe_snprintf(buf, BLEN, "*%lu\r\n", (unsigned long) argc);
-	req_->put(buf, len);
+	request_obj_->put(buf, len);
 
 	for (size_t i = 0; i < argc; i++)
 	{
 		buf = (char*) pool_->dbuf_alloc(BLEN);
 		len = safe_snprintf(buf, BLEN, "$%lu\r\n",
 			(unsigned long) lens[i]);
-		req_->put(buf, len);
+		request_obj_->put(buf, len);
 
-		req_->put(argv[i], lens[i]);
+		request_obj_->put(argv[i], lens[i]);
 
 		buf = (char*) pool_->dbuf_strdup("\r\n");
-		req_->put(buf, 2);
+		request_obj_->put(buf, 2);
 	}
 }
 

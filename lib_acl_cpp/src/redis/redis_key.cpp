@@ -264,7 +264,7 @@ bool redis_key::rename_key(const char* key, const char* newkey)
 	lens[2] = strlen(newkey);
 
 	build_request(3, argv, lens);
-	return get_status();
+	return check_status();
 }
 
 bool redis_key::renamenx(const char* key, const char* newkey)
@@ -282,7 +282,7 @@ bool redis_key::renamenx(const char* key, const char* newkey)
 	lens[2] = strlen(newkey);
 
 	build_request(3, argv, lens);
-	return get_status();
+	return check_status();
 }
 
 bool redis_key::restore(const char* key, const char* value, size_t len,
@@ -314,7 +314,7 @@ bool redis_key::restore(const char* key, const char* value, size_t len,
 	}
 
 	build_request(argc, argv, lens);
-	return get_status();
+	return check_status();
 }
 
 int redis_key::ttl(const char* key)
@@ -417,7 +417,7 @@ bool redis_key::migrate(const char* key, const char* addr, unsigned dest_db,
 	}
 
 	build_request(argc, argv, lens);
-	return get_status();
+	return check_status();
 }
 
 int redis_key::move(const char* key, unsigned dest_db)

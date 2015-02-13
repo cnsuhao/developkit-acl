@@ -39,6 +39,15 @@ public:
 	}
 
 	/**
+	 * 获得内存池句柄，该内存池由 redis_command 内部产生
+	 * @return {dbuf_pool*}
+	 */
+	dbuf_pool* get_pool() const
+	{
+		return pool_;
+	}
+
+	/**
 	 * 获得当前结果结点的数据类型
 	 * @return {redis_result_t}
 	 */
@@ -125,17 +134,28 @@ public:
 	const char* result_value(size_t i, size_t* len = NULL) const;
 
 	/////////////////////////////////////////////////////////////////////
+	/**
+	 * 设置是否对请求数据进行分片处理，如果为 true 则内部在组装请求协议的时候不会
+	 * 将所有数据块重新组装成一个连续的大数据块
+	 * @param on {bool} 内部默认值为 false
+	 */
 	void set_slice_request(bool on);
+
+	/**
+	 * 设置是否对响应数据进行分片处理，如果为 true 则当服务器的返回数据比较大时则
+	 * 将数据进行分片，分成一些不连续的数据块
+	 * @param on {bool} 内部默认值为 false
+	 */
 	void set_slice_respond(bool on);
-	void reset_request();
 
 protected:
+	const redis_result* run(size_t nchildren = 0);
+
+	void build_request(size_t argc, const char* argv[], size_t lens[]);
+	void reset_request();
 	const redis_result** scan_keys(const char* cmd, const char* key,
 		int& cursor, size_t& size, const char* pattern,
 		const size_t* count);
-	void build_request(size_t argc, const char* argv[], size_t lens[]);
-	const redis_result* run(size_t nchildren = 0);
-
 	/*******************************************************************/
 
 	void build(const char* cmd, const char* key,
@@ -191,7 +211,7 @@ protected:
 	long long int get_number64(bool* success = NULL);
 	int get_number(std::vector<int>& out);
 	int get_number64(std::vector<long long int>& out);
-	bool get_status(const char* success = "OK");
+	bool check_status(const char* success = "OK");
 
 	int get_status(std::vector<bool>& out);
 	const char* get_status();
@@ -207,16 +227,19 @@ protected:
 	int get_strings(std::vector<const char*>& names,
 		std::vector<const char*>& values);
 
-private:
 	/************************** common *********************************/
+protected:
 	dbuf_pool* pool_;
+
+private:
 	redis_client* conn_;
+	unsigned long long used_;
 
 private:
 	/************************** request ********************************/
 	bool slice_req_;
-	string  request_;
-	redis_request* req_;
+	string* request_buf_;
+	redis_request* request_obj_;
 	size_t  argv_size_;
 	const char**  argv_;
 	size_t* argv_lens_;
@@ -229,7 +252,7 @@ private:
 private:
 	/************************** respond ********************************/
 	bool slice_res_;
-	redis_result* result_;
+	const redis_result* result_;
 };
 
 } // namespace acl
