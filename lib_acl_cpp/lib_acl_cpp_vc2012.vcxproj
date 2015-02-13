@@ -288,10 +288,10 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClCompile Include="src\mime\rfc822.cpp" />
     <ClCompile Include="src\queue\queue_file.cpp" />
     <ClCompile Include="src\queue\queue_manager.cpp" />
-    <ClCompile Include="src\redis\redic_connection.cpp" />
     <ClCompile Include="src\redis\redis_client.cpp" />
     <ClCompile Include="src\redis\redis_cluster.cpp" />
     <ClCompile Include="src\redis\redis_command.cpp" />
+    <ClCompile Include="src\redis\redis_connection.cpp" />
     <ClCompile Include="src\redis\redis_hash.cpp" />
     <ClCompile Include="src\redis\redis_hyperloglog.cpp" />
     <ClCompile Include="src\redis\redis_key.cpp" />
