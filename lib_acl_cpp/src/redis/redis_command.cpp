@@ -30,13 +30,13 @@ redis_command::redis_command(redis_client* conn /* = NULL */)
 
 redis_command::~redis_command()
 {
-	delete pool_;
 	if (argv_ != NULL)
 		acl_myfree(argv_);
 	if (argv_lens_ != NULL)
 		acl_myfree(argv_lens_);
 	delete request_buf_;
 	delete request_obj_;
+	delete pool_;
 }
 
 void redis_command::reset()

@@ -5,7 +5,7 @@
 namespace acl
 {
 
-class ACL_CPP_API redis_manager : public connect_manager
+class ACL_CPP_API redis_cluster : public connect_manager
 {
 public:
 	/**
@@ -13,8 +13,8 @@ public:
 	 * @param conn_timeout {int} 服务器连接超时时间(秒)
 	 * @param rw_timeout {int}　网络 IO 读写超时时间(秒)
 	 */
-	redis_manager(int conn_timeout, int rw_timeout);
-	virtual ~redis_manager();
+	redis_cluster(int conn_timeout, int rw_timeout);
+	virtual ~redis_cluster();
 
 protected:
 	/**
