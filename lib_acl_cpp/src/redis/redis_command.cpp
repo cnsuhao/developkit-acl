@@ -19,6 +19,7 @@ redis_command::redis_command()
 : conn_(NULL)
 , cluster_(NULL)
 , used_(0)
+, slot_(-1)
 , slice_req_(false)
 , request_buf_(NULL)
 , request_obj_(NULL)
@@ -36,6 +37,7 @@ redis_command::redis_command(redis_client* conn)
 : conn_(conn)
 , cluster_(NULL)
 , used_(0)
+, slot_(-1)
 , slice_req_(false)
 , request_buf_(NULL)
 , request_obj_(NULL)
@@ -52,6 +54,7 @@ redis_command::redis_command(redis_cluster* cluster)
 : conn_(NULL)
 , cluster_(cluster)
 , used_(0)
+, slot_(-1)
 , slice_req_(false)
 , request_buf_(NULL)
 , request_obj_(NULL)
@@ -83,6 +86,7 @@ void redis_command::reset()
 		pool_ = NEW dbuf_pool();
 		result_ = NULL;
 	}
+	slot_ = -1;
 }
 
 void redis_command::set_slice_request(bool on)

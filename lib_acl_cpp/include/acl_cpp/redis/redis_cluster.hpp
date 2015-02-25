@@ -12,8 +12,9 @@ public:
 	 * 构造函数
 	 * @param conn_timeout {int} 服务器连接超时时间(秒)
 	 * @param rw_timeout {int}　网络 IO 读写超时时间(秒)
+	 * @param max_slot {int} 哈希槽最大值
 	 */
-	redis_cluster(int conn_timeout, int rw_timeout);
+	redis_cluster(int conn_timeout, int rw_timeout, int max_slot = 16384);
 	virtual ~redis_cluster();
 
 protected:
@@ -28,6 +29,8 @@ protected:
 private:
 	int   conn_timeout_;
 	int   rw_timeout_;
+	int   max_slot_;
+	int*  slots_;
 };
 
 } // namespace acl

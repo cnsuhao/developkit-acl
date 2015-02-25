@@ -115,33 +115,33 @@ protected:
 	virtual void* run()
 	{
 		bool ret;
-		acl::redis_key option;
-		acl::redis_string string_option;
+		acl::redis_key cmd_key;
+		acl::redis_string cmd_string;
 
 		for (int i = 0; i < n_; i++)
 		{
-			option.set_cluster(&cluster_);
-			string_option.set_cluster(&cluster_);
+			cmd_key.set_cluster(&cluster_);
+			cmd_string.set_cluster(&cluster_);
 
 			if (cmd_ == "set")
-				ret = test_set(string_option, i);
+				ret = test_set(cmd_string, i);
 			else if (cmd_ == "del")
-				ret = test_del(option, i);
+				ret = test_del(cmd_key, i);
 			else if (cmd_ == "expire")
-				ret = test_expire(option, i);
+				ret = test_expire(cmd_key, i);
 			else if (cmd_ == "ttl")
-				ret = test_ttl(option, i);
+				ret = test_ttl(cmd_key, i);
 			else if (cmd_ == "exists")
-				ret = test_exists(option, i);
+				ret = test_exists(cmd_key, i);
 			else if (cmd_ == "type")
-				ret = test_type(option, i);
+				ret = test_type(cmd_key, i);
 			else if (cmd_ == "all")
 			{
-				if (test_expire(option, i) == false
-					|| test_ttl(option, i) == false
-					|| test_exists(option, i) == false
-					|| test_type(option, i) == false
-					|| test_del(option, i) == false)
+				if (test_expire(cmd_key, i) == false
+					|| test_ttl(cmd_key, i) == false
+					|| test_exists(cmd_key, i) == false
+					|| test_type(cmd_key, i) == false
+					|| test_del(cmd_key, i) == false)
 				{
 					ret = false;
 				}
