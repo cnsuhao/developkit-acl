@@ -255,6 +255,7 @@ private:
 	redis_client* conn_;
 	redis_cluster* cluster_;
 	unsigned long long used_;
+	int slot_;
 
 	redis_pool* get_conns(redis_cluster* cluster, const char* info);
 
