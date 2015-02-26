@@ -7,6 +7,8 @@
 namespace acl
 {
 
+class redis_pool;
+
 class ACL_CPP_API redis_cluster : public connect_manager
 {
 public:
