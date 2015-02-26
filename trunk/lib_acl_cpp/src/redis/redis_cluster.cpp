@@ -17,6 +17,9 @@ redis_cluster::redis_cluster(int conn_timeout, int rw_timeout,
 redis_cluster::~redis_cluster()
 {
 	acl_myfree(slot_addrs_);
+	std::vector<char*>::iterator it = addrs_.begin();
+	for (; it != addrs_.end(); ++it)
+		acl_myfree(*it);
 }
 
 connect_pool* redis_cluster::create_pool(const char* addr,
@@ -60,21 +63,25 @@ void redis_cluster::set_slot(int slot, const char* addr)
 	// 该段代码需要加锁保护
 	lock();
 
-	std::vector<string>::const_iterator cit = addrs_.begin();
+	std::vector<char*>::const_iterator cit = addrs_.begin();
 	for (; cit != addrs_.end(); ++cit)
 	{
-		if ((*cit) == addr)
+		if (strcmp((*cit), addr) == 0)
 			break;
 	}
 
-	if (cit == addrs_.end())
-	{
-		addrs_.push_back(addr);
-		cit = addrs_.end();
-		--cit;
-	}
 	// 将 slot 与地址进行关联映射
-	slot_addrs_[slot] = (*cit).c_str();
+	if (cit != addrs_.end())
+		slot_addrs_[slot] = *cit;
+	else
+	{
+		// 只所以采用动态分配方式，是因为在往数组中添加对象时，无论
+		// 数组如何做动态调整，该添加的动态内存地址都是固定的，所以
+		// slot_addrs_ 的下标地址也是相对不变的
+		char* buf = acl_mystrdup(addr);
+		addrs_.push_back(buf);
+		slot_addrs_[slot] = buf;
+	}
 
 	unlock();
 }
