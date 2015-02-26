@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "util.h"
 
 static acl::string __keypre("test_key_cluster");
 
@@ -98,8 +99,9 @@ static bool test_set(acl::redis_string& option, int i)
 
 	option.reset();
 	bool ret = option.set(key.c_str(), value.c_str());
-	printf("set key: %s, value: %s %s\r\n", key.c_str(),
-		value.c_str(), ret ? "ok" : "error");
+	if (i < 10)
+		printf("set key: %s, value: %s %s\r\n", key.c_str(),
+			value.c_str(), ret ? "ok" : "error");
 	return ret;
 }
 
@@ -160,6 +162,13 @@ protected:
 				printf("cmd: %s error\r\n", cmd_.c_str());
 				break;
 			}
+
+			if (i > 0 && i % 1000 == 0)
+			{
+				char tmp[128];
+				acl::safe_snprintf(tmp, sizeof(tmp), "%d", i);
+				acl::meter_time(__FILE__, __LINE__, tmp);
+			}
 		}
 
 		return NULL;
@@ -175,7 +184,7 @@ private:
 static void usage(const char* procname)
 {
 	printf("usage: %s -h[help]\r\n"
-		"-s redis_addr_list[127.0.0.1:6379, 127.0.0.1:6380]\r\n"
+		"-s redis_addr_list[127.0.0.1:6379]\r\n"
 		"-n count[default: 10]\r\n"
 		"-C connect_timeout[default: 10]\r\n"
 		"-I rw_timeout[default: 10]\r\n"
@@ -226,6 +235,9 @@ int main(int argc, char* argv[])
 	acl::redis_cluster cluster(conn_timeout, rw_timeout);
 	cluster.init(NULL, addrs.c_str(), max_threads);
 
+	struct timeval begin;
+	gettimeofday(&begin, NULL);
+
 	std::vector<test_thread*> threads;
 	for (int i = 0; i < max_threads; i++)
 	{
@@ -242,6 +254,14 @@ int main(int argc, char* argv[])
 		(*it)->wait();
 		delete (*it);
 	}
+
+	struct timeval end;
+	gettimeofday(&end, NULL);
+
+	int total = max_threads * n;
+	double inter = util::stamp_sub(&end, &begin);
+	printf("total %s: %d, spent: %0.2f ms, speed: %0.2f\r\n", cmd.c_str(),
+		total, inter, (total * 1000) /(inter > 0 ? inter : 1));
 
 #ifdef WIN32
 	printf("enter any key to exit\r\n");

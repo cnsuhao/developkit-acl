@@ -58,7 +58,7 @@ private:
 	int   rw_timeout_;
 	int   max_slot_;
 	const char**  slot_addrs_;
-	std::vector<string> addrs_;
+	std::vector<char*> addrs_;
 };
 
 } // namespace acl
