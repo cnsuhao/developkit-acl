@@ -106,8 +106,9 @@ static bool test_set(acl::redis_string& option, int i)
 class test_thread : public acl::thread
 {
 public:
-	test_thread(acl::redis_cluster& cluster, const char* cmd, int n)
-		: cluster_(cluster), cmd_(cmd), n_(n) {}
+	test_thread(acl::redis_cluster& cluster, int max_conns,
+		const char* cmd, int n)
+	: cluster_(cluster), max_conns_(max_conns), cmd_(cmd), n_(n) {}
 
 	~test_thread() {}
 
@@ -120,8 +121,8 @@ protected:
 
 		for (int i = 0; i < n_; i++)
 		{
-			cmd_key.set_cluster(&cluster_);
-			cmd_string.set_cluster(&cluster_);
+			cmd_key.set_cluster(&cluster_, max_conns_);
+			cmd_string.set_cluster(&cluster_, max_conns_);
 
 			if (cmd_ == "set")
 				ret = test_set(cmd_string, i);
@@ -166,6 +167,7 @@ protected:
 
 private:
 	acl::redis_cluster& cluster_;
+	int max_conns_;
 	acl::string cmd_;
 	int n_;
 };
@@ -227,7 +229,8 @@ int main(int argc, char* argv[])
 	std::vector<test_thread*> threads;
 	for (int i = 0; i < max_threads; i++)
 	{
-		test_thread* thread = new test_thread(cluster, cmd.c_str(), n);
+		test_thread* thread = new test_thread(cluster, max_threads,
+			cmd.c_str(), n);
 		threads.push_back(thread);
 		thread->set_detachable(false);
 		thread->start();

@@ -18,6 +18,7 @@ namespace acl
 redis_command::redis_command()
 : conn_(NULL)
 , cluster_(NULL)
+, max_conns_(0)
 , used_(0)
 , slot_(-1)
 , slice_req_(false)
@@ -36,6 +37,7 @@ redis_command::redis_command()
 redis_command::redis_command(redis_client* conn)
 : conn_(conn)
 , cluster_(NULL)
+, max_conns_(0)
 , used_(0)
 , slot_(-1)
 , slice_req_(false)
@@ -50,9 +52,10 @@ redis_command::redis_command(redis_client* conn)
 	pool_ = NEW dbuf_pool(128000);
 }
 
-redis_command::redis_command(redis_cluster* cluster)
+redis_command::redis_command(redis_cluster* cluster, size_t max_conns)
 : conn_(NULL)
 , cluster_(cluster)
+, max_conns_(max_conns)
 , used_(0)
 , slot_(-1)
 , slice_req_(false)
@@ -78,7 +81,7 @@ redis_command::~redis_command()
 	delete pool_;
 }
 
-void redis_command::reset()
+void redis_command::reset(bool save_slot /* = false */)
 {
 	if (used_ > 0)
 	{
@@ -86,7 +89,8 @@ void redis_command::reset()
 		pool_ = NEW dbuf_pool();
 		result_ = NULL;
 	}
-	slot_ = -1;
+	if (!save_slot)
+		slot_ = -1;
 }
 
 void redis_command::set_slice_request(bool on)
@@ -104,9 +108,12 @@ void redis_command::set_client(redis_client* conn)
 	conn_ = conn;
 }
 
-void redis_command::set_cluster(redis_cluster* cluster)
+void redis_command::set_cluster(redis_cluster* cluster, size_t max_conns)
 {
 	cluster_ = cluster;
+	max_conns_ = max_conns;
+	if (max_conns_ == 0)
+		max_conns_ = 100;
 }
 
 bool redis_command::eof() const
@@ -130,6 +137,29 @@ void redis_command::argv_space(size_t n)
 		argv_lens_ = (size_t*) acl_myrealloc(argv_lens_,
 			n * sizeof(size_t));
 	}
+}
+
+void redis_command::hash_slot(const char* key)
+{
+	hash_slot(key, strlen(key));
+}
+
+void redis_command::hash_slot(const char* key, size_t len)
+{
+	// 只有集群模式才需要计算哈希槽值
+	if (cluster_ == NULL)
+		return;
+
+	int max_slot = cluster_->get_max_slot();
+	if (max_slot <= 0)
+		return;
+
+	// 如果缓存了哈希槽值，则不必重新计算
+	if (slot_ >= 0 && slot_ < max_slot)
+		return;
+
+	unsigned short n = acl_hash_crc16(key, len);
+	slot_ = (int) (n % max_slot);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -217,15 +247,50 @@ redis_pool* redis_command::get_conns(redis_cluster* cluster, const char* info)
 		return NULL;
 
 	// printf(">>>addr: %s, slot: %s\r\n", addr, slot);
-	return (redis_pool*) cluster->get(addr);
+	redis_pool* conns = (redis_pool*) cluster->get(addr);
+
+	// 如果服务器地址不存在，则根据服务器地址动态创建连接池对象
+	if (conns == NULL)
+		conns = (redis_pool*) &cluster->set(addr, max_conns_);
+
+	return conns;
 }
 
 const redis_result* redis_command::run(redis_cluster* cluster, size_t nchildren)
 {
-	redis_pool* conns = (redis_pool*) cluster->peek();
+	redis_pool* conns;
+	const char* addr;
+
+	// 如果已经计算了哈希槽值，则优先从本地缓存中查找对应的连接池
+	// 如果未找到，则从所有集群结点中随便找一个可用的连接池对象
+
+	if (slot_ >= 0)
+	{
+		conns = cluster->peek_slot(slot_);
+		if (conns != NULL)
+		{
+			addr = conns->get_addr();
+			// xxx, can addr be NULL ?
+			if (addr == NULL || *addr == 0)
+				addr = NULL;
+		}
+		else
+		{
+			addr = NULL;
+			conns = (redis_pool*) cluster->peek();
+		}
+	}
+	else
+	{
+		addr = NULL;
+		conns = (redis_pool*) cluster->peek();
+	}
+
+	// 如果没有找到可用的连接池对象，则直接返回 NULL 表示出错
 	if (conns == NULL)
 		return NULL;
 
+	// 从连接池对象中获取一个连接对象
 	redis_client* conn = (redis_client*) conns->peek();
 	if (conn == NULL)
 		return NULL;
@@ -235,27 +300,39 @@ const redis_result* redis_command::run(redis_cluster* cluster, size_t nchildren)
 
 	while (n++ <= 10)
 	{
+		// 根据请求过程是否采用内存分片方式调用不同的请求过程
 		if (slice_req_)
 			result_ = conn->run(pool_, *request_obj_, nchildren);
 		else
 			result_ = conn->run(pool_, *request_buf_, nchildren);
 
+		// 将连接对象归还给连接池对象
 		conns->put(conn, !conn->eof());
 
 		if (result_ == NULL)
 			return NULL;
 
+		// 取得服务器的响应结果的类型，并进行分别处理
 		type = result_->get_type();
 
 		if (type == REDIS_RESULT_UNKOWN)
 			return NULL;
-		if (type != REDIS_RESULT_ERROR)
-			return result_;
 
+		if (type != REDIS_RESULT_ERROR)
+		{
+			// 如果发生重定向过程，则设置哈希槽的对应 redis 服务地址
+			if (n > 1 && slot_ > 0 && addr != NULL)
+				cluster->set_slot(slot_, addr);
+
+			return result_;
+		}
+
+		// 对于结果类型为错误类型，则需要进一步判断是否是重定向指令
 		const char* ptr = result_->get_error();
 		if (ptr == NULL || *ptr == 0)
 			return result_;
 
+		// 如果出错信息为重定向指令，则执行重定向过程
 		if (strncasecmp(ptr, "MOVED", 5) == 0)
 		{
 			conns = get_conns(cluster_, ptr);
@@ -264,7 +341,8 @@ const redis_result* redis_command::run(redis_cluster* cluster, size_t nchildren)
 			conn = (redis_client*) conns->peek();
 			if (conn == NULL)
 				return result_;
-			reset();
+			// 需要保存哈希槽值
+			reset(true);
 		}
 		else if (strncasecmp(ptr, "ASK", 3) == 0)
 		{
@@ -274,8 +352,10 @@ const redis_result* redis_command::run(redis_cluster* cluster, size_t nchildren)
 			conn = (redis_client*) conns->peek();
 			if (conn == NULL)
 				return result_;
-			reset();
+			reset(true);
 		}
+
+		// 对于其它错误类型，则直接返回本次得到的响应结果对象
 		else
 			return result_;
 	}
@@ -717,6 +797,7 @@ const redis_result** redis_command::scan_keys(const char* cmd, const char* key,
 		argc++;
 	}
 
+	hash_slot(key);
 	build_request(argc, argv, lens);
 	const redis_result* result = run();
 	if (result == NULL)
