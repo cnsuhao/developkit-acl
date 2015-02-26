@@ -797,7 +797,8 @@ const redis_result** redis_command::scan_keys(const char* cmd, const char* key,
 		argc++;
 	}
 
-	hash_slot(key);
+	if (key && *key)
+		hash_slot(key);
 	build_request(argc, argv, lens);
 	const redis_result* result = run();
 	if (result == NULL)
