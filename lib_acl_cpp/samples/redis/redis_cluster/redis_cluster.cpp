@@ -105,6 +105,22 @@ static bool test_set(acl::redis_string& option, int i)
 	return ret;
 }
 
+static bool test_get(acl::redis_string& option, int i)
+{
+	acl::string key;
+	key.format("%s_%d", __keypre.c_str(), i);
+
+	acl::string value;
+
+	option.reset();
+	bool ret = option.get(key.c_str(), value);
+	if (i < 10)
+		printf("get key: %s, value: %s %s, len: %d\r\n",
+			key.c_str(), value.c_str(), ret ? "ok" : "error",
+			(int) value.length());
+	return ret;
+}
+
 class test_thread : public acl::thread
 {
 public:
@@ -128,6 +144,8 @@ protected:
 
 			if (cmd_ == "set")
 				ret = test_set(cmd_string, i);
+			else if (cmd_ == "get")
+				ret = test_get(cmd_string, i);
 			else if (cmd_ == "del")
 				ret = test_del(cmd_key, i);
 			else if (cmd_ == "expire")
@@ -140,10 +158,12 @@ protected:
 				ret = test_type(cmd_key, i);
 			else if (cmd_ == "all")
 			{
-				if (test_expire(cmd_key, i) == false
-					|| test_ttl(cmd_key, i) == false
+				if (test_set(cmd_string, i) == false
+					|| test_get(cmd_string, i) == false
 					|| test_exists(cmd_key, i) == false
 					|| test_type(cmd_key, i) == false
+					|| test_expire(cmd_key, i) == false
+					|| test_ttl(cmd_key, i) == false
 					|| test_del(cmd_key, i) == false)
 				{
 					ret = false;
@@ -189,7 +209,7 @@ static void usage(const char* procname)
 		"-C connect_timeout[default: 10]\r\n"
 		"-I rw_timeout[default: 10]\r\n"
 		"-c max_threads[default: 10]\r\n"
-		"-a cmd[set|expire|ttl|exists|type|del]\r\n",
+		"-a cmd[set|get|expire|ttl|exists|type|del]\r\n",
 		procname);
 }
 
@@ -197,7 +217,7 @@ int main(int argc, char* argv[])
 {
 	int  ch, n = 1, conn_timeout = 10, rw_timeout = 10;
 	int  max_threads = 10;
-	acl::string addrs("127.0.0.1:6379, 127.0.0.1:6380"), cmd;
+	acl::string addrs("127.0.0.1:6379"), cmd;
 
 	while ((ch = getopt(argc, argv, "hs:n:C:I:c:a:")) > 0)
 	{
@@ -258,9 +278,9 @@ int main(int argc, char* argv[])
 	struct timeval end;
 	gettimeofday(&end, NULL);
 
-	int total = max_threads * n;
+	long long int total = max_threads * n;
 	double inter = util::stamp_sub(&end, &begin);
-	printf("total %s: %d, spent: %0.2f ms, speed: %0.2f\r\n", cmd.c_str(),
+	printf("total %s: %lld, spent: %0.2f ms, speed: %0.2f\r\n", cmd.c_str(),
 		total, inter, (total * 1000) /(inter > 0 ? inter : 1));
 
 #ifdef WIN32

@@ -259,7 +259,6 @@ redis_pool* redis_command::get_conns(redis_cluster* cluster, const char* info)
 const redis_result* redis_command::run(redis_cluster* cluster, size_t nchildren)
 {
 	redis_pool* conns;
-	bool cache_used;
 
 	// 如果已经计算了哈希槽值，则优先从本地缓存中查找对应的连接池
 	// 如果未找到，则从所有集群结点中随便找一个可用的连接池对象
@@ -267,23 +266,11 @@ const redis_result* redis_command::run(redis_cluster* cluster, size_t nchildren)
 	if (slot_ >= 0)
 	{
 		conns = cluster->peek_slot(slot_);
-		if (conns != NULL)
-		{
-			cache_used = true;
-			// printf("use cached: yes, slot: %d\r\n", slot_);
-		}
-		else
-		{
-			cache_used = false;
+		if (conns == NULL)
 			conns = (redis_pool*) cluster->peek();
-			// printf("use cached: no, slot: %d\r\n", slot_);
-		}
 	}
 	else
-	{
-		cache_used = false;
 		conns = (redis_pool*) cluster->peek();
-	}
 
 	// 如果没有找到可用的连接池对象，则直接返回 NULL 表示出错
 	if (conns == NULL)
@@ -296,6 +283,7 @@ const redis_result* redis_command::run(redis_cluster* cluster, size_t nchildren)
 
 	redis_result_t type;
 	int   n = 0;
+	bool  last_moved = false;
 
 	while (n++ <= 10)
 	{
@@ -321,15 +309,11 @@ const redis_result* redis_command::run(redis_cluster* cluster, size_t nchildren)
 		{
 			// 如果发生重定向过程，则设置哈希槽的对应 redis 服务地址
 
-			if (slot_ < 0)
+			if (slot_ < 0 || !last_moved)
 				return result_;
 
 			const char* addr = conns->get_addr();
-
-			if (n > 1 || !cache_used)
-				cluster->set_slot(slot_, addr);
-			if (cache_used && n > 1)
-				logger("redirect, slot: %d, n: %d", slot_, n);
+			cluster->set_slot(slot_, addr);
 
 			return result_;
 		}
@@ -348,6 +332,8 @@ const redis_result* redis_command::run(redis_cluster* cluster, size_t nchildren)
 			conn = (redis_client*) conns->peek();
 			if (conn == NULL)
 				return result_;
+			last_moved = true;
+
 			// 需要保存哈希槽值
 			reset(true);
 		}
@@ -359,6 +345,7 @@ const redis_result* redis_command::run(redis_cluster* cluster, size_t nchildren)
 			conn = (redis_client*) conns->peek();
 			if (conn == NULL)
 				return result_;
+			last_moved = false;
 			reset(true);
 		}
 
