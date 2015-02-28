@@ -181,7 +181,6 @@ void connect_manager::remove(const char* addr)
 	lock_.unlock();
 }
 
-
 connect_pool* connect_manager::get(const char* addr,
 	bool exclusive /* = true */)
 {

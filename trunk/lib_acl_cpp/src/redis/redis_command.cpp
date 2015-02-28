@@ -256,21 +256,24 @@ redis_pool* redis_command::get_conns(redis_cluster* cluster, const char* info)
 	return conns;
 }
 
-const redis_result* redis_command::run(redis_cluster* cluster, size_t nchildren)
+redis_pool* redis_command::peek_conns(redis_cluster* cluster, int slot)
 {
-	redis_pool* conns;
-
 	// 如果已经计算了哈希槽值，则优先从本地缓存中查找对应的连接池
 	// 如果未找到，则从所有集群结点中随便找一个可用的连接池对象
 
-	if (slot_ >= 0)
-	{
-		conns = cluster->peek_slot(slot_);
-		if (conns == NULL)
-			conns = (redis_pool*) cluster->peek();
-	}
+	if (slot < 0)
+		return (redis_pool*) cluster->peek();
+
+	redis_pool* conns = cluster->peek_slot(slot);
+	if (conns != NULL)
+		return conns;
 	else
-		conns = (redis_pool*) cluster->peek();
+		return (redis_pool*) cluster->peek();
+}
+
+const redis_result* redis_command::run(redis_cluster* cluster, size_t nchild)
+{
+	redis_pool* conns = peek_conns(cluster, slot_);
 
 	// 如果没有找到可用的连接池对象，则直接返回 NULL 表示出错
 	if (conns == NULL)
@@ -283,18 +286,34 @@ const redis_result* redis_command::run(redis_cluster* cluster, size_t nchildren)
 
 	redis_result_t type;
 	int   n = 0;
-	bool  last_moved = false;
+	bool  last_moved = false, alive;
 
 	while (n++ <= 10)
 	{
 		// 根据请求过程是否采用内存分片方式调用不同的请求过程
 		if (slice_req_)
-			result_ = conn->run(pool_, *request_obj_, nchildren);
+			result_ = conn->run(pool_, *request_obj_, nchild);
 		else
-			result_ = conn->run(pool_, *request_buf_, nchildren);
+			result_ = conn->run(pool_, *request_buf_, nchild);
+
+		alive = !conn->eof();
 
 		// 将连接对象归还给连接池对象
-		conns->put(conn, !conn->eof());
+		conns->put(conn, alive);
+
+		// 如果连接异常断开，则需要进行重试
+		if (!alive)
+		{
+			// 动态删除该结点，然后重新从集群中获取一个可用的结点
+
+			cluster->remove(conns->get_addr());
+			conns = peek_conns(cluster, slot_);
+			if (conns == NULL)
+				return NULL;
+			conn = (redis_client*) conns->peek();
+			if (conn != NULL)
+				continue;
+		}
 
 		if (result_ == NULL)
 			return NULL;
@@ -358,18 +377,18 @@ const redis_result* redis_command::run(redis_cluster* cluster, size_t nchildren)
 	return NULL;
 }
 
-const redis_result* redis_command::run(size_t nchildren /* = 0 */)
+const redis_result* redis_command::run(size_t nchild /* = 0 */)
 {
 	used_++;
 
 	if (cluster_ != NULL)
-		return run(cluster_, nchildren);
+		return run(cluster_, nchild);
 	else if (conn_ != NULL)
 	{
 		if (slice_req_)
-			result_ = conn_->run(pool_, *request_obj_, nchildren);
+			result_ = conn_->run(pool_, *request_obj_, nchild);
 		else
-			result_ = conn_->run(pool_, *request_buf_, nchildren);
+			result_ = conn_->run(pool_, *request_buf_, nchild);
 		return result_;
 	}
 	else
