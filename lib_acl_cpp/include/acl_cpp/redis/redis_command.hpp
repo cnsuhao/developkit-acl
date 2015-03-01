@@ -266,9 +266,12 @@ private:
 	size_t max_conns_;
 	unsigned long long used_;
 	int slot_;
+	int redirect_max_;
+	int redirect_sleep_;
 
-	redis_pool* get_conns(redis_cluster* cluster, const char* info);
-	redis_pool* peek_conns(redis_cluster* cluster, int slot);
+	redis_client* peek_conn(redis_cluster* cluster, int slot);
+	redis_client* redirect(redis_cluster* cluster, const char* addr);
+	const char* get_addr(const char* info);
 
 private:
 	/************************** request ********************************/
