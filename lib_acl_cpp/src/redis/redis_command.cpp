@@ -314,9 +314,7 @@ redis_client* redis_command::peek_conn(redis_cluster* cluster, int slot)
 		if (slot < 0)
 			conns = (redis_pool*) cluster->peek();
 		else if ((conns = cluster->peek_slot(slot)) == NULL)
-		{
 			conns = (redis_pool*) cluster->peek();
-		}
 
 		if (conns == NULL)
 		{
@@ -384,11 +382,10 @@ const redis_result* redis_command::run(redis_cluster* cluster, size_t nchild)
 
 			last_moved = false;
 		}
+
+		// 将连接对象归还给连接池对象
 		else
-		{
-			// 将连接对象归还给连接池对象
 			conn->get_pool()->put(conn, true);
-		}
 
 		if (result_ == NULL)
 		{
