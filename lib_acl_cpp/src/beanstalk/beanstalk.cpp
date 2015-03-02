@@ -44,7 +44,7 @@ bool beanstalk::beanstalk_open()
 	{
 		logger_error("connect server: %s error: %s",
 			addr_, last_serror());
-		errbuf_.format("connect", addr_);
+		errbuf_.format("connect");
 		return false;
 	}
 	if (tube_used_ && beanstalk_use() == false)
