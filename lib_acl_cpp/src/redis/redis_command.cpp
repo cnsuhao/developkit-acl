@@ -293,6 +293,7 @@ redis_client* redis_command::redirect(redis_cluster* cluster, const char* addr)
 		if (conn != NULL)
 			return conn;
 
+		conns->set_alive(false);
 		conns = (redis_pool*) cluster->peek();
 	}
 
