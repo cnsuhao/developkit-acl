@@ -277,8 +277,8 @@ int main(int argc, char* argv[])
 	// 设置重定向的最大阀值，若重定向次数超过此阀值则报错
 	cluster.set_redirect_max(20);
 
-	// 当重定向次数 >= 2 时每次再重定向此函数设置休息的时间(秒)
-	cluster.set_redirect_sleep(1);
+	// 当重定向次数 >= 2 时每次再重定向此函数设置休息的时间(毫秒)
+	cluster.set_redirect_sleep(100);
 
 	cluster.init(NULL, addrs.c_str(), max_threads);
 
