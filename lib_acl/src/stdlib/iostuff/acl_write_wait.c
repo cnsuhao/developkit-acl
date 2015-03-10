@@ -107,7 +107,11 @@ int acl_write_wait(ACL_SOCKET fd, int timeout)
 	acl_set_error(0);
 
 	for (;;) {
+#ifdef WIN32
+		switch (select(1, (fd_set *) 0, &wfds, &xfds, tp)) {
+#else
 		switch (select(fd + 1, (fd_set *) 0, &wfds, &xfds, tp)) {
+#endif
 		case -1:
 			errnum = acl_last_error();
 #ifdef	WIN32
