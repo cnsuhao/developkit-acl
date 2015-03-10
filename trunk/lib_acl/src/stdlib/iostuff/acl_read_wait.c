@@ -139,12 +139,14 @@ int acl_read_wait(ACL_SOCKET fd, int timeout)
 	int  errnum;
 
 	/*
-	* Sanity checks.
-	*/
+	 * Sanity checks.
+	 */
+#ifndef WIN32
 	if (FD_SETSIZE <= (unsigned) fd)
 		acl_msg_fatal("%s(%d), %s: descriptor %d does not fit "
 			"FD_SETSIZE %d", __FILE__, __LINE__, myname,
 			(int) fd, FD_SETSIZE);
+#endif
 
 	/*
 	 * Guard the write() with select() so we do not depend on alarm()
