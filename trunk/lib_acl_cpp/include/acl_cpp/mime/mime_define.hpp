@@ -12,6 +12,7 @@
 #define MIME_CTYPE_MULTIPART    3
 #define MIME_CTYPE_IMAGE        4
 #define MIME_CTYPE_APPLICATION  5
+#define MIME_CTYPE_MIN          MIME_CTYPE_OTHER
 #define MIME_CTYPE_MAX          MIME_CTYPE_APPLICATION
 
 #define MIME_STYPE_OTHER        6
@@ -28,6 +29,7 @@
 #define MIME_STYPE_MIXED        17
 #define MIME_STYPE_ALTERNATIVE  18
 #define MIME_STYPE_RELATED      19
+#define MIME_STYPE_MIN          MIME_STYPE_OTHER
 #define MIME_STYPE_MAX          MIME_STYPE_RELATED
 
 #define MIME_ENC_OTHER          20
@@ -38,3 +40,8 @@
 #define MIME_ENC_BINARY         25   /* domain only */
 #define	MIME_ENC_UUCODE         26   /* encoding + domain */
 #define	MIME_ENC_XXCODE         27   /* encoding + domain */
+#define MIME_ENC_MIN            MIME_ENC_OTHER
+#define MIME_ENC_MAX            MIME_ENC_XXCODE
+
+#define MIME_MIN                MIME_CTYPE_OTHER
+#define MIME_MAX                MIME_ENC_MAX
