@@ -44,7 +44,7 @@ bool server_socket::open(const char* addr)
 		return false;
 	}
 
-	if (!unix_sock_)
+	if (unix_sock_)
 		return true;
 
 	// 之所以再用 getsockname 重新获得一些监听地址，主要是为了应对当输入的 addr 
@@ -54,7 +54,6 @@ bool server_socket::open(const char* addr)
 		logger_error("getsockname error: %s", acl_last_serror());
 		ACL_SAFE_STRNCPY(addr_, addr, sizeof(addr_));
 	}
-
 	return true;
 }
 
