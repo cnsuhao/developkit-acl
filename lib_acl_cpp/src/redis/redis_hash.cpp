@@ -36,20 +36,6 @@ bool redis_hash::hmset(const char* key, const std::map<string, const char*>& att
 	return check_status();
 }
 
-bool redis_hash::hmset(const char* key, const std::map<int, string>& attrs)
-{
-	hash_slot(key);
-	build("HMSET", key, attrs);
-	return check_status();
-}
-
-bool redis_hash::hmset(const char* key, const std::map<int, const char*>& attrs)
-{
-	hash_slot(key);
-	build("HMSET", key, attrs);
-	return check_status();
-}
-
 /////////////////////////////////////////////////////////////////////////////
 
 bool redis_hash::hmget(const char* key, const std::vector<string>& names,
@@ -68,23 +54,7 @@ bool redis_hash::hmget(const char* key, const std::vector<const char*>& names,
 	return get_strings(result) >= 0 ? true : false;
 }
 
-bool redis_hash::hmget(const char* key, const std::vector<int>& names,
-	std::vector<string>* result /* = NULL */)
-{
-	hash_slot(key);
-	build("HMGET", key, names);
-	return get_strings(result) >= 0 ? true : false;
-}
-
 bool redis_hash::hmget(const char* key, const char* names[], size_t argc,
-	std::vector<string>* result /* = NULL */)
-{
-	hash_slot(key);
-	build("HMGET", key, names, argc);
-	return get_strings(result) >= 0 ? true : false;
-}
-
-bool redis_hash::hmget(const char* key, const int names[], size_t argc,
 	std::vector<string>* result /* = NULL */)
 {
 	hash_slot(key);

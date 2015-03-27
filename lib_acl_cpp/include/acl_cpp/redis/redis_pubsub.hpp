@@ -11,11 +11,11 @@ class redis_client;
 class redis_result;
 class string;
 
-class ACL_CPP_API redis_pubsub : public redis_command
+class ACL_CPP_API redis_pubsub : virtual public redis_command
 {
 public:
 	redis_pubsub(redis_client* conn = NULL);
-	~redis_pubsub();
+	virtual ~redis_pubsub();
 
 	/////////////////////////////////////////////////////////////////////
 

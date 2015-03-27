@@ -9,11 +9,11 @@ namespace acl
 
 class redis_client;
 
-class ACL_CPP_API redis_hyperloglog : public redis_command
+class ACL_CPP_API redis_hyperloglog : virtual public redis_command
 {
 public:
 	redis_hyperloglog(redis_client* conn = NULL);
-	~redis_hyperloglog();
+	virtual ~redis_hyperloglog();
 
 	/**
 	 * 将任意数量的元素添加到指定的 HyperLogLog 里面
