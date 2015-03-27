@@ -14,7 +14,9 @@ class redis_client;
 class ACL_CPP_API redis_connection : virtual public redis_command
 {
 public:
-	redis_connection(redis_client* conn = NULL);
+	redis_connection();
+	redis_connection(redis_client* conn);
+	redis_connection(redis_cluster* cluster, size_t max_conns);
 	virtual ~redis_connection();
 
 	/////////////////////////////////////////////////////////////////////

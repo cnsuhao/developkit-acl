@@ -13,7 +13,9 @@ class redis_result;
 class ACL_CPP_API redis_script : virtual public redis_command
 {
 public:
-	redis_script(redis_client* conn = NULL);
+	redis_script();
+	redis_script(redis_client* conn);
+	redis_script(redis_cluster* cluster, size_t max_conns);
 	virtual ~redis_script();
 
 	/////////////////////////////////////////////////////////////////////

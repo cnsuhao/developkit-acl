@@ -2,7 +2,7 @@
 
 static acl::string __keypre("test_key");
 
-static bool test_del(acl::redis_key& option, int n)
+static bool test_del(acl::redis& option, int n)
 {
 	acl::string key;
 
@@ -23,7 +23,7 @@ static bool test_del(acl::redis_key& option, int n)
 	return true;
 }
 
-static bool test_expire(acl::redis_key& option, int n)
+static bool test_expire(acl::redis& option, int n)
 {
 	acl::string key;
 
@@ -43,7 +43,7 @@ static bool test_expire(acl::redis_key& option, int n)
 	return true;
 }
 
-static bool test_ttl(acl::redis_key& option, int n)
+static bool test_ttl(acl::redis& option, int n)
 {
 	acl::string key;
 	int ttl;
@@ -65,7 +65,7 @@ static bool test_ttl(acl::redis_key& option, int n)
 	return true;
 }
 
-static bool test_exists(acl::redis_key& option, int n)
+static bool test_exists(acl::redis& option, int n)
 {
 	acl::string key;
 
@@ -82,7 +82,7 @@ static bool test_exists(acl::redis_key& option, int n)
 	return true;
 }
 
-static bool test_type(acl::redis_key& option, int n)
+static bool test_type(acl::redis& option, int n)
 {
 	acl::string key;
 
@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
 
 	acl::acl_cpp_init();
 	acl::redis_client client(addr.c_str(), conn_timeout, rw_timeout);
-	acl::redis_key option(&client);
+	acl::redis option(&client);
 
 	bool ret;
 

@@ -23,7 +23,9 @@ typedef enum
 class ACL_CPP_API redis_key : virtual public redis_command
 {
 public:
-	redis_key(redis_client* conn = NULL);
+	redis_key();
+	redis_key(redis_client* conn);
+	redis_key(redis_cluster* cluster, size_t max_conns);
 	virtual ~redis_key();
 
 	/**
@@ -33,8 +35,8 @@ public:
 	 *  -1: 出错
 	 *  >0: 真正删除的 KEY 的个数，该值有可能少于输入的 KEY 的个数
 	 */
-	int del(const char* key);
-	int del(const char* key, size_t len);
+	int del_one(const char* key);
+	int del_one(const char* key, size_t len);
 	int del(const char* first_key, ...);
 	int del(const std::vector<string>& keys);
 	int del(const std::vector<const char*>& keys);
