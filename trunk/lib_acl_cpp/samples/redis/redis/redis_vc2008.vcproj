@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="redis"
-	ProjectGUID="{CCA2C901-6D42-4EA1-96CD-5D89489F939B}"
+	ProjectGUID="{01D0D367-9DEB-4E80-BFCD-66B43D55245D}"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
