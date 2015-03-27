@@ -13,15 +13,23 @@ namespace acl
 #define INT_LEN		11
 #define FLOAT_LEN	32
 
-redis_string::redis_string(redis_client* conn /* = NULL */)
+redis_string::redis_string()
+: redis_command(NULL)
+{
+}
+
+redis_string::redis_string(redis_client* conn)
 : redis_command(conn)
 {
+}
 
+redis_string::redis_string(redis_cluster* cluster, size_t max_conns)
+: redis_command(cluster, max_conns)
+{
 }
 
 redis_string::~redis_string()
 {
-
 }
 
 bool redis_string::set(const char* key, const char* value)

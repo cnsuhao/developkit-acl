@@ -1,5 +1,6 @@
 #pragma once
 #include "acl_cpp/acl_cpp_define.hpp"
+#include <map>
 #include "acl_cpp/redis/redis_result.hpp"
 
 namespace acl
@@ -8,6 +9,7 @@ namespace acl
 class redis_client;
 class redis_pool;
 class redis_cluster;
+class redis_request;
 
 /**
  * redis 客户端命令类的纯虚父类;

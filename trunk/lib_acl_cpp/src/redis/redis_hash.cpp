@@ -10,10 +10,19 @@ namespace acl
 #define INT64_LEN	21
 #define FLOAT_LEN	32
 
-redis_hash::redis_hash(redis_client* conn /* = NULL */)
+redis_hash::redis_hash()
+: redis_command(NULL)
+{
+}
+
+redis_hash::redis_hash(redis_client* conn)
 : redis_command(conn)
 {
+}
 
+redis_hash::redis_hash(redis_cluster* cluster, size_t max_conns)
+: redis_command(cluster, max_conns)
+{
 }
 
 redis_hash::~redis_hash()

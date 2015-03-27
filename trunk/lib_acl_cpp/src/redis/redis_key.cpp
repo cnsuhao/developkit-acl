@@ -11,25 +11,33 @@ namespace acl
 #define INT_LEN		11
 #define LONG_LEN	21
 
-redis_key::redis_key(redis_client* conn /* = NULL */)
+redis_key::redis_key()
+: redis_command(NULL)
+{
+}
+
+redis_key::redis_key(redis_client* conn)
 : redis_command(conn)
 {
+}
 
+redis_key::redis_key(redis_cluster* cluster, size_t max_conns)
+: redis_command(cluster, max_conns)
+{
 }
 
 redis_key::~redis_key()
 {
-
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-int redis_key::del(const char* key)
+int redis_key::del_one(const char* key)
 {
-	return del(key, strlen(key));
+	return del_one(key, strlen(key));
 }
 
-int redis_key::del(const char* key, size_t len)
+int redis_key::del_one(const char* key, size_t len)
 {
 	const char* argv[2];
 	size_t lens[2];

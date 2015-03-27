@@ -13,7 +13,9 @@ class redis_result;
 class ACL_CPP_API redis_server : virtual public redis_command
 {
 public:
-	redis_server(redis_client* conn = NULL);
+	redis_server();
+	redis_server(redis_client* conn);
+	redis_server(redis_cluster* cluster, size_t max_conns);
 	virtual ~redis_server();
 
 	/////////////////////////////////////////////////////////////////////
