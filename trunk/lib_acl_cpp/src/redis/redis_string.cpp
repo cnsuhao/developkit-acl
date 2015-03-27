@@ -598,11 +598,13 @@ bool redis_string::mset(const std::map<string, string>& objs)
 	return check_status();
 }
 
+#if 0
 bool redis_string::mset(const std::map<int, string>& objs)
 {
 	build("MSET", NULL, objs);
 	return check_status();
 }
+#endif
 
 bool redis_string::mset(const std::vector<string>& keys,
 	const std::vector<string>& values)
@@ -611,12 +613,14 @@ bool redis_string::mset(const std::vector<string>& keys,
 	return check_status();
 }
 
+#if 0
 bool redis_string::mset(const std::vector<int>& keys,
 	const std::vector<string>& values)
 {
 	build("MSET", NULL, keys, values);
 	return check_status();
 }
+#endif
 
 bool redis_string::mset(const char* keys[], const char* values[], size_t argc)
 {
@@ -639,11 +643,13 @@ int redis_string::msetnx(const std::map<string, string>& objs)
 	return get_number();
 }
 
+#if 0
 int redis_string::msetnx(const std::map<int, string>& objs)
 {
 	build("MSETNX", NULL, objs);
 	return get_number();
 }
+#endif
 
 int redis_string::msetnx(const std::vector<string>& keys,
 	const std::vector<string>& values)
@@ -652,12 +658,14 @@ int redis_string::msetnx(const std::vector<string>& keys,
 	return get_number();
 }
 
+#if 0
 int redis_string::msetnx(const std::vector<int>& keys,
 	const std::vector<string>& values)
 {
 	build("MSETNX", NULL, keys, values);
 	return get_number();
 }
+#endif
 
 int redis_string::msetnx(const char* keys[], const char* values[], size_t argc)
 {
@@ -688,12 +696,14 @@ bool redis_string::mget(const std::vector<const char*>& keys,
 	return get_strings(out) >= 0 ? true : false;
 }
 
+#if 0
 bool redis_string::mget(const std::vector<int>& keys,
 	std::vector<string>* out /* = NULL */)
 {
 	build("MGET", NULL, keys);
 	return get_strings(out) >= 0 ? true : false;
 }
+#endif
 
 bool redis_string::mget(std::vector<string>* out, const char* first_key, ...)
 {
@@ -717,12 +727,14 @@ bool redis_string::mget(const char* keys[], size_t argc,
 	return get_strings(out) >= 0 ? true : false;
 }
 
+#if 0
 bool redis_string::mget(const int keys[], size_t argc,
 	std::vector<string>* out /* = NULL */)
 {
 	build("MGET", NULL, keys, argc);
 	return get_strings(out) >= 0 ? true : false;
 }
+#endif
 
 bool redis_string::mget(const char* keys[], const size_t keys_len[],
 	size_t argc, std::vector<string>* out /* = NULL */)
