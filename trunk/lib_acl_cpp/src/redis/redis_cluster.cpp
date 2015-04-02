@@ -569,7 +569,7 @@ redis_node* redis_cluster::get_master_node(const redis_result* rr)
 	for (size_t i = 3; i < size; i++)
 	{
 		slave = create_node(children[i], slot_max, slot_min);
-		if (slot_min != NULL)
+		if (slave != NULL)
 			master->add_slave(slave);
 	}
 

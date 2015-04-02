@@ -1,4 +1,8 @@
 #include "acl_stdafx.hpp"
+#include <vector>
+#include "acl_cpp/redis/redis_cluster.hpp"
+#include "acl_cpp/redis/redis_node.hpp"
+#include "acl_cpp/redis/redis_client.hpp"
 #include "acl_cpp/redis/redis_client_pool.hpp"
 #include "acl_cpp/redis/redis_client_cluster.hpp"
 
@@ -109,6 +113,42 @@ void redis_client_cluster::set_slot(int slot, const char* addr)
 	}
 
 	unlock();
+}
+
+void redis_client_cluster::set_all_slot(const char* addr, int max_conns)
+{
+	redis_client client(addr, 30, 60, false);
+	redis_cluster cluster(&client);
+
+	const std::vector<redis_node*>* nodes = cluster.slots();
+	if (nodes == NULL)
+		return;
+
+	std::vector<redis_node*>::const_iterator cit;
+	for (cit = nodes->begin(); cit != nodes->end(); ++cit)
+	{
+		redis_node* node = *cit;
+		const char* ip = node->get_ip();
+		if (*ip == 0)
+			continue;
+		int port = node->get_port();
+		if (port <= 0)
+			continue;
+
+		size_t slot_min = node->get_slot_range_from();
+		size_t slot_max = node->get_slot_range_to();
+		if ((int) slot_max >= max_slot_ || slot_max < slot_min)
+			continue;
+		
+		char addr[128];
+		safe_snprintf(addr, sizeof(addr), "%s:%d", ip, port);
+		redis_client_pool* conns = (redis_client_pool*) get(addr);
+		if (conns == NULL)
+			set(addr, max_conns);
+
+		for (size_t i = slot_min; i <= slot_max; i++)
+			set_slot((int) i, addr);
+	}
 }
 
 } // namespace acl

@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="redis_client_cluster"
-	ProjectGUID="{34E75CAA-8883-4808-AC8A-FED139A49F11}"
+	ProjectGUID="{0C44CD71-0A6C-4132-B59A-8BB49F0C44F8}"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -412,6 +412,4 @@
 			>
 		</File>
 	</Files>
-	<Globals>
-	</Globals>
 </VisualStudioProject>

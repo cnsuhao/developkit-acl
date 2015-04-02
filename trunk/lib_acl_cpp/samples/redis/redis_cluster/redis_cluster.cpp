@@ -34,13 +34,33 @@ static bool test_slots(acl::redis_cluster& option)
 	return true;
 }
 
+static bool preset_all(const char* addr)
+{
+	int max_slot = 16384;
+	acl::redis_client_cluster cluster(10, 10, max_slot);
+	cluster.set_all_slot(addr, 100);
+
+	for (int i = 0; i < max_slot; i++)
+	{
+		acl::redis_client_pool* pool = cluster.peek_slot(i);
+		if (pool == NULL)
+		{
+			printf("null slot: %d\r\n", i);
+			return false;
+		}
+	}
+
+	printf("preset all slots ok\r\n");
+	return true;
+}
+
 static void usage(const char* procname)
 {
 	printf("usage: %s -h[help]\r\n"
 		"-s redis_addr[127.0.0.1:6379]\r\n"
 		"-C connect_timeout[default: 10]\r\n"
 		"-T rw_timeout[default: 10]\r\n"
-		"-a cmd[slots]\r\n",
+		"-a cmd[slots|preset]\r\n",
 		procname);
 }
 
@@ -81,6 +101,8 @@ int main(int argc, char* argv[])
 
 	if (cmd == "slots")
 		ret = test_slots(option);
+	else if (cmd == "preset")
+		ret = preset_all(addr.c_str());
 	else
 	{
 		ret = false;
