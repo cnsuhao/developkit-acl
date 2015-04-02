@@ -272,7 +272,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "redis_vc2010", "lib_acl_cpp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "redis_cluster_vc2010", "lib_acl_cpp\samples\redis\redis_cluster\redis_cluster_vc2010.vcxproj", "{560AD9F1-FDD5-4C89-9CCC-F4CF68FED05F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "redis_cluster2_vc2010", "lib_acl_cpp\samples\redis\redis_cluster2\redis_cluster2_vc2010.vcxproj", "{AD4762CE-510B-4D2C-9075-CCE7689286C4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "redis_client_cluster2_vc2010", "lib_acl_cpp\samples\redis\redis_client_cluster2\redis_client_cluster2_vc2010.vcxproj", "{AD4762CE-510B-4D2C-9075-CCE7689286C4}"
 	ProjectSection(ProjectDependencies) = postProject
 		{6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC} = {6EC1F44E-6A6A-48E9-B699-D7E89B63C8DC}
 		{B40213C2-507C-4C7F-A6E1-B850C9BDC27B} = {B40213C2-507C-4C7F-A6E1-B850C9BDC27B}
