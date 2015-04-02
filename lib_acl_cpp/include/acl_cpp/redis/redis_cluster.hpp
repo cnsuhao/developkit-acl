@@ -40,12 +40,12 @@ public:
 	 *  return true if success
 	 */
 	bool addslots(int first, ...);
-	bool addslots(const int slots[], size_t n);
-	bool addslots(const std::vector<int>& slosts);
+	bool addslots(const int slot_list[], size_t n);
+	bool addslots(const std::vector<int>& slot_list);
 
 	bool delslots(int first, ...);
-	bool delslots(const int slots[], size_t n);
-	bool delslots(const std::vector<int>& slosts);
+	bool delslots(const int slot_list[], size_t n);
+	bool delslots(const std::vector<int>& slot_list);
 
 	int getkeysinslot(size_t slot, size_t max, std::list<string>& result);
 

@@ -31,55 +31,55 @@ redis_cluster::~redis_cluster()
 
 bool redis_cluster::addslots(int first, ...)
 {
-	std::vector<int> slots;
+	std::vector<int> slot_list;
 	va_list ap;
 	va_start(ap, first);
 	int  n;
-	while ((n = va_arg(first, int)) >= 0)
-		slots.push_back(n);
+	while ((n = va_arg(ap, int)) >= 0)
+		slot_list.push_back(n);
 	va_end(ap);
 
-	if (slots.empty())
+	if (slot_list.empty())
 		return true;
-	return addslots(slots);
+	return addslots(slot_list);
 }
 
-bool redis_cluster::addslots(const int slots[], size_t n)
+bool redis_cluster::addslots(const int slot_list[], size_t n)
 {
-	build("CLUSTER", "ADDSLOTS", slots, n);
+	build("CLUSTER", "ADDSLOTS", slot_list, n);
 	return check_status();
 }
 
-bool redis_cluster::addslots(const std::vector<int>& slosts)
+bool redis_cluster::addslots(const std::vector<int>& slot_list)
 {
-	build("CLUSTER", "ADDSLOTS", slosts);
+	build("CLUSTER", "ADDSLOTS", slot_list);
 	return check_status();
 }
 
 bool redis_cluster::delslots(int first, ...)
 {
-	std::vector<int> slots;
+	std::vector<int> slot_list;
 	va_list ap;
 	va_start(ap, first);
 	int  n;
-	while ((n = va_arg(first, int)) >= 0)
-		slots.push_back(n);
+	while ((n = va_arg(ap, int)) >= 0)
+		slot_list.push_back(n);
 	va_end(ap);
 
-	if (slots.empty())
+	if (slot_list.empty())
 		return true;
-	return delslots(slots);
+	return delslots(slot_list);
 }
 
-bool redis_cluster::delslots(const int slots[], size_t n)
+bool redis_cluster::delslots(const int slot_list[], size_t n)
 {
-	build("CLUSTER", "DELSLOTS", slots, n);
+	build("CLUSTER", "DELSLOTS", slot_list, n);
 	return check_status();
 }
 
-bool redis_cluster::delslots(const std::vector<int>& slosts)
+bool redis_cluster::delslots(const std::vector<int>& slot_list)
 {
-	build("CLUSTER", "DELSLOTS", slosts);
+	build("CLUSTER", "DELSLOTS", slot_list);
 	return check_status();
 }
 

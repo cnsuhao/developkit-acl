@@ -8,8 +8,8 @@ static void print_slaves(const acl::redis_node* master)
 	{
 		printf("slave: ip: %s, port: %d, slot_min: %d, slot_max: %d\r\n",
 			(*cit)->get_ip(), (*cit)->get_port(),
-			(*cit)->get_slot_range_from(),
-			(*cit)->get_slot_range_to());
+			(int) (*cit)->get_slot_range_from(),
+			(int) (*cit)->get_slot_range_to());
 	}
 }
 
@@ -26,8 +26,8 @@ static bool test_slots(acl::redis_cluster& option)
 		printf("=========================================\r\n");
 		printf("master: ip: %s, port: %d, slot_min: %d, slot_max: %d\r\n",
 			(*cit)->get_ip(), (*cit)->get_port(),
-			(*cit)->get_slot_range_from(),
-			(*cit)->get_slot_range_to());
+			(int) (*cit)->get_slot_range_from(),
+			(int) (*cit)->get_slot_range_to());
 		print_slaves(*cit);
 	}
 

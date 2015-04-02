@@ -1,5 +1,6 @@
 #include "acl_stdafx.hpp"
 #include <vector>
+#include "acl_cpp/stdlib/snprintf.hpp"
 #include "acl_cpp/redis/redis_cluster.hpp"
 #include "acl_cpp/redis/redis_node.hpp"
 #include "acl_cpp/redis/redis_client.hpp"
@@ -140,14 +141,14 @@ void redis_client_cluster::set_all_slot(const char* addr, int max_conns)
 		if ((int) slot_max >= max_slot_ || slot_max < slot_min)
 			continue;
 		
-		char addr[128];
-		safe_snprintf(addr, sizeof(addr), "%s:%d", ip, port);
-		redis_client_pool* conns = (redis_client_pool*) get(addr);
+		char buf[128];
+		safe_snprintf(buf, sizeof(buf), "%s:%d", ip, port);
+		redis_client_pool* conns = (redis_client_pool*) get(buf);
 		if (conns == NULL)
-			set(addr, max_conns);
+			set(buf, max_conns);
 
 		for (size_t i = slot_min; i <= slot_max; i++)
-			set_slot((int) i, addr);
+			set_slot((int) i, buf);
 	}
 }
 

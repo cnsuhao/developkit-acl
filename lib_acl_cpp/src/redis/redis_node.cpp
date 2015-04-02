@@ -15,7 +15,9 @@ redis_node::redis_node(size_t slot_min, size_t slot_max,
 
 redis_node::~redis_node()
 {
-
+	std::vector<redis_node*>::iterator it;
+	for (it = slaves_.begin(); it != slaves_.end(); ++it)
+		delete *it;
 }
 
 redis_node& redis_node::add_slave(redis_node* node)
