@@ -229,6 +229,7 @@ static void usage(const char* procname)
 		"-c max_threads[default: 10]\r\n"
 		"-w wait_for_cluster_resume[default: 500 ms]\r\n"
 		"-r retry_for_cluster_resnum[default: 10]\r\n"
+		"-p [preset all hash-slots of the cluster]\r\n"
 		"-a cmd[set|get|expire|ttl|exists|type|del]\r\n",
 		procname);
 }
@@ -238,8 +239,9 @@ int main(int argc, char* argv[])
 	int  ch, n = 1, conn_timeout = 10, rw_timeout = 10;
 	int  max_threads = 10, nsleep = 500, nretry = 10;
 	acl::string addrs("127.0.0.1:6379"), cmd;
+	bool preset = false;
 
-	while ((ch = getopt(argc, argv, "hs:n:C:I:c:a:w:r:")) > 0)
+	while ((ch = getopt(argc, argv, "hs:n:C:I:c:a:w:r:p")) > 0)
 	{
 		switch (ch)
 		{
@@ -270,6 +272,9 @@ int main(int argc, char* argv[])
 		case 'r':
 			nretry = atoi(optarg);
 			break;
+		case 'p':
+			preset = true;
+			break;
 		default:
 			break;
 		}
@@ -291,6 +296,14 @@ int main(int argc, char* argv[])
 	cluster.set_redirect_sleep(nsleep);
 
 	cluster.init(NULL, addrs.c_str(), max_threads);
+
+	// 是否需要将所有哈希槽的对应关系提前设置好，这样可以去掉运行时动态添加
+	// 哈希槽的过程，从而可以提高运行时的效率
+	if (preset)
+	{
+		const std::vector<acl::string>& token = addrs.split2(",; \t");
+		cluster.set_all_slot(token[0], max_threads);
+	}
 
 	struct timeval begin;
 	gettimeofday(&begin, NULL);

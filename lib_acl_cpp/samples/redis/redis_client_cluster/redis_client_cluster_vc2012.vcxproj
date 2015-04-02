@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{814E8FCD-38B1-4CC2-A37D-A77A993D918D}</ProjectGuid>
+    <ProjectGuid>{E3280617-6D0D-4639-9014-31BCD4ADFADC}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <ProjectName>redis_client_cluster</ProjectName>
   </PropertyGroup>

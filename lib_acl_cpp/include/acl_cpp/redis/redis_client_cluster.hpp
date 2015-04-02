@@ -56,6 +56,17 @@ public:
 	void set_slot(int slot, const char* addr);
 
 	/**
+	 * 给定 redis 集群中的一个结点，自动发现所有的哈希槽对应的结点地址
+	 * according one node of the cluster, auto find all nodes with all
+	 * slots range
+	 * @param addr {const char*} 集群中的一个服务结点地址，格式 ip:port
+	 *  on server node's addr of the cluster, addr format is "ip:port"
+	 * @param max_conns {int} 集群中与每个结点所建连接池的最大连接限制
+	 *  the max connections limit for each connection pool
+	 */
+	void set_all_slot(const char* addr, int max_conns);
+
+	/**
 	 * 动态清除哈希槽对应的 redis 服务地址，以便于重新计算位置，内部有线程锁保护机制;
 	 * dynamicly remove one slot and redis-server addr mapping, which is
 	 * protected by thread mutex
