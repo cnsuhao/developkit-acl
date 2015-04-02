@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="redis_cluster2"
+	Name="redis_client_cluster2"
 	ProjectGUID="{9A0B9C5B-484E-4C8B-9793-DDA4A33B07FA}"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
@@ -63,11 +63,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib"
-				OutputFile="$(OutDir)/redis_cluster2.exe"
+				OutputFile="$(OutDir)/redis_client_cluster2.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\..\..\lib\win32;..\..\..\..\dist\lib\win32"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/redis_cluster2.pdb"
+				ProgramDatabaseFile="$(OutDir)/redis_client_cluster2.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -140,7 +140,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib wsock32.lib"
-				OutputFile="$(OutDir)/redis_cluster2.exe"
+				OutputFile="$(OutDir)/redis_client_cluster2.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\..\lib\win32;..\..\..\..\dist\lib\win32"
 				GenerateDebugInformation="true"
@@ -221,11 +221,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib"
-				OutputFile="$(OutDir)/redis_cluster2.exe"
+				OutputFile="$(OutDir)/redis_client_cluster2.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\..\..\lib\win32"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/redis_cluster2.pdb"
+				ProgramDatabaseFile="$(OutDir)/redis_client_cluster2.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -301,11 +301,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib"
-				OutputFile="$(OutDir)/redis_cluster2.exe"
+				OutputFile="$(OutDir)/redis_client_cluster2.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\..\..\lib\win32"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/redis_cluster2.pdb"
+				ProgramDatabaseFile="$(OutDir)/redis_client_cluster2.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -343,7 +343,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\redis_cluster2.cpp"
+				RelativePath=".\redis_client_cluster2.cpp"
 				>
 			</File>
 			<File
