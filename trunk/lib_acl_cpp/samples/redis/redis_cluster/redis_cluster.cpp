@@ -134,7 +134,7 @@ static int __threads_exit = 0;
 class test_thread : public acl::thread
 {
 public:
-	test_thread(acl::locker& locker, acl::redis_cluster& cluster,
+	test_thread(acl::locker& locker, acl::redis_client_cluster& cluster,
 		int max_conns, const char* cmd, int n)
 	: locker_(locker)
 	, cluster_(cluster)
@@ -215,7 +215,7 @@ protected:
 
 private:
 	acl::locker& locker_;
-	acl::redis_cluster& cluster_;
+	acl::redis_client_cluster& cluster_;
 	int max_conns_;
 	acl::string cmd_;
 	int n_;
@@ -280,7 +280,7 @@ int main(int argc, char* argv[])
 	acl::acl_cpp_init();
 	acl::log::stdout_open(true);
 
-	acl::redis_cluster cluster(conn_timeout, rw_timeout);
+	acl::redis_client_cluster cluster(conn_timeout, rw_timeout);
 
 	// 当某个连接池结点出问题，设置探测该连接结点是否恢复的时间间隔(秒)，当该值
 	// 为 0 时，则不检测

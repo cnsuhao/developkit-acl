@@ -11,7 +11,7 @@ namespace acl
  * redis connection pool inherting from connect_pool, which includes
  * TCP connection pool methods.
  */
-class ACL_CPP_API redis_pool : public connect_pool
+class ACL_CPP_API redis_client_pool : public connect_pool
 {
 public:
 	/**
@@ -20,17 +20,17 @@ public:
 	 * @param count {int} 连接池的最大连接数限制
 	 * @param idx {size_t} 该连接池对象在集合中的下标位置(从 0 开始)
 	 */
-	redis_pool(const char* addr, int count, size_t idx = 0);
+	redis_client_pool(const char* addr, int count, size_t idx = 0);
 
-	virtual ~redis_pool();
+	virtual ~redis_client_pool();
 
 	/**
 	 * 设置网络连接超时时间及网络 IO 读写超时时间(秒)
 	 * @param conn_timeout {int} 连接超时时间
 	 * @param rw_timeout {int} 网络 IO 读写超时时间(秒)
-	 * @return {redis_pool&}
+	 * @return {redis_client_pool&}
 	 */
-	redis_pool& set_timeout(int conn_timeout, int rw_timeout);
+	redis_client_pool& set_timeout(int conn_timeout, int rw_timeout);
 
 protected:
 	/**
