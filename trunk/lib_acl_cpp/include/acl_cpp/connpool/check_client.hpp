@@ -14,7 +14,7 @@ class aio_socket_stream;
 /**
  * 异步连接回调函数处理类
  */
-class check_client : public aio_open_callback
+class ACL_CPP_API check_client : public aio_open_callback
 {
 public:
 	check_client(check_timer& timer, const char* addr,

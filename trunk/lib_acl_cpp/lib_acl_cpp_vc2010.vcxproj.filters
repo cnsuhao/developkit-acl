@@ -451,6 +451,9 @@
     <ClCompile Include="src\connpool\check_timer.cpp">
       <Filter>src\connpool</Filter>
     </ClCompile>
+    <ClCompile Include="src\connpool\check_rpc.cpp">
+      <Filter>src\connpool</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\acl_stdafx.hpp">
@@ -922,6 +925,9 @@
       <Filter>include\connpool</Filter>
     </ClInclude>
     <ClInclude Include="src\connpool\check_timer.hpp">
+      <Filter>src\connpool</Filter>
+    </ClInclude>
+    <ClInclude Include="src\connpool\check_rpc.hpp">
       <Filter>src\connpool</Filter>
     </ClInclude>
   </ItemGroup>
