@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "connect_manager.h"
+#include "mymonitor.h"
 #include "connect_pool.h"
 #include "connect_client.h"
 
@@ -40,8 +41,10 @@ static void init(const char* addrs, int count)
 
 	// 启动后台检测线程
 	int  check_inter = 1, conn_timeout = 5;
-	__conn_manager->start_monitor(check_inter, conn_timeout);
 
+	acl::connect_monitor* monitor = new mymonitor(
+		*__conn_manager, check_inter, conn_timeout);
+	(void) __conn_manager->start_monitor(monitor);
 
 	int   n = 10;
 	printf(">>>sleep %d seconds for monitor check\r\n", n);
@@ -65,8 +68,20 @@ static void end(void)
 
 	printf("\r\n>>> STOPPING check thread now\r\n");
 
+#if 0
+	int i = 0;
+	while (i++ < 10)
+	{
+		sleep(1);
+		printf("----------- sleep %d seconds -----------\r\n", i);
+	}
+#endif
+
 	// 停止后台检测线程
-	__conn_manager->stop_monitor(true);
+	acl::connect_monitor* monitor = __conn_manager->stop_monitor(true);
+
+	// 删除检测器对象
+	delete monitor;
 
 	// 销毁连接池
 	delete __conn_manager;
@@ -91,7 +106,7 @@ static void thread_main(void*)
 			printf("\r\n>>>%lu(%d): peek pool failed<<<\r\n",
 				(unsigned long) acl_pthread_self(), __LINE__);
 			check_all_connections();
-			exit (1);
+			break;
 		}
 
 		// 设置连接的超时时间及读超时时间
@@ -105,7 +120,7 @@ static void thread_main(void*)
 				(unsigned long) acl_pthread_self(),
 				pool->get_addr());
 			check_all_connections();
-			exit (1);
+			break;
 		}
 
 		// 需要对获得的连接重置状态，以清除上次请求过程的临时数据
