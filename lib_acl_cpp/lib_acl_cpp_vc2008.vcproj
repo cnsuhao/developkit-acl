@@ -374,6 +374,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\src\connpool\check_rpc.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\connpool\check_rpc.hpp"
+					>
+				</File>
+				<File
 					RelativePath=".\src\connpool\check_timer.cpp"
 					>
 				</File>

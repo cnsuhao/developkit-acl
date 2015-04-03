@@ -1,9 +1,8 @@
 #include "stdafx.h"
 #include "mymonitor.h"
 
-mymonitor::mymonitor(acl::connect_manager& manager,
-	int check_inter, int conn_timeout)
-	: acl::connect_monitor(manager, check_inter, conn_timeout)
+mymonitor::mymonitor(acl::connect_manager& manager)
+: acl::connect_monitor(manager)
 {
 }
 
@@ -11,10 +10,34 @@ mymonitor::~mymonitor(void)
 {
 }
 
-bool mymonitor::on_open(acl::check_client& checker)
+void mymonitor::sio_check(acl::check_client& checker,
+	acl::socket_stream& conn)
+{
+	acl::string buf;
+	if (conn.gets(buf) == false)
+	{
+		checker.set_alive(false);
+		return;
+	}
+
+	printf(">>>get: %s, len: %d\r\n", buf.c_str(), (int) buf.length());
+
+	if (strncasecmp(buf.c_str(), "+OK", 3) == 0)
+	{
+		printf(">>> SERVER(%s) OK <<<\r\n", checker.get_addr());
+		checker.set_alive(true);
+	}
+	else
+	{
+		printf(">>> SERVER(%s) ERROR <<<\r\n", checker.get_addr());
+		checker.set_alive(false);
+	}
+}
+
+void mymonitor::nio_check(acl::check_client& checker,
+	acl::aio_socket_stream& conn)
 {
 	checker_ = &checker;
-	acl::aio_socket_stream& conn = checker_->get_conn();
 
 	// 注册非阻塞 IO 处理过程的回调过程
 	conn.add_close_callback(this);
@@ -26,9 +49,6 @@ bool mymonitor::on_open(acl::check_client& checker)
 	// 异步读取一行数据，同时要求不保留 \r\n
 
 	conn.gets(timeout);
-
-	// 返回 true 表示该检测过程继续
-	return true;
 }
 
 bool mymonitor::read_callback(char* data, int len)

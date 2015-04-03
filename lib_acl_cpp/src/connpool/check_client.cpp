@@ -48,7 +48,8 @@ void check_client::close()
 bool check_client::open_callback()
 {
 	set_alive(true);
-	return timer_.get_monitor().on_open(*this);
+	timer_.get_monitor().on_open(*this);
+	return true;
 }
 
 void check_client::close_callback()
