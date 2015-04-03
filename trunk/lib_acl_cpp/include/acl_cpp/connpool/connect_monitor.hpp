@@ -8,14 +8,22 @@ namespace acl
 {
 
 class aio_handle;
+class check_client;
 class connect_manager;
 
 class connect_monitor : public thread
 {
 public:
+	/**
+	 * 构造函数
+	 * @param manager {connect_manager&}
+	 * @param check_inter {int} 检测的时间间隔(秒)
+	 * @param conn_timeout {int} 连接服务器的超时时间(秒)
+	 */
 	connect_monitor(connect_manager& manager,
 		int check_inter = 1, int conn_timeout = 10);
-	~connect_monitor();
+
+	virtual ~connect_monitor();
 
 	/**
 	 * 停止线程
@@ -26,6 +34,28 @@ public:
 	 *  连接池集群管理对象在运行过程中需要被多次创建与释放，则应该设为 true
 	 */
 	void stop(bool graceful);
+
+	/**
+	 * 获得 connect_manager 引用对象
+	 * @return {connect_manager&}
+	 */
+	connect_manager& get_manager() const
+	{
+		return manager_;
+	}
+
+	/**
+	 * 虚函数，子类可以重载本函数用来进一步判断该连接是否是存活的
+	 * @param checker {check_client&} 服务端连接的检查对象，可以通过
+	 *  check_client 类中的方法如下：
+	 *  1) get_conn 获得非阻塞连接句柄
+	 *  2) get_addr 获得服务端地址
+	 *  3) set_alive 设置连接是否存活
+	 *  4) close 关闭连接
+	 * @return {bool} 返回 true 表示子类还需要进一步进行检测，返回 false 则
+	 *  表明子类已经检测完毕
+	 */
+	virtual bool on_open(check_client& checker);
 
 protected:
 	// 基类纯虚函数
