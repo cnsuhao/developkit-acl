@@ -94,7 +94,7 @@ void connect_monitor::on_open(check_client& checker)
 	}
 }
 
-void connect_monitor::nio_check(check_client& checker, aio_socket_stream& conn)
+void connect_monitor::nio_check(check_client& checker, aio_socket_stream&)
 {
 	// 设置状态表明该连接是存活的
 	checker.set_alive(true);
