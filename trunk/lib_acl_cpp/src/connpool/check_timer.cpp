@@ -30,7 +30,8 @@ void check_timer::timer_callback(unsigned int id)
 
 	connect_manager& manager = monitor_.get_manager();
 
-	// 先提取所有服务器地址
+	// 先提取所有服务器地址，因为要操作的对象处于多线程环境中，
+	// 所以需要进行互斥锁保护
 	manager.lock();
 
 	const std::vector<connect_pool*>& pools = manager.get_pools();
@@ -85,12 +86,12 @@ void check_timer::timer_callback(unsigned int id)
 			conn->add_open_callback(checker);
 			conn->add_close_callback(checker);
 			conn->add_timeout_callback(checker);
-			conns_.push_back(conn);
+			checkers_.push_back(checker);
 		}
 	}
 }
 
-void check_timer::remove_client(const char* addr, aio_socket_stream& conn)
+void check_timer::remove_client(const char* addr, check_client* checker)
 {
 	// 从当前检查服务器地址列表中删除当前的检测地址
 	std::map<string, int>::iterator it1 = addrs_.find(addr);
@@ -98,12 +99,12 @@ void check_timer::remove_client(const char* addr, aio_socket_stream& conn)
 		addrs_.erase(it1);
 
 	// 从检测连接集群中删除本连接对象
-	for (std::vector<aio_socket_stream*>::iterator it2 = conns_.begin();
-		it2 != conns_.end(); ++it2)
+	for (std::vector<check_client*>::iterator it2 = checkers_.begin();
+		it2 != checkers_.end(); ++it2)
 	{
-		if ((*it2) == &conn)
+		if ((*it2) == checker)
 		{
-			conns_.erase(it2);
+			checkers_.erase(it2);
 			break;
 		}
 	}
@@ -111,7 +112,7 @@ void check_timer::remove_client(const char* addr, aio_socket_stream& conn)
 
 bool check_timer::finish(bool graceful)
 {
-	if (!graceful || conns_.empty())
+	if (!graceful || checkers_.empty())
 		return true;
 
 	// 需要等待所有检测连接关闭
@@ -123,12 +124,14 @@ bool check_timer::finish(bool graceful)
 		keep_timer(false);
 	}
 
-	// 遍历当前所有正在检测的连接，异步关闭之
+	// 遍历当前所有正在检测的处于非阻塞状态的连接检测对象，异步关闭之
 
-	for (std::vector<aio_socket_stream*>::iterator it = conns_.begin();
-		it != conns_.end(); ++it)
+	for (std::vector<check_client*>::iterator it = checkers_.begin();
+		it != checkers_.end(); ++it)
 	{
-		(*it)->close();
+		// 在阻塞检测方式如果该检测对象处于阻塞状态，则不能直接关闭
+		if (!(*it)->blocked())
+			(*it)->close();
 	}
 
 	return false;

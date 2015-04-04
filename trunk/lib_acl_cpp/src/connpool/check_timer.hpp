@@ -11,6 +11,7 @@ namespace acl
 class connect_monitor;
 class aio_handle;
 class aio_socket_stream;
+class check_client;
 
 class check_timer : public aio_timer_callback
 {
@@ -24,7 +25,7 @@ public:
 		return monitor_;
 	}
 
-	void remove_client(const char* addr, aio_socket_stream& conn);
+	void remove_client(const char* addr, check_client* checker);
 	bool finish(bool graceful);
 
 protected:
@@ -39,7 +40,7 @@ private:
 	aio_handle& handle_;
 	int   conn_timeout_;
 	std::map<string, int> addrs_;
-	std::vector<aio_socket_stream*> conns_;
+	std::vector<check_client*> checkers_;
 };
 
 } // namespace acl

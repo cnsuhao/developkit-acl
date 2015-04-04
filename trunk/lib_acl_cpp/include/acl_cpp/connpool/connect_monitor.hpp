@@ -70,12 +70,6 @@ public:
 	}
 
 	/**
-	 * 当与服务端建立连接后调用此函数
-	 * @param checker {check_client&}
-	 */
-	void on_open(check_client& checker);
-
-	/**
 	 * 虚函数，子类可以重载本函数用来进一步判断该连接是否是存活的，该回调函数的运行
 	 * 空间为当前非阻塞检测线程的运行空间，因此在该回调函数中不得有阻塞过程，否则将
 	 * 会阻塞整个非阻塞检测线程
@@ -100,6 +94,14 @@ public:
 	 *  2) close 关闭连接
 	 */
 	virtual void sio_check(check_client& checker, socket_stream& conn);
+
+public:
+	// 虽然下面的函数是 public 的，但只供内部使用
+	/**
+	 * 当与服务端建立连接后调用此函数
+	 * @param checker {check_client&}
+	 */
+	void on_open(check_client& checker);
 
 protected:
 	// 基类纯虚函数

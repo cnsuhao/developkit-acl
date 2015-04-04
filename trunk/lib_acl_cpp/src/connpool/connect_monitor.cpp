@@ -69,13 +69,14 @@ void* connect_monitor::run()
 	while (!stop_)
 		handle_.check();
 
-	// 如果 rpc_service_ 对象非空则删除之
-	delete rpc_service_;
-
 	// 等待定时器结束
 	while (!timer.finish(stop_graceful_))
 		handle_.check();
 
+	// 如果 rpc_service_ 对象非空则删除之
+	delete rpc_service_;
+
+	// 最后再检测一次，以尽量释放可能存在的异步对象
 	handle_.check();
 
 	return NULL;
@@ -85,10 +86,16 @@ void connect_monitor::on_open(check_client& checker)
 {
 	// 如果未设置 rpc 服务对象，则采用异步 IO 检测过程
 	if (rpc_service_ == NULL)
+	{
+		checker.set_blocked(false);
 		nio_check(checker, checker.get_conn());
+	}
 	else
 	{
-		// 创建 rpc 请求对象，将其放入线程池中运行，采用阻塞 IO 检测过程
+		// 设置检测对象为阻塞模式
+		checker.set_blocked(true);
+
+		// 创建 rpc 请求对象，将其放入线程池中运行，采用阻塞 IO 过程
 		check_rpc* req = new check_rpc(*this, checker);
 		rpc_service_->rpc_fork(req);
 	}

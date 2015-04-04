@@ -27,7 +27,8 @@ static double stamp_sub(const struct timeval& from, const struct timeval& sub)
 
 check_client::check_client(check_timer& timer, const char* addr,
 	aio_socket_stream& conn, struct timeval& begin)
-: aliving_(false)
+: blocked_(true)
+, aliving_(false)
 , timer_(timer)
 , conn_(conn)
 , addr_(addr)
@@ -38,6 +39,11 @@ check_client::check_client(check_timer& timer, const char* addr,
 void check_client::set_alive(bool yesno)
 {
 	aliving_ = yesno;
+}
+
+void check_client::set_blocked(bool on)
+{
+	blocked_ = on;
 }
 
 void check_client::close()
@@ -65,8 +71,10 @@ void check_client::close_callback()
 	//	logger("server: %s alive, spent: %.2f ms",
 	//		addr_.c_str(), spent);
 
+	// 放在此处的好处是保证了当前流肯定处于关闭过程中，同时将本检测对象
+	// 从 timer_ 中删除以减少 timer_ 中检测对象的个数
 	timer_.get_monitor().get_manager().set_pools_status(addr_, aliving_);
-	timer_.remove_client(addr_, conn_);
+	timer_.remove_client(addr_, this);
 
 	delete this;
 }
