@@ -29,7 +29,8 @@ static void check_all_connections(void)
 }
 
 // 初始化过程
-static void init(const char* addrs, int count, bool sync_check)
+static void init(const char* addrs, int count,
+	bool sync_check, const acl::string& proto)
 {
 	// 创建 HTTP 请求连接池集群管理对象
 	__conn_manager = new connect_manager();
@@ -42,7 +43,7 @@ static void init(const char* addrs, int count, bool sync_check)
 	// 启动后台检测线程
 	int  check_inter = 1, conn_timeout = 5;
 
-	acl::connect_monitor* monitor = new mymonitor(*__conn_manager);
+	acl::connect_monitor* monitor = new mymonitor(*__conn_manager, proto);
 	monitor->set_check_inter(check_inter);
 	monitor->set_conn_timeout(conn_timeout);
 	if (sync_check)
@@ -157,6 +158,7 @@ static void usage(const char* procname)
 		"	-s server_addrs [www.sina.com.cn:80;www.263.net:80;www.qq.com:80]\r\n"
 		"	-c cocurrent [default: 10]\r\n"
 		"	-S [sync check io]\r\n"
+		"	-P protocol [http|pop3]\r\n"
 		"	-n loop_count[default: 10]\r\n", procname);
 }
 
@@ -165,6 +167,7 @@ int main(int argc, char* argv[])
 	int   ch, cocurrent = 10;
 	bool  sync_check = false;
 	acl::string addrs("www.sina.com.cn:80;www.263.net:80;www.qq.com:81");
+	acl::string proto("pop3");
 
 	// 初始化 acl 库
 	acl::acl_cpp_init();
@@ -172,7 +175,7 @@ int main(int argc, char* argv[])
 	// 日志输出至标准输出
 	acl::log::stdout_open(true);
 
-	while ((ch = getopt(argc, argv, "hs:n:c:S")) > 0)
+	while ((ch = getopt(argc, argv, "hs:n:c:SP:")) > 0)
 	{
 		switch (ch)
 		{
@@ -191,13 +194,16 @@ int main(int argc, char* argv[])
 		case 'S':
 			sync_check = true;
 			break;
+		case 'P':
+			proto = optarg;
+			break;
 		default:
 			usage(argv[0]);
 			return 0;
 		}
 	}
 
-	init(addrs, cocurrent, sync_check);
+	init(addrs, cocurrent, sync_check, proto);
 	run(cocurrent);
 	end();
 

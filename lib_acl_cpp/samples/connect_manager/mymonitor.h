@@ -3,7 +3,7 @@
 class mymonitor : public acl::connect_monitor, public acl::aio_callback
 {
 public:
-	mymonitor(acl::connect_manager& manager);
+	mymonitor(acl::connect_manager& manager, const acl::string& proto);
 	~mymonitor(void);
 
 protected:
@@ -56,4 +56,8 @@ protected:
 
 private:
 	acl::check_client* checker_;
+	acl::string proto_;
+
+	void sio_check_pop3(acl::check_client& checker, acl::socket_stream& conn);
+	void sio_check_http(acl::check_client& checker, acl::socket_stream& conn);
 };

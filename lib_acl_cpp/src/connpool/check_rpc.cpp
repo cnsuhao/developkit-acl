@@ -48,6 +48,9 @@ void check_rpc::rpc_run()
 
 void check_rpc::rpc_onover()
 {
+	// 取消该检测对象的阻塞状态
+	checker_.set_blocked(false);
+
 	// 异步关闭检测对象
 	checker_.close();
 
