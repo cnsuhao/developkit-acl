@@ -55,7 +55,7 @@ void mymonitor::sio_check_pop3(acl::check_client& checker,
 void mymonitor::sio_check_http(acl::check_client& checker,
 	acl::socket_stream& conn)
 {
-	acl::http_request req(&conn, 60);
+	acl::http_request req(&conn, 60, false);
 	acl::http_header& hdr = req.request_header();
 
 	acl::string ctype("text/plain; charset=gbk");

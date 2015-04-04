@@ -105,7 +105,8 @@
 # define	ACL_SOCKET	SOCKET
 # define	ACL_FILEFD	unsigned int
 # ifndef	HAS_SOCKLEN_T
-typedef 	socklen_t	int
+#  define	HAS_SOCKLEN_T
+typedef int socklen_t;
 # endif
 # define	ACL_SOCKET_INVALID	INVALID_SOCKET
 # define	ACL_FILE_HANDLE		HANDLE
@@ -113,7 +114,8 @@ typedef 	socklen_t	int
 # define	ACL_DLL_HANDLE		HINSTANCE
 # define	ACL_DLL_FARPROC		FARPROC
 # ifndef	HAS_SSIZE_T
-typedef		ssize_t		long
+#  define	HAS_SSIZE_T
+typedef long ssize_t;
 # endif
 
 # define ACL_INTERNAL_LOCK	ACL_FLOCK_STYLE_FLOCK
