@@ -1,5 +1,7 @@
 #include "acl_stdafx.hpp"
 #include "acl_cpp/stdlib/snprintf.hpp"
+#include "acl_cpp/redis/redis_node.hpp"
+#include "acl_cpp/redis/redis_slot.hpp"
 #include "acl_cpp/redis/redis_cluster.hpp"
 
 
@@ -26,7 +28,8 @@ redis_cluster::redis_cluster(redis_client_cluster* cluster, size_t max_conns)
 
 redis_cluster::~redis_cluster()
 {
-	free_nodes();
+	free_slots();
+	free_masters();
 }
 
 bool redis_cluster::addslots(int first, ...)
@@ -369,21 +372,6 @@ bool redis_cluster::info(string& result)
 	return get_string(result) > 0 ? true : false;
 }
 
-bool redis_cluster::nodes(string& result)
-{
-	const char* argv[2];
-	size_t lens[2];
-
-	argv[0] = "CLUSTER";
-	lens[0] = sizeof("CLUSTER") - 1;
-
-	argv[1] = "NODES";
-	lens[1] = sizeof("NODES") - 1;
-
-	build_request(2, argv, lens);
-	return get_string(result) > 0 ? true : false;
-}
-
 bool redis_cluster::saveconfig()
 {
 	const char* argv[2];
@@ -397,24 +385,6 @@ bool redis_cluster::saveconfig()
 
 	build_request(2, argv, lens);
 	return check_status();
-}
-
-bool redis_cluster::slaves(const char* node, std::vector<string>& result)
-{
-	const char* argv[3];
-	size_t lens[3];
-
-	argv[0] = "CLUSTER";
-	lens[0] = sizeof("CLUSTER") - 1;
-
-	argv[1] = "SLAVES";
-	lens[1] = sizeof("SLAVES") - 1;
-
-	argv[2] = node;
-	lens[2] = strlen(node);
-
-	build_request(3, argv, lens);
-	return get_strings(result) >= 0 ? true : false;
 }
 
 int redis_cluster::countkeysinslot(size_t slot)
@@ -509,9 +479,11 @@ bool redis_cluster::set_config_epoch(const char* epoch)
 	return check_status();
 }
 
-const std::vector<redis_node*>* redis_cluster::slots()
+//////////////////////////////////////////////////////////////////////////
+
+const std::vector<const redis_slot*>* redis_cluster::slots()
 {
-	free_nodes();
+	free_slots();
 
 	const char* argv[2];
 	size_t lens[2];
@@ -523,29 +495,29 @@ const std::vector<redis_node*>* redis_cluster::slots()
 	lens[1] = sizeof("SLOTS") - 1;
 
 	build_request(2, argv, lens);
-	const redis_result* result = run();
-	if (result == NULL || result->get_type() != REDIS_RESULT_ARRAY)
+	const redis_result* rr = run();
+	if (rr == NULL || rr->get_type() != REDIS_RESULT_ARRAY)
 		return NULL;
 
 	size_t size;
-	const redis_result** children = result->get_children(&size);
+	const redis_result** children = rr->get_children(&size);
 	if (children == NULL)
 		return NULL;
 
 	for (size_t i = 0; i < size; i++)
 	{
-		const redis_result* rr = children[i];
-		if (rr == NULL || rr->get_type() != REDIS_RESULT_ARRAY)
+		const redis_result* rr2 = children[i];
+		if (rr2 == NULL || rr2->get_type() != REDIS_RESULT_ARRAY)
 			continue;
-		redis_node* node = get_master_node(rr);
-		if (node != NULL)
-			nodes_.push_back(node);
+		redis_slot* master = get_slot_master(rr2);
+		if (master != NULL)
+			slots_.push_back(master);
 	}
 
-	return &nodes_;
+	return &slots_;
 }
 
-redis_node* redis_cluster::get_master_node(const redis_result* rr)
+redis_slot* redis_cluster::get_slot_master(const redis_result* rr)
 {
 	size_t size;
 	const redis_result** children = rr->get_children(&size);
@@ -561,14 +533,13 @@ redis_node* redis_cluster::get_master_node(const redis_result* rr)
 	if (slot_max < slot_min)
 		return NULL;
 
-	redis_node* master = create_node(children[2], slot_max, slot_min);
+	redis_slot* master = get_slot(children[2], slot_max, slot_min);
 	if (master == NULL)
 		return NULL;
 
-	redis_node* slave;
 	for (size_t i = 3; i < size; i++)
 	{
-		slave = create_node(children[i], slot_max, slot_min);
+		redis_slot* slave = get_slot(children[i], slot_max, slot_min);
 		if (slave != NULL)
 			master->add_slave(slave);
 	}
@@ -576,7 +547,7 @@ redis_node* redis_cluster::get_master_node(const redis_result* rr)
 	return master;
 }
 
-redis_node* redis_cluster::create_node(const redis_result* rr,
+redis_slot* redis_cluster::get_slot(const redis_result* rr,
 	size_t slot_max, size_t slot_min)
 {
 	if (rr == NULL)
@@ -595,16 +566,63 @@ redis_node* redis_cluster::create_node(const redis_result* rr,
 	if (port <= 0)
 		return NULL;
 
-	redis_node* node = NEW redis_node(slot_min, slot_max, ip, port);
-	return node;
+	redis_slot* slot = NEW redis_slot(slot_min, slot_max, ip, port);
+	return slot;
 }
 
-void redis_cluster::free_nodes()
+void redis_cluster::free_slots()
 {
-	std::vector<redis_node*>::iterator it;
-	for (it = nodes_.begin(); it != nodes_.end(); ++it)
+	std::vector<const redis_slot*>::iterator it;
+	for (it = slots_.begin(); it != slots_.end(); ++it)
 		delete *it;
-	nodes_.clear();
+	slots_.clear();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+bool redis_cluster::slaves(const char* node, std::vector<string>& result)
+{
+	const char* argv[3];
+	size_t lens[3];
+
+	argv[0] = "CLUSTER";
+	lens[0] = sizeof("CLUSTER") - 1;
+
+	argv[1] = "SLAVES";
+	lens[1] = sizeof("SLAVES") - 1;
+
+	argv[2] = node;
+	lens[2] = strlen(node);
+
+	build_request(3, argv, lens);
+	return get_strings(result) >= 0 ? true : false;
+}
+
+const std::vector<const redis_node*>* redis_cluster::nodes()
+{
+	free_masters();
+
+	const char* argv[2];
+	size_t lens[2];
+
+	argv[0] = "CLUSTER";
+	lens[0] = sizeof("CLUSTER") - 1;
+
+	argv[1] = "NODES";
+	lens[1] = sizeof("NODES") - 1;
+
+	build_request(2, argv, lens);
+
+	string buf;
+	if (get_string(buf) <= 0)
+		return NULL;
+
+	return &masters_;
+}
+
+void redis_cluster::free_masters()
+{
+
 }
 
 } // namespace acl
