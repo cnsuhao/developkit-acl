@@ -1,4 +1,5 @@
 #include "acl_stdafx.hpp"
+#include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/redis/redis_node.hpp"
 
 namespace acl
@@ -50,7 +51,7 @@ bool redis_node::add_slave(const redis_node* slave)
 		if (*cit == slave)
 		{
 			logger_warn("slave exists, id: %s, addr: %s",
-				(*cit)->get_id(), (*cit)->get_id());
+				(*cit)->get_id(), (*cit)->get_addr());
 			return false;
 		}
 	}
@@ -61,13 +62,13 @@ bool redis_node::add_slave(const redis_node* slave)
 
 const redis_node* redis_node::remove_slave(const char* id)
 {
-	std::vector<const redis_node*>::const_iterator cit;
-	for (cit = slaves_.begin(); cit != slaves_.end(); ++cit)
+	std::vector<const redis_node*>::iterator it;
+	for (it = slaves_.begin(); it != slaves_.end(); ++it)
 	{
-		if (strcmp((*cit)->get_id(), id) == 0)
+		if (strcmp((*it)->get_id(), id) == 0)
 		{
-			slaves_.erase(cit);
-			return *cit;
+			slaves_.erase(it);
+			return *it;
 		}
 	}
 
