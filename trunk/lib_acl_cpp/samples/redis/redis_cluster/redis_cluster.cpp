@@ -1,33 +1,33 @@
 #include "stdafx.h"
 
-static void print_slaves(const acl::redis_node* master)
+static void print_slaves(const acl::redis_slot* master)
 {
-	const std::vector<acl::redis_node*>& slaves = master->get_slaves();
-	std::vector<acl::redis_node*>::const_iterator cit;
+	const std::vector<const acl::redis_slot*>& slaves = master->get_slaves();
+	std::vector<const acl::redis_slot*>::const_iterator cit;
 	for (cit = slaves.begin(); cit != slaves.end(); ++cit)
 	{
 		printf("slave: ip: %s, port: %d, slot_min: %d, slot_max: %d\r\n",
 			(*cit)->get_ip(), (*cit)->get_port(),
-			(int) (*cit)->get_slot_range_from(),
-			(int) (*cit)->get_slot_range_to());
+			(int) (*cit)->get_slot_min(),
+			(int) (*cit)->get_slot_max());
 	}
 }
 
 static bool test_slots(acl::redis_cluster& option)
 {
-	const std::vector<acl::redis_node*>* nodes = option.slots();
+	const std::vector<const acl::redis_slot*>* nodes = option.slots();
 	if (nodes == NULL)
 		return false;
 
-	std::vector<acl::redis_node*>::const_iterator cit;
+	std::vector<const acl::redis_slot*>::const_iterator cit;
 
 	for (cit = nodes->begin(); cit != nodes->end(); ++cit)
 	{
 		printf("=========================================\r\n");
 		printf("master: ip: %s, port: %d, slot_min: %d, slot_max: %d\r\n",
 			(*cit)->get_ip(), (*cit)->get_port(),
-			(int) (*cit)->get_slot_range_from(),
-			(int) (*cit)->get_slot_range_to());
+			(int) (*cit)->get_slot_min(),
+			(int) (*cit)->get_slot_max());
 		print_slaves(*cit);
 	}
 

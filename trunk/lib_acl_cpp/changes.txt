@@ -1,6 +1,9 @@
 修改历史列表：
 
 ------------------------------------------------------------------------
+297) 2015.4.6
+297.1) feature: 增加了 redis_slot 类及 redis_node 类
+
 296) 2015.4.5
 296.1) performance: HttpServletResponse::write 当采用 chunk 传输时由原来的
 多次调用系统 API write 方式改为只调用一次 writev，从而减少了系统调用次数
