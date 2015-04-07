@@ -15,7 +15,7 @@ static void print_slaves(const acl::redis_slot* master)
 
 static bool test_slots(acl::redis_cluster& option)
 {
-	const std::vector<const acl::redis_slot*>* nodes = option.slots();
+	const std::vector<const acl::redis_slot*>* nodes = option.cluster_slots();
 	if (nodes == NULL)
 		return false;
 

@@ -121,7 +121,7 @@ void redis_client_cluster::set_all_slot(const char* addr, int max_conns)
 	redis_client client(addr, 30, 60, false);
 	redis_cluster cluster(&client);
 
-	const std::vector<const redis_slot*>* slots = cluster.slots();
+	const std::vector<const redis_slot*>* slots = cluster.cluster_slots();
 	if (slots == NULL)
 		return;
 

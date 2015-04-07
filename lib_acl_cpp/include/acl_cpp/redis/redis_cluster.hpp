@@ -46,9 +46,9 @@ public:
 	 * @return {bool} 是否成功
 	 *  return true if successful
 	 */
-	bool addslots(int first, ...);
-	bool addslots(const int slot_list[], size_t n);
-	bool addslots(const std::vector<int>& slot_list);
+	bool cluster_addslots(int first, ...);
+	bool cluster_addslots(const int slot_list[], size_t n);
+	bool cluster_addslots(const std::vector<int>& slot_list);
 
 	/**
 	 * 批量删除哈希槽，最后必须以小于 0 的哈希槽表示结束
@@ -64,9 +64,9 @@ public:
 	 * @return {bool} 是否成功
 	 *  return true if successful
 	 */
-	bool delslots(int first, ...);
-	bool delslots(const int slot_list[], size_t n);
-	bool delslots(const std::vector<int>& slot_list);
+	bool cluster_delslots(int first, ...);
+	bool cluster_delslots(const int slot_list[], size_t n);
+	bool cluster_delslots(const std::vector<int>& slot_list);
 
 	/**
 	 * 获得某个哈希槽当前所存储对象的键名集合
@@ -80,7 +80,7 @@ public:
 	 * @return {int} 查询结果集的个数，-1 表示出错
 	 *  >= 0 if OK, -1 if error
 	 */
-	int getkeysinslot(size_t slot, size_t max, std::list<string>& result);
+	int cluster_getkeysinslot(size_t slot, size_t max, std::list<string>& result);
 
 	/**
 	 * 在建立 redis 集群时，可以使用此命令让一个 redis 结点是连接别的结点
@@ -93,7 +93,7 @@ public:
 	 * @return {bool} 连接是否成功
 	 *  if the linking is successful
 	 */
-	bool meet(const char* ip, int port);
+	bool cluster_meet(const char* ip, int port);
 
 	/**
 	 * 重置一个 redis 结点的状态，使之从集群结点中脱离，清除哈希槽-结点的对应关系，
@@ -104,9 +104,9 @@ public:
 	 * @return {bool} 操作是否成功
 	 *  if the operation is successful
 	 */
-	bool reset();
-	bool reset_hard();
-	bool reset_soft();
+	bool cluster_reset();
+	bool cluster_reset_hard();
+	bool cluster_reset_soft();
 
 	/**
 	 * 设定某个哈希槽在当前 redis 结点上正处于导入状态
@@ -119,7 +119,7 @@ public:
 	 * @return {boo} 设置状态是否成功
 	 *  if success for setting the slot's status
 	 */
-	bool setslot_importing(size_t slot, const char* src_node);
+	bool cluster_setslot_importing(size_t slot, const char* src_node);
 
 	/**
 	 * 设定某个哈希槽在当前 redis 结点上正处于迁移状态
@@ -132,7 +132,7 @@ public:
 	 * @return {boo} 设置状态是否成功
 	 *  if success for setting the slot's status
 	 */
-	bool setslot_migrating(size_t slot, const char* dst_node);
+	bool cluster_setslot_migrating(size_t slot, const char* dst_node);
 
 	/**
 	 * 当导入/迁移哈希槽完成后使用此操作指定该哈希槽为稳定状态
@@ -142,7 +142,7 @@ public:
 	 * @return {bool} 设置状态是否成功
 	 *  if success for setting the slot's status
 	 */
-	bool setslot_stable(size_t slot);
+	bool cluster_setslot_stable(size_t slot);
 
 	/**设置指定的哈希槽至指定的某个 redis 结点，该指令有较为复杂的行为特征，具体
 	 * 请参见官方在线文档
@@ -154,7 +154,7 @@ public:
 	 * @return {bool} 操作是否成功
 	 *  if the operation is successful
 	 */
-	bool setslot_node(size_t slot, const char* node);
+	bool cluster_setslot_node(size_t slot, const char* node);
 
 	/**
 	 * 获得某个指定 redis 结点报错的数量
@@ -164,7 +164,7 @@ public:
 	 *  return the failure count reporting by the specified redis node,
 	 *  return value >= 0 if successful, or -1 for error happened
 	 */
-	int count_failure_reports(const char* node);
+	int cluster_count_failure_reports(const char* node);
 
 	/**
 	 * 该命令操作只能发送给一个从结点，用来对主结点进行故障转移，使当前的从结点
@@ -174,7 +174,7 @@ public:
 	 * @return {bool} 操作是否成功
 	 *  if the operation is successful
 	 */
-	bool failover();
+	bool cluster_failover();
 
 	/**
 	 * 强制性将一个从结点变为主结点，该操作不必与原来的主结点进行协商，但仍需得到
@@ -184,7 +184,7 @@ public:
 	 * @return {bool} 操作是否成功
 	 *  if the operation is successful
 	 */
-	bool failover_force();
+	bool cluster_failover_force();
 
 	/**
 	 * 强制性将一个从结点变为主结点，该操作不必与原来的主结点和集群中的其它主结点
@@ -194,7 +194,7 @@ public:
 	 * @return {bool} 操作是否成功
 	 *  if the operation is successful
 	 */
-	bool failover_takeover();
+	bool cluster_failover_takeover();
 
 	/**
 	 * 获得当前集群的一些概述信息
@@ -204,7 +204,7 @@ public:
 	 * @return {bool} 操作是否成功
 	 *  if this operation is successful
 	 */
-	bool info(string& result);
+	bool cluster_info(string& result);
 
 	/**
 	 * 让当前 redis 结点将配置信息保存至磁盘的 nodes.conf 中
@@ -212,7 +212,7 @@ public:
 	 * @return {bool} 操作是否成功
 	 *  if this operation is successful
 	 */
-	bool saveconfig();
+	bool cluster_saveconfig();
 
 	/**
 	 * 获得某个哈希槽中的对象总数量
@@ -222,7 +222,7 @@ public:
 	 * @return {int} 返回哈希槽中的对象数量，-1 表示出错
 	 *　return the keys's count in the hash-slot, return -1 if error 
 	 */
-	int countkeysinslot(size_t slot);
+	int cluster_countkeysinslot(size_t slot);
 
 	/**
 	 * 将指定结点从当前的结点中移除
@@ -232,7 +232,7 @@ public:
 	 * @return {bool} 操作是否成功
 	 *  if this operation is successful
 	 */
-	bool forget(const char* node);
+	bool cluster_forget(const char* node);
 
 	/**
 	 * 获得某个键所属的哈希槽
@@ -242,7 +242,7 @@ public:
 	 * @return {int} 哈希槽值，>= 0 表示成功，-1 表示操作失败
 	 *  return the key's hash-slot, >= 0 if successful, -1 on error
 	 */
-	int keyslot(const char* key);
+	int cluster_keyslot(const char* key);
 
 	/**
 	 * 将指定结点设置为从结点，如果该结点原来为从结点，则也会返回成功
@@ -252,9 +252,9 @@ public:
 	 * @return {bool} 操作是否成功
 	 *  if this operation is successful
 	 */
-	bool replicate(const char* node);
+	bool cluster_replicate(const char* node);
 
-	bool set_config_epoch(const char* epoch);
+	bool cluster_set_config_epoch(const char* epoch);
 
 	/**
 	 * 获得所有哈希槽在集群中各个 redis 结点的分布情况
@@ -264,7 +264,7 @@ public:
 	 *  return all the master nodes with all hash-slots in them,
 	 *  and NULL will be returned if error happened
 	 */
-	const std::vector<const redis_slot*>* slots();
+	const std::vector<const redis_slot*>* cluster_slots();
 	
 	/**
 	 * 获得当前集群中所有结点的主结点，主结点的所有从结点可以通过
@@ -274,7 +274,7 @@ public:
 	 * @return {const std::vector<redis_node*>*} 返回 NULL 表示出错
 	 *  return NULL if error happened
 	 */
-	const std::vector<const redis_node*>* nodes();
+	const std::vector<const redis_node*>* cluster_nodes();
 
 	/**
 	 * 当列指定的主结点的所有从结点
@@ -284,7 +284,7 @@ public:
 	 * @return {bool} 操作是否成功
 	 *  if this operation is successful
 	 */
-	bool slaves(const char* node, std::vector<string>& result);
+	bool cluster_slaves(const char* node, std::vector<string>& result);
 
 private:
 	std::vector<const redis_slot*> slots_;
@@ -297,6 +297,10 @@ private:
 private:
 	std::vector<const redis_node*> masters_;
 
+	redis_node* get_node(string& line);
+	redis_node* get_master_node(std::vector<string>& tokens);
+	void add_slot(redis_node* node, char* slots);
+	redis_node* get_slave_node(std::vector<string>& tokens);
 	void free_masters();
 };
 
