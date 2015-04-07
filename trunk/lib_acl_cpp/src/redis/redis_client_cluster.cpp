@@ -121,11 +121,11 @@ void redis_client_cluster::set_all_slot(const char* addr, int max_conns)
 	redis_client client(addr, 30, 60, false);
 	redis_cluster cluster(&client);
 
-	const std::vector<const redis_slot*>* slots = cluster.cluster_slots();
+	const std::vector<redis_slot*>* slots = cluster.cluster_slots();
 	if (slots == NULL)
 		return;
 
-	std::vector<const redis_slot*>::const_iterator cit;
+	std::vector<redis_slot*>::const_iterator cit;
 	for (cit = slots->begin(); cit != slots->end(); ++cit)
 	{
 		const redis_slot* slot = *cit;

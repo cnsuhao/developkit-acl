@@ -7,6 +7,8 @@
 298.2) bugfix: acl::redis 类因为是虚继承了 redis_xxx 类，所以无法通过这些
 类的构造函数将参数传递给基类 redis_command 的构造函数，必须在 acl::redis
 的构造函数中显示地将参数传递给基类 redis_command 的构造函数
+298.3) feature: acl::redis_cluster 类中的 cluster_nodes, cluster_slots,
+cluster_slaves, cluster_info 方法返回组织好的结果集
 
 297) 2015.4.6
 297.1) feature: 增加了 redis_slot 类及 redis_node 类

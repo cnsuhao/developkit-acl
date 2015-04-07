@@ -31,6 +31,7 @@ redis_cluster::~redis_cluster()
 {
 	free_slots();
 	free_masters();
+	free_slaves();
 }
 
 bool redis_cluster::cluster_addslots(int first, ...)
@@ -358,7 +359,7 @@ bool redis_cluster::cluster_failover_takeover()
 	return check_status();
 }
 
-bool redis_cluster::cluster_info(string& result)
+bool redis_cluster::cluster_info(std::map<string, string>& result)
 {
 	const char* argv[2];
 	size_t lens[2];
@@ -370,7 +371,28 @@ bool redis_cluster::cluster_info(string& result)
 	lens[1] = sizeof("INFO") - 1;
 
 	build_request(2, argv, lens);
-	return get_string(result) > 0 ? true : false;
+
+	string buf;
+	if (get_string(buf) <= 0)
+		return false;
+
+	string line;
+
+	while (true)
+	{
+		line.clear();
+		if (buf.scan_line(line) == false)
+			break;
+
+		char* name = line.c_str();
+		char* value = strchr(name, ':');
+		if (value == NULL || *(value + 1) == 0)
+			continue;
+		*value++ = 0;
+		result[name] = value;
+	}
+
+	return true;
 }
 
 bool redis_cluster::cluster_saveconfig()
@@ -482,7 +504,7 @@ bool redis_cluster::cluster_set_config_epoch(const char* epoch)
 
 //////////////////////////////////////////////////////////////////////////
 
-const std::vector<const redis_slot*>* redis_cluster::cluster_slots()
+const std::vector<redis_slot*>* redis_cluster::cluster_slots()
 {
 	free_slots();
 
@@ -573,7 +595,7 @@ redis_slot* redis_cluster::get_slot(const redis_result* rr,
 
 void redis_cluster::free_slots()
 {
-	std::vector<const redis_slot*>::iterator it;
+	std::vector<redis_slot*>::iterator it;
 	for (it = slots_.begin(); it != slots_.end(); ++it)
 		delete *it;
 	slots_.clear();
@@ -581,8 +603,10 @@ void redis_cluster::free_slots()
 
 //////////////////////////////////////////////////////////////////////////
 
-bool redis_cluster::cluster_slaves(const char* node, std::vector<string>& result)
+const std::vector<redis_node*>* redis_cluster::cluster_slaves(const char* node)
 {
+	free_slaves();
+
 	const char* argv[3];
 	size_t lens[3];
 
@@ -596,10 +620,43 @@ bool redis_cluster::cluster_slaves(const char* node, std::vector<string>& result
 	lens[2] = strlen(node);
 
 	build_request(3, argv, lens);
-	return get_strings(result) >= 0 ? true : false;
+
+	std::vector<string> lines;
+	if (get_strings(lines) < 0)
+		return NULL;
+
+	std::vector<string>::iterator it = lines.begin();
+	for (; it != lines.end(); ++it)
+	{
+		std::vector<string>& tokens = (*it).split2(" ");
+		if (tokens.size() < 3)
+			continue;
+
+		char* node_type = tokens[2].c_str();
+		char* ptr = strchr(node_type, ',');
+		if (ptr != NULL && *(ptr + 1))
+			node_type = ptr + 1;
+		if (strcasecmp(node_type, "slave") != 0)
+			continue;
+
+		redis_node* slave = get_slave_node(tokens);
+		if (slave != NULL)
+			slaves_.push_back(slave);
+	}
+
+	return &slaves_;
 }
 
-const std::vector<const redis_node*>* redis_cluster::cluster_nodes()
+void redis_cluster::free_slaves()
+{
+	std::vector<redis_node*>::iterator it = slaves_.begin();
+	for (; it != slaves_.end(); ++it)
+		delete *it;
+
+	slaves_.clear();
+}
+
+const std::map<string, redis_node*>* redis_cluster::cluster_nodes()
 {
 	free_masters();
 
@@ -618,19 +675,43 @@ const std::vector<const redis_node*>* redis_cluster::cluster_nodes()
 	if (get_string(buf) <= 0)
 		return NULL;
 
+	std::vector<redis_node*> slaves;
 	acl::string line;
+
 	while (true)
 	{
 		if (buf.scan_line(line) == false)
 			break;
-		//redis_node* node = get_node(line);
-
+		redis_node* node = get_node(line);
+		if (node != NULL && !node->is_master())
+			slaves.push_back(node);
 		line.clear();
+	}
+
+	std::map<string, redis_node*>::iterator it2;
+	std::vector<redis_node*>::iterator it = slaves.begin(), it_next;
+
+	for (it_next = it; it != slaves.end(); it = it_next)
+	{
+		++it_next;
+		const char* id = (*it)->get_master_id();
+		it2 = masters_.find(id);
+		if (it2 != masters_.end())
+			it2->second->add_slave(*it);
+		else
+		{
+			logger_warn("delete orphan slave: %s", id);
+			delete *it;
+		}
 	}
 
 	return &masters_;
 }
 
+// d52ea3cb4cdf7294ac1fb61c696ae6483377bcfc 127.0.0.1:16385 master - 0 1428410625374 73 connected 5461-10922
+// 94e5d32cbcc9539cc1539078ca372094c14f9f49 127.0.0.1:16380 myself,master - 0 0 1 connected 0-9 11-5460
+// e7b21f65e8d0d6e82dee026de29e499bb518db36 127.0.0.1:16381 slave d52ea3cb4cdf7294ac1fb61c696ae6483377bcfc 0 1428410625373 73 connected
+// 6a78b47b2e150693fc2bed8578a7ca88b8f1e04c 127.0.0.1:16383 myself,slave 94e5d32cbcc9539cc1539078ca372094c14f9f49 0 0 4 connected
 redis_node* redis_cluster::get_node(string& line)
 {
 	std::vector<string>& tokens = line.split2(" ");
@@ -639,11 +720,8 @@ redis_node* redis_cluster::get_node(string& line)
 
 	char* node_type = tokens[2].c_str();
 	char* ptr = strchr(node_type, ',');
-	if (ptr != NULL)
-	{
-		*ptr++ = 0;
-		node_type = ptr;
-	}
+	if (ptr != NULL && *(ptr + 1) != 0)
+		node_type = ptr + 1;
 
 	if (strcasecmp(node_type, "master") == 0)
 		return get_master_node(tokens);
@@ -660,30 +738,41 @@ redis_node* redis_cluster::get_master_node(std::vector<string>& tokens)
 {
 	if (tokens.size() < 9)
 	{
-		logger_error("invalid line, tokens's size: %d",
-			(int) tokens.size());
+		logger_warn("invalid tokens's size: %d", (int) tokens.size());
+		return NULL;
+	}
+
+	std::map<string, redis_node*>::const_iterator cit;
+	if ((cit = masters_.find(tokens[0].c_str())) != masters_.end())
+	{
+		logger_warn("already exists master: %s", tokens[0].c_str());
 		return NULL;
 	}
 
 	redis_node* node = NEW redis_node(tokens[0].c_str(), tokens[1].c_str());
 	node->set_master(node);
 
+	masters_[tokens[0]] = node;
+
 	size_t n = tokens.size();
 	for (size_t i = 8; i < n; i++)
-		add_slot(node, tokens[i].c_str());
+		add_slot_range(node, tokens[i].c_str());
 	return node;
 }
 
-void redis_cluster::add_slot(redis_node* node, char* slots)
+void redis_cluster::add_slot_range(redis_node* node, char* slots)
 {
 	size_t slot_min, slot_max;
 
-	char* ptr = strchr(slots, ',');
-	if (ptr)
+	char* ptr = strchr(slots, '-');
+	if (ptr != NULL && *(ptr + 1) != 0)
 	{
 		*ptr++ = 0;
 		slot_min = (size_t) atol(slots);
 		slot_max = (size_t) atol(ptr);
+		// xxx
+		if (slot_max < slot_min)
+			slot_max = slot_min;
 	}
 	else
 	{
@@ -696,15 +785,25 @@ void redis_cluster::add_slot(redis_node* node, char* slots)
 
 redis_node* redis_cluster::get_slave_node(std::vector<string>& tokens)
 {
-	(void) tokens;
-	return NULL;
+	if (tokens.size() < 4)
+	{
+		logger_warn("invalid tokens's size: %d", (int) tokens.size());
+		return NULL;
+	}
+
+	redis_node* node = NEW redis_node(tokens[0].c_str(), tokens[1].c_str());
+	node->set_master_id(tokens[3].c_str());
+	return node;
 }
 
 void redis_cluster::free_masters()
 {
-	std::vector<const redis_node*>::iterator it = masters_.begin();
+	std::map<string, redis_node*>::iterator it = masters_.begin();
 	for (; it != masters_.end(); ++it)
-		delete *it;
+	{
+		it->second->clear_slaves(true);
+		delete it->second;
+	}
 	masters_.clear();
 }
 

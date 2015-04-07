@@ -20,20 +20,20 @@ redis_slot::redis_slot(const redis_slot& node)
 	ACL_SAFE_STRNCPY(ip_, node.get_ip(), sizeof(ip_));
 	port_ = node.get_port();
 
-	const std::vector<const redis_slot*>& slaves = node.get_slaves();
-	std::vector<const redis_slot*>::const_iterator cit;
+	const std::vector<redis_slot*>& slaves = node.get_slaves();
+	std::vector<redis_slot*>::const_iterator cit;
 	for (cit = slaves.begin(); cit != slaves.end(); ++cit)
 		slaves_.push_back(*cit);
 }
 
 redis_slot::~redis_slot()
 {
-	std::vector<const redis_slot*>::iterator it;
+	std::vector<redis_slot*>::iterator it;
 	for (it = slaves_.begin(); it != slaves_.end(); ++it)
 		delete *it;
 }
 
-redis_slot& redis_slot::add_slave(const redis_slot* node)
+redis_slot& redis_slot::add_slave(redis_slot* node)
 {
 	slaves_.push_back(node);
 	return *this;

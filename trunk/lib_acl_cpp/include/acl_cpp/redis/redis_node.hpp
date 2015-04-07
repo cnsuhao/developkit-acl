@@ -15,12 +15,13 @@ public:
 	~redis_node();
 
 	void set_master(const redis_node* master);
-	bool add_slave(const redis_node* slave);
+	void set_master_id(const char* id);
+	bool add_slave(redis_node* slave);
 	const redis_node* remove_slave(const char* id);
 	void clear_slaves(bool free_all = false);
 
 	void add_slot_range(size_t min, size_t max);
-	const std::vector<std::pair<int, int> >& get_slots() const
+	const std::vector<std::pair<size_t, size_t> >& get_slots() const
 	{
 		return slots_;
 	}
@@ -30,7 +31,12 @@ public:
 		return master_;
 	}
 
-	const std::vector<const redis_node*>* get_slaves() const
+	const char* get_master_id() const
+	{
+		return master_id_.c_str();
+	}
+
+	const std::vector<redis_node*>* get_slaves() const
 	{
 		return (master_ && master_ == this) ? &slaves_ : NULL;
 	}
@@ -54,8 +60,9 @@ private:
 	string id_;
 	string addr_;
 	const redis_node* master_;
-	std::vector<const redis_node*> slaves_;
-	std::vector<std::pair<int, int> > slots_;
+	string master_id_;
+	std::vector<redis_node*> slaves_;
+	std::vector<std::pair<size_t, size_t> > slots_;
 };
 
 } // namespace acl
