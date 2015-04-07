@@ -14,9 +14,9 @@ public:
 
 	~redis_slot();
 
-	redis_slot& add_slave(const redis_slot* node);
+	redis_slot& add_slave(redis_slot* node);
 
-	const std::vector<const redis_slot*>& get_slaves() const
+	const std::vector<redis_slot*>& get_slaves() const
 	{
 		return slaves_;
 	}
@@ -47,7 +47,7 @@ private:
 	char ip_[128];
 	int port_;
 
-	std::vector<const redis_slot*> slaves_;
+	std::vector<redis_slot*> slaves_;
 };
 
 } // namespace acl

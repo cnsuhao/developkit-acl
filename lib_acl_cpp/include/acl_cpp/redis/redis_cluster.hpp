@@ -2,6 +2,7 @@
 #include "acl_cpp/acl_cpp_define.hpp"
 #include <vector>
 #include <list>
+#include <map>
 #include "acl_cpp/stdlib/string.hpp"
 #include "acl_cpp/redis/redis_command.hpp"
 
@@ -199,12 +200,12 @@ public:
 	/**
 	 * 获得当前集群的一些概述信息
 	 * get running informantion about the redis cluster
-	 * @param result {acl::string&} 存储结果
+	 * @param result {std::map<acl::string, acl::string>&} 存储结果
 	 *  store the result of this operation
 	 * @return {bool} 操作是否成功
 	 *  if this operation is successful
 	 */
-	bool cluster_info(string& result);
+	bool cluster_info(std::map<string, string>& result);
 
 	/**
 	 * 让当前 redis 结点将配置信息保存至磁盘的 nodes.conf 中
@@ -262,32 +263,34 @@ public:
 	 * @return {const std::vector<redis_slot*>*} 返回存储哈希槽信息
 	 *  的所有主结点集合，返回 NULL 表示出错
 	 *  return all the master nodes with all hash-slots in them,
-	 *  and NULL will be returned if error happened
+	 *  and NULL will be returned if error happened, and the return
+	 *  value needn't be freed because it can be freed internal
 	 */
-	const std::vector<const redis_slot*>* cluster_slots();
+	const std::vector<redis_slot*>* cluster_slots();
 	
 	/**
 	 * 获得当前集群中所有结点的主结点，主结点的所有从结点可以通过
 	 * redis_node::get_slaves 获得
 	 * get all the masters of the cluster, and master's slave nodes
 	 * can be got by redis_node::get_slaves
-	 * @return {const std::vector<redis_node*>*} 返回 NULL 表示出错
-	 *  return NULL if error happened
+	 * @return {const std::map<string, redis_node*>*} 返回 NULL 表示出错
+	 *  return NULL if error happened, the return value needn't be
+	 *  freed because it can be freed internal
 	 */
-	const std::vector<const redis_node*>* cluster_nodes();
+	const std::map<string, redis_node*>* cluster_nodes();
 
 	/**
-	 * 当列指定的主结点的所有从结点
+	 * 获得指定主结点的所有从结点
 	 * get all slave nodes of the specified master node
-	 * @param node {const char*} 主结点标识符
-	 *  one of the master node
-	 * @return {bool} 操作是否成功
-	 *  if this operation is successful
+	 * @return node {const char*} 主结点标识符，返回 NULL 表示出错，该
+	 *  返回结果不需要释放，内部自动维护
+	 *  one of the master node, NULL if error, and the return value
+	 *  needn't be freed because it can be freed internal
 	 */
-	bool cluster_slaves(const char* node, std::vector<string>& result);
+	const std::vector<redis_node*>* cluster_slaves(const char* node);
 
 private:
-	std::vector<const redis_slot*> slots_;
+	std::vector<redis_slot*> slots_;
 
 	redis_slot* get_slot_master(const redis_result* rr);
 	redis_slot* get_slot(const redis_result* rr,
@@ -295,13 +298,17 @@ private:
 	void free_slots();
 
 private:
-	std::vector<const redis_node*> masters_;
+	std::map<string, redis_node*> masters_;
 
 	redis_node* get_node(string& line);
 	redis_node* get_master_node(std::vector<string>& tokens);
-	void add_slot(redis_node* node, char* slots);
+	void add_slot_range(redis_node* node, char* slots);
 	redis_node* get_slave_node(std::vector<string>& tokens);
 	void free_masters();
+
+private:
+	std::vector<redis_node*> slaves_;
+	void free_slaves();
 };
 
 } // namespace acl
