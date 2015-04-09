@@ -149,8 +149,9 @@ public:
 
 	/**
 	 * 获得当前结果结点存储的对象的个数, 该方法可以获得结果为下面两个方法
-	 * (get_child/get_value) 所需要的数组元素的个数;
-	 * get number of result objects, just for functions get_child/get_value 
+	 * (result_child/result_value) 所需要的数组元素的个数;
+	 * get number of result objects, just for functions
+	 * result_child/result_value 
 	 * @return {size_t} 返回值与存储类型的对应关系如下：
 	 *  the relation between return value and result type, as below:
 	 *  REDIS_RESULT_ERROR: 1
