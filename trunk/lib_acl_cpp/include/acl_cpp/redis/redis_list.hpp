@@ -33,15 +33,32 @@ public:
 	 * 从 key 列表对象中弹出一个元素对象（name/value对），采用阻塞方式从头部弹出；
 	 * 当给定多个 key 参数时，按参数 key 的先后顺序依次检查各个列表，弹出第一个
 	 * 非空列表的头元素
+	 * remove and get a element from list head, or block until one
+	 * is available; when multiple keys were given, multiple elements
+	 * will be gotten according the sequence of keys given.
 	 * @param result {std::pair<string, string>&} 存储结果元素对象，该对象的
 	 *  第一个字符串表示是列表对象的 key，第二个为该对象的头部元素
+	 *  store the elements result, the first string of pair is the key,
+	 *  and the second string of pair is the element
 	 * @param timeout {size_t} 等待阻塞时间（秒），在超时时间内没有获得元素对象，
 	 *  则返回 false；如果该值为 0 则一直等待至获得元素对象或出错
-	 * @param first_key {const char*} 第一个非空字符串的 key 键
+	 *  the blocking timeout in seconds before one element availble;
+	 *  false will be returned when the timeout is arrived; if the timeout
+	 *  was set to be 0, this function will block until a element was
+	 *  available or some error happened.
+	 * @param first_key {const char*} 第一个非空字符串的 key 键，最后一个参数
+	 *  必须以 NULL 结束，表示变参列表的结束
+	 *  the first key of a variable args, the last arg must be NULL
+	 *  indicating the end of the variable args.
 	 * @return {bool} 是否获得了头部元素对象，如果返回 false 则有以下可能原因：
+	 *  true if got a element in the head of list, when false was be
+	 *  returned, there'are some reasons show below:
 	 *  1、出错
+	 *     error happened.
 	 *  2、有一个 key 非列表对象
+	 *     at least one key was not a list object.
 	 *  3、key 不存在或超时未获得元素对象
+	 *     key not exist or timeout was got.
 
 	 */
 	bool blpop(std::pair<string, string>& result, size_t timeout,
@@ -53,7 +70,9 @@ public:
 
 	/**
 	 * 含义参见 blpop，唯一区别为该方法弹出尾部元素对象
-	 * @sess blpop
+	 * the meaning is same as the blpop above except that this function
+	 * is used to pop element from the tail of the list
+	 * @see blpop
 	 */
 	bool brpop(std::pair<string, string>& result, size_t timeout,
 		const char* first_key, ...);
@@ -66,12 +85,22 @@ public:
 	 * 阻塞式执行以下两个动作：
 	 * 1) 将列表 src 中的最后一个元素(尾元素)弹出，并返回给客户端。
 	 * 2) 将 src 弹出的元素插入到列表 dst ，作为 dst 列表的的头元素
+	 * two actions will be executed in blocking mode as below:
+	 * 1) pop a element from src list's tail, and return it to caller
+	 * 2) push the element to dst list's head
 	 * @param src {const char*} 源列表对象 key
+	 *  the key of source list
 	 * @param dst {const char*} 目标列表对象 key
+	 *  the key of destination list
 	 * @param buf {string*} 非空时存储 src 的尾部元素 key 值
+	 *  if not NULL, buf will store the element poped from the head of src
 	 * @param timeout {size_t} 等待超时时间，如果为 0 则一直等待直到有数据或出错
+	 *  the timeout to wait, if the timeout is 0 this function will
+	 *  block until a element was available or error happened.
 	 * @return {bool} 当从 src 列表中成功弹出尾部元素并放入 dst 列表头部后
 	 *  该方法返回 true；返回 false 表示超时、出错或 src/dst 有一个非列表对象
+	 *  true if success, false if timeout arrived, or error happened,
+	 *  or one of the src and dst is not a list object
 	 * @see rpoplpush
 	 */
 	bool brpoplpush(const char* src, const char* dst, size_t timeout,
@@ -79,22 +108,35 @@ public:
 
 	/**
 	 * 返回 key 对应的列表对象中，指定下标的元素
+	 * return the element of the specified subscript from the list at key
 	 * @param key {const char*} 列表对象的 key
+	 *  the key of one list object
 	 * @param idx {size_t} 下标值
+	 *  the specified subscript
 	 * @param buf {string&} 存储结果
+	 *  store the result
 	 * @return {bool} 返回 true 表明操作成功，此时若 buf 数据非空则表明正确获得了
 	 *  指定下标的元素，如果 buf.empty()表示没有获得元素；返回 false 时表明操作失败
+	 *  true if success, and if buf is empty, no element was got;
+	 *  false if error happened
 	 */
 	bool lindex(const char* key, size_t idx, string& buf);
 
 	/**
 	 * 在列表对象中将一个新元素添加至指定元素的前面
+	 * insert one new element before the specified element in list
 	 * @param key {const char*} 列表对象的 key
+	 *  the key of specified list
 	 * @param pivot {const char*} 列表对象中的一个指定元素名
+	 *  the speicifed element of list
 	 * @param value {const char*} 新的元素名
+	 *  the new element to be inserted
 	 * @reutrn {int} 返回该列表对象的元素个数，含义如下：
+	 *  return the number of list specified by the given key, as below:
 	 *  -1 -- 表示出错或 key 非列表对象
+	 *        error happened or the object of the key is not a list
 	 *  >0 -- 当前列表对象的元素个数
+	 *        the number of elements of the specified list
 	 */
 	int linsert_before(const char* key, const char* pivot,
 		const char* value);
@@ -103,12 +145,19 @@ public:
 
 	/**
 	 * 在列表对象中将一个新元素添加至指定元素的后面
+	 * append a new element after the specified element in the list
 	 * @param key {const char*} 列表对象的 key
+	 *  the key of the specified list
 	 * @param pivot {const char*} 列表对象中的一个指定元素名
+	 *  the specified element
 	 * @param value {const char*} 新的元素名
+	 *  the new element
 	 * @reutrn {int} 返回该列表对象的元素个数，含义如下：
+	 *  return the number of elements in the list specifed by the key:
 	 *  -1 -- 表示出错或 key 非列表对象
+	 *        error happened or it is not a list object specified by key
 	 *  >0 -- 当前列表对象的元素个数
+	 *        the number of elements in list specified by the key
 	 */
 	int linsert_after(const char* key, const char* pivot,
 		const char* value);
@@ -117,27 +166,43 @@ public:
 
 	/**
 	 * 返回指定列表对象的元素个数
+	 * get the number of elements in list specified the given key
 	 * @param key {const char*} 列表对象的 key
-	 * @return {int} 返回指定列表对象的长度（即元素个数），
+	 *  the list's key
+	 * @return {int} 返回指定列表对象的长度（即元素个数）， -1 if error happened
+	 *  return the number of elements in list, -1 if error
 	 */
 	int llen(const char* key);
 
 	/**
 	 * 从列表对象中移除并返回头部元素
+	 * remove and get the element in the list's head
 	 * @param key {const char*} 元素对象的 key
+	 *  the key of one list
 	 * @param buf {string&} 存储弹出的元素值
+	 *  store the element when successful.
 	 * @return {int} 返回值含义：1 -- 表示成功弹出一个元素，-1 -- 表示出错，或该
 	 *  对象非列表对象，或该对象已经为空
+	 *  return value as below:
+	 *   1: get one element successfully
+	 *  -1: error happened, or the oject is not a list specified
+	 *      by the key, or the list specified by key is empty
 	 */
 	int lpop(const char* key, string& buf);
 
 	/**
 	 * 将一个或多个值元素插入到列表对象 key 的表头
+	 * add one or more element(s) to the head of a list
 	 * @param key {const char*} 列表对象的 key
+	 *  the list key
 	 * @param first_value {const char*} 第一个非空字符串，该变参的列表的最后一个
 	 *  必须设为 NULL
+	 *  the first no-NULL element of the variable args, the last arg must
+	 *  be NULL indicating the end of the args.
 	 * @return {int} 返回添加完后当前列表对象中的元素个数，返回 -1 表示出错或该 key
 	 *  对象非列表对象，当该 key 不存在时会添加新的列表对象及对象中的元素
+	 *  return the number of elements in list. -1 if error happened,
+	 *  or the object specified by key is not a list.
 	 */
 	int lpush(const char* key, const char* first_value, ...);
 	int lpush(const char* key, const char* values[], size_t argc);
@@ -147,14 +212,21 @@ public:
 		size_t argc);
 
 	/**
-	* 将一个新的列表对象的元素添加至已经存在的指定列表对象的头部，当该列表对象
-	* 不存在时则不添加
+	 * 将一个新的列表对象的元素添加至已经存在的指定列表对象的头部，当该列表对象
+	 * 不存在时则不添加
+	 * add a new element before the head of a list, only if the list exists
 	 * @param key {const char*} 列表对象的 key
+	 *  the list's key
 	 * @param value {const char*} 新加的列表对象的元素
+	 *  the new element to be added
 	 * @return {int} 返回当前列表对象的元素个数，含义如下：
+	 *  return the number of elements in the list:
 	 *  -1：出错，或该 key 非列表对象
+	 *      error or the key isn't refer to a list
 	 *   0：该 key 对象不存在
+	 *      the list specified by the given key doesn't exist
 	 *  >0：添加完后当前列表对象中的元素个数
+	 *      the number of elements in list specifed by key after added
 	 */
 	int lpushx(const char* key, const char* value);
 	int lpushx(const char* key, const char* value, size_t len);
