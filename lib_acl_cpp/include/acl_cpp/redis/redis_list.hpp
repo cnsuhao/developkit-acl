@@ -234,41 +234,78 @@ public:
 	/**
 	 * 返回列表 key 中指定区间内（闭区间）的元素，区间以偏移量 start 和 end 指定；
 	 * 下标起始值从 0 开始，-1 表示最后一个下标值
+	 * get a range of elements from list, the range is specified by
+	 * start and end, and the start begins with 0, -1 means the end
 	 * @param key {const char*} 列表对象的 key
+	 *  the specified key of one list
 	 * @param start {int} 起始下标值
+	 *  the start subscript of list
 	 * @param end {int} 结束下标值
+	 *  the end subscript of list
 	 * @param result {std::vector<string>*} 非空时存储列表对象中指定区间的元素集合
+	 *  if not NULL, result will be used to store the results
 	 * @return {bool} 操作是否成功，当返回 false 表示出错或 key 非列表对象
+	 *  if success for this operation, false if the key is not a list or
+	 *  error happened
 	 *  举例：
+	 *  for example:
 	 *  1) 当 start = 0, end = 10 时则指定从下标 0 开始至 10 的 11 个元素
+	 *     if start is 0 and end is 10, then the subscript range is
+	 *     between 0 and 10(include 10).
 	 *  2) 当 start = -1, end = -2 时则指定从最后一个元素第倒数第二个共 2 个元素 
+	 *     if start is -1 and end is -2, the range is from the end and
+	 *     backward the second element.
 	 *
 	 *  操作成功后可以通过以下任一方式获得数据
-	 *  1、基类方法 get_value 获得指定下标的元素数据
-	 *  2、基类方法 get_child 获得指定下标的元素对象(redis_result），然后再通过
+	 *  the result can be got by one of the ways as below:
+	 *
+	 *  1、在调用方法中传入非空的存储结果对象的地址
+	 *     the most easily way is to set a non-NULL result parameter
+	 *     for this function
+	 *  2、基类方法 get_value 获得指定下标的元素数据
+	 *     get the specified subscript's element by redis_command::get_value 
+	 *  3、基类方法 get_child 获得指定下标的元素对象(redis_result），然后再通过
 	 *     redis_result::argv_to_string 方法获得元素数据
-	 *  3、基类方法 get_result 方法取得总结果集对象 redis_result，然后再通过
+	 *     get redis_result object with the given subscript, and get the
+	 *     element by redis_result::argv_to_string
+	 *  4、基类方法 get_result 方法取得总结果集对象 redis_result，然后再通过
 	 *     redis_result::get_child 获得一个元素对象，然后再通过方式 2 中指定
 	 *     的方法获得该元素的数据
-	 *  4、基类方法 get_children 获得结果元素数组对象，再通过 redis_result 中
+	 *     get redis_result object by redis_command::get_result, and get
+	 *     the first element by redis_result::get_child, then get the
+	 *     element by the way same as the way 2 above.
+	 *  5、基类方法 get_children 获得结果元素数组对象，再通过 redis_result 中
 	 *     的方法 argv_to_string 从每一个元素对象中获得元素数据
-	 *  5、在调用方法中传入非空的存储结果对象的地址
+	 *     get child array by redis_command::get_children, and get the
+	 *     element from one of redis_result array by argv_to_string.
 	 */
 	bool lrange(const char* key, int start, int end,
 		std::vector<string>* result);
 
 	/**
 	 * 根据元素值从列表对象中移除指定数量的元素
+	 * remove the first count occurrences of elements equal to value
+	 * from the list stored at key
 	 * @param key {const char*} 列表对象的 key
+	 *  the key of a list
 	 * @param count {int} 移除元素的数量限制，count 的含义如下：
+	 *  the first count of elements to be removed, as below:
 	 *  count > 0 : 从表头开始向表尾搜索，移除与 value 相等的元素，数量为 count
+	 *              remove elements equal to value moving from head to tail
 	 *  count < 0 : 从表尾开始向表头搜索，移除与 value 相等的元素，数量为 count 的绝对值
+	 *              remove elements equal to value moving from tail to head
 	 *  count = 0 : 移除表中所有与 value 相等的值
+	 *              remove all elements equal to value
 	 * @param value {const char*} 指定的元素值，需要从列表对象中遍历所有与该值比较
+	 *  the specified value for removing elements
 	 * @return {int} 被移除的对象数量，返回值含义如下：
+	 *  the count of elements removed, meaning show below:
 	 *  -1：出错或该 key 对象非列表对象
+	 *      error happened or the key is not refer to a list
 	 *   0：key 不存在或移除的元素个数为 0
+	 *      the key does not exist or the count of elements removed is 0
 	 *  >0：被成功移除的元素数量
+	 *      the count of elements removed successfully
 	 */
 	int lrem(const char* key, int count, const char* value);
 	int lrem(const char* key, int count, const char* value, size_t len);
@@ -276,11 +313,19 @@ public:
 	/**
 	 * 将列表 key 下标为 idx 的元素的值设置为 value，当 idx 参数超出范围，或对
 	 * 一个空列表( key 不存在)进行 lset 时，返回一个错误
+	 * set the value of a element in a list by its index, if the index
+	 * out of bounds or the key of list not exist, an error will happen.
 	 * @param key {const char*} 列表对象的 key
+	 *  the key of list
 	 * @param idx {int} 下标位置，当为负值时则从尾部向头尾部定位，否则采用顺序方式；
 	 *  如：0 表示头部第一个元素，-1 表示尾部开始的第一个元素
+	 *  the index in the list, if it's negative, iterating data will be
+	 *  from tail to head, or be from head to tail.
 	 * @param value {const char*} 元素新值
+	 *  the new value of the element by its index
 	 * @return {bool} 当 key 非列表对象或 key 不存在或 idx 超出范围则返回 false
+	 *  if success. false if the object of the key isn't list, or key's
+	 *  list not exist, or the index out of bounds.
 	 */
 	bool lset(const char* key, int idx, const char* value);
 	bool lset(const char* key, int idx, const char* value, size_t len);
@@ -288,20 +333,32 @@ public:
 	/**
 	 * 对指定的列表对象，根据限定区间范围进行删除；区间以偏移量 start 和 end 指定；
 	 * 下标起始值从 0 开始，-1 表示最后一个下标值
+	 * remove elements in a list by range betwwen start and end.
 	 * @param key {const char*} 列表对象的 key
+	 *  the key of a list
 	 * @param start {int} 起始下标值
+	 *  the start index in a list
 	 * @param end {int} 结束下标值
+	 *  the end index in a list
 	 * @return {bool} 操作是否成功，当返回 false 时表示出错或指定的 key 对象非
 	 *  列表对象；当成功删除或 key 对象不存在时则返回 true
+	 *  if success. false if error happened, or the key's object is not
+	 *  a list, or the key's object not exist.
 	 */
 	bool ltrim(const char* key, int start, int end);
 
 	/**
 	 * 从列表对象中移除并返回尾部元素
+	 * remove and get the last element of a list
 	 * @param key {const char*} 元素对象的 key
+	 *  the key of the list
 	 * @param buf {string&} 存储弹出的元素值
+	 *  store the element pop from list
 	 * @return {int} 返回值含义：1 -- 表示成功弹出一个元素，-1 -- 表示出错，或该
 	 *  对象非列表对象，或该对象已经为空
+	 *  return as below:
+	 *   1: get a element successfully
+	 *  -1: error happened, or not a list, or the list is empty.
 	 */
 	int rpop(const char* key, string& buf);
 
@@ -309,21 +366,35 @@ public:
 	 * 在一个原子时间内，非阻塞方式执行以下两个动作：
 	 * 将列表 src 中的最后一个元素(尾元素)弹出，并返回给客户端。
 	 * 将 src 弹出的元素插入到列表 dst ，作为 dst 列表的的头元素
+	 * remove the last element in a list, prepend it to another list
+	 * and return it.
 	 * @param src {const char*} 源列表对象 key
+	 *  the key of the source list
 	 * @param dst {const char*} 目标列表对象 key
+	 *  the key of the destination list
 	 * @param buf {string*} 非空时存储 src 的尾部元素 key 值
+	 *  if not NULL, it will store the element
 	 * @return {bool} 当从 src 列表中成功弹出尾部元素并放入 dst 列表头部后
 	 *  该方法返回 true；返回 false 出错或 src/dst 有一个非列表对象
+	 *  true if the element was removed from a list to another list,
+	 *  false if error happened, one of src or dst is not a list.
 	 */
 	bool rpoplpush(const char* src, const char* dst, string* buf = NULL);
 
 	/**
 	 * 将一个或多个值元素插入到列表对象 key 的表尾
+	 * append one or multiple values to a list
 	 * @param key {const char*} 列表对象的 key
+	 *  the key of a list
 	 * @param first_value {const char*} 第一个非空字符串，该变参的列表的最后一个
 	 *  必须设为 NULL
+	 *  the first element of a variable args must be not NULL, and the
+	 *  last arg must be NULL indicating the end of the args.
 	 * @return {int} 返回添加完后当前列表对象中的元素个数，返回 -1 表示出错或该 key
 	 *  对象非列表对象，当该 key 不存在时会添加新的列表对象及对象中的元素
+	 *  return the number of a list specified by a key. -1 if error
+	 *  happened, or the key's object isn't a list, if the list by the
+	 *  key doese not exist, a new list will be created with the key.
 	 */
 	int rpush(const char* key, const char* first_value, ...);
 	int rpush(const char* key, const char* values[], size_t argc);
@@ -335,12 +406,19 @@ public:
 	/**
 	 * 将一个新的列表对象的元素添加至已经存在的指定列表对象的尾部，当该列表对象
 	 * 不存在时则不添加
+	 * append one or multiple values to a list only if the list exists.
 	 * @param key {const char*} 列表对象的 key
+	 *  the key of a list
 	 * @param value {const char*} 新加的列表对象的元素
+	 *  the new element to be added.
 	 * @return {int} 返回当前列表对象的元素个数，含义如下：
+	 *  return the number of the list, as below:
 	 *  -1：出错，或该 key 非列表对象
+	 *      error happened, or the key's object isn't a list
 	 *   0：该 key 对象不存在
+	 *      the key's object doesn't exist
 	 *  >0：添加完后当前列表对象中的元素个数
+	 *     the number of elements in the list after adding.
 	 */
 	int rpushx(const char* key, const char* value);
 	int rpushx(const char* key, const char* value, size_t len);
