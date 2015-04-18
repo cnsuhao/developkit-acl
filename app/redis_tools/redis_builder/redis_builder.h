@@ -27,7 +27,7 @@ private:
 	bool add_slave(const acl::redis_node& master,
 		const acl::redis_node& slave);
 	acl::redis_node* find_slave(const acl::redis_node* node,
-		const char* addr);
+		const char* addr, size_t& nslaves);
 
 	bool show_nodes(const std::map<acl::string, acl::redis_node*>* masters);
 	void show_master_slots(const acl::redis_node* master);
