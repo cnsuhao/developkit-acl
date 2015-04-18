@@ -315,9 +315,10 @@ bool redis_builder::add_slave(const acl::redis_node& master,
 }
 
 acl::redis_node* redis_builder::find_slave(const acl::redis_node* node,
-	const char* addr)
+	const char* addr, size_t& nslaves)
 {
 	const std::vector<acl::redis_node*>* slaves = node->get_slaves();
+	nslaves += slaves->size();
 	std::vector<acl::redis_node*>::const_iterator cit;
 	for (cit = slaves->begin(); cit != slaves->end(); ++cit)
 	{
@@ -344,6 +345,7 @@ bool redis_builder::cluster_meeting(acl::redis& redis, const char* addr)
 		return false;
 	}
 
+	size_t nslaves = 0;
 	acl::redis_node* node = NULL;
 	std::map<acl::string, acl::redis_node*>::const_iterator cit;
 	for (cit = nodes->begin(); cit != nodes->end(); ++cit)
@@ -354,7 +356,7 @@ bool redis_builder::cluster_meeting(acl::redis& redis, const char* addr)
 			break;
 		}
 
-		node = find_slave(cit->second, addr);
+		node = find_slave(cit->second, addr, nslaves);
 		if (node != NULL)
 			break;
 	}
@@ -363,8 +365,8 @@ bool redis_builder::cluster_meeting(acl::redis& redis, const char* addr)
 	{
 		//show_nodes(nodes);
 
-		printf("%s waiting for %s, size: %d\r\n",
-			myaddr, addr, (int) nodes->size());
+		printf("%s waiting for %s, nodes: %d, %d\r\n",
+			myaddr, addr, (int) nodes->size(), (int) nslaves);
 		return false;
 	}
 
