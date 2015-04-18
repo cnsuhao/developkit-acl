@@ -159,7 +159,7 @@ bool redis_builder::build_cluster()
 	// let one master to connect all other master nodes
 
 	printf("===================================================\r\n");
-	printf("Meeting all master ...\r\n");
+	printf("Meeting all masters and slaves ...\r\n");
 
 	std::vector<acl::redis_node*> all_slaves;
 	std::vector<acl::redis_node*>::const_iterator cit;
@@ -363,7 +363,7 @@ bool redis_builder::cluster_meeting(acl::redis& redis, const char* addr)
 	{
 		//show_nodes(nodes);
 
-		printf("Waiting, slave(%s) meeting: %s, size: %d\r\n",
+		printf("%s waiting for %s, size: %d\r\n",
 			myaddr, addr, (int) nodes->size());
 		return false;
 	}
@@ -371,12 +371,12 @@ bool redis_builder::cluster_meeting(acl::redis& redis, const char* addr)
 	const char* type = node->get_type();
 	if (strcasecmp(type, "slave") && strcasecmp(type, "master"))
 	{
-		printf("%s: meeting with %s, status: %s\r\n",
+		printf("%s meeting with %s, status: %s\r\n",
 			myaddr, addr, type);
 		return false;
 	}
 
-	printf("%s: meet with %s OK, status: %s\r\n", myaddr, addr, type);
+	printf("%s meet with %s OK, status: %s\r\n", myaddr, addr, type);
 
 	return true;
 }
