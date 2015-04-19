@@ -184,10 +184,12 @@ copy ..\..\..\dist\lib\win32\lib_protocol_d.dll $(OutDir) /Y</Command>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="redis_builder.cpp" />
+    <ClCompile Include="redis_status.cpp" />
     <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="redis_builder.h" />
+    <ClInclude Include="redis_status.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
