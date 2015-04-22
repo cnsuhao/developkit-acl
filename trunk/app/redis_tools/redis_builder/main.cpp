@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "redis_status.h"
 #include "redis_builder.h"
+#include "redis_reshard.h"
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -8,7 +9,7 @@ static void usage(const char* procname)
 {
 	printf("usage: %s -h[help]\r\n"
 		"-s redis_addr[ip:port]\r\n"
-		"-a cmd[nodes|slots|create|add_node|del_node|node_id]\r\n"
+		"-a cmd[nodes|slots|create|add_node|del_node|node_id|reshard]\r\n"
 		"-N new_node[ip:port]\r\n"
 		"-S [add node as slave]\r\n"
 		"-r replicas[default 0]\r\n"
@@ -22,9 +23,10 @@ static void usage(const char* procname)
 		"%s -s 127.0.0.1:6379 -a slots\r\n"
 		"%s -s 127.0.0.1:6379 -a del_node -I node_id\r\n"
 		"%s -s 127.0.0.1:6379 -a node_id\r\n"
+		"%s -s 127.0.0.1:6379 -a reshard\r\n"
 		"%s -s 127.0.0.1:6379 -a add_node -N 127.0.0.1:6380 -S\r\n",
 		procname, procname, procname, procname,
-		procname, procname, procname);
+		procname, procname, procname, procname);
 }
 
 int main(int argc, char* argv[])
@@ -139,6 +141,17 @@ int main(int argc, char* argv[])
 		else
 			printf("addr: %s, node_id: %s\r\n", addr.c_str(),
 				node_id.c_str());
+	}
+	else if (cmd == "reshard")
+	{
+		if (addr.empty())
+		{
+			printf("usage: %s -s ip:port -a reshard\r\n", argv[0]);
+			goto END;
+		}
+
+		redis_reshard reshard(addr);
+		reshard.run();
 	}
 	else
 		printf("unknown cmd: %s\r\n", cmd.c_str());
