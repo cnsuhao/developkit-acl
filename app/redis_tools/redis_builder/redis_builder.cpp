@@ -131,7 +131,6 @@ bool redis_builder::build(const char* conf, size_t replicas /* = 0 */)
 	printf("===================================================\r\n");
 
 	print_nodes(0, masters_);
-	return true;
 
 	return build_cluster();
 }
