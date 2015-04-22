@@ -32,6 +32,9 @@ private:
 
 	acl::redis_node* peek_master(std::vector<acl::redis_node*>& nodes,
 		std::map<acl::string, size_t>& addrs);
+	acl::redis_node* peek_slave(const char* master_addr,
+		std::vector<acl::redis_node*>& nodes,
+		std::map<acl::string, size_t>& addrs);
 
 	// create one master node according to one xml node of configure
 	acl::redis_node* create_master(acl::xml_node& node);
@@ -63,6 +66,9 @@ private:
 	// check if the given addr was in the node's slave
 	acl::redis_node* find_slave(const acl::redis_node* node,
 		const char* addr, size_t& nslaves);
+
+	void print_nodes(int nested, const std::vector<acl::redis_node*>& nodes);
+	void free_nodes(const std::vector<acl::redis_node*>& nodes);
 
 	bool get_ip(const char* addr, acl::string& buf);
 };

@@ -12,9 +12,20 @@ redis_builder::redis_builder(int meet_wait /* = 100 */)
 
 redis_builder::~redis_builder(void)
 {
-	std::vector<acl::redis_node*>::iterator it = masters_.begin();
-	for (; it != masters_.end(); ++it)
+	free_nodes(masters_);
+}
+
+void redis_builder::free_nodes(const std::vector<acl::redis_node*>& nodes)
+{
+	std::vector<acl::redis_node*>::const_iterator it;
+	for (it = nodes.begin(); it != nodes.end(); ++it)
+	{
+		const std::vector<acl::redis_node*>* slaves =
+			(*it)->get_slaves();
+		if (!slaves->empty())
+			free_nodes(*slaves);
 		delete *it;
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -29,14 +40,14 @@ bool redis_builder::add_node(const char* addr,
 	const std::vector<acl::string>& tokens = buf.split2(":");
 	if (tokens.size() != 2)
 	{
-		printf("invalid addr: %s\r\n", addr);
+		printf("%s: invalid addr: %s\r\n", __FUNCTION__, addr);
 		return false;
 	}
 
 	// CLUSTER MEET master node
 	if (!redis.cluster_meet(tokens[0].c_str(), atoi(tokens[1].c_str())))
 	{
-		printf("cluster meet %s %s error: %s\r\n",
+		printf("%s: cluster meet %s %s error: %s\r\n", __FUNCTION__,
 			tokens[0].c_str(), tokens[1].c_str(),
 			redis.result_error());
 		return false;
@@ -56,15 +67,16 @@ bool redis_builder::add_node(const char* addr,
 	acl::string node_id;
 	if (get_node_id(addr, node_id) == false)
 	{
-		printf("can't get master(%s)'s node_id\r\n", addr);
+		printf("%s: can't get master(%s)'s node_id\r\n",
+			__FUNCTION__, addr);
 		return false;
 	}
 
 	if (redis.cluster_replicate(node_id.c_str()) == false)
 	{
-		printf("cluster replicate id: %s, error: %s, "
+		printf("%s: cluster replicate id: %s, error: %s, "
 			"master_addr: %s, slave_addr: %s\r\n",
-			node_id.c_str(), redis.result_error(),
+			__FUNCTION__, node_id.c_str(), redis.result_error(),
 			addr, new_node_addr);
 		return false;
 	}
@@ -78,11 +90,29 @@ bool redis_builder::del_node(const char* addr, const char* node_id)
 	acl::redis redis(&client);
 	if (redis.cluster_forget(node_id) == false)
 	{
-		printf("del node: %s error: %s, addr: %s\r\n",
-			node_id, redis.result_error(), addr);
+		printf("%s: del node: %s error: %s, addr: %s\r\n",
+			__FUNCTION__, node_id, redis.result_error(), addr);
 		return false;
 	}
 	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void redis_builder::print_nodes(int nested, const std::vector<acl::redis_node*>& nodes)
+{
+	nested++;
+	std::vector<acl::redis_node*>::const_iterator cit;
+	for (cit = nodes.begin(); cit != nodes.end(); ++cit)
+	{
+		for (int i = 0; i < nested - 1; ++i)
+			printf("\t");
+		printf("addr: %s\r\n", (*cit)->get_addr());
+		const std::vector<acl::redis_node*>* slaves =
+			(*cit)->get_slaves();
+		if (!slaves->empty())
+			print_nodes(nested, *slaves);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -94,11 +124,14 @@ bool redis_builder::build(const char* conf, size_t replicas /* = 0 */)
 
 	if (masters_.empty())
 	{
-		printf("no nodes available\r\n");
+		printf("%s: no nodes available\r\n", __FUNCTION__);
 		return false;
 	}
 
 	printf("===================================================\r\n");
+
+	print_nodes(0, masters_);
+	return true;
 
 	return build_cluster();
 }
@@ -110,8 +143,8 @@ bool redis_builder::load(const char* conf, size_t replicas)
 	// load xml information from local file
 	if (acl::ifstream::load(conf, &buf) == false)
 	{
-		printf("load configure error: %s, file: %s\r\n",
-			acl::last_serror(), conf);
+		printf("%s: load configure error: %s, file: %s\r\n",
+			__FUNCTION__, acl::last_serror(), conf);
 		return false;
 	}
 	/* <xml>
@@ -144,7 +177,7 @@ bool redis_builder::create_cluster(acl::xml& xml, size_t replicas)
 
 	if (nodes.empty())
 	{
-		printf("nodes null\r\n");
+		printf("%s: nodes null\r\n", __FUNCTION__);
 		return false;
 	}
 
@@ -158,24 +191,39 @@ bool redis_builder::create_cluster(acl::xml& xml, size_t replicas)
 			redis_nodes.push_back(n);
 	}
 
-	size_t mod = redis_nodes.size() % replicas;
+	size_t mod = redis_nodes.size() % (replicas + 1);
 	if (replicas > 0 && mod != 0)
 	{
-		printf("nodes' size(%d) %% replicas(%d) is %d != 0\r\n",
-			(int) redis_nodes.size(), (int) replicas,
-			(int) mod);
+		printf("%s: nodes' size(%d) %% replicas + 1(%d) is %d != 0\r\n",
+			__FUNCTION__, (int) redis_nodes.size(),
+			(int) replicas + 1, (int) mod);
 		std::vector<acl::redis_node*>::iterator it;
 		for (it = redis_nodes.begin(); it != redis_nodes.end(); ++it)
 			delete *it;
 		return false;
 	}
 
-	std::map<acl::string, size_t> addrs;
+	std::map<acl::string, size_t> master_addrs;
+	std::map<acl::string, size_t> all_addrs;
+	acl::redis_node* master, *slave;
+	acl::string ip;
 	while (true)
 	{
-		acl::redis_node* master = peek_master(redis_nodes, addrs);
+		master = peek_master(redis_nodes, master_addrs);
 		if (master == NULL)
 			break;
+		masters_.push_back(master);
+
+		assert(get_ip(master->get_addr(), ip));
+		all_addrs[ip]++;
+
+		for (size_t i = 0; i < replicas; i++)
+		{
+			slave = peek_slave(master->get_addr(),
+					redis_nodes, all_addrs);
+			if (slave != NULL)
+				master->add_slave(slave);
+		}
 	}
 
 	return true;
@@ -194,7 +242,8 @@ acl::redis_node* redis_builder::peek_master(
 		const char* addr = (*it)->get_addr();
 		if (get_ip(addr, ip) == false)
 		{
-			printf("delete invalid addr: %s\r\n", addr);
+			printf("%s: delete invalid addr: %s\r\n",
+				__FUNCTION__, addr);
 			delete *it;
 			nodes.erase(it);
 			continue;
@@ -202,7 +251,7 @@ acl::redis_node* redis_builder::peek_master(
 		if (addrs.find(ip) != addrs.end())
 			continue;
 		acl::redis_node* master = *it;
-		addrs[addr]++;
+		addrs[ip]++;
 		nodes.erase(it);
 		return master;
 	}
@@ -222,6 +271,7 @@ acl::redis_node* redis_builder::peek_master(
 		{
 			n = iter_addr->second;
 			min_addr = ip;
+			min_node = it;
 		}
 	}
 
@@ -234,6 +284,86 @@ acl::redis_node* redis_builder::peek_master(
 	return master;
 }
 
+acl::redis_node* redis_builder::peek_slave(const char* master_addr,
+	std::vector<acl::redis_node*>& nodes,
+	std::map<acl::string, size_t>& addrs)
+{
+	acl::string master_ip;
+	assert(get_ip(master_addr, master_ip));
+
+	acl::string ip;
+	std::vector<acl::redis_node*> slaves;
+	std::vector<acl::redis_node*>::iterator it, next;
+	for (it = nodes.begin(), next = it; it != nodes.end(); it = next)
+	{
+		++next;
+		const char* addr = (*it)->get_addr();
+		if (get_ip(addr, ip) == false)
+		{
+			printf("%s: delete invalid addr: %s\r\n",
+				__FUNCTION__, addr);
+			delete *it;
+			nodes.erase(it);
+			continue;
+		}
+		if (ip == master_ip)
+			continue;
+		slaves.push_back(*it);
+	}
+
+	if (slaves.empty())
+	{
+		//printf("not found valid slave node for master: %s\r\n",
+		//	master_addr);
+		for (it = nodes.begin(); it != nodes.end(); ++it)
+			slaves.push_back(*it);
+	}
+
+	size_t n = 100000;
+	acl::string min_addr;
+	std::vector<acl::redis_node*>::iterator min_node = slaves.end();
+	acl::redis_node* slave = NULL;
+
+	std::map<acl::string, size_t>::iterator iter_addr;
+	for (it = slaves.begin(); it != slaves.end(); ++it)
+	{
+		const char* addr = (*it)->get_addr();
+		assert(get_ip(addr, ip));
+		iter_addr = addrs.find(ip);
+		if (iter_addr == addrs.end())
+		{
+			min_addr = ip;
+			slave = *it;
+			break;
+		}
+		if (iter_addr->second <= n)
+		{
+			n = iter_addr->second;
+			min_addr = ip;
+			slave = *it;
+		}
+	}
+
+	if (min_addr.empty() || slave == NULL)
+		return NULL;
+
+	addrs[min_addr]++;
+	bool found = false;
+
+	for (it = nodes.begin(); it != nodes.end(); ++it)
+	{
+		if (*it == slave)
+		{
+			nodes.erase(it);
+			found = true;
+			break;
+		}
+	}
+
+	assert(found);
+	return slave;
+}
+
 bool redis_builder::create_cluster(acl::xml& xml)
 {
 	// get the master redis nodes
@@ -242,7 +372,7 @@ bool redis_builder::create_cluster(acl::xml& xml)
 
 	if (nodes.empty())
 	{
-		printf("nodes null\r\n");
+		printf("%s: nodes null\r\n", __FUNCTION__);
 		return false;
 	}
 
@@ -263,11 +393,11 @@ acl::redis_node* redis_builder::create_master(acl::xml_node& node)
 	const char* addr = node.attr_value("addr");
 	if (addr == NULL || *addr == 0)
 	{
-		printf("no addr in the master node\r\n");
+		printf("%s: no addr in the master node\r\n", __FUNCTION__);
 		return NULL;
 	}
 
-	printf(">>> master: %s\r\n", addr);
+	//printf(">>> master: %s\r\n", addr);
 
 	acl::redis_node* master = new acl::redis_node;
 	master->set_addr(addr);
@@ -292,11 +422,11 @@ acl::redis_node* redis_builder::create_node(acl::xml_node& node)
 	const char* addr = node.attr_value("addr");
 	if (addr == NULL || *addr == 0)
 	{
-		printf("no addr in the node\r\n");
+		printf("%s: no addr in the node\r\n", __FUNCTION__);
 		return NULL;
 	}
 
-	printf("\tnode: %s\r\n", addr);
+	//printf("%s: node: %s\r\n", __FUNCTION__, addr);
 	acl::redis_node* slave = new acl::redis_node;
 	slave->set_addr(addr);
 	return slave;
@@ -306,7 +436,7 @@ bool redis_builder::build_cluster()
 {
 	if (masters_.empty())
 	{
-		printf("no master available!\r\n");
+		printf("%s: no master available!\r\n", __FUNCTION__);
 		return false;
 	}
 
@@ -374,8 +504,8 @@ bool redis_builder::build_cluster()
 	const std::map<acl::string, acl::redis_node*>* nodes;
 	if ((nodes = master.cluster_nodes())== NULL)
 	{
-		printf("can't get cluster nodes, addr: %s\r\n",
-			client.get_stream()->get_peer(true));
+		printf("%s: can't get cluster nodes, addr: %s\r\n",
+			__FUNCTION__, client.get_stream()->get_peer(true));
 		return false;
 	}
 
@@ -390,14 +520,15 @@ bool redis_builder::cluster_meet(acl::redis& redis,
 	const std::vector<acl::string>& tokens = buf.split2(":");
 	if (tokens.size() != 2)
 	{
-		printf("invalid addr: %s\r\n", node.get_addr());
+		printf("%s: invalid addr: %s\r\n",
+			__FUNCTION__, node.get_addr());
 		return false;
 	}
 
 	if (!redis.cluster_meet(tokens[0].c_str(), atoi(tokens[1].c_str())))
 	{
-		printf("cluster meet %s %s error: %s\r\n",
-			tokens[0].c_str(), tokens[1].c_str(),
+		printf("%s: cluster meet %s %s error: %s\r\n",
+			__FUNCTION__, tokens[0].c_str(), tokens[1].c_str(),
 			redis.result_error());
 		return false;
 	}
@@ -424,7 +555,8 @@ bool redis_builder::build_master(acl::redis_node& master)
 	const char* id = myself_id(redis);
 	if (id == NULL || *id == 0)
 	{
-		printf("null id, master addr: %s\r\n", master.get_addr());
+		printf("%s: null id, master addr: %s\r\n",
+			__FUNCTION__, master.get_addr());
 		return false;
 	}
 	master.set_id(id);
@@ -451,22 +583,23 @@ bool redis_builder::add_slave(const acl::redis_node& master,
 	const char* master_addr = master.get_addr();
 	if (master_addr == NULL || *master_addr == 0)
 	{
-		printf("master addr null\r\n");
+		printf("%s: master addr null\r\n", __FUNCTION__);
 		return false;
 	}
 	acl::string buf(master_addr);
 	const std::vector<acl::string>& tokens = buf.split2(":");
 	if (tokens.size() != 2)
 	{
-		printf("invalid master_addr: %s\r\n", master_addr);
+		printf("%s: invalid master_addr: %s\r\n",
+			__FUNCTION__, master_addr);
 		return false;
 	}
 
 	// CLUSTER MEET master node
 	if (!redis.cluster_meet(tokens[0].c_str(), atoi(tokens[1].c_str())))
 	{
-		printf("cluster meet %s %s error: %s\r\n",
-			tokens[0].c_str(), tokens[1].c_str(),
+		printf("%s: cluster meet %s %s error: %s\r\n",
+			__FUNCTION__, tokens[0].c_str(), tokens[1].c_str(),
 			redis.result_error());
 		return false;
 	}
@@ -481,8 +614,8 @@ bool redis_builder::add_slave(const acl::redis_node& master,
 
 	if (redis.cluster_replicate(master.get_id()) == false)
 	{
-		printf("cluster replicate id: %s, error: %s, addr: %s\r\n",
-			master.get_id(), redis.result_error(),
+		printf("%s: cluster replicate id: %s, error: %s, addr: %s\r\n",
+			__FUNCTION__, master.get_id(), redis.result_error(),
 			slave.get_addr());
 		return false;
 	}
@@ -510,14 +643,15 @@ bool redis_builder::cluster_meeting(acl::redis& redis, const char* addr)
 	acl::socket_stream* conn = redis.get_client()->get_stream();
 	if (conn == NULL)
 	{
-		printf("connection disconnected!\r\n");
+		printf("%s: connection disconnected!\r\n", __FUNCTION__);
 		return false;
 	}
 	const char* myaddr = conn->get_peer(true);
 	const std::map<acl::string, acl::redis_node*>* nodes;
 	if ((nodes = redis.cluster_nodes())== NULL)
 	{
-		printf("can't get cluster nodes, addr: %s\r\n", myaddr);
+		printf("%s: can't get cluster nodes, addr: %s\r\n",
+			__FUNCTION__, myaddr);
 		return false;
 	}
 
@@ -578,8 +712,8 @@ bool redis_builder::master_set_slots(acl::redis& redis,
 		= master.get_slots();
 	if (slots.size() != 1)
 	{
-		printf("invalid slots's size: %d, addr: %s\r\n",
-			(int) slots.size(), master.get_addr());
+		printf("%s: invalid slots's size: %d, addr: %s\r\n",
+			__FUNCTION__, (int) slots.size(), master.get_addr());
 		return false;
 	}
 	const std::pair<size_t, size_t> slot = slots[0];
@@ -594,8 +728,8 @@ bool redis_builder::master_set_slots(acl::redis& redis,
 
 	if (redis.cluster_addslots(slot_array, n) == false)
 	{
-		printf("addslots error: %s, addr: %s, slots: %d, %d\r\n",
-			redis.result_error(), master.get_addr(),
+		printf("%s: addslots error: %s, addr: %s, slots: %d, %d\r\n",
+			__FUNCTION__, redis.result_error(), master.get_addr(),
 			(int) min_slot, (int) max_slot);
 		return false;
 	}
@@ -611,7 +745,8 @@ bool redis_builder::get_node_id(const char* addr, acl::string& node_id)
 	const char* ptr = myself_id(redis);
 	if (ptr == NULL || *ptr == 0)
 	{
-		printf("null node_id from addr: %s\r\n", addr);
+		printf("%s: null node_id from addr: %s\r\n",
+			__FUNCTION__, addr);
 		return false;
 	}
 
@@ -624,7 +759,7 @@ const char* redis_builder::myself_id(acl::redis& redis)
 	acl::socket_stream* conn = redis.get_client()->get_stream();
 	if (conn == NULL)
 	{
-		printf("connection disconnected!\r\n");
+		printf("%s: connection disconnected!\r\n", __FUNCTION__);
 		return NULL;
 	}
 
@@ -634,7 +769,8 @@ const char* redis_builder::myself_id(acl::redis& redis)
 		redis.cluster_nodes();
 	if (nodes == NULL)
 	{
-		printf("cluster_nodes null, addr: %s\r\n", addr);
+		printf("%s: cluster_nodes null, addr: %s\r\n",
+			__FUNCTION__, addr);
 		return NULL;
 	}
 
@@ -658,10 +794,10 @@ bool redis_builder::get_ip(const char* addr, acl::string& buf)
 	const std::vector<acl::string>& tokens = tmp.split2(":");
 	if (tokens.size() != 2)
 	{
-		printf("invalid addr: %s\r\n", addr);
+		printf("%s: invalid addr: %s\r\n", __FUNCTION__, addr);
 		return false;
 	}
 
-	buf = tokens[1].c_str();
+	buf = tokens[0].c_str();
 	return true;
 }

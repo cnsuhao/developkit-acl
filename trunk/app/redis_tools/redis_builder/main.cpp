@@ -11,6 +11,7 @@ static void usage(const char* procname)
 		"-a cmd[nodes|slots|create|add_node|del_node|node_id]\r\n"
 		"-N new_node[ip:port]\r\n"
 		"-S [add node as slave]\r\n"
+		"-r replicas[default 0]\r\n"
 		"-f configure_file\r\n",
 		procname);
 
@@ -31,10 +32,11 @@ int main(int argc, char* argv[])
 	acl::log::stdout_open(true);
 
 	int  ch;
+	size_t replicas = 0;
 	bool add_slave = false;
 	acl::string addr, cmd, conf, new_addr, node_id;
 
-	while ((ch = getopt(argc, argv, "hs:a:f:N:SI:")) > 0)
+	while ((ch = getopt(argc, argv, "hs:a:f:N:SI:r:")) > 0)
 	{
 		switch (ch)
 		{
@@ -58,6 +60,9 @@ int main(int argc, char* argv[])
 			break;
 		case 'I':
 			node_id = optarg;
+			break;
+		case 'r':
+			replicas = (size_t) atoi(optarg);
 			break;
 		default:
 			break;
@@ -96,7 +101,7 @@ int main(int argc, char* argv[])
 			goto END;
 		}
 		redis_builder builder;
-		builder.build(conf.c_str());
+		builder.build(conf.c_str(), replicas);
 	}
 	else if (cmd == "add_node")
 	{
