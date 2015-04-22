@@ -158,11 +158,12 @@ bool redis_builder::create_cluster(acl::xml& xml, size_t replicas)
 			redis_nodes.push_back(n);
 	}
 
-	if (replicas > 0 && redis_nodes.size() % replicas != 0)
+	size_t mod = redis_nodes.size() % replicas;
+	if (replicas > 0 && mod != 0)
 	{
-		printf("nodes' size(%d) % replicas(%d) is %d != 0\r\n",
+		printf("nodes' size(%d) %% replicas(%d) is %d != 0\r\n",
 			(int) redis_nodes.size(), (int) replicas,
-			(int) (redis_nodes.size() % replicas));
+			(int) mod);
 		std::vector<acl::redis_node*>::iterator it;
 		for (it = redis_nodes.begin(); it != redis_nodes.end(); ++it)
 			delete *it;
