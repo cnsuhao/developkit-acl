@@ -28,10 +28,17 @@ private:
 
 	// parse xml and create cluster nodes before connecting them
 	bool create_cluster(acl::xml& xml);
+
+	// parse xml and create cluster nodes before connecting them,
+	// don't use the master/slave relation from xml configure,
+	// use the replicas param to build the cluster automatic
 	bool create_cluster(acl::xml& xml, size_t replicas);
 
+	// peek one master node and remove it from nodes
 	acl::redis_node* peek_master(std::vector<acl::redis_node*>& nodes,
 		std::map<acl::string, size_t>& addrs);
+
+	// peek one slave node and remove it from nodes
 	acl::redis_node* peek_slave(const char* master_addr,
 		std::vector<acl::redis_node*>& nodes,
 		std::map<acl::string, size_t>& addrs);
@@ -67,8 +74,12 @@ private:
 	acl::redis_node* find_slave(const acl::redis_node* node,
 		const char* addr, size_t& nslaves);
 
-	void print_nodes(int nested, const std::vector<acl::redis_node*>& nodes);
+	// free all nodes nestly
 	void free_nodes(const std::vector<acl::redis_node*>& nodes);
 
+	// get ip from the addr which format is ip:port
 	bool get_ip(const char* addr, acl::string& buf);
+
+	// show the nodes's information, including master and slave
+	void print_nodes(int nested, const std::vector<acl::redis_node*>& nodes);
 };
