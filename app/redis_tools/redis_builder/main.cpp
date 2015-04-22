@@ -17,12 +17,14 @@ static void usage(const char* procname)
 
 	printf("\r\nfor samples:\r\n"
 		"%s -s 127.0.0.1:6379 -a create -f cluster.xml\r\n"
+		"%s -s 127.0.0.1:6379 -a create -f nodes4.xml -r 2\r\n"
 		"%s -s 127.0.0.1:6379 -a nodes\r\n"
 		"%s -s 127.0.0.1:6379 -a slots\r\n"
 		"%s -s 127.0.0.1:6379 -a del_node -I node_id\r\n"
 		"%s -s 127.0.0.1:6379 -a node_id\r\n"
 		"%s -s 127.0.0.1:6379 -a add_node -N 127.0.0.1:6380 -S\r\n",
-		procname, procname, procname, procname, procname, procname);
+		procname, procname, procname, procname,
+		procname, procname, procname);
 }
 
 int main(int argc, char* argv[])
