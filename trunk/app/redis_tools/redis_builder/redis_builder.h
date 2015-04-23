@@ -13,11 +13,6 @@ public:
 	bool add_node(const char* addr, const char* new_node_addr, bool slave);
 	bool del_node(const char* addr, const char* node_id);
 
-	// get the node's id of the given addr
-	bool get_node_id(const char* addr, acl::string& node_id);
-	// get the current node's ID
-	const char* myself_id(acl::redis& redis);
-
 private:
 	int meet_wait_;
 	std::vector<acl::redis_node*> masters_;
@@ -73,13 +68,4 @@ private:
 	// check if the given addr was in the node's slave
 	acl::redis_node* find_slave(const acl::redis_node* node,
 		const char* addr, size_t& nslaves);
-
-	// free all nodes nestly
-	void free_nodes(const std::vector<acl::redis_node*>& nodes);
-
-	// get ip from the addr which format is ip:port
-	bool get_ip(const char* addr, acl::string& buf);
-
-	// show the nodes's information, including master and slave
-	void print_nodes(int nested, const std::vector<acl::redis_node*>& nodes);
 };
