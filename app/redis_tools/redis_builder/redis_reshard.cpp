@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "redis_util.h"
 #include "redis_reshard.h"
 
 redis_reshard::redis_reshard(const char* addr)
@@ -142,9 +143,63 @@ void redis_reshard::move_slots(std::vector<acl::redis_node*>& from,
 	printf("move over!\r\n");
 }
 
-bool redis_reshard::move_slots(acl::redis_node& from,
+int redis_reshard::move_slots(acl::redis_node& from,
 	acl::redis_node& to, int count)
 {
+	const std::vector<std::pair<size_t, size_t> >& slots = from.get_slots();
+	std::vector<std::pair<size_t, size_t> >::const_iterator cit;
+
+	acl::redis_client from_conn(from.get_addr());
+	acl::redis from_redis(&from_conn);
+	acl::redis_client to_conn(to.get_addr());
+	acl::redis to_redis(&to_conn);
+	int n = 0;
+
+	acl::string from_id, to_id;
+	if (redis_util::get_node_id(from_redis, from_id) == false)
+		return -1;
+	if (redis_util::get_node_id(to_redis, to_id) == false)
+		return -1;
+
+	for (cit = slots.begin(); cit != slots.end() && n < count; ++cit)
+	{
+		size_t min = cit->first;
+		size_t max = cit->second;
+		for (size_t i = min; i < max; i++)
+		{
+			if (move_slot(i, from_redis, from_id,
+				to_redis, to_id) == false)
+			{
+				return -1;
+			}
+			n++;
+			if (n >= count)
+				break;
+		}
+		if (n >= count)
+			break;
+	}
+	
+	return n;
+}
+
+bool redis_reshard::move_slot(size_t slot, acl::redis& from,
+	const char* from_id, acl::redis& to, const char* to_id)
+{
+	if (to.cluster_setslot_importing(slot, from_id) == false)
+		return false;
+	if (from.cluster_setslot_migrating(slot, to_id) == false)
+		return false;
+
+	std::vector<acl::redis_node*>::iterator it;
+	for (it = masters_.begin(); it != masters_.end(); ++it)
+	{
+		acl::redis_client conn((*it)->get_addr());
+		acl::redis redis(&conn);
+		if (redis.cluster_setslot_node(slot, to_id) == false)
+			return false;
+	}
+	
 	return true;
 }
 

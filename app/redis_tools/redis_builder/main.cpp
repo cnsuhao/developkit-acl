@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "redis_status.h"
+#include "redis_util.h"
 #include "redis_builder.h"
 #include "redis_reshard.h"
 
@@ -135,8 +136,7 @@ int main(int argc, char* argv[])
 			goto END;
 		}
 		node_id.clear();
-		redis_builder builder;
-		if (builder.get_node_id(addr, node_id) == false)
+		if (redis_util::get_node_id(addr, node_id) == false)
 			printf("can't get node id, addr: %s\r\n", addr.c_str());
 		else
 			printf("addr: %s, node_id: %s\r\n", addr.c_str(),

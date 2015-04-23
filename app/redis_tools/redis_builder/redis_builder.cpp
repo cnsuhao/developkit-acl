@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "redis_status.h"
+#include "redis_util.h"
 #include "redis_builder.h"
 
 #define MAX_SLOTS 16384
@@ -12,20 +13,7 @@ redis_builder::redis_builder(int meet_wait /* = 100 */)
 
 redis_builder::~redis_builder(void)
 {
-	free_nodes(masters_);
-}
-
-void redis_builder::free_nodes(const std::vector<acl::redis_node*>& nodes)
-{
-	std::vector<acl::redis_node*>::const_iterator it;
-	for (it = nodes.begin(); it != nodes.end(); ++it)
-	{
-		const std::vector<acl::redis_node*>* slaves =
-			(*it)->get_slaves();
-		if (!slaves->empty())
-			free_nodes(*slaves);
-		delete *it;
-	}
+	redis_util::free_nodes(masters_);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -65,7 +53,7 @@ bool redis_builder::add_node(const char* addr,
 		return true;
 
 	acl::string node_id;
-	if (get_node_id(addr, node_id) == false)
+	if (redis_util::get_node_id(addr, node_id) == false)
 	{
 		printf("%s: can't get master(%s)'s node_id\r\n",
 			__FUNCTION__, addr);
@@ -99,21 +87,6 @@ bool redis_builder::del_node(const char* addr, const char* node_id)
 
 //////////////////////////////////////////////////////////////////////////
 
-void redis_builder::print_nodes(int nested, const std::vector<acl::redis_node*>& nodes)
-{
-	nested++;
-	std::vector<acl::redis_node*>::const_iterator cit;
-	for (cit = nodes.begin(); cit != nodes.end(); ++cit)
-	{
-		for (int i = 0; i < nested - 1; ++i)
-			printf("\t");
-		printf("addr: %s\r\n", (*cit)->get_addr());
-		const std::vector<acl::redis_node*>* slaves =
-			(*cit)->get_slaves();
-		if (!slaves->empty())
-			print_nodes(nested, *slaves);
-	}
-}
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -130,7 +103,7 @@ bool redis_builder::build(const char* conf, size_t replicas /* = 0 */)
 
 	printf("===================================================\r\n");
 
-	print_nodes(0, masters_);
+	redis_util::print_nodes(0, masters_);
 
 	return build_cluster();
 }
@@ -213,7 +186,7 @@ bool redis_builder::create_cluster(acl::xml& xml, size_t replicas)
 			break;
 		masters_.push_back(master);
 
-		assert(get_ip(master->get_addr(), ip));
+		assert(redis_util::get_ip(master->get_addr(), ip));
 		all_addrs[ip]++;
 
 		for (size_t i = 0; i < replicas; i++)
@@ -239,7 +212,7 @@ acl::redis_node* redis_builder::peek_master(
 	{
 		++next;
 		const char* addr = (*it)->get_addr();
-		if (get_ip(addr, ip) == false)
+		if (redis_util::get_ip(addr, ip) == false)
 		{
 			printf("%s: delete invalid addr: %s\r\n",
 				__FUNCTION__, addr);
@@ -263,7 +236,7 @@ acl::redis_node* redis_builder::peek_master(
 	for (it = nodes.begin(); it != nodes.end(); ++it)
 	{
 		const char* addr = (*it)->get_addr();
-		assert(get_ip(addr, ip));
+		assert(redis_util::get_ip(addr, ip));
 		iter_addr = addrs.find(ip);
 		assert(iter_addr != addrs.end());
 		if (iter_addr->second <= n)
@@ -288,7 +261,7 @@ acl::redis_node* redis_builder::peek_slave(const char* master_addr,
 	std::map<acl::string, size_t>& addrs)
 {
 	acl::string master_ip;
-	assert(get_ip(master_addr, master_ip));
+	assert(redis_util::get_ip(master_addr, master_ip));
 
 	acl::string ip;
 	std::vector<acl::redis_node*> slaves;
@@ -297,7 +270,7 @@ acl::redis_node* redis_builder::peek_slave(const char* master_addr,
 	{
 		++next;
 		const char* addr = (*it)->get_addr();
-		if (get_ip(addr, ip) == false)
+		if (redis_util::get_ip(addr, ip) == false)
 		{
 			printf("%s: delete invalid addr: %s\r\n",
 				__FUNCTION__, addr);
@@ -327,7 +300,7 @@ acl::redis_node* redis_builder::peek_slave(const char* master_addr,
 	for (it = slaves.begin(); it != slaves.end(); ++it)
 	{
 		const char* addr = (*it)->get_addr();
-		assert(get_ip(addr, ip));
+		assert(redis_util::get_ip(addr, ip));
 		iter_addr = addrs.find(ip);
 		if (iter_addr == addrs.end())
 		{
@@ -551,14 +524,14 @@ bool redis_builder::build_master(acl::redis_node& master)
 	if (master_set_slots(redis, master) == false)
 		return false;
 
-	const char* id = myself_id(redis);
-	if (id == NULL || *id == 0)
+	acl::string id;
+	if (redis_util::get_node_id(redis, id) == false)
 	{
 		printf("%s: null id, master addr: %s\r\n",
 			__FUNCTION__, master.get_addr());
 		return false;
 	}
-	master.set_id(id);
+	master.set_id(id.c_str());
 
 	printf("Build master: %s, %s\r\n", id, master.get_addr());
 
@@ -732,71 +705,5 @@ bool redis_builder::master_set_slots(acl::redis& redis,
 			(int) min_slot, (int) max_slot);
 		return false;
 	}
-	return true;
-}
-
-//////////////////////////////////////////////////////////////////////////
-
-bool redis_builder::get_node_id(const char* addr, acl::string& node_id)
-{
-	acl::redis_client client(addr);
-	acl::redis redis(&client);
-	const char* ptr = myself_id(redis);
-	if (ptr == NULL || *ptr == 0)
-	{
-		printf("%s: null node_id from addr: %s\r\n",
-			__FUNCTION__, addr);
-		return false;
-	}
-
-	node_id = ptr;
-	return true;
-}
-
-const char* redis_builder::myself_id(acl::redis& redis)
-{
-	acl::socket_stream* conn = redis.get_client()->get_stream();
-	if (conn == NULL)
-	{
-		printf("%s: connection disconnected!\r\n", __FUNCTION__);
-		return NULL;
-	}
-
-	const char* addr = conn->get_peer(true);
-
-	const std::map<acl::string, acl::redis_node*>* nodes =
-		redis.cluster_nodes();
-	if (nodes == NULL)
-	{
-		printf("%s: cluster_nodes null, addr: %s\r\n",
-			__FUNCTION__, addr);
-		return NULL;
-	}
-
-	std::map<acl::string, acl::redis_node*>::const_iterator it;
-
-	for (it = nodes->begin(); it != nodes->end(); ++it)
-	{
-		const acl::redis_node* node = it->second;
-		if (node->is_myself())
-			return node->get_id();
-	}
-
-	printf("cluster_nodes no myself id, addr: %s\r\n", addr);
-
-	return NULL;
-}
-
-bool redis_builder::get_ip(const char* addr, acl::string& buf)
-{
-	acl::string tmp(addr);
-	const std::vector<acl::string>& tokens = tmp.split2(":");
-	if (tokens.size() != 2)
-	{
-		printf("%s: invalid addr: %s\r\n", __FUNCTION__, addr);
-		return false;
-	}
-
-	buf = tokens[0].c_str();
 	return true;
 }
