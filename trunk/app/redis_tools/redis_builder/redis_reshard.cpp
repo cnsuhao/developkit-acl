@@ -32,6 +32,17 @@ acl::redis_node* redis_reshard::find_node(const char* id)
 	return NULL;
 }
 
+void redis_reshard::copy_all(std::vector<acl::redis_node*>& src,
+	const char* exclude)
+{
+	std::vector<acl::redis_node*>::iterator it;
+	for (it = masters_.begin(); it != masters_.end(); ++it)
+	{
+		if (strcmp((*it)->get_id(), exclude) != 0)
+			src.push_back(*it);
+	}
+}
+
 void redis_reshard::run()
 {
 	if (get_masters_info() == false)
@@ -54,6 +65,7 @@ void redis_reshard::run()
 		printf("invalid value: %d\r\n", ret);
 	}
 
+	acl::redis_node* target = NULL;
 	while (true)
 	{
 		printf("What is the receiving node ID?");
@@ -61,11 +73,79 @@ void redis_reshard::run()
 		int ret = acl_vstream_gets_nonl(ACL_VSTREAM_IN, buf, sizeof(buf));
 		if (ret == ACL_VSTREAM_EOF)
 			exit(1);
-		acl::redis_node* node = find_node(buf);
-		if (node != NULL)
+		target = find_node(buf);
+		if (target != NULL)
 			break;
-		printf("invalid node: %s\r\n", buf);
+		printf("...The specified node(%s) is not known or not "
+			"a master, please try again.\r\n", buf);
 	}
+	assert(target != NULL);
+
+	printf("Please input all the source node IDs.\r\n");
+	printf("  Type 'all' to use all the nodes as source nodes for the hash slots\r\n");
+	printf("  Type 'done' once you entered all the source node IDs.\r\n");
+
+	std::vector<acl::redis_node*> sources;
+	while (true)
+	{
+		printf("Source node #%d:", (int) sources.size() + 1);
+		fflush(stdout);
+		int ret = acl_vstream_gets_nonl(ACL_VSTREAM_IN, buf, sizeof(buf));
+		if (ret == ACL_VSTREAM_EOF)
+			exit(1);
+		if (strcasecmp(buf, "done") == 0)
+			break;
+		if (strcasecmp(buf, "all") == 0)
+		{
+			copy_all(sources, target->get_id());
+			break;
+		}
+		acl::redis_node* source = find_node(buf);
+		if (source == NULL)
+		{
+			printf("...The source node(%s) is not known\r\n", buf);
+			continue;
+		}
+		if (strcmp(target->get_id(), buf) == 0)
+		{
+			printf("... It is not possible to use the target node as source node\r\n");
+			continue;
+		}
+		
+		sources.push_back(source);
+	}
+	if (sources.empty())
+	{
+		printf("*** No source nodes given, operation aborted\r\n");
+		exit(1);
+	}
+
+	move_slots(sources, *target, nslots);
+}
+
+void redis_reshard::move_slots(std::vector<acl::redis_node*>& from,
+	acl::redis_node& to, int nslots)
+{
+	assert(from.empty() == true);
+
+	int base = nslots / (int) from.size();
+	std::vector<acl::redis_node*>::iterator it;
+	for (it = from.begin(); it != from.end(); ++it)
+	{
+		if (move_slots(**it, to, base) == false)
+		{
+			printf("move failed, stop!\r\n");
+			break;
+		}
+	}
+
+	printf("move over!\r\n");
+}
+
+bool redis_reshard::move_slots(acl::redis_node& from,
+	acl::redis_node& to, int count)
+{
+	return true;
 }
 
 bool redis_reshard::get_masters_info()
