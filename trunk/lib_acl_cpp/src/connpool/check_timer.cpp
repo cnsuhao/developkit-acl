@@ -69,8 +69,9 @@ void check_timer::timer_callback(unsigned int id)
 		cit_next = cit;
 		++cit_next;
 
-		//if (cit->second > 1)
-		//	continue;
+		// 如果该值大于 1 则说明该地址的上一个检测还未结束
+		if (cit->second > 1)
+			continue;
 
 		gettimeofday(&begin, NULL);
 
