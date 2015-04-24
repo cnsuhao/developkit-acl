@@ -66,8 +66,8 @@ void check_timer::timer_callback(unsigned int id)
 		cit_next = cit;
 		++cit_next;
 
-		if (cit->second > 1)
-			continue;
+		//if (cit->second > 1)
+		//	continue;
 
 		gettimeofday(&begin, NULL);
 
