@@ -1,4 +1,5 @@
 #include "acl_stdafx.hpp"
+#include "acl_cpp/stdlib/log.hpp"
 #include "acl_cpp/stream/aio_timer_callback.hpp"
 #include "aio_timer_delay_free.hpp"
 #include "acl_cpp/stream/aio_handle.hpp"
