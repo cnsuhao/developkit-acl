@@ -26,7 +26,10 @@ void check_timer::timer_callback(unsigned int id)
 	id_ = (int) id;
 
 	if (stopping_)
+	{
+		logger("check_timer stopping ...");
 		return;
+	}
 
 	connect_manager& manager = monitor_.get_manager();
 
