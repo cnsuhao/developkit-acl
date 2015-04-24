@@ -55,6 +55,9 @@ void check_timer::timer_callback(unsigned int id)
 
 	manager.unlock();
 
+	if (addrs_.empty())
+		logger_warn(">>>no addr been set!<<<");
+
 	// 连接所有服务器地址
 
 	struct timeval begin;
@@ -76,6 +79,7 @@ void check_timer::timer_callback(unsigned int id)
 			addr, conn_timeout_);
 		if (conn == NULL)
 		{
+			logger_warn("connect server: %s error", addr);
 			manager.set_pools_status(addr, false);
 			addrs_.erase(cit);
 		}
@@ -97,6 +101,8 @@ void check_timer::remove_client(const char* addr, check_client* checker)
 	std::map<string, int>::iterator it1 = addrs_.find(addr);
 	if (it1 != addrs_.end())
 		addrs_.erase(it1);
+	else
+		logger_warn("not found addr: %s", addr);
 
 	// 从检测连接集群中删除本连接对象
 	for (std::vector<check_client*>::iterator it2 = checkers_.begin();
