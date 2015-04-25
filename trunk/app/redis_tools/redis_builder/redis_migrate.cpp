@@ -11,17 +11,22 @@ redis_migrate::~redis_migrate(void)
 {
 }
 
-void redis_migrate::move_slots(std::vector<acl::redis_node*>& froms,
-	acl::redis_node& to, int nslots)
+int redis_migrate::move_slots(std::vector<acl::redis_node*>& from,
+	acl::redis_node& to, int count)
 {
-	assert(!froms.empty());
+	assert(!from.empty());
 
-	int base = nslots / (int) froms.size(), nslots_moved = 0;
+	int base = count / (int) from.size(), nslots_moved = 0;
+	int first = base + count % (int) from.size(), ret;
+
 	std::vector<acl::redis_node*>::iterator it;
-	for (it = froms.begin(); it != froms.end(); ++it)
+	for (it = from.begin(); it != from.end(); ++it)
 	{
 		// move some slots from one source node to the target node
-		int ret = move_slots(**it, to, base);
+		if (it == from.begin())
+			ret = move_slots(**it, to, first);
+		else
+			ret = move_slots(**it, to, base);
 		if (ret < 0)
 		{
 			printf("move failed, stop!\r\n");
@@ -31,7 +36,7 @@ void redis_migrate::move_slots(std::vector<acl::redis_node*>& froms,
 		nslots_moved += ret;
 
 		// check if all the slots have been moved
-		if (nslots_moved >= nslots)
+		if (nslots_moved >= count)
 		{
 			printf("moved %d slots ok\r\n", nslots_moved);
 			break;
@@ -39,6 +44,24 @@ void redis_migrate::move_slots(std::vector<acl::redis_node*>& froms,
 	}
 
 	printf("move over!\r\n");
+	return nslots_moved;
+}
+
+bool redis_migrate::check_nodes_id(acl::redis& from, acl::redis& to)
+{
+	if (from_id_.empty() && redis_util::get_node_id(from, from_id_) == false)
+	{
+		printf("can't get source node id, addr: %s\r\n",
+			from.get_client_addr());
+		return false;
+	}
+	if (to_id_.empty() && redis_util::get_node_id(to, to_id_) == false)
+	{
+		printf("can't get target node id, addr: %s\r\n",
+			to.get_client_addr());
+		return false;
+	}
+	return true;
 }
 
 int redis_migrate::move_slots(acl::redis_node& from,
@@ -49,22 +72,14 @@ int redis_migrate::move_slots(acl::redis_node& from,
 	acl::redis_client to_conn(to.get_addr());
 	acl::redis to_redis(&to_conn);
 
-	acl::string from_id, to_id;
-	if (redis_util::get_node_id(from_redis, from_id) == false)
-	{
-		printf("can't get source node id, addr: %s\r\n",
-			from.get_addr());
-		return -1;
-	}
-	if (redis_util::get_node_id(to_redis, to_id) == false)
-	{
-		printf("can't get target node id, addr: %s\r\n",
-			to.get_addr());
-		return -1;
-	}
-
 	// get all the specified source node's slots
 	const std::vector<std::pair<size_t, size_t> >& slots = from.get_slots();
+	return move_slots(from_redis, to_redis, count, slots);
+}
+
+int redis_migrate::move_slots(acl::redis& from, acl::redis& to, int count,
+	const std::vector<std::pair<size_t, size_t> >& slots)
+{
 	std::vector<std::pair<size_t, size_t> >::const_iterator cit;
 	int nslots_moved = 0;
 
@@ -73,39 +88,49 @@ int redis_migrate::move_slots(acl::redis_node& from,
 	{
 		size_t min = cit->first;
 		size_t max = cit->second;
-		for (size_t slot = min; slot < max; slot++)
-		{
-			// move the specified slot from source to target
-			if (move_slot(slot, from_redis, from_id,
-				to_redis, to_id) == false)
-			{
-				printf("move slots error, slot: %d\r\n",
-					(int) slot);
-				return -1;
-			}
-			nslots_moved++;
-
-			// if the specified number slots have been moved ?
-			if (nslots_moved >= count)
-				return nslots_moved;
-		}
+		int ret = move_slots(from, to, count, min, max);
+		if (ret < 0)
+			return -1;
+		nslots_moved += ret;
 	}
 	
 	return nslots_moved;
 }
 
-bool redis_migrate::move_slot(size_t slot, acl::redis& from,
-	const char* from_id, acl::redis& to, const char* to_id)
+int redis_migrate::move_slots(acl::redis& from, acl::redis& to, int count,
+	size_t min_slot, size_t max_slot)
 {
-	// set the slot in migrating status for the source node
-	if (from.cluster_setslot_migrating(slot, to_id) == false)
-		return false;
-	// set the slot in importing status for the target node
-	if (to.cluster_setslot_importing(slot, from_id) == false)
+	int nslots_moved = 0;
+
+	for (size_t slot = min_slot; slot <= max_slot; slot++)
+	{
+		// move the specified slot from source to target
+		if (move_slot(slot, from, to) == false)
+		{
+			printf("move slots error, slot: %d\r\n",
+				(int) slot);
+			return -1;
+		}
+		nslots_moved++;
+
+		// if the specified number slots have been moved ?
+		if (nslots_moved >= count)
+			return nslots_moved;
+	}
+	return nslots_moved;
+}
+
+bool redis_migrate::move_slot(size_t slot, acl::redis& from, acl::redis& to)
+{
+	if (check_nodes_id(from, to) == false)
 		return false;
 
-	const char* from_addr = from.get_client()->get_stream()->get_peer(true);
-	const char* to_addr = to.get_client()->get_stream()->get_peer(true);
+	// set the slot in migrating status for the source node
+	if (from.cluster_setslot_migrating(slot, to_id_.c_str()) == false)
+		return false;
+	// set the slot in importing status for the target node
+	if (to.cluster_setslot_importing(slot, from_id_.c_str()) == false)
+		return false;
 
 	// the number of keys to be moved in each moving
 	size_t max = 10;
@@ -129,41 +154,19 @@ bool redis_migrate::move_slot(size_t slot, acl::redis& from,
 		// move all the keys stored by the specifed key
 		for (cit = keys.begin(); cit != keys.end(); ++cit)
 		{
-			if (move_key((*cit).c_str(), from, to_addr) == false)
+			if (move_key((*cit).c_str(), from,
+				to.get_client_addr()) == false)
 			{
 				printf("move key: %s error, from: %s"
 					", to: %s\r\n", (*cit).c_str(),
-					from_addr, to_addr);
+					from.get_client_addr(),
+					to.get_client_addr());
 				return false;
 			}
 		}
 	}
 
-	return notify_cluster(slot, to_id);
-}
-
-bool redis_migrate::notify_cluster(size_t slot, const char* id)
-{
-	acl::redis redis;
-	std::vector<acl::redis_node*>::const_iterator cit;
-
-	for (cit = masters_.begin(); cit != masters_.end(); ++cit)
-	{
-		acl::redis_client client((*cit)->get_addr());
-		redis.set_client(&client);
-		redis.clear();
-
-		if (redis.cluster_setslot_node(slot, id) == false)
-		{
-			printf("cluster_setslot_node error: %s, slot: %d, "
-				"addr: %s\r\n", redis.result_error(),
-				(int) slot, (*cit)->get_addr());
-			return false;
-		}
-	}
-	
-	printf("slot: %d, moved to %s ok\r\n", (int) slot, id);
-	return true;
+	return notify_cluster(slot, to_id_.c_str());
 }
 
 bool redis_migrate::move_key(const char* key, acl::redis& from,
@@ -172,12 +175,11 @@ bool redis_migrate::move_key(const char* key, acl::redis& from,
 	bool ret = from.migrate(key, to_addr, 0, 15000);
 	if (ret == true)
 		return true;
-	const char* from_addr = from.get_client()->get_stream()->get_peer(true);
 	acl::string error(from.result_error());
 	if (error.find("BUSYKEY", false) == NULL)
 	{
 		printf("move key: %s error: %s, from: %s, to: %s\r\n",
-			key, error.c_str(), from_addr, to_addr);
+			key, error.c_str(), from.get_client_addr(), to_addr);
 		return false;
 	}
 
@@ -203,6 +205,30 @@ bool redis_migrate::move_key(const char* key, acl::redis& from,
 		return true;
 
 	printf("move key: %s error: %s, from: %s, to: %s\r\n",
-		key, from.result_error(), from_addr, to_addr);
+		key, from.result_error(), from.get_client_addr(), to_addr);
 	return false;
+}
+
+bool redis_migrate::notify_cluster(size_t slot, const char* id)
+{
+	acl::redis redis;
+	std::vector<acl::redis_node*>::const_iterator cit;
+
+	for (cit = masters_.begin(); cit != masters_.end(); ++cit)
+	{
+		acl::redis_client client((*cit)->get_addr());
+		redis.set_client(&client);
+		redis.clear();
+
+		if (redis.cluster_setslot_node(slot, id) == false)
+		{
+			printf("cluster_setslot_node error: %s, slot: %d, "
+				"addr: %s\r\n", redis.result_error(),
+				(int) slot, (*cit)->get_addr());
+			return false;
+		}
+	}
+
+	printf("slot: %d, moved to %s ok\r\n", (int) slot, id);
+	return true;
 }
