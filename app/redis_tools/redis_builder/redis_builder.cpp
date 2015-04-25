@@ -533,7 +533,7 @@ bool redis_builder::build_master(acl::redis_node& master)
 	}
 	master.set_id(id.c_str());
 
-	printf("Build master: %s, %s\r\n", id, master.get_addr());
+	printf("Build master: %s, %s\r\n", id.c_str(), master.get_addr());
 
 	const std::vector<acl::redis_node*>* slaves = master.get_slaves();
 	std::vector<acl::redis_node*>::const_iterator cit;

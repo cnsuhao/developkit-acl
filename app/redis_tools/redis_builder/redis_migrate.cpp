@@ -33,7 +33,7 @@ void redis_migrate::move_slots(std::vector<acl::redis_node*>& froms,
 		// check if all the slots have been moved
 		if (nslots_moved >= nslots)
 		{
-			printf("moved %d slots ok\r\n");
+			printf("moved %d slots ok\r\n", nslots_moved);
 			break;
 		}
 	}
@@ -131,7 +131,7 @@ bool redis_migrate::move_slot(size_t slot, acl::redis& from,
 		{
 			if (move_key((*cit).c_str(), from, to_addr) == false)
 			{
-				printf("move key: %s error: %s, from: %s"
+				printf("move key: %s error, from: %s"
 					", to: %s\r\n", (*cit).c_str(),
 					from_addr, to_addr);
 				return false;
@@ -173,11 +173,11 @@ bool redis_migrate::move_key(const char* key, acl::redis& from,
 	if (ret == true)
 		return true;
 	const char* from_addr = from.get_client()->get_stream()->get_peer(true);
-	const char* error = from.result_error();
-	if (strcasestr((char*) error, "BUSYKEY") == false)
+	acl::string error(from.result_error());
+	if (error.find("BUSYKEY", false) == NULL)
 	{
 		printf("move key: %s error: %s, from: %s, to: %s\r\n",
-			key, error, from_addr, to_addr);
+			key, error.c_str(), from_addr, to_addr);
 		return false;
 	}
 
