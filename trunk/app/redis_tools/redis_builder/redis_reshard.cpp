@@ -58,6 +58,7 @@ void redis_reshard::run()
 	while (true)
 	{
 		printf("How many slots do you want to move (from 1 to 16384)?");
+		fflush(stdout);
 		int ret = acl_vstream_gets_nonl(ACL_VSTREAM_IN, buf, sizeof(buf));
 		if (ret == ACL_VSTREAM_EOF)
 			exit(1);
