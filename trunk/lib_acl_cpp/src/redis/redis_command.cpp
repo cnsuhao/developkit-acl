@@ -499,6 +499,19 @@ const redis_result* redis_command::run(redis_client_cluster* cluster,
 				acl_doze(redirect_sleep_);
 			}
 
+			result_ = conn->run(pool_, "ASKING\r\n", 0);
+			if (result_ == NULL)
+			{
+				logger_error("ASKING's reply null");
+				return NULL;
+			}
+			const char* status = result_->get_status();
+			if (status == NULL || strcasecmp(status, "OK") != 0)
+			{
+				logger_error("ASKING's reply error: %s",
+					status ? status : "null");
+				return NULL;
+			}
 			last_moved = false;
 			clear(true);
 		}
