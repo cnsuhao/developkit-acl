@@ -9,23 +9,33 @@
 static void usage(const char* procname)
 {
 	printf("usage: %s -h[help]\r\n"
-		"-s redis_addr[ip:port]\r\n"
-		"-a cmd[nodes|slots|create|add_node|del_node|node_id|reshard]\r\n"
-		"-N new_node[ip:port]\r\n"
-		"-S [add node as slave]\r\n"
-		"-r replicas[default 0]\r\n"
-		"-f configure_file\r\n",
+		" -s redis_addr[ip:port]\r\n"
+		" -a cmd[nodes|slots|create|add_node|del_node|node_id|reshard]\r\n"
+		" -N new_node[ip:port]\r\n"
+		" -S [add node as slave]\r\n"
+		" -r replicas[default 0]\r\n"
+		" -d [if just display the result for create command]\r\n"
+		" -f configure_file\r\n",
 		procname);
 
+	printf("\r\nabout command:\r\n"
+		" nodes: display information about nodes of the cluster\r\n"
+		" slots: display information about slots of the cluster\r\n"
+		" create: build a cluster after all nodes started\r\n"
+		" add_node: add a node specified by -N to another by -s\r\n"
+		" del_node: remove a node specified by -N from anothrer by -s\r\n"
+		" node_id: get the address of one node specified by -s\r\n"
+		" reshard: resharding the slots in all the nodes of the cluster\r\n");
+
 	printf("\r\nfor samples:\r\n"
-		"%s -s 127.0.0.1:6379 -a create -f cluster.xml\r\n"
-		"%s -s 127.0.0.1:6379 -a create -f nodes4.xml -r 2\r\n"
-		"%s -s 127.0.0.1:6379 -a nodes\r\n"
-		"%s -s 127.0.0.1:6379 -a slots\r\n"
-		"%s -s 127.0.0.1:6379 -a del_node -I node_id\r\n"
-		"%s -s 127.0.0.1:6379 -a node_id\r\n"
-		"%s -s 127.0.0.1:6379 -a reshard\r\n"
-		"%s -s 127.0.0.1:6379 -a add_node -N 127.0.0.1:6380 -S\r\n",
+		" %s -s 127.0.0.1:6379 -a create -f cluster.xml\r\n"
+		" %s -s 127.0.0.1:6379 -a create -f nodes4.xml -r 2\r\n"
+		" %s -s 127.0.0.1:6379 -a nodes\r\n"
+		" %s -s 127.0.0.1:6379 -a slots\r\n"
+		" %s -s 127.0.0.1:6379 -a del_node -I node_id\r\n"
+		" %s -s 127.0.0.1:6379 -a node_id\r\n"
+		" %s -s 127.0.0.1:6379 -a reshard\r\n"
+		" %s -s 127.0.0.1:6379 -a add_node -N 127.0.0.1:6380 -S\r\n",
 		procname, procname, procname, procname,
 		procname, procname, procname, procname);
 }
@@ -38,10 +48,10 @@ int main(int argc, char* argv[])
 
 	int  ch;
 	size_t replicas = 0;
-	bool add_slave = false;
+	bool add_slave = false, just_display = false;
 	acl::string addr, cmd, conf, new_addr, node_id;
 
-	while ((ch = getopt(argc, argv, "hs:a:f:N:SI:r:")) > 0)
+	while ((ch = getopt(argc, argv, "hs:a:f:N:SI:r:d")) > 0)
 	{
 		switch (ch)
 		{
@@ -68,6 +78,9 @@ int main(int argc, char* argv[])
 			break;
 		case 'r':
 			replicas = (size_t) atoi(optarg);
+			break;
+		case 'd':
+			just_display = true;
 			break;
 		default:
 			break;
@@ -106,7 +119,7 @@ int main(int argc, char* argv[])
 			goto END;
 		}
 		redis_builder builder;
-		builder.build(conf.c_str(), replicas);
+		builder.build(conf.c_str(), replicas, just_display);
 	}
 	else if (cmd == "add_node")
 	{
