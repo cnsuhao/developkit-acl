@@ -29,7 +29,7 @@ disque::disque(redis_client_cluster* cluster, size_t max_conns)
 
 disque::~disque()
 {
-
+	free_nodes();
 }
 
 const char* disque::addjob(const char* name, const char* job,
@@ -219,39 +219,107 @@ bool disque::show(const char* job_id, std::map<string, string>& out)
 	return true;
 }
 
-int disque::ackjob(const std::vector<string>& jobs)
+int disque::ackjob(const std::vector<string>& job_ids)
 {
-	return true;
+	return jobs_bat(job_ids, "ACKJOB");
 }
 
-int disque::fastack(const std::vector<string>& jobs)
+int disque::fastack(const std::vector<string>& job_ids)
 {
-	return true;
+	return jobs_bat(job_ids, "FASKACK");
+}
+
+int disque::enqueue(const std::vector<string>& job_ids)
+{
+	return jobs_bat(job_ids, "ENQUEUE");
+}
+
+int disque::dequeue(const std::vector<string>& job_ids)
+{
+	return jobs_bat(job_ids, "ENQUEUE");
+}
+
+int disque::deljob(const std::vector<string>& job_ids)
+{
+	return jobs_bat(job_ids, "DEQUEUE");
+}
+
+int disque::jobs_bat(const std::vector<string>& job_ids, const char* cmd)
+{
+	size_t argc = 1 + job_ids.size();
+	const char** argv = (const char**) pool_->dbuf_alloc(argc * sizeof(char*));
+	size_t* lens = (size_t*) pool_->dbuf_alloc(argc * sizeof(size_t));
+
+	argv[0] = cmd;
+	lens[0] = strlen(cmd);
+
+	size_t i = 1;
+	std::vector<string>::const_iterator cit;
+	for (cit = job_ids.begin(); cit != job_ids.end(); ++cit)
+	{
+		argv[i] = (*cit).c_str();
+		lens[i] = (*cit).length();
+		i++;
+	}
+
+	build_request(argc, argv, lens);
+	return get_number();
 }
 
 bool disque::info(std::map<string, string>& out)
 {
+	size_t argc = 1;
+	const char* argv[1];
+	size_t lens[1];
+
+	argv[0] = "INFO";
+	lens[0] = sizeof("INFO") - 1;
+
+	build_request(argc, argv, lens);
+	string buf;
+	if (get_string(buf) <= 0)
+		return false;
+
+	string line;
+	while ((buf.scan_line(line)) == true)
+	{
+		const std::vector<string>& tokens = line.split2(":");
+		if (tokens.size() != 2)
+		{
+			line.clear();
+			continue;
+		}
+		out[tokens[0]] = tokens[1];
+		line.clear();
+	}
+
 	return true;
 }
 
-bool disque::hello(std::map<string, string>& result)
+const std::vector<disque_node*>* disque::hello()
 {
-	return true;
+	free_nodes();
+
+	size_t argc = 1;
+	const char* argv[1];
+	size_t lens[1];
+
+	argv[0] = "HELLO";
+	lens[0] = sizeof("HELLO") - 1;
+
+	build_request(argc, argv, lens);
+	const redis_result* rr = run();
+	if (rr == NULL)
+		return NULL;
+	return &nodes_;
 }
 
-int disque::enqueue(const std::vector<string>& jobs)
+void disque::free_nodes()
 {
-	return true;
-}
-
-int disque::dequeue(const std::vector<string>& jobs)
-{
-	return true;
-}
-
-int disque::deljob(const std::vector<string>& jobs)
-{
-	return true;
+	std::vector<disque_node*>::iterator it;
+	for (it = nodes_.begin(); it != nodes_.end(); ++it)
+		delete *it;
+	nodes_.clear();
 }
 
 } // namespace acl
