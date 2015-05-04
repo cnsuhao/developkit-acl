@@ -689,7 +689,7 @@ int redis_command::get_status(std::vector<bool>& out)
 const char* redis_command::get_status()
 {
 	const redis_result* result = run();
-	return result == NULL ? NULL : result->get_status();
+	return result == NULL ? "" : result->get_status();
 }
 
 int redis_command::get_string(string& buf)
