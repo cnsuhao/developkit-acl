@@ -457,6 +457,9 @@
     <ClCompile Include="src\redis\redis_slot.cpp">
       <Filter>src\redis</Filter>
     </ClCompile>
+    <ClCompile Include="src\redis\disque.cpp">
+      <Filter>src\redis</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\acl_stdafx.hpp">
@@ -940,6 +943,9 @@
       <Filter>src\connpool</Filter>
     </ClInclude>
     <ClInclude Include="include\acl_cpp\redis\redis_slot.hpp">
+      <Filter>include\redis</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\redis\disque.hpp">
       <Filter>include\redis</Filter>
     </ClInclude>
   </ItemGroup>
