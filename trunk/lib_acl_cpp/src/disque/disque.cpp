@@ -4,6 +4,7 @@
 #include "acl_cpp/stdlib/dbuf_pool.hpp"
 #include "acl_cpp/disque/disque_node.hpp"
 #include "acl_cpp/disque/disque_job.hpp"
+#include "acl_cpp/disque/disque_cond.hpp"
 #include "acl_cpp/disque/disque.hpp"
 
 namespace acl
@@ -187,7 +188,7 @@ const std::vector<disque_job*>* disque::getjob(const std::vector<string>& names,
 		i++;
 
 		char* tmp = (char*) pool_->dbuf_alloc(INT_LEN);
-		safe_snprintf(tmp, INT_LEN, "%d", timeout);
+		safe_snprintf(tmp, INT_LEN, "%d", (int) timeout);
 		argv[i] = tmp;
 		lens[i] = strlen(tmp);
 		i++;
@@ -200,7 +201,7 @@ const std::vector<disque_job*>* disque::getjob(const std::vector<string>& names,
 		i++;
 
 		char* tmp = (char*) pool_->dbuf_alloc(INT_LEN);
-		safe_snprintf(tmp, INT_LEN, "%d", count);
+		safe_snprintf(tmp, INT_LEN, "%d", (int) count);
 		argv[i] = tmp;
 		lens[i] = strlen(tmp);
 		i++;

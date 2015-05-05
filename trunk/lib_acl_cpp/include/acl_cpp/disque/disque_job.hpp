@@ -6,6 +6,8 @@
 namespace acl
 {
 
+class redis_result;
+
 class ACL_CPP_API disque_job
 {
 public:
