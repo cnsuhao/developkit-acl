@@ -11,6 +11,7 @@ namespace acl
 class redis_client;
 class redis_client_cluster;
 class disque_node;
+class disque_job;
 
 class ACL_CPP_API disque : virtual public redis_command
 {
@@ -45,7 +46,7 @@ public:
 		size_t timeout, size_t count);
 	int qlen(const char* name);
 	int qpeek(const char* name, int count, std::vector<string>& out);
-	bool show(const char* job_id, std::map<string, string>& out);
+	const disque_job* show(const char* job_id);
 	int ackjob(const std::vector<string>& job_ids);
 	int fastack(const std::vector<string>& job_ids);
 	int enqueue(const std::vector<string>& job_ids);
@@ -59,6 +60,7 @@ private:
 	int jobs_bat(const std::vector<string>& job_ids, const char* cmd);
 
 private:
+	disque_job* job_;
 	int version_;
 	string myid_;
 	std::vector<disque_node*> nodes_;

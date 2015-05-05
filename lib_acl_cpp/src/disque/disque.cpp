@@ -3,6 +3,7 @@
 #include "acl_cpp/stdlib/snprintf.hpp"
 #include "acl_cpp/stdlib/dbuf_pool.hpp"
 #include "acl_cpp/disque/disque_node.hpp"
+#include "acl_cpp/disque/disque_job.hpp"
 #include "acl_cpp/disque/disque.hpp"
 
 namespace acl
@@ -12,18 +13,24 @@ namespace acl
 
 disque::disque()
 : redis_command(NULL)
+, job_(NULL)
+, version_(0)
 {
 
 }
 
 disque::disque(redis_client* conn)
 : redis_command(conn)
+, job_(NULL)
+, version_(0)
 {
 
 }
 
 disque::disque(redis_client_cluster* cluster, size_t max_conns)
 : redis_command(cluster, max_conns)
+, job_(NULL)
+, version_(0)
 {
 
 }
@@ -31,6 +38,8 @@ disque::disque(redis_client_cluster* cluster, size_t max_conns)
 disque::~disque()
 {
 	free_nodes();
+	if (job_)
+		delete job_;
 }
 
 const char* disque::addjob(const char* name, const char* job,
@@ -200,8 +209,14 @@ int disque::qpeek(const char* name, int count, std::vector<string>& out)
 	return get_strings(out);
 }
 
-bool disque::show(const char* job_id, std::map<string, string>& out)
+const disque_job* disque::show(const char* job_id)
 {
+	if (job_)
+	{
+		delete job_;
+		job_ = NULL;
+	}
+
 	size_t argc = 2;
 	const char* argv[2];
 	size_t lens[2];
@@ -213,11 +228,18 @@ bool disque::show(const char* job_id, std::map<string, string>& out)
 	lens[1] = strlen(job_id);
 
 	build_request(argc, argv, lens);
-	const redis_result* result = run();
-	if (result == NULL)
-		return false;
+	const redis_result* rr = run();
+	if (rr == NULL)
+		return NULL;
 
-	return true;
+	job_ = NEW disque_job;
+	if (job_->init(*rr) == false)
+	{
+		delete job_;
+		job_ = NULL;
+		return NULL;
+	}
+	return job_;
 }
 
 int disque::ackjob(const std::vector<string>& job_ids)
