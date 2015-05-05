@@ -110,7 +110,11 @@ private:
 	int jobs_bat(const std::vector<string>& job_ids, const char* cmd);
 
 private:
+	int version_;
+	string myid_;
 	std::vector<disque_node*> nodes_;
+	disque_node* create_node(const redis_result* rr);
+	void current_node(const redis_result* rr);
 	void free_nodes();
 };
 

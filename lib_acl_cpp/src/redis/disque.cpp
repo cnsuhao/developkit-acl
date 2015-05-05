@@ -311,7 +311,74 @@ const std::vector<disque_node*>* disque::hello()
 	const redis_result* rr = run();
 	if (rr == NULL)
 		return NULL;
+
+	size_t n;
+	const redis_result** children = rr->get_children(&n);
+	if (children == NULL || n == 0)
+		return NULL;
+
+	current_node(children[0]);
+
+	for (size_t i = 1; i < n; i++)
+	{
+		disque_node* node = create_node(children[1]);
+		if (node != NULL)
+			nodes_.push_back(node);
+	}
 	return &nodes_;
+}
+
+void disque::current_node(const redis_result* rr)
+{
+	version_ = 0;
+	myid_.clear();
+
+	size_t n;
+	const redis_result** children = rr->get_children(&n);
+	if (n < 2)
+		return;
+	if (children[0]->get_type() == REDIS_RESULT_INTEGER)
+		version_ = children[0]->get_integer();
+
+	if (children[1]->get_type() == REDIS_RESULT_STRING)
+		children[1]->argv_to_string(myid_);
+}
+
+disque_node* disque::create_node(const redis_result* rr)
+{
+	size_t n;
+	const redis_result** children = rr->get_children(&n);
+	if (n < 4)
+		return NULL;
+
+	if (children[0]->get_type() != REDIS_RESULT_STRING)
+		return NULL;
+	string id;
+	children[0]->argv_to_string(id);
+
+	if (children[1]->get_type() != REDIS_RESULT_STRING)
+		return NULL;
+	string ip;
+	children[1]->argv_to_string(ip);
+
+	if (children[2]->get_type() != REDIS_RESULT_STRING)
+		return NULL;
+	string tmp;
+	children[2]->argv_to_string(tmp);
+	int port = ::atoi(tmp.c_str());
+
+	if (children[3]->get_type() != REDIS_RESULT_STRING)
+		return NULL;
+	children[3]->argv_to_string(tmp);
+	int priority = ::atoi(tmp.c_str());
+
+	disque_node* node = NEW disque_node;
+	node->set_id(id.c_str());
+	node->set_ip(ip.c_str());
+	node->set_port(port);
+	node->set_priority(priority);
+
+	return node;
 }
 
 void disque::free_nodes()
