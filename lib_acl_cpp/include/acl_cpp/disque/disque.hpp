@@ -53,7 +53,6 @@ public:
 	int dequeue(const std::vector<string>& job_ids);
 	int deljob(const std::vector<string>& job_ids);
 	bool info(std::map<string, string>& out);
-	bool hello(std::map<string, string>& result);
 	const std::vector<disque_node*>* hello();
 
 private:

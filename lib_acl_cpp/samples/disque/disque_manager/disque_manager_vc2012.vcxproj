@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{4DF99E14-36C7-4C31-B22C-4A43C5C1A8C6}</ProjectGuid>
+    <ProjectGuid>{067E9700-A518-4747-AE70-0C6F433AE478}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <ProjectName>disque_manager</ProjectName>
   </PropertyGroup>

@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{50AA7AE2-55DA-4A66-B7B1-EB5F65D3319F}</ProjectGuid>
+    <ProjectGuid>{2425D8B1-FE96-4D7F-BDB0-48C932935D96}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <ProjectName>disque_pool</ProjectName>
   </PropertyGroup>

@@ -1,156 +1,162 @@
 #include "stdafx.h"
 
-static acl::string __keypre("test_key");
+static acl::string __queue("greeting");
+static acl::string __jobpre("test_job");
 
-static bool test_set(acl::redis& cmd, int n)
+static bool test_addjob(acl::disque& cmd, int n)
 {
-	acl::string key, val;
+	acl::string job;
+	int timeout = 0;
+	const char* jobid;
 
 	for (int i = 0; i < n; i++)
 	{
-		key.format("%s_%d", __keypre.c_str(), i);
-		val.format("val_%s", key.c_str());
+		job.format("job_%s_%d", __jobpre.c_str(), i);
 		cmd.clear();
-		if (cmd.set(key, val) == false)
+		jobid = cmd.addjob(__queue, job, timeout);
+		if (jobid == NULL)
 		{
-			printf("set key: %s error: %s\r\n", key.c_str(),
-				cmd.result_error());
+			printf("addjob queue: %s error: %s\r\n",
+				__queue.c_str(), cmd.result_error());
 			return false;
 		}
 		else if (i < 10)
-			printf("set key: %s ok\r\n", key.c_str());
+			printf("addjob queue: %s ok, jobid: %s\r\n",
+				__queue.c_str(), jobid);
 	}
 
 	return true;
 }
 
-static bool test_get(acl::redis& cmd, int n)
+static bool test_getjob(acl::disque& cmd, int n)
 {
-	acl::string key, val;
+	std::vector<acl::string> queues;
+	std::vector<acl::string> jobs;
+	size_t timeout = 10, count = 100;
+
+	queues.push_back(__queue);
 
 	for (int i = 0; i < n; i++)
 	{
-		key.format("%s_%d", __keypre.c_str(), i);
 		cmd.clear();
-		val.clear();
-		if (cmd.get(key, val) == false)
+		int n = cmd.getjob(queues, jobs, timeout, count);
+		if (n < 0)
 		{
-			printf("get key: %s error: %s\r\n", key.c_str(),
-				cmd.result_error());
+			printf("getjob queue: %s error: %s\r\n",
+				__queue.c_str(), cmd.result_error());
 			return false;
 		}
 		else if (i < 10)
-			printf("get key: %s ok, val: %s\r\n", key.c_str(),
-				val.c_str());
+		{
+			printf("getjob queue: %s ok\r\n", __queue.c_str());
+			for (int j = 0; j < n; j++)
+				printf("job(%d): %s\r\n", j, jobs[j].c_str());
+		}
+		jobs.clear();
 	}
 
 	return true;
 }
 
-static bool test_del(acl::redis& cmd, int n)
+static bool test_qlen(acl::disque& cmd, int n)
 {
-	acl::string key;
-
 	for (int i = 0; i < n; i++)
 	{
-		key.format("%s_%d", __keypre.c_str(), i);
 		cmd.clear();
-		int ret = cmd.del_one(key.c_str());
+		int ret = cmd.qlen(__queue.c_str());
 		if (ret < 0)
 		{
-			printf("del key: %s error: %s\r\n", key.c_str(),
+			printf("qlen queue: %s error: %s\r\n",
+				__queue.c_str(), cmd.result_error());
+			return false;
+		}
+		else if (i < 10)
+			printf("qlen: %d, queue: %s\r\n",
+				ret, __queue.c_str());
+	}
+
+	return true;
+}
+
+static bool test_qpeek(acl::disque& cmd, int n)
+{
+	int count = 100;
+	std::vector<acl::string> jobs;
+
+	for (int i = 0; i < n; i++)
+	{
+		cmd.clear();
+		int n = cmd.qpeek(__queue.c_str(), count, jobs);
+		if (n < 0)
+		{
+			printf("qpeek queue: %s error: %s\r\n",
+				__queue.c_str(), cmd.result_error());
+			return false;
+		}
+		else if (i < 10)
+		{
+			printf("qpeek queue: %s ok\r\n", __queue.c_str());
+			for (int j = 0; j < n; j++)
+				printf("job(%d): %s\r\n", j, jobs[j].c_str());
+		}
+		jobs.clear();
+	}
+
+	return true;
+}
+
+static bool test_show(acl::disque& cmd, int n)
+{
+	acl::string jobid("dddd");
+	acl::string key;
+
+	for (int i = 0; i < n; i++)
+	{
+		key.format("%s_%d", __jobpre.c_str(), i);
+		cmd.clear();
+		const acl::disque_job* job = cmd.show(jobid.c_str());
+		if (job == NULL)
+		{
+			printf("show jobid: %s error: %s\r\n", jobid.c_str(),
 				cmd.result_error());
 			return false;
 		}
 		else if (i < 10)
-			printf("del ok, key: %s\r\n", key.c_str());
+			printf("show ok, jobid: %s\r\n", jobid.c_str());
 	}
 
 	return true;
 }
 
-static bool test_expire(acl::redis& cmd, int n)
+static bool test_ackjob(acl::disque& cmd, int n)
 {
-	acl::string key;
+	std::vector<acl::string> job_ids;
 
 	for (int i = 0; i < n; i++)
 	{
-		key.format("%s_%d", __keypre.c_str(), i);
 		cmd.clear();
-		if (cmd.expire(key.c_str(), 100) < 0)
-		{
-			printf("expire key: %s error: %s\r\n", key.c_str(),
-				cmd.result_error());
-			return false;
-		}
+		int ret = cmd.ackjob(job_ids);
+		if (ret < 0)
+			printf("ackjob error: %s\r\n", cmd.result_error());
 		else if (i < 10)
-			printf("expire ok, key: %s\r\n", key.c_str());
+			printf("ackjob ok\r\n");
 	}
 
 	return true;
 }
 
-static bool test_ttl(acl::redis& cmd, int n)
+static bool test_enqueue(acl::disque& cmd, int n)
 {
-	acl::string key;
-	int ttl;
+	std::vector<acl::string> job_ids;
 
 	for (int i = 0; i < n; i++)
 	{
-		key.format("%s_%d", __keypre.c_str(), i);
 		cmd.clear();
-		if ((ttl = cmd.ttl(key.c_str())) < 0)
-		{
-			printf("get ttl key: %s error: %s\r\n", key.c_str(),
-				cmd.result_error());
-			return false;
-		}
+		int ret = cmd.enqueue(job_ids);
+		if (ret < 0)
+			printf("enqueue error: %s\r\n", cmd.result_error());
 		else if (i < 10)
-			printf("ttl ok, key: %s, ttl: %d\r\n",
-				key.c_str(), ttl);
-	}
-
-	return true;
-}
-
-static bool test_exists(acl::redis& cmd, int n)
-{
-	acl::string key;
-
-	for (int i = 0; i < n; i++)
-	{
-		key.format("%s_%d", __keypre.c_str(), i);
-		cmd.clear();
-		if (cmd.exists(key.c_str()) == false)
-		{
-			if (i < 10)
-				printf("no exists key: %s\r\n", key.c_str());
-		}
-		else if (i < 10)
-			printf("exists key: %s\r\n", key.c_str());
-	}
-
-	return true;
-}
-
-static bool test_type(acl::redis& cmd, int n)
-{
-	acl::string key;
-
-	for (int i = 0; i < n; i++)
-	{
-		key.format("%s_%d", __keypre.c_str(), i);
-		cmd.clear();
-		acl::redis_key_t ret = cmd.type(key.c_str());
-		if (ret == acl::REDIS_KEY_NONE)
-		{
-			printf("unknown type key: %s error: %s\r\n",
-				key.c_str(), cmd.result_error());
-			return false;
-		}
-		else if (i < 10)
-			printf("type ok, key: %s, ret: %d\r\n",
-				key.c_str(), ret);
+			printf("enqueue ok\r\n");
 	}
 
 	return true;
@@ -159,18 +165,18 @@ static bool test_type(acl::redis& cmd, int n)
 static void usage(const char* procname)
 {
 	printf("usage: %s -h[help]\r\n"
-		"-s redis_addr[127.0.0.1:6379]\r\n"
+		"-s disque_addr[127.0.0.1:7711]\r\n"
 		"-n count\r\n"
 		"-C connect_timeout[default: 10]\r\n"
 		"-T rw_timeout[default: 10]\r\n"
-		"-a cmd[set|del|expire|ttl|exists|type|all]\r\n",
+		"-a cmd[addjob|getjob|qlen|qpeek|show|ackjob|fastack|enqueue|dequeue|deljob|info|hello|all]\r\n",
 		procname);
 }
 
 int main(int argc, char* argv[])
 {
 	int  ch, n = 1, conn_timeout = 10, rw_timeout = 10;
-	acl::string addr("127.0.0.1:6379"), command;
+	acl::string addr("127.0.0.1:7711"), command;
 
 	while ((ch = getopt(argc, argv, "hs:n:C:T:a:")) > 0)
 	{
@@ -202,33 +208,41 @@ int main(int argc, char* argv[])
 	acl::acl_cpp_init();
 	acl::log::stdout_open(true);
 	acl::redis_client client(addr.c_str(), conn_timeout, rw_timeout);
-	acl::redis cmd(&client);
+	acl::disque cmd(&client);
 
 	bool ret;
 
-	if (command == "set")
-		ret = test_set(cmd, n);
-	else if (command == "get")
-		ret = test_get(cmd, n);
-	else if (command == "del")
-		ret = test_del(cmd, n);
-	else if (command == "expire")
-		ret = test_expire(cmd, n);
-	else if (command == "ttl")
-		ret = test_ttl(cmd, n);
-	else if (command == "exists")
-		ret = test_exists(cmd, n);
-	else if (command == "type")
-		ret = test_type(cmd, n);
+	if (command == "addjob")
+		ret = test_addjob(cmd, n);
+	else if (command == "getjob")
+		ret = test_getjob(cmd, n);
+	else if (command == "qlen")
+		ret = test_qlen(cmd, n);
+	else if (command == "qpeek")
+		ret = test_qpeek(cmd, n);
+	else if (command == "show")
+		ret = test_show(cmd, n);
+	else if (command == "ackjob")
+		ret = test_ackjob(cmd, n);
+	else if (command == "enqueue")
+		ret = test_enqueue(cmd, n);
+	else if (command == "dequeue")
+		;
+	else if (command == "deljob")
+		;
+	else if (command == "info")
+		;
+	else if (command == "hello")
+		;
 	else if (command == "all")
 	{
-		ret = test_set(cmd, n)
-			&& test_get(cmd, n)
-			&& test_expire(cmd, n)
-			&& test_ttl(cmd, n)
-			&& test_exists(cmd, n)
-			&& test_type(cmd, n)
-			&& test_del(cmd, n);
+		ret = test_addjob(cmd, n)
+			&& test_getjob(cmd, n)
+			&& test_qlen(cmd, n)
+			&& test_qpeek(cmd, n)
+			&& test_show(cmd, n)
+			&& test_ackjob(cmd, n)
+			&& test_enqueue(cmd, n);
 	}
 	else
 	{
