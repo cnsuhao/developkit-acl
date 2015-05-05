@@ -50,7 +50,7 @@ bool disque_job::init(const redis_result& rr)
 #define IS_STRING(x) (x) == REDIS_RESULT_STRING
 #define IS_ARRAY(x)  (x) == REDIS_RESULT_ARRAY
 
-		if (EQ(name, "id") && IS_NUMBER(type))
+		if (EQ(name, "id") && IS_STRING(type))
 			r2->argv_to_string(id_);
 		else if (EQ(name, "queue") && IS_STRING(type))
 			r2->argv_to_string(queue_);
@@ -107,6 +107,21 @@ void disque_job::set_nodes(const redis_result& rr, std::vector<string>& out)
 			id.clear();
 		}
 	}
+}
+
+void disque_job::set_id(const char* id)
+{
+	id_ = id;
+}
+
+void disque_job::set_queue(const char* name)
+{
+	queue_ = name;
+}
+
+void disque_job::set_body(const char* job, size_t len)
+{
+	body_.copy(job, len);
 }
 
 } // namespace acl

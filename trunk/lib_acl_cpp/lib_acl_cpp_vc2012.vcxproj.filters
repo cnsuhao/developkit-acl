@@ -463,6 +463,9 @@
     <ClCompile Include="src\disque\disque_job.cpp">
       <Filter>src\disque</Filter>
     </ClCompile>
+    <ClCompile Include="src\disque\disque_cond.cpp">
+      <Filter>src\disque</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\acl_stdafx.hpp">
@@ -955,6 +958,9 @@
       <Filter>include\disque</Filter>
     </ClInclude>
     <ClInclude Include="include\acl_cpp\disque\disque_job.hpp">
+      <Filter>include\disque</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\disque\disque_cond.hpp">
       <Filter>include\disque</Filter>
     </ClInclude>
   </ItemGroup>

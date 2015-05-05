@@ -225,6 +225,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClCompile Include="src\db\mysql_pool.cpp" />
     <ClCompile Include="src\db\sqlite_pool.cpp" />
     <ClCompile Include="src\disque\disque.cpp" />
+    <ClCompile Include="src\disque\disque_cond.cpp" />
     <ClCompile Include="src\disque\disque_job.cpp" />
     <ClCompile Include="src\event\event_timer.cpp" />
     <ClCompile Include="src\hsocket\hsclient.cpp" />
@@ -380,6 +381,7 @@ copy $(TargetName).pdb ..\dist\lib\win32\$(TargetName).pdb /Y
     <ClInclude Include="include\acl_cpp\db\mysql_pool.hpp" />
     <ClInclude Include="include\acl_cpp\db\sqlite_pool.hpp" />
     <ClInclude Include="include\acl_cpp\disque\disque.hpp" />
+    <ClInclude Include="include\acl_cpp\disque\disque_cond.hpp" />
     <ClInclude Include="include\acl_cpp\disque\disque_job.hpp" />
     <ClInclude Include="include\acl_cpp\disque\disque_node.hpp" />
     <ClInclude Include="include\acl_cpp\event\event_timer.hpp" />

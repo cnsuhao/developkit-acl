@@ -12,8 +12,6 @@ public:
 	disque_job();
 	~disque_job();
 
-	bool init(const redis_result& rr);
-
 	const char* get_id() const
 	{
 		return id_.c_str();
@@ -23,6 +21,19 @@ public:
 	{
 		return queue_.c_str();
 	}
+
+	const string& get_body() const
+	{
+		return body_;
+	}
+
+	void set_id(const char* id);
+	void set_queue(const char* name);
+	void set_body(const char* job, size_t len);
+
+	/////////////////////////////////////////////////////////////////////
+
+	bool init(const redis_result& rr);
 
 	const char* get_state() const
 	{
@@ -72,11 +83,6 @@ public:
 	int get_next_awake_within() const
 	{
 		return next_awake_within_;
-	}
-
-	const string& get_body() const
-	{
-		return body_;
 	}
 
 private:
