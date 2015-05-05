@@ -2,7 +2,8 @@
 #include "acl_cpp/stdlib/string.hpp"
 #include "acl_cpp/stdlib/snprintf.hpp"
 #include "acl_cpp/stdlib/dbuf_pool.hpp"
-#include "acl_cpp/redis/disque.hpp"
+#include "acl_cpp/disque/disque_node.hpp"
+#include "acl_cpp/disque/disque.hpp"
 
 namespace acl
 {

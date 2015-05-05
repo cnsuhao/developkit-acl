@@ -9,59 +9,8 @@ namespace acl
 {
 
 class redis_client;
-
-class ACL_CPP_API disque_node
-{
-public:
-	disque_node() : port_(0), priority_(0) {}
-	~disque_node() {}
-
-	void set_id(const char* id)
-	{
-		id_ = id;
-	}
-
-	void set_ip(const char* ip)
-	{
-		ip_ = ip;
-	}
-
-	void set_port(int port)
-	{
-		port_ = port;
-	}
-
-	void set_priority(int n)
-	{
-		priority_ = n;
-	}
-
-	const char* get_id() const
-	{
-		return id_.c_str();
-	}
-
-	const char* get_ip() const
-	{
-		return ip_.c_str();
-	}
-
-	int get_port() const
-	{
-		return port_;
-	}
-
-	int get_priority() const
-	{
-		return priority_;
-	}
-
-private:
-	string id_;
-	string ip_;
-	int port_;
-	int priority_;
-};
+class redis_client_cluster;
+class disque_node;
 
 class ACL_CPP_API disque : virtual public redis_command
 {
@@ -113,6 +62,7 @@ private:
 	int version_;
 	string myid_;
 	std::vector<disque_node*> nodes_;
+
 	disque_node* create_node(const redis_result* rr);
 	void current_node(const redis_result* rr);
 	void free_nodes();
