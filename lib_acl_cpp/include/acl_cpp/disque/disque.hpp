@@ -10,6 +10,7 @@ namespace acl
 
 class redis_client;
 class redis_client_cluster;
+class disque_cond;
 class disque_node;
 class disque_job;
 
@@ -41,11 +42,17 @@ public:
 		int timeout, const std::map<string, int>* args = NULL);
 	const char* addjob(const char* name, const void* job, size_t job_len,
 		int timeout, const std::map<string, int>* args = NULL);
+	const char* addjob(const char* name, const char* job,
+		int timeout, const disque_cond* cond);
+	const char* addjob(const char* name, const string& job,
+		int timeout, const disque_cond* cond);
+	const char* addjob(const char* name, const void* job, size_t job_len,
+		int timeout, const disque_cond* cond);
 
-	int getjob(const std::vector<string>& names, std::vector<string>& out,
+	const std::vector<disque_job*>* getjob(const std::vector<string>& names,
 		size_t timeout, size_t count);
+	const std::vector<disque_job*>* qpeek(const char* name, int count);
 	int qlen(const char* name);
-	int qpeek(const char* name, int count, std::vector<string>& out);
 	const disque_job* show(const char* job_id);
 	int ackjob(const std::vector<string>& job_ids);
 	int fastack(const std::vector<string>& job_ids);
@@ -60,6 +67,12 @@ private:
 
 private:
 	disque_job* job_;
+	std::vector<disque_job*> jobs_;
+
+	const std::vector<disque_job*>* get_jobs(const char* name);
+	void free_jobs();
+
+private:
 	int version_;
 	string myid_;
 	std::vector<disque_node*> nodes_;

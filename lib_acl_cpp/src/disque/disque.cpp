@@ -40,6 +40,7 @@ disque::~disque()
 	free_nodes();
 	if (job_)
 		delete job_;
+	free_jobs();
 }
 
 const char* disque::addjob(const char* name, const char* job,
@@ -118,7 +119,56 @@ const char* disque::addjob(const char* name, const void* job, size_t job_len,
 	return get_status();
 }
 
-int disque::getjob(const std::vector<string>& names, std::vector<string>& out,
+const char* disque::addjob(const char* name, const char* job,
+	int timeout, const disque_cond* cond)
+{
+	return addjob(name, job, strlen(job), timeout, cond);
+}
+
+const char* disque::addjob(const char* name, const string& job,
+	int timeout, const disque_cond* cond)
+{
+	return addjob(name, job.c_str(), job.length(), timeout, cond);
+}
+
+const char* disque::addjob(const char* name, const void* job, size_t job_len,
+	int timeout, const disque_cond* cond)
+{
+	if (cond == NULL)
+		return addjob(name, job, job_len, timeout);
+	std::map<string, int> args;
+	int n = cond->get_replicate();
+	if (n > 0)
+		args["REPLICATE"] = n;
+	n = cond->get_delay();
+	if (n >= 0)
+		args["DELAY"] = n;
+	n = cond->get_retry();
+	if (n > 0)
+		args["RETRY"] = n;
+	n = cond->get_ttl();
+	if (n > 0)
+		args["TTL"] = n;
+	n = cond->get_maxlen();
+	if (n > 0)
+		args["MAXLEN"] = n;
+	if (cond->is_async())
+		args["ASYNC"] = 1;
+
+	return addjob(name, job, job_len, timeout, &args);
+}
+
+void disque::free_jobs()
+{
+	if (jobs_.empty())
+		return;
+	std::vector<disque_job*>::iterator it;
+	for (it = jobs_.begin(); it != jobs_.end(); ++it)
+		delete *it;
+	jobs_.clear();
+}
+
+const std::vector<disque_job*>* disque::getjob(const std::vector<string>& names,
 	size_t timeout, size_t count)
 {
 	size_t argc = 2 + names.size() + 4;
@@ -169,26 +219,10 @@ int disque::getjob(const std::vector<string>& names, std::vector<string>& out,
 	}
 
 	build_request(i, argv, lens);
-	return get_strings(out);
+	return get_jobs(NULL);
 }
 
-int disque::qlen(const char* name)
-{
-	size_t argc = 2;
-	const char* argv[2];
-	size_t lens[2];
-
-	argv[0] = "QLEN";
-	lens[0] = sizeof("QLEN") - 1;
-
-	argv[1] = name;
-	lens[1] = strlen(name);
-
-	build_request(argc, argv, lens);
-	return get_number();
-}
-
-int disque::qpeek(const char* name, int count, std::vector<string>& out)
+const std::vector<disque_job*>* disque::qpeek(const char* name, int count)
 {
 	size_t argc = 3;
 	const char* argv[3];
@@ -206,7 +240,80 @@ int disque::qpeek(const char* name, int count, std::vector<string>& out)
 	lens[2] = strlen(tmp);
 
 	build_request(argc, argv, lens);
-	return get_strings(out);
+	return get_jobs(name);
+}
+
+const std::vector<disque_job*>* disque::get_jobs(const char* name)
+{
+	const redis_result* result = run();
+	if (result == NULL)
+		return NULL;
+	if (result->get_type() != REDIS_RESULT_ARRAY)
+		return NULL;
+
+	size_t n;
+	const redis_result**children = result->get_children(&n);
+	if (children == NULL || n == 0)
+		return NULL;
+
+	free_jobs();
+
+	string buf;
+	for (size_t i = 0; i < n; i++)
+	{
+		const redis_result* rr = children[i];
+		if (rr->get_type() != REDIS_RESULT_ARRAY)
+			continue;
+		size_t k;
+		const redis_result** jobs = rr->get_children(&k);
+		if (jobs == NULL || k < 2)
+			continue;
+		disque_job* job = new disque_job;
+		jobs_.push_back(job);
+		
+		jobs[0]->argv_to_string(buf);
+		job->set_id(buf.c_str());
+		buf.clear();
+
+		if (name == NULL)
+		{
+			if (k < 3)
+				continue;
+
+			jobs[1]->argv_to_string(buf);
+			job->set_queue(buf.c_str());
+			buf.clear();
+
+			jobs[2]->argv_to_string(buf);
+			job->set_body(buf.c_str(), buf.length());
+			buf.clear();
+		}
+		else
+		{
+			job->set_queue(name);
+			jobs[1]->argv_to_string(buf);
+			job->set_body(buf.c_str(), buf.length());
+			buf.clear();
+		}
+	}
+
+	return &jobs_;
+}
+
+int disque::qlen(const char* name)
+{
+	size_t argc = 2;
+	const char* argv[2];
+	size_t lens[2];
+
+	argv[0] = "QLEN";
+	lens[0] = sizeof("QLEN") - 1;
+
+	argv[1] = name;
+	lens[1] = strlen(name);
+
+	build_request(argc, argv, lens);
+	return get_number();
 }
 
 const disque_job* disque::show(const char* job_id)
