@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="disque_manager"
-	ProjectGUID="{E6A5B31A-3798-40C9-BDDC-0D84DE31911D}"
+	ProjectGUID="{71A55E11-A1AD-44A2-8D7E-B717B8EDF76B}"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
