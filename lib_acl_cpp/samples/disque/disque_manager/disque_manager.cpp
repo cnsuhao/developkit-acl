@@ -1,98 +1,137 @@
 #include "stdafx.h"
 
-static acl::string __keypre("test_key");
+static acl::string __queue("greeting");
+static acl::string __jobpre("test_job");
 
-static bool test_del(acl::redis_key& redis, int i)
+static bool test_addjob(acl::disque& cmd, const acl::disque_cond& cond, int i)
 {
-	acl::string key;
+	acl::string job;
+	int timeout = 0;
+	const char* jobid;
 
-	key.format("%s_%d", __keypre.c_str(), i);
-	redis.clear();
-	int ret = redis.del(key.c_str(), NULL);
+	job.format("job_%s_%d", __jobpre.c_str(), i);
+	cmd.clear();
+	jobid = cmd.addjob(__queue, job, timeout, &cond);
+	if (jobid == NULL)
+	{
+		printf("addjob queue: %s error: %s\r\n",
+			__queue.c_str(), cmd.result_error());
+		return false;
+	}
+	else if (i < 10)
+		printf("addjob queue: %s ok, jobid: %s\r\n",
+			__queue.c_str(), jobid);
+
+	return true;
+}
+
+static bool test_ackjob(acl::disque& cmd,
+	const std::vector<acl::string>& job_ids, int i)
+{
+	cmd.clear();
+	int ret = cmd.ackjob(job_ids);
+	if (ret < 0)
+		printf("ackjob error: %s\r\n", cmd.result_error());
+	else if (i < 10)
+		printf("ackjob ok, ret: %d\r\n", ret);
+
+	return true;
+}
+
+static bool test_getjob(acl::disque& cmd, int i)
+{
+	std::vector<acl::string> queues;
+	size_t timeout = 10, count = 10;
+
+	queues.push_back(__queue);
+
+	cmd.clear();
+	const std::vector<acl::disque_job*>* jobs =
+		cmd.getjob(queues, timeout, count);
+	if (jobs == NULL)
+	{
+		printf("getjob queue: %s error: %s\r\n",
+			__queue.c_str(), cmd.result_error());
+		return false;
+	}
+
+	std::vector<acl::string> job_ids;
+	std::vector<acl::disque_job*>::const_iterator cit1;
+	for (cit1 = jobs->begin(); cit1 != jobs->end(); ++cit1)
+	{
+		const char* jobid = (*cit1)->get_id();
+		if (*jobid)
+			job_ids.push_back(jobid);
+	}
+
+	if (!job_ids.empty() && !test_ackjob(cmd, job_ids, i))
+		return false;
+
+	if (i >= 10)
+		return true;
+
+	printf(">>getjob ok\r\n");
+	std::vector<acl::disque_job*>::const_iterator cit2;
+	for (cit2 = jobs->begin(); cit2 != jobs->end(); ++cit2)
+	{
+		printf("\tid: %s\r\n", (*cit2)->get_id());
+		printf("\tqueue: %s\r\n", (*cit2)->get_queue());
+		printf("\tjob: %s\r\n", (*cit2)->get_body().c_str());
+	}
+
+	return true;
+}
+
+static bool test_qlen(acl::disque& cmd, int i)
+{
+	cmd.clear();
+	int ret = cmd.qlen(__queue.c_str());
 	if (ret < 0)
 	{
-		printf("del key: %s error\r\n", key.c_str());
+		printf("qlen queue: %s error: %s\r\n",
+			__queue.c_str(), cmd.result_error());
 		return false;
 	}
 	else if (i < 10)
-		printf("del ok, key: %s\r\n", key.c_str());
+		printf("qlen: %d, queue: %s\r\n", ret, __queue.c_str());
+
 	return true;
 }
 
-static bool test_expire(acl::redis_key& redis, int i)
+static bool test_qpeek(acl::disque& cmd, int i)
 {
-	acl::string key;
+	int count = 1;
 
-	key.format("%s_%d", __keypre.c_str(), i);
-	redis.clear();
-	if (redis.expire(key.c_str(), 100) < 0)
+	cmd.clear();
+	const std::vector<acl::disque_job*>* jobs =
+		cmd.qpeek(__queue.c_str(), count);
+	if (jobs == NULL)
 	{
-		printf("expire key: %s error\r\n", key.c_str());
+		printf("qpeek queue: %s error: %s\r\n",
+			__queue.c_str(), cmd.result_error());
 		return false;
 	}
-	else if (i < 10)
-		printf("expire ok, key: %s\r\n", key.c_str());
-	return true;
-}
+	else if (i >= 10)
+		return true;
 
-static bool test_ttl(acl::redis_key& redis, int i)
-{
-	acl::string key;
-	int ttl;
-
-	key.format("%s_%d", __keypre.c_str(), i);
-	redis.clear();
-	if ((ttl = redis.ttl(key.c_str())) < 0)
+	printf("qpeek queue: %s ok\r\n", __queue.c_str());
+	std::vector<acl::disque_job*>::const_iterator cit;
+	for (cit = jobs->begin(); cit != jobs->end(); ++cit)
 	{
-		printf("get ttl key: %s error\r\n", key.c_str());
-		return false;
+		printf("\tid: %s\r\n", (*cit)->get_id());
+		printf("\tqueue: %s\r\n", (*cit)->get_queue());
+		printf("\tjob: %s\r\n", (*cit)->get_body().c_str());
 	}
-	else if (i < 10)
-		printf("ttl ok, key: %s, ttl: %d\r\n", key.c_str(), ttl);
-	return true;
-}
 
-static bool test_exists(acl::redis_key& redis, int i)
-{
-	acl::string key;
-
-	key.format("%s_%d", __keypre.c_str(), i);
-	redis.clear();
-	if (redis.exists(key.c_str()) == false)
-	{
-		if (i < 10)
-			printf("no exists key: %s\r\n", key.c_str());
-	}
-	else
-	{
-		if (i < 10)
-			printf("exists key: %s\r\n", key.c_str());
-	}
-	return true;
-}
-
-static bool test_type(acl::redis_key& redis, int i)
-{
-	acl::string key;
-
-	key.format("%s_%d", __keypre.c_str(), i);
-	redis.clear();
-	acl::redis_key_t ret = redis.type(key.c_str());
-	if (ret == acl::REDIS_KEY_NONE)
-	{
-		printf("unknown type key: %s\r\n", key.c_str());
-		return false;
-	}
-	else if (i < 10)
-		printf("type ok, key: %s, ret: %d\r\n", key.c_str(), ret);
 	return true;
 }
 
 class test_thread : public acl::thread
 {
 public:
-	test_thread(acl::redis_client_cluster& manager, const char* cmd, int n)
-		: manager_(manager), cmd_(cmd), n_(n) {}
+	test_thread(acl::disque_client_cluster& manager,
+		acl::disque_cond& cond, const char* cmd, int n)
+		: manager_(manager), cond_(cond), cmd_(cmd), n_(n) {}
 
 	~test_thread() {}
 
@@ -100,52 +139,37 @@ protected:
 	virtual void* run()
 	{
 		bool ret;
-		acl::redis_client_pool* pool;
-		acl::redis_client* conn;
-		acl::redis_key redis;
+		acl::disque_client_pool* pool;
+		acl::disque_client* conn;
+		acl::disque cmd;
 
 		for (int i = 0; i < n_; i++)
 		{
-			pool = (acl::redis_client_pool*) manager_.peek();
+			pool = (acl::disque_client_pool*) manager_.peek();
 			if (pool == NULL)
 			{
 				printf("peek connection pool failed\r\n");
 				break;
 			}
 
-			conn = (acl::redis_client*) pool->peek();
+			conn = (acl::disque_client*) pool->peek();
 			
 			if (conn == NULL)
 			{
-				printf("peek redis_client failed\r\n");
+				printf("peek disque_client failed\r\n");
 				break;
 			}
 
-			redis.set_client(conn);
+			cmd.set_client(conn);
 
-			if (cmd_ == "del")
-				ret = test_del(redis, i);
-			else if (cmd_ == "expire")
-				ret = test_expire(redis, i);
-			else if (cmd_ == "ttl")
-				ret = test_ttl(redis, i);
-			else if (cmd_ == "exists")
-				ret = test_exists(redis, i);
-			else if (cmd_ == "type")
-				ret = test_type(redis, i);
-			else if (cmd_ == "all")
-			{
-				if (test_expire(redis, i) == false
-					|| test_ttl(redis, i) == false
-					|| test_exists(redis, i) == false
-					|| test_type(redis, i) == false
-					|| test_del(redis, i) == false)
-				{
-					ret = false;
-				}
-				else
-					ret = true;
-			}
+			if (cmd_ == "addjob")
+				ret = test_addjob(cmd, cond_, i);
+			else if (cmd_ == "getjob")
+				ret = test_getjob(cmd, i);
+			else if (cmd_ == "qlen")
+				ret = test_qlen(cmd, i);
+			else if (cmd_ == "qpeek")
+				ret = test_qpeek(cmd, i);
 			else
 			{
 				printf("unknown cmd: %s\r\n", cmd_.c_str());
@@ -162,7 +186,8 @@ protected:
 	}
 
 private:
-	acl::redis_client_cluster& manager_;
+	acl::disque_client_cluster& manager_;
+	acl::disque_cond& cond_;
 	acl::string cmd_;
 	int n_;
 };
@@ -175,7 +200,7 @@ static void usage(const char* procname)
 		"-C connect_timeout[default: 10]\r\n"
 		"-I rw_timeout[default: 10]\r\n"
 		"-c max_threads[default: 10]\r\n"
-		"-a cmd[expire|ttl|exists|type|del]\r\n",
+		"-a cmd[addjob|getjob|qlen|qpeek]\r\n",
 		procname);
 }
 
@@ -183,9 +208,10 @@ int main(int argc, char* argv[])
 {
 	int  ch, n = 1, conn_timeout = 10, rw_timeout = 10;
 	int  max_threads = 10;
+	acl::disque_cond cond;
 	acl::string addr("127.0.0.1:6379"), cmd;
 
-	while ((ch = getopt(argc, argv, "hs:n:C:I:c:a:")) > 0)
+	while ((ch = getopt(argc, argv, "hs:n:C:I:c:a:D:R:r:T:M:A")) > 0)
 	{
 		switch (ch)
 		{
@@ -210,6 +236,24 @@ int main(int argc, char* argv[])
 		case 'a':
 			cmd = optarg;
 			break;
+		case 'D':
+			cond.set_delay(atoi(optarg));
+			break;
+		case 'R':
+			cond.set_replicate(atoi(optarg));
+			break;
+		case 'r':
+			cond.set_retry(atoi(optarg));
+			break;
+		case 'T':
+			cond.set_ttl(atoi(optarg));
+			break;
+		case 'M':
+			cond.set_maxlen(atoi(optarg));
+			break;
+		case 'A':
+			cond.set_async(true);
+			break;
 		default:
 			break;
 		}
@@ -217,13 +261,14 @@ int main(int argc, char* argv[])
 
 	acl::acl_cpp_init();
 
-	acl::redis_client_cluster manager(conn_timeout, rw_timeout);
+	acl::disque_client_cluster manager(conn_timeout, rw_timeout);
 	manager.set(addr.c_str(), max_threads);
 
 	std::vector<test_thread*> threads;
 	for (int i = 0; i < max_threads; i++)
 	{
-		test_thread* thread = new test_thread(manager, cmd.c_str(), n);
+		test_thread* thread = new test_thread(manager, cond,
+			cmd.c_str(), n);
 		threads.push_back(thread);
 		thread->set_detachable(false);
 		thread->start();

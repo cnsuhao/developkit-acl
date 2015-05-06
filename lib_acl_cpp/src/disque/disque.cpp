@@ -267,22 +267,23 @@ const std::vector<disque_job*>* disque::get_jobs(const char* name)
 			continue;
 		size_t k;
 		const redis_result** jobs = rr->get_children(&k);
-		if (jobs == NULL || k < 2)
+		if (jobs == NULL)
 			continue;
-		disque_job* job = new disque_job;
-		jobs_.push_back(job);
-		
-		jobs[0]->argv_to_string(buf);
-		job->set_id(buf.c_str());
-		buf.clear();
 
 		if (name == NULL)
 		{
 			if (k < 3)
 				continue;
 
-			jobs[1]->argv_to_string(buf);
+			disque_job* job = new disque_job;
+			jobs_.push_back(job);
+
+			jobs[0]->argv_to_string(buf);
 			job->set_queue(buf.c_str());
+			buf.clear();
+
+			jobs[1]->argv_to_string(buf);
+			job->set_id(buf.c_str());
 			buf.clear();
 
 			jobs[2]->argv_to_string(buf);
@@ -291,7 +292,15 @@ const std::vector<disque_job*>* disque::get_jobs(const char* name)
 		}
 		else
 		{
+			disque_job* job = new disque_job;
+			jobs_.push_back(job);
+
 			job->set_queue(name);
+
+			jobs[0]->argv_to_string(buf);
+			job->set_id(buf.c_str());
+			buf.clear();
+
 			jobs[1]->argv_to_string(buf);
 			job->set_body(buf.c_str(), buf.length());
 			buf.clear();
@@ -445,38 +454,29 @@ const std::vector<disque_node*>* disque::hello()
 
 	size_t n;
 	const redis_result** children = rr->get_children(&n);
-	if (children == NULL || n == 0)
+	if (children == NULL || n < 3)
 		return NULL;
 
-	current_node(children[0]);
+	if (children[0]->get_type() == REDIS_RESULT_INTEGER)
+		version_ = children[0]->get_integer();
 
-	for (size_t i = 1; i < n; i++)
+	if (children[1]->get_type() == REDIS_RESULT_STRING)
+		children[1]->argv_to_string(myid_);
+
+	for (size_t i = 2; i < n; i++)
 	{
-		disque_node* node = create_node(children[1]);
+		disque_node* node = create_node(children[i]);
 		if (node != NULL)
 			nodes_.push_back(node);
 	}
 	return &nodes_;
 }
 
-void disque::current_node(const redis_result* rr)
-{
-	version_ = 0;
-	myid_.clear();
-
-	size_t n;
-	const redis_result** children = rr->get_children(&n);
-	if (n < 2)
-		return;
-	if (children[0]->get_type() == REDIS_RESULT_INTEGER)
-		version_ = children[0]->get_integer();
-
-	if (children[1]->get_type() == REDIS_RESULT_STRING)
-		children[1]->argv_to_string(myid_);
-}
-
 disque_node* disque::create_node(const redis_result* rr)
 {
+	if (rr->get_type() != REDIS_RESULT_ARRAY)
+		return NULL;
+
 	size_t n;
 	const redis_result** children = rr->get_children(&n);
 	if (n < 4)
