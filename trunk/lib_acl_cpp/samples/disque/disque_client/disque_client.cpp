@@ -25,10 +25,23 @@ static bool test_addjob(acl::disque& cmd, const acl::disque_cond& cond, int i)
 	return true;
 }
 
-static bool test_getjob(acl::disque& cmd, int i)
+static bool test_ackjob(acl::disque& cmd,
+	const std::vector<acl::string>& job_ids, int i)
+{
+	cmd.clear();
+	int ret = cmd.ackjob(job_ids);
+	if (ret < 0)
+		printf("ackjob error: %s\r\n", cmd.result_error());
+	else if (i < 10)
+		printf("ackjob ok, ret: %d\r\n", ret);
+
+	return true;
+}
+
+static bool test_getjob(acl::disque& cmd, bool ack, int i)
 {
 	std::vector<acl::string> queues;
-	size_t timeout = 10, count = 1;
+	size_t timeout = 10, count = 10;
 
 	queues.push_back(__queue);
 
@@ -41,17 +54,34 @@ static bool test_getjob(acl::disque& cmd, int i)
 			__queue.c_str(), cmd.result_error());
 		return false;
 	}
-	else if (i >= 10)
+	
+	if (ack)
+	{
+		std::vector<acl::string> job_ids;
+		std::vector<acl::disque_job*>::const_iterator cit1;
+		for (cit1 = jobs->begin(); cit1 != jobs->end(); ++cit1)
+		{
+			const char* jobid = (*cit1)->get_id();
+			if (*jobid)
+				job_ids.push_back(jobid);
+		}
+
+		if (!job_ids.empty() && !test_ackjob(cmd, job_ids, i))
+			return false;
+	}
+
+	if (i >= 10)
 		return true;
 
 	printf(">>getjob ok\r\n");
-	std::vector<acl::disque_job*>::const_iterator cit;
-	for (cit = jobs->begin(); cit != jobs->end(); ++cit)
+	std::vector<acl::disque_job*>::const_iterator cit2;
+	for (cit2 = jobs->begin(); cit2 != jobs->end(); ++cit2)
 	{
-		printf("\tid: %s\r\n", (*cit)->get_id());
-		printf("\tqueue: %s\r\n", (*cit)->get_queue());
-		printf("\tjob: %s\r\n", (*cit)->get_body().c_str());
+		printf("\tid: %s\r\n", (*cit2)->get_id());
+		printf("\tqueue: %s\r\n", (*cit2)->get_queue());
+		printf("\tjob: %s\r\n", (*cit2)->get_body().c_str());
 	}
+
 	return true;
 }
 
@@ -96,6 +126,84 @@ static bool test_qpeek(acl::disque& cmd, int i)
 		printf("\tjob: %s\r\n", (*cit)->get_body().c_str());
 	}
 
+	return true;
+}
+
+static bool test_enqueue(acl::disque& cmd,
+	const std::vector<acl::string>& job_ids, int i)
+{
+	cmd.clear();
+	int ret = cmd.enqueue(job_ids);
+	if (ret < 0)
+		printf("enqueue error: %s\r\n", cmd.result_error());
+	else if (i < 10)
+		printf("enqueue ok\r\n");
+
+	return true;
+}
+
+static bool test_dequeue(acl::disque& cmd,
+	const std::vector<acl::string>& job_ids, int i)
+{
+	cmd.clear();
+	int ret = cmd.dequeue(job_ids);
+	if (ret < 0)
+		printf("dequeue error: %s\r\n", cmd.result_error());
+	else if (i < 10)
+		printf("dequeue ok\r\n");
+
+	return true;
+}
+
+static bool test_deljob(acl::disque& cmd,
+	const std::vector<acl::string>& job_ids, int i)
+{
+	cmd.clear();
+	int ret = cmd.deljob(job_ids);
+	if (ret < 0)
+		printf("deljob error: %s\r\n", cmd.result_error());
+	else if (i < 10)
+		printf("deljob ok\r\n");
+
+	return true;
+}
+
+static bool test_info(acl::disque& cmd, int i)
+{
+	cmd.clear();
+	std::map<acl::string, acl::string> infos;
+	if (cmd.info(infos) == false)
+	{
+		printf("info error: %s\r\n", cmd.result_error());
+		return false;
+	}
+	else if (i >= 10)
+		return true;
+
+	std::map<acl::string, acl::string>::const_iterator cit;
+	for (cit = infos.begin(); cit != infos.end(); ++cit)
+		printf("%s: %s\r\n", cit->first.c_str(), cit->second.c_str());
+	return true;
+}
+
+static bool test_hello(acl::disque& cmd, int i)
+{
+	cmd.clear();
+	const std::vector<acl::disque_node*>* nodes = cmd.hello();
+	if (nodes == NULL)
+	{
+		printf("hello error: %s\r\n", cmd.result_error());
+		return false;
+	}
+	else if (i >= 10)
+		return true;
+
+	std::vector<acl::disque_node*>::const_iterator cit;
+	for (cit = nodes->begin(); cit != nodes->end(); ++cit)
+	{
+		printf("id: %s, ip: %s, port: %d\r\n", (*cit)->get_id(),
+			(*cit)->get_ip(), (*cit)->get_port());
+	}
 	return true;
 }
 
@@ -146,34 +254,6 @@ static bool test_show(acl::disque& cmd, const char* jobid, int i)
 	return true;
 }
 
-static bool test_ackjob(acl::disque& cmd, int i)
-{
-	std::vector<acl::string> job_ids;
-
-	cmd.clear();
-	int ret = cmd.ackjob(job_ids);
-	if (ret < 0)
-		printf("ackjob error: %s\r\n", cmd.result_error());
-	else if (i < 10)
-		printf("ackjob ok\r\n");
-
-	return true;
-}
-
-static bool test_enqueue(acl::disque& cmd, int i)
-{
-	std::vector<acl::string> job_ids;
-
-	cmd.clear();
-	int ret = cmd.enqueue(job_ids);
-	if (ret < 0)
-		printf("enqueue error: %s\r\n", cmd.result_error());
-	else if (i < 10)
-		printf("enqueue ok\r\n");
-
-	return true;
-}
-
 static void usage(const char* procname)
 {
 	printf("usage: %s -h[help]\r\n"
@@ -188,6 +268,7 @@ static void usage(const char* procname)
 		"-M maxlen\r\n"
 		"-A [async]\r\n"
 		"-I jobid\r\n"
+		"-C [if need ackjob for getjob]\r\n"
 		"-a cmd[addjob|getjob|qlen|qpeek|show|ackjob|fastack|enqueue|dequeue|deljob|info|hello]\r\n",
 		procname);
 }
@@ -196,9 +277,11 @@ int main(int argc, char* argv[])
 {
 	int  ch, n = 1, conn_timeout = 10, rw_timeout = 10;
 	acl::string addr("127.0.0.1:7711"), command, jobid;
+	std::vector<acl::string> job_ids;
 	acl::disque_cond cond;
+	bool ack = false;
 
-	while ((ch = getopt(argc, argv, "hs:n:c:t:a:D:R:r:T:M:AI:")) > 0)
+	while ((ch = getopt(argc, argv, "hs:n:c:t:a:D:R:r:T:M:AI:C")) > 0)
 	{
 		switch (ch)
 		{
@@ -240,6 +323,10 @@ int main(int argc, char* argv[])
 			break;
 		case 'I':
 			jobid = optarg;
+			job_ids.push_back(jobid);
+			break;
+		case 'C':
+			ack = true;
 			break;
 		default:
 			break;
@@ -248,7 +335,7 @@ int main(int argc, char* argv[])
 
 	acl::acl_cpp_init();
 	acl::log::stdout_open(true);
-	acl::redis_client client(addr.c_str(), conn_timeout, rw_timeout);
+	acl::disque_client client(addr.c_str(), conn_timeout, rw_timeout);
 	acl::disque cmd(&client);
 
 	bool ret;
@@ -258,7 +345,7 @@ int main(int argc, char* argv[])
 		if (command == "addjob")
 			ret = test_addjob(cmd, cond, i);
 		else if (command == "getjob")
-			ret = test_getjob(cmd, i);
+			ret = test_getjob(cmd, ack, i);
 		else if (command == "qlen")
 			ret = test_qlen(cmd, i);
 		else if (command == "qpeek")
@@ -273,19 +360,45 @@ int main(int argc, char* argv[])
 			ret = test_show(cmd, jobid.c_str(), i);
 		}
 		else if (command == "ackjob")
-			ret = test_ackjob(cmd, i);
+		{
+			if (job_ids.empty())
+			{
+				printf("need: -I jobid\r\n");
+				break;
+			}
+			ret = test_ackjob(cmd, job_ids, i);
+		}
 		else if (command == "enqueue")
-			ret = test_enqueue(cmd, i);
-		/*
+		{
+			if (job_ids.empty())
+			{
+				printf("need: -I jobid\r\n");
+				break;
+			}
+			ret = test_enqueue(cmd, job_ids, i);
+		}
 		else if (command == "dequeue")
-			;
+		{
+			if (job_ids.empty())
+			{
+				printf("need: -I jobid\r\n");
+				break;
+			}
+			ret = test_dequeue(cmd, job_ids, i);
+		}
 		else if (command == "deljob")
-			;
+		{
+			if (job_ids.empty())
+			{
+				printf("need: -I jobid\r\n");
+				break;
+			}
+			ret = test_deljob(cmd, job_ids, i);
+		}
 		else if (command == "info")
-			;
+			ret = test_info(cmd, i);
 		else if (command == "hello")
-			;
-		*/
+			ret = test_hello(cmd, i);
 		else
 		{
 			printf("unknown cmd: %s\r\n", command.c_str());
