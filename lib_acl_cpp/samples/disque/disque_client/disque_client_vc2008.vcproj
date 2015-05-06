@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="disque_client"
-	ProjectGUID="{01D0D367-9DEB-4E80-BFCD-66B43D55245D}"
+	ProjectGUID="{60E02ECD-9FF5-4ED0-B991-49D2548FE193}"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>

@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="disque_pool"
-	ProjectGUID="{C090282C-A161-4C76-90AE-77735C4FC00A}"
+	ProjectGUID="{D4FB2F8D-F9C4-4B84-8677-0D2205F5EC16}"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>

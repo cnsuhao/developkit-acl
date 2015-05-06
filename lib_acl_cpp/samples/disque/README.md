@@ -47,6 +47,7 @@ static void test_disque(acl::disque& cmd)
 	// call disque-server with GETJOB
 	std::vector<acl::string> queues;
 	queues.push_back(queue);
+
 	size_t count = 100;
 
 	const std::vector<acl::disque_job*>* jobs = cmd.getjob(queues, timeout, count);
@@ -61,7 +62,7 @@ static void test_disque(acl::disque& cmd)
 
 	for (cit1 = jobs->begin(); cit1 != jobs->end(); ++cit1)
 	{
-		const char* jobid = (*cit1)->get_id();
+		jobid = (*cit1)->get_id();
 		if (*jobid)
 			job_ids.push_back(jobid);
 	}
