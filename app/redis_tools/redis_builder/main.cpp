@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
 	int  ch;
 	size_t replicas = 0;
 	bool add_slave = false, just_display = false;
-	acl::string addr, cmd, conf, new_addr, node_id, key;
+	acl::string addr("127.0.0.1:6379"), cmd, conf, new_addr, node_id, key;
 
 	while ((ch = getopt(argc, argv, "hs:a:f:N:SI:r:dk:")) > 0)
 	{
@@ -90,6 +90,21 @@ int main(int argc, char* argv[])
 		default:
 			break;
 		}
+	}
+
+	if (cmd == "hash_slot")
+	{
+		if (key.empty())
+		{
+			printf("usage: %s -a hash_slot -k key\r\n", argv[0]);
+			return 1;
+		}
+		size_t max_slot = 16384;
+		unsigned short n = acl_hash_crc16(key.c_str(), key.length());
+		unsigned short slot = n %  max_slot;
+		printf("key: %s, slot: %d\r\n", key.c_str(), (int) slot);
+
+		return 0;
 	}
 
 	int conn_timeout = 10, rw_timeout = 120;
@@ -170,18 +185,6 @@ int main(int argc, char* argv[])
 
 		redis_reshard reshard(addr);
 		reshard.run();
-	}
-	else if (cmd == "hash_slot")
-	{
-		if (key.empty())
-		{
-			printf("usage: %s -a hash_slot -k key\r\n", argv[0]);
-			goto END;
-		}
-		size_t max_slot = 16384;
-		unsigned short n = acl_hash_crc16(key.c_str(), key.length());
-		unsigned short slot = n %  max_slot;
-		printf("key: %s, slot: %d\r\n", key.c_str(), (int) slot);
 	}
 	else
 		printf("unknown cmd: %s\r\n", cmd.c_str());
