@@ -32,6 +32,8 @@ redis_set::~redis_set()
 int redis_set::sadd(const char* key, const char* first_member, ...)
 {
 	std::vector<const char*> members;
+	members.push_back(first_member);
+
 	va_list ap;
 	va_start(ap, first_member);
 	const char* member;
