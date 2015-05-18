@@ -1,14 +1,7 @@
 #include <iostream>
 #include <assert.h>
 #include "lib_acl.h"
-#include "acl_cpp/acl_cpp_init.hpp"
-#include "acl_cpp/stdlib/log.hpp"
-#include "acl_cpp/stream/aio_handle.hpp"
-#include "acl_cpp/stream/aio_istream.hpp"
-#include "acl_cpp/stream/aio_listen_stream.hpp"
-#include "acl_cpp/stream/aio_socket_stream.hpp"
-
-using namespace acl;
+#include "acl_cpp/lib_acl.hpp"
 
 static int   __timeout = 0;
 
@@ -28,10 +21,10 @@ struct DAT_HDR
 /**
  * 异步客户端流的回调类的子类
  */
-class io_callback : public aio_callback
+class io_callback : public acl::aio_callback
 {
 public:
-	io_callback(aio_socket_stream* client)
+	io_callback(acl::aio_socket_stream* client)
 		: status_(STATUS_T_HDR)
 		, client_(client)
 		, i_(0)
@@ -146,14 +139,14 @@ public:
 
 private:
 	status_t status_;
-	aio_socket_stream* client_;
+	acl::aio_socket_stream* client_;
 	int   i_;
 };
 
 /**
  * 异步监听流的回调类的子类
  */
-class io_accept_callback : public aio_accept_callback
+class io_accept_callback : public acl::aio_accept_callback
 {
 public:
 	io_accept_callback() {}
@@ -167,7 +160,7 @@ public:
 	 * @param client {aio_socket_stream*} 异步客户端流
 	 * @return {bool} 返回 true 以通知监听流继续监听
 	 */
-	bool accept_callback(aio_socket_stream* client)
+	bool accept_callback(acl::aio_socket_stream* client)
 	{
 		// 创建异步客户端流的回调对象并与该异步流进行绑定
 		io_callback* callback = new io_callback(client);
@@ -229,10 +222,10 @@ int main(int argc, char* argv[])
 	acl::log::stdout_open(true);
 
 	// 构建异步引擎类对象
-	aio_handle handle(use_kernel ? ENGINE_KERNEL : ENGINE_SELECT);
+	acl::aio_handle handle(use_kernel ? acl::ENGINE_KERNEL : acl::ENGINE_SELECT);
 
 	// 创建监听异步流
-	aio_listen_stream* sstream = new aio_listen_stream(&handle);
+	acl::aio_listen_stream* sstream = new acl::aio_listen_stream(&handle);
 
 	// 初始化ACL库(尤其是在WIN32下一定要调用此函数，在UNIX平台下可不调用)
 	acl::acl_cpp_init();
