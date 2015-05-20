@@ -23,7 +23,7 @@ int acl_read_fd(int fd, void *ptr, int nbytes, int *recv_fd)
 	struct msghdr msg;
 	struct iovec iov[1];
 	int n;
-#ifdef HAVE_MSGHDR_MSG_CONTROL
+#if defined(HAVE_MSGHDR_MSG_CONTROL) && !defined(MINGW)
 	const char *myname = "acl_read_fd";
 	union {
 		struct cmsghdr cm;
@@ -58,7 +58,7 @@ int acl_read_fd(int fd, void *ptr, int nbytes, int *recv_fd)
 	if ((n = recvmsg(fd, &msg, 0)) <= 0)
 		return (n);
 
-#ifdef HAVE_MSGHDR_MSG_CONTROL
+#if  defined(HAVE_MSGHDR_MSG_CONTROL) && !defined(MINGW)
 	if ((cmptr = CMSG_FIRSTHDR(&msg)) != NULL
 	    && cmptr->cmsg_len == CMSG_LEN(sizeof(int)))
 	{
@@ -91,7 +91,7 @@ int acl_write_fd(int fd, void *ptr, int nbytes, int send_fd)
 	struct msghdr msg;
 	struct iovec  iov[1];
 
-#ifdef HAVE_MSGHDR_MSG_CONTROL
+#if defined(HAVE_MSGHDR_MSG_CONTROL) && !defined(MINGW)
 	struct cmsghdr *cmptr;
 	int *fdptr;
 	union {
