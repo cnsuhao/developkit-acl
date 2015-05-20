@@ -10,7 +10,9 @@
 
 #ifdef	ACL_LINUX
 #include <unistd.h>
+# ifndef MINGW
 #include <execinfo.h>
+# endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>

@@ -609,6 +609,8 @@ int acl_pthread_atexit_remove(void *arg, void (*free_fn)(void*))
 
 /*----------------------------------------------------------------------------*/
 
+#ifndef MINGW
+
 typedef struct {
 	acl_pthread_key_t key;
 	void *ptr;
@@ -852,3 +854,5 @@ void acl_pthread_tls_key_set(acl_pthread_key_t key)
 {
 	__tls_ctx_key = key;
 }
+
+#endif
