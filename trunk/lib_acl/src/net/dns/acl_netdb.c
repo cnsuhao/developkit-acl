@@ -330,7 +330,7 @@ ACL_DNS_DB *acl_gethostbyname(const char *name, int *h_error)
 /* #endif */
 
 #ifdef	ACL_UNIX
-# ifndef ACL_MACOSX
+# if !defined(ACL_MACOSX) && !defined(MINGW)
 	struct hostent  h_buf;
 	int   errnum = 0;
 # endif

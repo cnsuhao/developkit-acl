@@ -8,11 +8,10 @@
 #include "stdlib/unix/acl_trace.h"
 #endif
 
-#ifdef	ACL_LINUX
+#if defined(ACL_LINUX) && !defined(MINGW)
+
 #include <unistd.h>
-# ifndef MINGW
 #include <execinfo.h>
-# endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>

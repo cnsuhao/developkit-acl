@@ -80,6 +80,7 @@ endif
 ifeq ($(findstring MINGW, $(UNIXNAME)), MINGW)
 	CFLAGS += -DLINUX2 -DMINGW
 	UNIXTYPE = LINUX
+	SYSLIB = -lpthread-2
 endif
 
 # For SunOS
