@@ -2,6 +2,12 @@
 #ifndef ACL_PREPARE_COMPILE
 
 #include "stdlib/acl_define.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "stdlib/acl_msg.h"
+#include "stdlib/unix/acl_transfer_fd.h"
 
 #ifdef ACL_BCB_COMPILER
 #pragma hdrstop
@@ -9,14 +15,41 @@
 
 #endif
 
-#ifdef ACL_UNIX
+#if defined(ACL_UNIX)
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+# ifdef MINGW
 
-#include "stdlib/acl_msg.h"
-#include "stdlib/unix/acl_transfer_fd.h"
+int acl_read_fd(int fd, void *ptr, int nbytes, int *recv_fd)
+{
+	const char *myname = "acl_read_fd";
+
+	(void) fd;
+	(void) ptr;
+	(void) nbytes;
+	(void) recv_fd;
+
+	acl_msg_error("%s(%d): not implement yet!", myname, __LINE__);
+	return -1;
+}
+
+int acl_write_fd(int fd, void *ptr, int nbytes, int send_fd)
+{
+	const char *myname = "acl_write_fd";
+
+	(void) fd;
+	(void) ptr;
+	(void) nbytes;
+	(void) send_fd;
+
+	acl_msg_error("%s(%d): not implement yet!", myname, __LINE__);
+	return -1;
+}
+
+# else
+
+#define SENDMSG	sendmsg
+#define RECVMSG	recvmsg
+
 
 int acl_read_fd(int fd, void *ptr, int nbytes, int *recv_fd)
 {
@@ -55,8 +88,8 @@ int acl_read_fd(int fd, void *ptr, int nbytes, int *recv_fd)
 	msg.msg_iov = iov;
 	msg.msg_iovlen = 1;
 
-	if ((n = recvmsg(fd, &msg, 0)) <= 0)
-		return (n);
+	if ((n = RECVMSG(fd, &msg, 0)) <= 0)
+		return n;
 
 #if  defined(HAVE_MSGHDR_MSG_CONTROL) && !defined(MINGW)
 	if ((cmptr = CMSG_FIRSTHDR(&msg)) != NULL
@@ -83,7 +116,7 @@ int acl_read_fd(int fd, void *ptr, int nbytes, int *recv_fd)
 		*recv_fd = -1; /* descriptor was not passed */
 #endif
 	
-	return (n);
+	return n;
 }
 
 int acl_write_fd(int fd, void *ptr, int nbytes, int send_fd)
@@ -131,7 +164,8 @@ int acl_write_fd(int fd, void *ptr, int nbytes, int send_fd)
 	msg.msg_iov = iov;
 	msg.msg_iovlen = 1;
 
-	return (sendmsg(fd, &msg, 0));
+	return SENDMSG(fd, &msg, 0);
 }
 
+# endif /* MINGW */
 #endif /* ACL_UNIX */
