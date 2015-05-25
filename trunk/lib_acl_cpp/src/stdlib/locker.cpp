@@ -13,7 +13,7 @@ locker::locker(bool use_mutex /* = true */, bool use_spinlock /* = false */)
 	else
 	{
 		mutex_ = NULL;
-#ifndef	WIN32
+#if	!defined(WIN32) && !defined(MINGW)
 		spinlock_ = NULL;
 #endif
 	}
@@ -27,13 +27,13 @@ locker::~locker()
 		acl_file_close(fHandle_);
 	if (mutex_)
 	{
-#ifndef WIN32
+#ifndef	WIN32
 		(void) pthread_mutexattr_destroy(&mutex_attr_);
 #endif
 		(void) acl_pthread_mutex_destroy(mutex_);
 		acl_myfree(mutex_);
 	}
-#ifndef	WIN32
+#if	!defined(WIN32) && !defined(MINGW)
 	if (spinlock_)
 	{
 		pthread_spin_destroy(spinlock_);
@@ -42,12 +42,10 @@ locker::~locker()
 #endif
 }
 
-void locker::init_mutex(bool use_spinlock)
+void locker::init_mutex(bool use_spinlock acl_unused)
 {
 
-#ifdef WIN32
-	(void) use_spinlock;
-#else
+#if	defined(ACL_UNIX) && !defined(MINGW)
 	if (use_spinlock)
 	{
 		spinlock_ = (pthread_spinlock_t*)
@@ -95,7 +93,7 @@ bool locker::open(ACL_FILE_HANDLE fh)
 
 bool locker::lock()
 {
-#ifndef	WIN32
+#if	defined(ACL_UNIX) && !defined(MINGW)
 	if (spinlock_)
 	{
 		if (pthread_spin_lock(spinlock_) != 0)
@@ -123,7 +121,7 @@ bool locker::lock()
 
 bool locker::try_lock()
 {
-#ifndef	WIN32
+#if	defined(ACL_UNIX) && !defined(MINGW)
 	if (spinlock_)
 	{
 		if (pthread_spin_trylock(spinlock_) != 0)
@@ -153,7 +151,7 @@ bool locker::unlock()
 {
 	bool  ret;
 
-#ifndef	WIN32
+#if	defined(ACL_UNIX) && !defined(MINGW)
 	if (spinlock_)
 	{
 		if (pthread_spin_unlock(spinlock_) == 0)
