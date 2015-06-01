@@ -9,6 +9,7 @@ namespace acl
 redis_session::redis_session(const char* addrs, size_t max_conns,
 	int conn_timeout /* = 180 */, int rw_timeout /* = 300 */,
 	time_t ttl /* = 0 */, const char* sid /* = NULL */)
+	: session(ttl, sid)
 {
 	cluster_ = NEW redis_client_cluster(conn_timeout, rw_timeout);
 	cluster_->init(NULL, addrs, max_conns);
