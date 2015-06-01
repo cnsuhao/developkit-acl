@@ -466,6 +466,9 @@
     <ClCompile Include="src\disque\disque_cond.cpp">
       <Filter>src\disque</Filter>
     </ClCompile>
+    <ClCompile Include="src\session\redis_session.cpp">
+      <Filter>src\session</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\acl_stdafx.hpp">
@@ -962,6 +965,9 @@
     </ClInclude>
     <ClInclude Include="include\acl_cpp\disque\disque_cond.hpp">
       <Filter>include\disque</Filter>
+    </ClInclude>
+    <ClInclude Include="include\acl_cpp\session\redis_session.hpp">
+      <Filter>include\session</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

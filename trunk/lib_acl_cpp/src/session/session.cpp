@@ -115,14 +115,11 @@ bool session::flush()
 		return true;
 	dirty_ = false;
 
-	string buf(256);
-
 	// 调用纯虚接口，获得原来的 sid 数据
-	if (get_data(sid_->buf, buf) == true)
+	if (get_attrs(sid_->buf, attrs_) == true)
 	{
 		if (!sid_saved_)
 			sid_saved_ = true;
-		deserialize(buf, attrs_);  // 反序列化
 	}
 
 	std::map<string, VBUF*>::iterator it_cache = attrs_cache_.begin();
@@ -164,11 +161,8 @@ bool session::flush()
 	// 所以只需要将 attrs_cache_ 空间清除即可
 	attrs_cache_.clear();
 
-	serialize(attrs_, buf);  // 序列化数据
-	attrs_clear(attrs_);  // 清除属性集合数据
-
 	// 调用纯虚接口，向 memcached 或类似缓存中添加数据
-	if (set_data(sid_->buf, buf.c_str(), buf.length(), ttl_) == false)
+	if (set_attrs(sid_->buf, attrs_, ttl_) == false)
 	{
 		logger_error("set cache error, sid(%s)", sid_->buf);
 		return false;
@@ -202,23 +196,17 @@ bool session::set(const char* name, const void* value, size_t len,
 
 	// 直接操作后端 cache 服务器，设置(添加/修改) 属性字段
 
-	string buf(256);
-
 	// 调用纯虚接口，获得原来的 sid 数据
-	if (get_data(sid_->buf, buf) == false)
+	if (get_attrs(sid_->buf, attrs_) == false)
 	{
 		// 如果没有则创建新的 sid 数据
-		serialize(name, value, len, buf);
+		attrs_[name] = vbuf_new(value, len, TODO_SET);
 	}
-
 	// 如果存在对应 sid 的数据，则将新数据添加在原来数据中
 	else
 	{
 		if (!sid_saved_)
 			sid_saved_ = true;
-
-		// 反序列化
-		deserialize(buf, attrs_);
 
 		// 如果该属性已存在，则需要先释放原来的属性值后再添加新值
 
@@ -228,12 +216,10 @@ bool session::set(const char* name, const void* value, size_t len,
 		else
 			attrs_[name] = vbuf_set(it->second, value,
 						len, TODO_SET);
-		serialize(attrs_, buf);  // 序列化数据
-		attrs_clear(attrs_);
 	}
 
 	// 调用纯虚接口，向 memcached 或类似缓存中添加数据
-	if (set_data(sid_->buf, buf.c_str(), buf.length(), ttl_) == false)
+	if (set_attrs(sid_->buf, attrs_, ttl_) == false)
 	{
 		logger_error("set cache error, sid(%s)", sid_->buf);
 		return false;
@@ -243,23 +229,19 @@ bool session::set(const char* name, const void* value, size_t len,
 	return true;
 }
 
-const char* session::get(const char* name, bool local_cached /* = false */)
+const char* session::get(const char* name)
 {
-	const VBUF* bf = get_vbuf(name, local_cached);
+	const VBUF* bf = get_vbuf(name);
 	if (bf == NULL)
 		return "";
 	return bf->buf;
 }
 
-const VBUF* session::get_vbuf(const char* name, bool local_cached /* = false */)
+const VBUF* session::get_vbuf(const char* name)
 {
-	string buf(256);
-	if (local_cached == false || attrs_.empty())
-	{
-		if (get_data(sid_->buf, buf) == false)
-			return NULL;
-		deserialize(buf, attrs_);
-	}
+	if (get_attrs(sid_->buf, attrs_) == false)
+		return NULL;
+
 	std::map<string, VBUF*>::const_iterator cit = attrs_.find(name);
 	if (cit == attrs_.end())
 		return NULL;
@@ -316,11 +298,9 @@ bool session::del(const char* name, bool delay /* = false */)
 
 	// 直接操作后端 cache 服务器，删除属性字段
 
-	string buf(256);
-	if (get_data(sid_->buf, buf) == false)
+	if (get_attrs(sid_->buf, attrs_) == false)
 		return true;
 
-	deserialize(buf, attrs_);
 	std::map<string, VBUF*>::iterator it = attrs_.find(name);
 	if (it == attrs_.end())
 		return false;
@@ -333,7 +313,7 @@ bool session::del(const char* name, bool delay /* = false */)
 	if (attrs_.empty())
 	{
 		// 调用虚函数，删除该 sid 对应的缓存内容
-		if (del_data(sid_->buf) == false)
+		if (del_key(sid_->buf) == false)
 		{
 			logger_error("del sid(%s) error", sid_->buf);
 			return false;
@@ -341,12 +321,9 @@ bool session::del(const char* name, bool delay /* = false */)
 		return true;
 	}
 
-	// 向 memcached 中重新添加剩余的数据
+	// 重新添加剩余的数据
 
-	serialize(attrs_, buf);
-	attrs_clear(attrs_);
-
-	if (set_data(sid_->buf, buf.c_str(), buf.length(), ttl_) == false)
+	if (set_attrs(sid_->buf, attrs_, ttl_) == false)
 	{
 		logger_error("set cache error, sid(%s)", sid_->buf);
 		return false;
@@ -357,7 +334,7 @@ bool session::del(const char* name, bool delay /* = false */)
 bool session::remove()
 {
 	// 调用虚函数，删除缓存对象
-	if (del_data(sid_->buf) == false)
+	if (del_key(sid_->buf) == false)
 	{
 		logger_error("invalid sid(%s) error", sid_->buf);
 		return false;
@@ -391,15 +368,6 @@ void session::serialize(const std::map<string, VBUF*>& attrs, string& out)
 		escape(&ch, 1, out);
 		escape(it->second->buf, it->second->len, out);
 	}
-}
-
-void session::serialize(const char* name, const void* value,
-	size_t len, string& out)
-{
-	escape(name, strlen(name), out);
-	const char ch = 1;
-	escape(&ch, 1, out);
-	escape((const char*) value, len, out);
 }
 
 // 采用 handlersocket 的解码方式
