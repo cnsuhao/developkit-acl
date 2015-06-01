@@ -91,34 +91,27 @@ public:
 	 *  样可以提高传输效率；当为 false 时，则立刻更新数据
 	 * @return {bool} 返回 false 表示出错
 	 */
-	bool set(const char* name, const void* value, size_t len, bool delay = false);
+	virtual bool set(const char* name, const void* value,
+		size_t len, bool delay = false);
 	
 	/**
 	 * 从 session 中取得字符串类型属性值
 	 * @param name {const char*} session 属性名，非空
-	 * @param local_cached {bool} 当本 session 对象从后端 cache 服务器
-	 *  取过一次数据后，如果该参数为 true，则连续调用本函数时，所用数据
-	 *  是本对象缓存的数据，而不是每次都要从后端取；否则，则每调用本函数
-	 *  都将从后端 cache 服务器取数据
 	 * @return {const char*} session 属性值，返回的指针地址永远非空，用户
 	 *  可以通过判断返回的是否是空串(即: "\0")来判断出错或不存在
 	 *  注：该函数返回非空数据后，用户应该立刻保留此返回值，因为下次
 	 *      的其它函数调用可能会清除该临时返回数据
 	 */
-	const char* get(const char* name, bool local_cached = false);
+	const char* get(const char* name);
 
 	/**
 	 * 从 session 中取得二进制数据类型的属性值
 	 * @param name {const char*} session 属性名，非空
-	 * @param local_cached {bool} 当本 session 对象从后端 cache 服务器
-	 *  取过一次数据后，如果该参数为 true，则连续调用本函数时，所用数据
-	 *  是本对象缓存的数据，而不是每次都要从后端取；否则，则每调用本函数
-	 *  都将从后端 cache 服务器取数据
 	 * @return {const VBUF*} session 属性值，返回空时表示出错或不存在
 	 *  注：该函数返回非空数据后，用户应该立刻保留此返回值，因为下次
 	 *      的其它函数调用可能会清除该临时返回数据
 	 */
-	const VBUF* get_vbuf(const char* name, bool local_cached = false);
+	const VBUF* get_vbuf(const char* name);
 
 	/**
 	 * 从 session 中删除指定属性值，当所有的变量都删除
@@ -156,18 +149,29 @@ public:
 	bool remove(void);
 
 protected:
-	// 获得对应 sid 的数据
-	virtual bool get_data(const char* sid, string& buf) = 0;
+	// 从后端缓存中获得对应 sid 的属性对象集合
+	virtual bool get_attrs(const char* sid,
+		std::map<string, VBUF*>& attrs) = 0;
 
-	// 设置对应 sid 的数据
-	virtual bool set_data(const char* sid, const char* buf,
-		size_t len, time_t ttl) = 0;
+	// 向后端缓存写入对应 sid 的属性对象集合
+	virtual bool set_attrs(const char* sid,
+		std::map<string, VBUF*>& attrs, time_t ttl) = 0;
 
 	// 删除对应 sid 的数据
-	virtual bool del_data(const char* sid) = 0;
+	virtual bool del_key(const char* sid) = 0;
 
 	// 设置对应 sid 数据的过期时间
 	virtual bool set_timeout(const char* sid, time_t ttl) = 0;
+
+protected:
+	// 将 session 数据序列化
+	static void serialize(const std::map<string, VBUF*>& attrs, string& out);
+
+	// 将 session 数据反序列化
+	static void deserialize(string& buf, std::map<string, VBUF*>& attrs);
+
+	// 清空 session 属性集合
+	static void attrs_clear(std::map<string, VBUF*>& attrs);
 
 private:
 	time_t ttl_;
@@ -181,25 +185,14 @@ private:
 	std::map<string, VBUF*> attrs_;
 	std::map<string, VBUF*> attrs_cache_;
 
-	// 将 session 数据序列化
-	static void serialize(const std::map<string, VBUF*>& attrs, string& out);
-
-	static void serialize(const char* name, const void* value,
-		size_t len, string& buf);
-
-	// 将 session 数据反序列化
-	static void deserialize(string& buf, std::map<string, VBUF*>& attrs);
-
-	// 清空 session 属性集合
-	static void attrs_clear(std::map<string, VBUF*>& attrs);
-
 	// 分配内存对象
 	static VBUF* vbuf_new(const void* str, size_t len, todo_t todo);
 
 	// 对内存对象赋值，如果内存对象空间不够，则重新分配
 	// 内存，调用者必须用返回值做为新的内存对象，该对象
 	// 可能是原有的内存对象，也有可能是新的内存对象
-	static VBUF* vbuf_set(VBUF* buf, const void* str, size_t len, todo_t todo);
+	static VBUF* vbuf_set(VBUF* buf, const void* str,
+		size_t len, todo_t todo);
 
 	// 释放内存对象
 	static void vbuf_free(VBUF* buf);

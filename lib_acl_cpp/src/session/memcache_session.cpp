@@ -35,18 +35,31 @@ memcache_session::~memcache_session()
 		delete cache_;
 }
 
-bool memcache_session::get_data(const char* sid, string& buf)
+bool memcache_session::get_attrs(const char* sid,
+	std::map<string, VBUF*>& attrs)
 {
-	return cache_->get(sid, buf);
+	// 清空原有数据
+	attrs_clear(attrs);
+
+	string buf;
+	if (cache_->get(sid, buf) == false)
+		return false;
+
+	// 反序列化
+	deserialize(buf, attrs);
+	return true;
 }
 
-bool memcache_session::set_data(const char* sid, const char* buf,
-	size_t len, time_t ttl)
+bool memcache_session::set_attrs(const char* sid,
+	std::map<string, VBUF*>& attrs, time_t ttl)
 {
-	return cache_->set(sid, buf, len, ttl);
+	string buf;
+	serialize(attrs, buf);  // 序列化数据
+	attrs_clear(attrs);  // 清除属性集合数据
+	return cache_->set(sid, buf.c_str(), buf.length(), ttl);
 }
 
-bool memcache_session::del_data(const char* sid)
+bool memcache_session::del_key(const char* sid)
 {
 	return cache_->del(sid);
 }
