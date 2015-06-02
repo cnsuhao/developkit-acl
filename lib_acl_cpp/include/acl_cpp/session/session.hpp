@@ -74,7 +74,7 @@ public:
 	 * 则必须通过调用本函数将数据真正进行更新
 	 * @return {bool} 数据更新是否成功
 	 */
-	bool flush();
+	virtual bool flush();
 
 	/**
 	 * 向 session 中添加新的字符串属性，同时设置该
@@ -83,7 +83,7 @@ public:
 	 * @param value {const char*} session 值，非空
 	 * @return {bool} 返回 false 表示出错
 	 */
-	bool set(const char* name, const char* value);
+	virtual bool set(const char* name, const char* value);
 
 	/**
 	 * 向 session 中添加新的属性对象并设置该 session 的过期时间间隔(秒)，
@@ -117,7 +117,8 @@ public:
 	/**
 	 * 从 session 中取得二进制数据类型的属性值
 	 * @param name {const char*} session 属性名，非空
-	 * @return {const session_string*} session 属性值，返回空时表示出错或不存在
+	 * @return {const session_string*} session 属性值，返回空时
+	 *  表示出错或不存在
 	 *  注：该函数返回非空数据后，用户应该立刻保留此返回值，因为下次
 	 *      的其它函数调用可能会清除该临时返回数据
 	 */
@@ -143,7 +144,7 @@ public:
 	 *  样可以提高传输效率；当为 false 时，则立刻更新数据
 	 * @return {bool} 设置是否成功
 	 */
-	bool set_ttl(time_t ttl, bool delay = true);
+	bool set_ttl(time_t ttl, bool delay);
 
 	/**
 	 * 获得本 session 对象中记录的 session 生存周期；该值有可能
@@ -160,36 +161,25 @@ public:
 	 * 使 session 从服务端的缓存中删除即使 session 失效
 	 * @return {bool} 是否使 session 失效
 	 */
-	bool remove(void);
+	virtual bool remove(void) = 0;
 
 	/**
 	 * 从后端缓存中获得对应 sid 的属性对象集合
 	 * @param attrs {std::map<string, session_string>&}
 	 * @return {bool}
 	 */
-	bool get_attrs(std::map<string, session_string>& attrs);
+	virtual bool get_attrs(std::map<string, session_string>& attrs) = 0;
 
 	/**
 	 * 向后端缓存写入对应 sid 的属性对象集合
 	 * @param attrs {std::map<string, session_string>&}
 	 * @return {bool}
 	 */
-	bool set_attrs(const std::map<string, session_string>& attrs);
+	virtual bool set_attrs(const std::map<string, session_string>& attrs) = 0;
 
 protected:
-	// 从后端缓存中获得对应 sid 的属性对象集合
-	virtual bool get_attrs(const char* sid,
-		std::map<string, session_string>& attrs) = 0;
-
-	// 向后端缓存写入对应 sid 的属性对象集合
-	virtual bool set_attrs(const char* sid,
-		const std::map<string, session_string>& attrs, time_t ttl) = 0;
-
-	// 删除对应 sid 的数据
-	virtual bool del_key(const char* sid) = 0;
-
 	// 设置对应 sid 数据的过期时间
-	virtual bool set_ttl(const char* sid, time_t ttl) = 0;
+	virtual bool set_timeout(time_t ttl) = 0;
 
 protected:
 	// 将 session 数据序列化

@@ -68,7 +68,7 @@ bool session::flush()
 	dirty_ = false;
 
 	// 调用纯虚接口，获得原来的 sid 数据
-	if (get_attrs(sid_.c_str(), attrs_) == true)
+	if (get_attrs(attrs_) == true)
 	{
 		if (!sid_saved_)
 			sid_saved_ = true;
@@ -110,7 +110,7 @@ bool session::flush()
 	attrs_cache_.clear();
 
 	// 调用纯虚接口，向 memcached 或类似缓存中添加数据
-	if (set_attrs(sid_.c_str(), attrs_, ttl_) == false)
+	if (set_attrs(attrs_) == false)
 	{
 		logger_error("set cache error, sid(%s)", sid_.c_str());
 		attrs_clear(attrs_);  // 清除属性集合数据
@@ -146,7 +146,7 @@ bool session::set(const char* name, const void* value, size_t len)
 	// 直接操作后端 cache 服务器，设置(添加/修改) 属性字段
 
 	// 调用纯虚接口，获得原来的 sid 数据
-	if (get_attrs(sid_.c_str(), attrs_) == false)
+	if (get_attrs(attrs_) == false)
 	{
 		session_string ss(len);
 		ss.copy(value, len);
@@ -167,7 +167,7 @@ bool session::set(const char* name, const void* value, size_t len)
 	}
 
 	// 调用纯虚接口，向 memcached 或类似缓存中添加数据
-	if (set_attrs(sid_.c_str(), attrs_, ttl_) == false)
+	if (set_attrs(attrs_) == false)
 	{
 		logger_error("set cache error, sid(%s)", sid_.c_str());
 		attrs_clear(attrs_);  // 清除属性集合数据
@@ -191,7 +191,7 @@ const char* session::get(const char* name)
 
 const session_string* session::get_buf(const char* name)
 {
-	if (get_attrs(sid_.c_str(), attrs_) == false)
+	if (get_attrs(attrs_) == false)
 		return NULL;
 
 	std::map<string, session_string>::const_iterator cit = attrs_.find(name);
@@ -200,17 +200,7 @@ const session_string* session::get_buf(const char* name)
 	return &cit->second;
 }
 
-bool session::get_attrs(std::map<string, session_string>& attrs)
-{
-	return get_attrs(sid_.c_str(), attrs);
-}
-
-bool session::set_attrs(const std::map<string, session_string>& attrs)
-{
-	return set_attrs(sid_.c_str(), attrs, ttl_);
-}
-
-bool session::set_ttl(time_t ttl, bool delay /* = true */)
+bool session::set_ttl(time_t ttl, bool delay)
 {
 	if (ttl == ttl_)
 		return true;
@@ -231,7 +221,7 @@ bool session::set_ttl(time_t ttl, bool delay /* = true */)
 	}
 
 	// 修改后端 cache 上针对该 sid 的 ttl
-	else if (set_ttl(sid_.c_str(), ttl) == true)
+	else if (set_timeout(ttl) == true)
 	{
 		ttl_ = ttl;
 		return true;
@@ -253,7 +243,7 @@ bool session::del(const char* name)
 {
 	// 直接操作后端 cache 服务器，删除属性字段
 
-	if (get_attrs(sid_.c_str(), attrs_) == false)
+	if (get_attrs(attrs_) == false)
 		return true;
 
 	std::map<string, session_string>::iterator it = attrs_.find(name);
@@ -267,7 +257,7 @@ bool session::del(const char* name)
 	if (attrs_.empty())
 	{
 		// 调用虚函数，删除该 sid 对应的缓存内容
-		if (del_key(sid_.c_str()) == false)
+		if (remove() == false)
 		{
 			logger_error("del sid(%s) error", sid_.c_str());
 			return false;
@@ -277,7 +267,7 @@ bool session::del(const char* name)
 
 	// 重新添加剩余的数据
 
-	if (set_attrs(sid_.c_str(), attrs_, ttl_) == false)
+	if (set_attrs(attrs_) == false)
 	{
 		logger_error("set cache error, sid(%s)", sid_.c_str());
 		attrs_clear(attrs_);  // 清除属性集合数据
@@ -286,17 +276,6 @@ bool session::del(const char* name)
 	}
 	attrs_clear(attrs_);  // 清除属性集合数据
 
-	return true;
-}
-
-bool session::remove()
-{
-	// 调用虚函数，删除缓存对象
-	if (del_key(sid_.c_str()) == false)
-	{
-		logger_error("invalid sid(%s) error", sid_.c_str());
-		return false;
-	}
 	return true;
 }
 

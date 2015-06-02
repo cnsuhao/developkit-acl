@@ -43,19 +43,18 @@ public:
 
 	~memcache_session(void);
 
-private:
 	// 基类纯虚函数，从 memcached 中获得数据
-	bool get_attrs(const char* sid, std::map<string, session_string>& attrs);
+	bool get_attrs(std::map<string, session_string>& attrs);
 
 	// 基类纯虚函数，向 memcached 中添加或修改数据
-	bool set_attrs(const char* sid, const std::map<string, session_string>& attrs,
-		time_t ttl);
+	bool set_attrs(const std::map<string, session_string>& attrs);
 
 	// 基类纯虚函数，从 memcached 中删除数据
-	bool del_key(const char* sid);
+	bool remove();
 
+protected:
 	//重新设置 session 在 memcached 上的缓存时间
-	bool set_ttl(const char* sid, time_t ttl);
+	bool set_timeout(time_t ttl);
 
 private:
 	memcache* cache_;
