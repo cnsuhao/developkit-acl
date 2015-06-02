@@ -52,7 +52,7 @@ bool HttpSession::removeAttribute(const char* name)
 
 bool HttpSession::setMaxAge(time_t ttl)
 {
-	return session_.set_ttl(ttl);
+	return session_.set_ttl(ttl, false);
 }
 
 bool HttpSession::invalidate()

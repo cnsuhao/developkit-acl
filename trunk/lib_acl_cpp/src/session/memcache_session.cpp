@@ -35,11 +35,13 @@ memcache_session::~memcache_session()
 		delete cache_;
 }
 
-bool memcache_session::get_attrs(const char* sid,
-	std::map<string, session_string>& attrs)
+bool memcache_session::get_attrs(std::map<string, session_string>& attrs)
 {
 	// 清空原有数据
 	attrs_clear(attrs);
+	const char* sid = get_sid();
+	if (sid == NULL || *sid == 0)
+		return false;
 
 	string buf;
 	if (cache_->get(sid, buf) == false)
@@ -50,21 +52,33 @@ bool memcache_session::get_attrs(const char* sid,
 	return true;
 }
 
-bool memcache_session::set_attrs(const char* sid,
-	const std::map<string, session_string>& attrs, time_t ttl)
+bool memcache_session::set_attrs(const std::map<string, session_string>& attrs)
 {
+	const char* sid = get_sid();
+	if (sid == NULL || *sid == 0)
+		return false;
+
 	string buf;
 	serialize(attrs, buf);  // 序列化数据
+	time_t ttl = get_ttl();
 	return cache_->set(sid, buf.c_str(), buf.length(), ttl);
 }
 
-bool memcache_session::del_key(const char* sid)
+bool memcache_session::remove()
 {
+	const char* sid = get_sid();
+	if (sid == NULL || * sid == 0)
+		return false;
+
 	return cache_->del(sid);
 }
 
-bool memcache_session::set_ttl(const char* sid, time_t ttl)
+bool memcache_session::set_timeout(time_t ttl)
 {
+	const char* sid = get_sid();
+	if (sid == NULL || * sid == 0)
+		return false;
+
 	return cache_->set(sid, ttl);
 }
 
