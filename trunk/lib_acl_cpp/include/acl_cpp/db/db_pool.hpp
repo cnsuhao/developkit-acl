@@ -110,6 +110,8 @@ private:
 
 	// 设置本实例的唯一 ID 标识
 	void set_id();
+
+	db_handle* peek_handle();
 };
 
 } // namespace acl
