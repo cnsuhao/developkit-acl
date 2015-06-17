@@ -68,7 +68,6 @@ struct ACL_AQUEUE {
 
 ACL_AQUEUE *acl_aqueue_new(void)
 {
-	const char *myname = "acl_aqueue_new";
 	ACL_AQUEUE *queue;
 
 	queue = (ACL_AQUEUE *) acl_mymalloc(sizeof(ACL_AQUEUE));
