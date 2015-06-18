@@ -20,7 +20,7 @@ public:
 	~thread_queue();
 
 	bool push(thread_qitem* item);
-	thread_qitem* pop(int wait_sec = 0, int wait_usec = 0);
+	thread_qitem* pop(int wait_ms = -1);
 	int qlen() const;
 
 private:

@@ -1,2 +1,3 @@
+base_path = ../..
 include ../Makefile.in
-PROG = thread
+PROG = thread_queue
