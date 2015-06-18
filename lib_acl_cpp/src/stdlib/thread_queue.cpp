@@ -25,8 +25,10 @@ bool thread_queue::push(thread_qitem* item)
 	return acl_aqueue_push(queue_, item) == -1 ? false : true;
 }
 
-thread_qitem* thread_queue::pop(int wait_sec /* = 0 */, int wait_usec /* = 0 */)
+thread_qitem* thread_queue::pop(int wait_ms /* = -1 */)
 {
+	int wait_sec = wait_ms / 1000;
+	int wait_usec = (wait_ms % 1000) * 1000;
 	return (thread_qitem*) acl_aqueue_pop_timedwait(
 				queue_, wait_sec, wait_usec);
 }
