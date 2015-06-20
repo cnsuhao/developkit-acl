@@ -97,7 +97,7 @@ int main(int argc, char** argv)
 	ids = (acl_pthread_t*) acl_mymalloc(max_threads * sizeof(acl_pthread_t));
 
 	for (i = 0; i < max_threads; i++) {
-		pthread_create(&tid, &attr, thread_func, NULL);
+		acl_pthread_create(&tid, &attr, thread_func, NULL);
 		ids[i] = tid;
 	}
 
