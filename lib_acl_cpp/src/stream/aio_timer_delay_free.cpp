@@ -31,16 +31,16 @@ aio_timer_delay_free::~aio_timer_delay_free()
 
 void aio_timer_delay_free::timer_callback(unsigned int /* id */)
 {
-	std::set<aio_delay_free*>::iterator it, next;
-	for (it = gc_set_.begin(); it != gc_set_.end(); it = next)
+	std::set<aio_delay_free*>::iterator it;
+	for (it = gc_set_.begin(); it != gc_set_.end();)
 	{
-		next = it;
-		++next;
 		if (!(*it)->locked())
 		{
 			(*it)->destroy();
-			gc_set_.erase(it);
+			it = gc_set_.erase(it);
 		}
+		else
+			++it;
 	}
 
 	// 不管事件引擎是否设置了重复定时器过程，重置本定时器任务
