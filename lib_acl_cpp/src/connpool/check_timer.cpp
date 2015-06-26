@@ -64,28 +64,27 @@ void check_timer::timer_callback(unsigned int id)
 	// 连接所有服务器地址
 
 	struct timeval begin;
-	std::map<string, int>::iterator cit_next;
 
-	for (std::map<string, int>::iterator cit = addrs_.begin();
-		cit != addrs_.end(); cit = cit_next)
+	for (std::map<string, int>::iterator it = addrs_.begin();
+		it != addrs_.end();)
 	{
-		cit_next = cit;
-		++cit_next;
-
 		// 如果该值大于 1 则说明该地址的上一个检测还未结束
-		if (cit->second > 1)
+		if (it->second > 1)
+		{
+			++it;
 			continue;
+		}
 
 		gettimeofday(&begin, NULL);
 
-		const char* addr = cit->first.c_str();
+		const char* addr = it->first.c_str();
 		aio_socket_stream* conn = aio_socket_stream::open(&handle_,
 			addr, conn_timeout_);
 		if (conn == NULL)
 		{
 			logger_warn("connect server: %s error", addr);
 			manager.set_pools_status(addr, false);
-			addrs_.erase(cit);
+			it = addrs_.erase(it);
 		}
 		else
 		{
@@ -95,6 +94,7 @@ void check_timer::timer_callback(unsigned int id)
 			conn->add_close_callback(checker);
 			conn->add_timeout_callback(checker);
 			checkers_.push_back(checker);
+			++it;
 		}
 	}
 }
