@@ -319,21 +319,21 @@ public:
 	 * 输出服务器返回的 HTTP 响应头信息至标准输出
 	 * @param prompt {const char*} 若非空则随同 HTTP 头信息一起输出
 	 */
-	void print_header(const char* prompt);
+	void print_header(const char* prompt = NULL);
 
 	/**
 	 * 输出服务器返回的 HTTP 响应头信息至输出流中
 	 * @param out {ostream&} 输出流，可以是文件流，也可以是网络流
 	 * @param prompt {const char*} 若非空则随同 HTTP 头信息一起输出
 	 */
-	void fprint_header(ostream& out, const char* prompt);
+	void fprint_header(ostream& out, const char* prompt = NULL);
 
 	/**
 	 * 输出服务器返回的 HTTP 响应头信息至缓冲区中
 	 * @param out {string&} 存储结果的数据缓冲区
 	 * @param prompt {const char*} 若非空则随同 HTTP 头信息一起输出
 	 */
-	void sprint_header(string& out, const char* prompt);
+	void sprint_header(string& out, const char* prompt = NULL);
 
 private:
 	socket_stream* stream_;     // HTTP 数据流

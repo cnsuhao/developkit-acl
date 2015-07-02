@@ -565,7 +565,8 @@ void http_hdr_print(const HTTP_HDR *hh, const char *msg)
 		entry = (HTTP_HDR_ENTRY *) acl_array_index(hh->entry_lnk, i);
 		if (entry == NULL)
 			break;
-		printf("%s: %s\r\n", entry->name, entry->value);
+		if (entry->off == 0)
+			printf("%s: %s\r\n", entry->name, entry->value);
 	}
 	printf("--------------- end -----------------\r\n");
 }
@@ -598,7 +599,9 @@ void http_hdr_fprint(ACL_VSTREAM *fp, const HTTP_HDR *hh, const char *msg)
 		entry = (HTTP_HDR_ENTRY *) acl_array_index(hh->entry_lnk, i);
 		if (entry == NULL)
 			break;
-		acl_vstream_fprintf(fp, "%s: %s\r\n", entry->name, entry->value);
+		if (entry->off == 0)
+			acl_vstream_fprintf(fp, "%s: %s\r\n",
+				entry->name, entry->value);
 	}
 
 	if (msg && *msg)
@@ -635,8 +638,9 @@ void http_hdr_sprint(ACL_VSTRING *bf, const HTTP_HDR *hh, const char *msg)
 		entry = (HTTP_HDR_ENTRY *) acl_array_index(hh->entry_lnk, i);
 		if (entry == NULL)
 			break;
-		acl_vstring_sprintf_append(bf, "%s: %s\r\n",
-			entry->name, entry->value);
+		if (entry->off == 0)
+			acl_vstring_sprintf_append(bf, "%s: %s\r\n",
+				entry->name, entry->value);
 	}
 
 	if (msg && *msg)
