@@ -837,9 +837,9 @@ HTTP_HDR_REQ* http_client::get_request_head(string* buf)
 void http_client::print_header(const char* prompt /* = NULL */)
 {
 	if (hdr_res_)
-		http_hdr_print(&hdr_res_->hdr, prompt ? prompt : "dummy");
+		http_hdr_print(&hdr_res_->hdr, prompt);
 	else if (hdr_req_)
-		http_hdr_print(&hdr_req_->hdr, prompt ? prompt : "dummy");
+		http_hdr_print(&hdr_req_->hdr, prompt);
 }
 
 void http_client::fprint_header(ostream& out, const char* prompt /* = NULL */)
@@ -851,9 +851,9 @@ void http_client::fprint_header(ostream& out, const char* prompt /* = NULL */)
 		return;
 	}
 	if (hdr_res_)
-		http_hdr_fprint(fp, &hdr_res_->hdr, prompt ? prompt : "dummy");
+		http_hdr_fprint(fp, &hdr_res_->hdr, prompt);
 	else if (hdr_req_)
-		http_hdr_fprint(fp, &hdr_req_->hdr, prompt ? prompt : "dummy");
+		http_hdr_fprint(fp, &hdr_req_->hdr, prompt);
 }
 
 void http_client::sprint_header(string& out, const char* prompt /* = NULL */)
