@@ -142,7 +142,7 @@ public:
 #if defined(_WIN32) || defined(_WIN64)
 	bool request_range(__int64& range_from, __int64& range_to);
 #else
-	bool request_range(long long int& range_from, long long& int range_to);
+	bool request_range(long long int& range_from, long long int& range_to);
 #endif
 
 	/**
