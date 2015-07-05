@@ -162,7 +162,7 @@ public:
 		__int64& total);
 #else
 	bool response_range(long long int& range_from,
-		long long& int range_to, long long int& total);
+		long long int& range_to, long long int& total);
 #endif
 
 	/**
