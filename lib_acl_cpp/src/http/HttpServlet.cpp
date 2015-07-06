@@ -138,7 +138,9 @@ bool HttpServlet::doRun(session& session, socket_stream* stream /* = NULL */)
 		delete out;
 	}
 
-	return ret;
+	// 返回给上层调用者：true 表示继续保持长连接，否则表示需断开连接
+	return ret && req.isKeepAlive()
+		&& res.getHttpHeader().get_keep_alive();
 }
 
 bool HttpServlet::doRun(const char* memcached_addr /* = "127.0.0.1:11211" */,
