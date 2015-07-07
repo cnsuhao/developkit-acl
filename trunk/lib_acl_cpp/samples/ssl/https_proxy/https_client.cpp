@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <memory>
 #include <iostream>
 #include "master_service.h"
 #include "https_client.h"
