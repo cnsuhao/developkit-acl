@@ -14,20 +14,6 @@ http_servlet::~http_servlet(void)
 
 }
 
-bool http_servlet::doUnknown(acl::HttpServletRequest&,
-	acl::HttpServletResponse& res)
-{
-	res.setStatus(400);
-	res.setContentType("text/html; charset=");
-	// 发送 http 响应头
-	if (res.sendHeader() == false)
-		return false;
-	// 发送 http 响应体
-	acl::string buf("<root error='unkown request method' />\r\n");
-	(void) res.getOutputStream().write(buf);
-	return false;
-}
-
 void http_servlet::logger_request(acl::HttpServletRequest& req)
 {
 	acl::string req_hdr;
@@ -36,6 +22,34 @@ void http_servlet::logger_request(acl::HttpServletRequest& req)
 	out_.format("\r\n>>>request header<<<\r\n");
 	out_.write(req_hdr);
 	out_.format("\r\n");
+}
+
+bool http_servlet::doError(acl::HttpServletRequest& req,
+	acl::HttpServletResponse& res)
+{
+	out_.format(">>> request method: doError <<<\r\n");
+	logger_request(req);
+
+	res.setStatus(400);
+	res.setContentType("text/html; charset=");
+	// 发送 http 响应体
+	acl::string buf("<root error='error request' />\r\n");
+	(void) res.getOutputStream().write(buf);
+	return false;
+}
+
+bool http_servlet::doUnknown(acl::HttpServletRequest& req,
+	acl::HttpServletResponse& res)
+{
+	out_.format(">>> request method: doUnknown <<<\r\n");
+	logger_request(req);
+
+	res.setStatus(400);
+	res.setContentType("text/html; charset=");
+	// 发送 http 响应体
+	acl::string buf("<root error='unkown request method' />\r\n");
+	(void) res.getOutputStream().write(buf);
+	return false;
 }
 
 bool http_servlet::doPut(acl::HttpServletRequest& req,
@@ -70,7 +84,7 @@ bool http_servlet::doHead(acl::HttpServletRequest& req,
 	return true;
 }
 
-bool http_servlet::doOption(acl::HttpServletRequest& req,
+bool http_servlet::doOptions(acl::HttpServletRequest& req,
 	acl::HttpServletResponse& res)
 {
 	out_.format(">>> request method: OPTIONS <<<\r\n");

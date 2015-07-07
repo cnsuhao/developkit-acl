@@ -8,10 +8,12 @@
 char *var_cfg_crt_file;
 char *var_cfg_key_file;
 char *var_cfg_log_file;
+char *var_cfg_addrs_map;
 acl::master_str_tbl var_conf_str_tab[] = {
-	{ "crt_file", "./mm263com1.crt", &var_cfg_crt_file },
-	{ "key_file", "./mm263com.key", &var_cfg_key_file },
+	{ "crt_file", "./ssl_crt.pem", &var_cfg_crt_file },
+	{ "key_file", "./ssl_key.pem", &var_cfg_key_file },
 	{ "log_file", "./log.txt", &var_cfg_log_file },
+	{ "addrs_map", "", &var_cfg_addrs_map },
 
 	{ 0, 0, 0 }
 };
@@ -145,8 +147,45 @@ void master_service::thread_on_exit()
 {
 }
 
+const char* master_service::get_addr(const char* from) const
+{
+	if (from == NULL || *from == 0)
+		return NULL;
+	acl::string key(from);
+	key.lower();
+	std::map<acl::string, acl::string>::const_iterator cit =
+		addrs_map_.find(key);
+	if (cit != addrs_map_.end())
+		return cit->second.c_str();
+	else
+		return NULL;
+}
+
+void master_service::create_addrs_map()
+{
+	if (var_cfg_addrs_map == NULL || *var_cfg_addrs_map == 0)
+		return;
+
+	// 数据格式：domain11:port11|domain12:port12, ...
+	acl::string buf(var_cfg_addrs_map);
+	std::vector<acl::string>& addrs = buf.split2(" \t;,");
+	for (std::vector<acl::string>::iterator it = addrs.begin();
+		it != addrs.end(); ++it)
+	{
+		std::vector<acl::string> pair = (*it).split2("|");
+		if (pair.size() == 2)
+		{
+			addrs_map_[pair[0].lower()] = pair[1].lower();
+			logger("add addr map: %s->%s", pair[0].c_str(),
+				pair[1].c_str());
+		}
+	}
+}
+
 void master_service::proc_on_init()
 {
+	create_addrs_map();
+
 	if (var_cfg_log_file != NULL && *var_cfg_log_file != 0)
 	{
 		if (out_.open_write(var_cfg_log_file) == false)
@@ -173,7 +212,7 @@ void master_service::proc_on_init()
 	server_ssl_conf_ = new acl::polarssl_conf();
 
 	// 允许服务端的 SSL 会话缓存功能
-	server_ssl_conf_->enable_cache(var_cfg_session_cache);
+	server_ssl_conf_->enable_cache(var_cfg_session_cache ? true : false);
 
 	// 添加本地服务的证书
 	if (server_ssl_conf_->add_cert(var_cfg_crt_file) == false)
@@ -190,7 +229,8 @@ void master_service::proc_on_init()
 	// 添加本地服务密钥
 	if (server_ssl_conf_->set_key(var_cfg_key_file) == false)
 	{
-		logger_error("set private key error");
+		logger_error("add key failed, crt: %s, key: %s",
+			var_cfg_crt_file, var_cfg_key_file);
 		delete server_ssl_conf_;
 		server_ssl_conf_ = NULL;
 	}

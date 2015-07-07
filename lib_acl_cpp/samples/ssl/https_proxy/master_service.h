@@ -25,6 +25,8 @@ public:
 	master_service();
 	~master_service();
 
+	const char* get_addr(const char* from) const;
+
 protected:
 	/**
 	 * 纯虚函数：当某个客户端连接有数据可读或关闭或出错时调用此函数
@@ -82,8 +84,11 @@ protected:
 private:
 	acl::polarssl_conf* server_ssl_conf_;
 	acl::polarssl_conf* client_ssl_conf_;
+	std::map<acl::string, acl::string> addrs_map_;
 	acl::ofstream out_;
 
 	acl::polarssl_io* setup_ssl(acl::socket_stream& conn,
 			acl::polarssl_conf& conf);
+
+	void create_addrs_map();
 };
