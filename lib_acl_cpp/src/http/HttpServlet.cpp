@@ -116,7 +116,7 @@ bool HttpServlet::doRun(session& session, socket_stream* stream /* = NULL */)
 		ret = doHead(req, res);
 		break;
 	case HTTP_METHOD_OPTION:
-		ret = doOption(req, res);
+		ret = doOptions(req, res);
 		break;
 	default:
 		ret = false; // 有可能是IO失败或未知方法
