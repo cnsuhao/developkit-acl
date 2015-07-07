@@ -7,21 +7,23 @@ public:
 	~http_servlet();
 
 protected:
-	virtual bool doGet(acl::HttpServletRequest& req,
+	bool doGet(acl::HttpServletRequest& req,
 		acl::HttpServletResponse& res);
-	virtual bool doPost(acl::HttpServletRequest& req,
+	bool doPost(acl::HttpServletRequest& req,
 		acl::HttpServletResponse& res);
-	virtual bool doUnknown(acl::HttpServletRequest&,
+	bool doUnknown(acl::HttpServletRequest&,
 		acl::HttpServletResponse& res);
-	virtual bool doConnect(acl::HttpServletRequest& req,
+	bool doError(acl::HttpServletRequest&,
 		acl::HttpServletResponse& res);
-	virtual bool doPut(acl::HttpServletRequest& req,
+	bool doConnect(acl::HttpServletRequest& req,
 		acl::HttpServletResponse& res);
-	virtual bool doDelete(acl::HttpServletRequest& req,
+	bool doPut(acl::HttpServletRequest& req,
 		acl::HttpServletResponse& res);
-	virtual bool doHead(acl::HttpServletRequest& req,
+	bool doDelete(acl::HttpServletRequest& req,
 		acl::HttpServletResponse& res);
-	virtual bool doOption(acl::HttpServletRequest& req,
+	bool doHead(acl::HttpServletRequest& req,
+		acl::HttpServletResponse& res);
+	bool doOptions(acl::HttpServletRequest& req,
 		acl::HttpServletResponse& res);
 
 private:
