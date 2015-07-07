@@ -1,0 +1,11 @@
+
+service server {
+	domain_map = mailz.hexun.com:127.0.0.1:211.157.110.179:211.157.110.185 \
+			www1.sina.com:192.168.0.1:192.168.0.2:192.168.0.3 \
+			a.b.c:193.168.0.1:193.168.0.2:193.168.0.3
+	domain_unknown = 211.157.110.179:211.157.110.185
+	dns_name = mydns.com.cn
+	dns_ip = 8.8.8.8
+	stream_count_dup = 0;
+}
+
