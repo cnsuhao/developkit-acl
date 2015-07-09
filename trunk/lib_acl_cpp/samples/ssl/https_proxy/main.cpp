@@ -16,13 +16,19 @@ int main(int argc, char* argv[])
 
 	// 开始运行
 
-	if (argc >= 2 && strcmp(argv[1], "alone") == 0)
+	if (argc >= 2 && strcmp(argv[1], "help") == 0)
+		printf("usage: %s alone addr conf_file\r\n", argv[0]);
+	else if (argc >= 2 && strcmp(argv[1], "alone") == 0)
 	{
 		acl::log::stdout_open(true);  // 日志输出至标准输出
+
 		const char* addr = "0.0.0.0:443";
-		printf("listen on: %s\r\n", addr);
 		if (argc >= 3)
-			ms.run_alone(addr, argv[2], 0, 100);  // 单独运行方式
+			addr = argv[2];
+		printf("listen on: %s\r\n", addr);
+
+		if (argc >= 4)
+			ms.run_alone(addr, argv[3], 0, 100);  // 单独运行方式
 		else
 			ms.run_alone(addr, NULL, 0, 100);  // 单独运行方式
 
