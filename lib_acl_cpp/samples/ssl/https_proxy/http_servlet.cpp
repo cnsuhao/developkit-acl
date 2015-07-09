@@ -3,7 +3,8 @@
 #include "http_servlet.h"
 
 http_servlet::http_servlet(acl::ostream& out, acl::polarssl_conf* conf)
-	: out_(out)
+	: handled_(false)
+	, out_(out)
 	, client_ssl_conf_(conf)
 {
 
@@ -27,6 +28,9 @@ void http_servlet::logger_request(acl::HttpServletRequest& req)
 bool http_servlet::doError(acl::HttpServletRequest& req,
 	acl::HttpServletResponse& res)
 {
+//	if (handled_)
+		return false;
+
 	out_.format(">>> request method: doError <<<\r\n");
 	logger_request(req);
 
@@ -55,6 +59,7 @@ bool http_servlet::doUnknown(acl::HttpServletRequest& req,
 bool http_servlet::doPut(acl::HttpServletRequest& req,
 	acl::HttpServletResponse&)
 {
+	handled_ = true;
 	out_.format(">>> request method: PUT <<<\r\n");
 	logger_request(req);
 	return true;
@@ -63,6 +68,7 @@ bool http_servlet::doPut(acl::HttpServletRequest& req,
 bool http_servlet::doConnect(acl::HttpServletRequest& req,
 	acl::HttpServletResponse&)
 {
+	handled_ = true;
 	out_.format(">>> request method: CONNECT <<<\r\n");
 	logger_request(req);
 	return true;
@@ -71,6 +77,7 @@ bool http_servlet::doConnect(acl::HttpServletRequest& req,
 bool http_servlet::doDelete(acl::HttpServletRequest& req,
 	acl::HttpServletResponse&)
 {
+	handled_ = true;
 	out_.format(">>> request method: DELETE <<<\r\n");
 	logger_request(req);
 	return true;
@@ -79,6 +86,7 @@ bool http_servlet::doDelete(acl::HttpServletRequest& req,
 bool http_servlet::doHead(acl::HttpServletRequest& req,
 	acl::HttpServletResponse&)
 {
+	handled_ = true;
 	out_.format(">>> request method: HEAD <<<\r\n");
 	logger_request(req);
 	return true;
@@ -87,6 +95,7 @@ bool http_servlet::doHead(acl::HttpServletRequest& req,
 bool http_servlet::doOptions(acl::HttpServletRequest& req,
 	acl::HttpServletResponse& res)
 {
+	handled_ = true;
 	out_.format(">>> request method: OPTIONS <<<\r\n");
 	return doPost(req, res);
 }
@@ -94,6 +103,7 @@ bool http_servlet::doOptions(acl::HttpServletRequest& req,
 bool http_servlet::doGet(acl::HttpServletRequest& req,
 	acl::HttpServletResponse& res)
 {
+	handled_ = true;
 	out_.format(">>> request method: GET <<<\r\n");
 	return doPost(req, res);
 }
@@ -101,6 +111,7 @@ bool http_servlet::doGet(acl::HttpServletRequest& req,
 bool http_servlet::doPost(acl::HttpServletRequest& req,
 	acl::HttpServletResponse& res)
 {
+	handled_ = true;
 	acl::http_client* conn = req.getClient();
 	conn->header_disable("Accept-Encoding");
 	logger_request(req);

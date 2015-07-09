@@ -27,6 +27,7 @@ protected:
 		acl::HttpServletResponse& res);
 
 private:
+	bool handled_;
 	acl::string url_;
 	acl::ostream& out_;
 	acl::polarssl_conf* client_ssl_conf_;

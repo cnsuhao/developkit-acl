@@ -10,8 +10,8 @@ char *var_cfg_key_file;
 char *var_cfg_log_file;
 char *var_cfg_addrs_map;
 acl::master_str_tbl var_conf_str_tab[] = {
-	{ "crt_file", "./ssl_crt.pem", &var_cfg_crt_file },
-	{ "key_file", "./ssl_key.pem", &var_cfg_key_file },
+	{ "crt_file", "", &var_cfg_crt_file },
+	{ "key_file", "", &var_cfg_key_file },
 	{ "log_file", "./log.txt", &var_cfg_log_file },
 	{ "addrs_map", "", &var_cfg_addrs_map },
 
@@ -158,7 +158,10 @@ const char* master_service::get_addr(const char* from) const
 	if (cit != addrs_map_.end())
 		return cit->second.c_str();
 	else
+	{
+		logger("Local not exist from: %s\r\n", from);
 		return NULL;
+	}
 }
 
 void master_service::create_addrs_map()
@@ -168,7 +171,7 @@ void master_service::create_addrs_map()
 
 	// 数据格式：domain11:port11|domain12:port12, ...
 	acl::string buf(var_cfg_addrs_map);
-	std::vector<acl::string>& addrs = buf.split2(" \t;,");
+	std::vector<acl::string>& addrs = buf.split2(" \t,;");
 	for (std::vector<acl::string>::iterator it = addrs.begin();
 		it != addrs.end(); ++it)
 	{
