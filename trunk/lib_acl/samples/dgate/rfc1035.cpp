@@ -713,7 +713,7 @@ ssize_t rfc1035BuildAReply(const char *hostname, const ACL_ARGV *ip_argv,
 		snprintf(rr.name, sizeof(rr.name), "%s", hostname);
 		rr.type = RFC1035_TYPE_A;
 		rr.tclass = RFC1035_CLASS_IN;
-		rr.ttl = 600;
+		rr.ttl = 5;
 		rr.rdlength = 4;
 		nip = inet_addr(ip_argv->argv[i]);
 		rr.rdata = (char*) acl_mycalloc(1, rr.rdlength);
@@ -727,7 +727,7 @@ ssize_t rfc1035BuildAReply(const char *hostname, const ACL_ARGV *ip_argv,
 		snprintf(rr.name, sizeof(rr.name), "%s", dnsname);
 		rr.type = RFC1035_TYPE_NS;
 		rr.tclass = RFC1035_CLASS_IN;
-		rr.ttl = 600;
+		rr.ttl = 5;
 		rr.rdlength = (unsigned short) strlen(dnsname);
 		rr.rdata = acl_mystrdup(dnsname);
 		offset += rfc1035RRPack(&rr, buf + offset, sz - offset);
@@ -739,7 +739,7 @@ ssize_t rfc1035BuildAReply(const char *hostname, const ACL_ARGV *ip_argv,
 		snprintf(rr.name, sizeof(rr.name), "%s", dnsname);
 		rr.type = RFC1035_TYPE_NS;
 		rr.tclass = RFC1035_CLASS_IN;
-		rr.ttl = 600;
+		rr.ttl = 5;
 		rr.rdlength = (unsigned short) strlen(dns_ip);
 		rr.rdata = acl_mystrdup(dns_ip);
 		offset += rfc1035RRPack(&rr, buf + offset, sz - offset);

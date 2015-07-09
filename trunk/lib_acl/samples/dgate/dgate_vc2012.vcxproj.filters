@@ -63,5 +63,6 @@
   <ItemGroup>
     <None Include="start.sh" />
     <None Include="stop.sh" />
+    <None Include="dgate.cf" />
   </ItemGroup>
 </Project>

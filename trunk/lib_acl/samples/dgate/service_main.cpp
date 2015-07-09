@@ -14,7 +14,8 @@ void create_key(char *key, size_t size, char type, unsigned short id)
 	else if (type == SERVICE_CTX_UDP_RESPOND)
 		snprintf(key, size, "UDP:RESPOND:%d", id);
 	else
-		acl_msg_fatal("%s(%d): type(%d) invalid", myname, __LINE__, type);
+		acl_msg_fatal("%s(%d): type(%d) invalid",
+			myname, __LINE__, type);
 }
 
 SERVICE_CTX *service_ctx_new(SERVICE *service, ACL_ASTREAM *stream,
@@ -30,7 +31,7 @@ SERVICE_CTX *service_ctx_new(SERVICE *service, ACL_ASTREAM *stream,
 
 	create_key(ctx->key, sizeof(ctx->key), type, id);
 
-	if (acl_htable_enter(service->table, ctx->key, (char*) ctx) == NULL)
+	if (acl_htable_enter(service->table, ctx->key, ctx) == NULL)
 		acl_msg_fatal("%s(%d): enter to table error, key(%s)",
 			myname, __LINE__, ctx->key);
 	return (ctx);
@@ -62,9 +63,8 @@ static int accept_callback(ACL_ASTREAM *client, void *context)
 
 void service_start(SERVICE *service)
 {
-	while (1) {
+	while (1)
 		acl_aio_loop(service->aio);
-	}
 }
 
 SERVICE *service_create(const char *local_ip, short local_port,
@@ -75,15 +75,18 @@ SERVICE *service_create(const char *local_ip, short local_port,
 	ACL_VSTREAM *sstream;
 	char addr[64];
 
+	// 创建提供 TCP 方式查询时的监听流
 	snprintf(addr, sizeof(addr), "%s:%d", local_ip, local_port);
 	sstream = acl_vstream_listen_ex(addr, 128, ACL_NON_BLOCKING, 1024, 10);
 	if (sstream == NULL) {
-		acl_msg_error("%s(%d): can't listen on addr(%s)", myname, __LINE__, addr);
+		acl_msg_error("%s(%d): can't listen on addr(%s)",
+			myname, __LINE__, addr);
 		return (NULL);
 	}
 
 	service = (SERVICE*) acl_mycalloc(1, sizeof(SERVICE));
-	ACL_SAFE_STRNCPY(service->listen_addr, addr, sizeof(service->listen_addr));
+	ACL_SAFE_STRNCPY(service->listen_addr,
+		addr, sizeof(service->listen_addr));
 	ACL_SAFE_STRNCPY(service->dns_ip, dns_ip, sizeof(service->dns_ip));
 	service->dns_port = dns_port;
 	snprintf(service->dns_addr, sizeof(service->dns_addr),
