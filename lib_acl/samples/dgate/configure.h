@@ -16,6 +16,9 @@ extern char *var_cfg_domains;
 extern char *var_cfg_domain_unknown;
 extern char *var_cfg_dns_name;
 extern char *var_cfg_dns_ip;
+extern char *var_cfg_dns_neighbor_ip;
+extern int   var_cfg_hijack_unknown;
+extern int   var_cfg_dns_neighbor_port;
 
 void conf_load(const char *filepath);
 int host_allow(const char *ip);

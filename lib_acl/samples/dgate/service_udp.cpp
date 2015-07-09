@@ -144,9 +144,9 @@ static ACL_VSTREAM *stream_udp_bind(struct sockaddr_in addr)
 
 	stream = stream_udp_open();
 	fd = ACL_VSTREAM_SOCK(stream);
-	if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
+	if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) != 0)
 		acl_msg_fatal("%s(%d): can't bind", myname, __LINE__);
-	}
+
 	return (stream);
 }
 
@@ -160,7 +160,9 @@ static ACL_ARGV *build_ip_list(DOMAIN_MAP *domain_map)
 	if (domain_map->idx >= n)
 		domain_map->idx = 0;
 	i = domain_map->idx++;
+
 	while (n-- > 0) {
+		acl_msg_info("\t%s", ip_list->argv[i]);
 		acl_argv_add(argv, ip_list->argv[i++], NULL);
 		if (i >= ip_list->argc)
 			i = 0;
@@ -177,14 +179,33 @@ static void reply_client_local(ACL_SOCKET fd, DOMAIN_MAP *domain_map,
 	int   dlen;
 
 	ip_list = build_ip_list(domain_map);
-	dlen = rfc1035BuildAReply(domain_map->domain, ip_list,
-		service_ctx->domain_root, var_cfg_dns_ip,
-		service_ctx->id_original, respond_buf, sizeof(respond_buf));
+	dlen = rfc1035BuildAReply(service_ctx->domain,
+		ip_list,
+		service_ctx->domain_root,
+		var_cfg_dns_ip,
+		service_ctx->id_original,
+		respond_buf,
+		sizeof(respond_buf));
 
 	acl_argv_free(ip_list);
 
 	(void) udp_write(fd, respond_buf, dlen, &service_ctx->client_addr,
 		service_ctx->client_addr_len);
+}
+
+static void debug_msg(const rfc1035_message* msg, int n)
+{
+	int   i;
+	char  ip[64];
+	struct sockaddr_in saddr;
+
+	for (i = 0; i < n; i++)	{
+		if (msg->answer[i].type == RFC1035_TYPE_A) {
+			memcpy(&saddr.sin_addr, msg->answer[i].rdata, 4);
+			acl_inet_ntoa(saddr.sin_addr, ip, sizeof(ip));
+			acl_msg_info("\t%s", ip);
+		}
+	}
 }
 
 static void reply_client(ACL_SOCKET fd, char *buf, int dlen,
@@ -199,15 +220,21 @@ static void reply_client(ACL_SOCKET fd, char *buf, int dlen,
 	memcpy(respond_buf, buf, dlen);
 
 	ret = rfc1035MessageUnpack(buf, dlen, &msg);
-	if (service_ctx->qtype == RFC1035_TYPE_A && ret == -3) {
+
+	// 当上游 DNS 服务器返回域名不存在或出现错误时，若允许进行域名替换，则返回缺省地址
+	if (var_cfg_hijack_unknown
+		&& service_ctx->qtype == RFC1035_TYPE_A && ret == -3)
+	{
 		const char *domain_query = service_ctx->domain[0]
 			? service_ctx->domain : NULL;
 		DOMAIN_MAP *domain_map= domain_map_unknown();
 		ACL_ARGV *ip_list;
 
-		ip_list = build_ip_list(domain_map);
 		acl_msg_error("%s(%d): rfc1035MessageUnpack error(%d)",
 			myname, __LINE__, ret);
+
+		// 当解包失败时返回本地配置好的 IP 列表
+		ip_list = build_ip_list(domain_map);
 		dlen = rfc1035BuildAReply(
 			domain_query ? domain_query : "unknown",
 			ip_list,
@@ -229,11 +256,16 @@ static void reply_client(ACL_SOCKET fd, char *buf, int dlen,
 
 		id_original = htons(service_ctx->id_original);
 		memcpy(respond_buf, &id_original, 2);
+
+		debug_msg(msg, ret);
+
 		acl_msg_info("%s(%d): reply to client, dlen=%d, id=%d, "
-			"ret=%d, domain(%s)", myname, __LINE__, dlen,
-			id_original, ret,
+			"ret=%d, domain(%s)",
+			myname, __LINE__, dlen, id_original, ret,
 			msg->query ? msg->query->name : "unknown");
+
 		rfc1035MessageDestroy(msg);
+
 		(void) udp_write(fd, respond_buf, dlen,
 			&service_ctx->client_addr,
 			service_ctx->client_addr_len);
@@ -278,9 +310,24 @@ static int read_respond_callback(ACL_ASTREAM *astream, void *context,
 		len, service_ctx);
 
 	service_ctx_free(service_ctx);
-
 	acl_aio_read(astream);
 	return (0);
+}
+
+static const char* get_query_type(int n)
+{
+	if (n == RFC1035_TYPE_A)
+		return "A";
+	else if (n == RFC1035_TYPE_NS)
+		return "NS";
+	else if (n == RFC1035_TYPE_CNAME)
+		return "CNAME";
+	else if (n == RFC1035_TYPE_PTR)
+		return "PTR";
+	else if (n == RFC1035_TYPE_AAAA)
+		return "AAA";
+	else
+		return "UNKNOWN";
 }
 
 static void parse_query(const rfc1035_query *query, SERVICE_CTX *service_ctx)
@@ -316,7 +363,9 @@ static void parse_query(const rfc1035_query *query, SERVICE_CTX *service_ctx)
 	acl_argv_free(argv);
 
 	service_ctx->qtype = query->qtype;
-	acl_msg_info("type=%d, class=%d", query->qtype, query->qclass);
+
+	acl_msg_info("type=%s(%d), class=%d", get_query_type(query->qtype),
+		query->qtype, query->qclass);
 }
 
 static int read_request_callback(ACL_ASTREAM *astream, void *context,
@@ -359,9 +408,14 @@ static int read_request_callback(ACL_ASTREAM *astream, void *context,
 	service_ctx->id_original = ntohs(service_ctx->id_original);
 	acl_msg_info("id_original=%d", service_ctx->id_original);
 
+	acl_msg_info(">>> query %s, type(%d) %s: ", service_ctx->domain,
+		service_ctx->qtype, get_query_type(service_ctx->qtype));
+
+	// 仅处理 A 记录
 	if (service_ctx->qtype == RFC1035_TYPE_A) {
 		DOMAIN_MAP *domain_map;
 
+		// 先查询本地域名映射中是否存在对应域名
 		domain_map = domain_map_find(service_ctx->domain);
 		if (domain_map) {
 			reply_client_local(
@@ -372,6 +426,8 @@ static int read_request_callback(ACL_ASTREAM *astream, void *context,
 		}
 	}
 
+	// 如果非 A 记录且本地域名映射表中不存在该域名，则需要转发请求给上游 DNS 服务器
+
 	service_ctx->request_len = len > MAX_BUF ? MAX_BUF : len;
 	memcpy(service_ctx->request_buf, data, len);
 	id = htons(service_ctx->id);
@@ -380,6 +436,7 @@ static int read_request_callback(ACL_ASTREAM *astream, void *context,
 	acl_msg_info("request one key=%s, request_len=%d, len=%d",
 		service_ctx->key, service_ctx->request_len, len);
 
+	// 向上游 DNS 服务器转发请求包，收到响应后 read_respond_callback 将被回调
 	(void) udp_write(ACL_VSTREAM_SOCK(server_stream),
 		service_ctx->request_buf, service_ctx->request_len,
 		&ctx->remote_addr, sizeof(ctx->remote_addr));
