@@ -2,6 +2,7 @@
 #include "acl_cpp/acl_cpp_define.hpp"
 #include <vector>
 #include <map>
+#include "acl_cpp/stdlib/string.hpp"
 #include "acl_cpp/redis/redis_command.hpp"
 
 namespace acl
