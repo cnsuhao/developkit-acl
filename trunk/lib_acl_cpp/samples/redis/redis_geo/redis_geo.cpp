@@ -184,7 +184,7 @@ static bool test_georadius(acl::redis& redis, int n)
 static bool test_georadiusbymember(acl::redis& redis, int n)
 {
 	acl::string key;
-	double longitude = 48, latitude = 45, radius = 10;
+	double radius = 10;
 	const char* member = "member_10";
 
 	for (int i = 0; i < n; i++)
