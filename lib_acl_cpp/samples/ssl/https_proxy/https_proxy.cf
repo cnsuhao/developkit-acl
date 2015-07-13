@@ -114,9 +114,12 @@ service http_server {
 #	key_file = {install_path}/conf/ssl/mm263com.key
 	crt_file = ssl_crt.pem
 	key_file = ssl_key.pem
+	client_ssl = 1
 	addrs_map = 263esComp1.263es.com:443|192.168.198.47:443, \
 			263es.com:443|192.168.198.47:443, \
-			m.hotmail.com:443|65.55.68.119:443, \
-			blu405-m.hotmail.com:443|134.170.0.216:443
+			m.hotmail.com:443|65.54.225.167:443, \
+			blu405-m.hotmail.com:443|134.170.0.216:443, \
+			i.163.com:443|61.135.251.139:443, \
+			ex.qq.com:443|183.60.15.145:443
 }
 

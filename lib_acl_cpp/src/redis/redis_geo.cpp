@@ -11,46 +11,48 @@ namespace acl
 
 /////////////////////////////////////////////////////////////////////////////
 
-geo_pos::geo_pos(const char* name)
+geo_member::geo_member(const char* name)
 : name_(name)
 {
 	dist_ = -1;
 	hash_ = -1;
-	longitude_ = GEO_INVALID_POS;
-	latitude_ = GEO_INVALID_POS;
+	longitude_ = GEO_INVALID;
+	latitude_ = GEO_INVALID;
 }
 
-geo_pos::geo_pos(const geo_pos& pos)
+geo_member::geo_member(const geo_member& member)
 {
-	name_ = pos.name_;
-	dist_ = pos.dist_;
-	hash_ = pos.hash_;
-	longitude_ = pos.longitude_;
-	latitude_ = pos.latitude_;
+	name_ = member.name_.c_str();
+	dist_ = member.dist_;
+	hash_ = member.hash_;
+	longitude_ = member.longitude_;
+	latitude_ = member.latitude_;
 }
 
-geo_pos::~geo_pos()
+geo_member::~geo_member()
 {
 }
 
-void geo_pos::set_dist(double dist)
+void geo_member::set_dist(double dist)
 {
 	dist_ = dist;
 }
 
-void geo_pos::set_hash(acl_int64 hash)
+void geo_member::set_hash(acl_int64 hash)
 {
 	hash_ = hash;
 }
 
-void geo_pos::set_longitude(double longitude)
+void geo_member::set_coordinate(double longitude, double latitude)
 {
-	longitude_ = longitude;
-}
-
-void geo_pos::set_latitude(double latitude)
-{
-	latitude_ = latitude;
+	if (longitude >= GEO_LONGITUDE_MIN
+		&& longitude <= GEO_LONGITUDE_MAX
+		&& latitude >= GEO_LATITUDE_MIN
+		&& latitude <= GEO_LATITUDE_MAX)
+	{
+		longitude_ = longitude;
+		latitude_ = longitude;
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -206,17 +208,30 @@ bool redis_geo::geohash(const char* key, const std::vector<string>& members,
 {
 	hash_slot(key);
 	build("GEOHASH", key, members);
-	return get_strings(results) < 0 ? false : true;
+	if (get_strings(results) < 0)
+		return false;
+	return results.size() == members.size() ? true : false;
+}
+
+bool redis_geo::geohash(const char* key, const char* member, string& result)
+{
+	const char* names[1];
+	names[0] = member;
+
+	hash_slot(key);
+	build("GEOHASH", key, names, 1);
+	return get_string(result) < 0 ? false : true;
 }
 
 bool redis_geo::geopos(const char* key, const std::vector<string>& members,
 	std::vector<std::pair<double, double> >& results)
 {
 	hash_slot(key);
-	build("GEOHASH", key, members);
+	build("GEOPOS", key, members);
 	const redis_result* result = run();
 	if (result == NULL || result->get_type() != REDIS_RESULT_ARRAY)
 		return false;
+
 	size_t size;
 	const redis_result** children = result->get_children(&size);
 	if (children == NULL)
@@ -229,8 +244,8 @@ bool redis_geo::geopos(const char* key, const std::vector<string>& members,
 		const redis_result* child = children[i];
 		if (child->get_type() != REDIS_RESULT_ARRAY)
 		{
-			results[i] = std::make_pair(GEO_INVALID_POS,
-				GEO_INVALID_POS);
+			results.push_back(std::make_pair(GEO_INVALID,
+				GEO_INVALID));
 			continue;
 		}
 
@@ -238,51 +253,103 @@ bool redis_geo::geopos(const char* key, const std::vector<string>& members,
 		const redis_result** xy = child->get_children(&n);
 		if (xy == NULL || n != 2)
 		{
-			results[i] = std::make_pair(GEO_INVALID_POS,
-				GEO_INVALID_POS);
+			results.push_back(std::make_pair(GEO_INVALID,
+				GEO_INVALID));
 			continue;
 		}
-		const redis_result* lo = xy[0], *la = xy[1];
-		if (lo->get_type() != REDIS_RESULT_STRING
-			|| la->get_type() != REDIS_RESULT_STRING)
+		const redis_result* rr_lo = xy[0], *rr_la = xy[1];
+		if (rr_lo->get_type() != REDIS_RESULT_STRING
+			|| rr_la->get_type() != REDIS_RESULT_STRING)
 		{
-			results[i] = std::make_pair(GEO_INVALID_POS,
-				GEO_INVALID_POS);
+			results.push_back(std::make_pair(GEO_INVALID,
+				GEO_INVALID));
 			continue;
 		}
 
-		double longitude = lo->get_double();
-		if (longitude < -180 || longitude > 180)
+		double lo = rr_lo->get_double();
+		if (lo < GEO_LONGITUDE_MIN || lo > GEO_LONGITUDE_MAX)
 		{
-			results[i] = std::make_pair(GEO_INVALID_POS,
-				GEO_INVALID_POS);
+			results.push_back(std::make_pair(GEO_INVALID,
+				GEO_INVALID));
 			continue;
 		}
 
-		double latitude = la->get_double();
-		if (latitude < -85.05112878 || latitude > 85.05112878)
+		double la = rr_la->get_double();
+		if (la < GEO_LATITUDE_MIN || la > GEO_LATITUDE_MAX)
 		{
-			results[i] = std::make_pair(GEO_INVALID_POS,
-				GEO_INVALID_POS);
+			results.push_back(std::make_pair(GEO_INVALID,
+				GEO_INVALID));
 			continue;
 		}
-		results[i] = std::make_pair(longitude, latitude);
+
+		results.push_back(std::make_pair(lo, la));
 	}
 
+	return true;
+}
+
+bool redis_geo::geopos(const char* key, const char* member,
+	std::pair<double, double>& result)
+{
+	result.first = GEO_INVALID;
+	result.second = GEO_INVALID;
+
+	const char* names[1];
+	names[0] = member;
+
+	hash_slot(key);
+	build("GEOHASH", key, names, 1);
+	const redis_result* rr = run();
+	if (rr == NULL || rr->get_type() != REDIS_RESULT_ARRAY)
+		return false;
+
+	size_t size;
+	const redis_result** children = rr->get_children(&size);
+	if (children == NULL || size != 1)
+		return false;
+
+	string buf;
+	const redis_result* child = children[0];
+	if (child->get_type() != REDIS_RESULT_ARRAY)
+		return false;
+
+	size_t n;
+	const redis_result** xy = child->get_children(&n);
+	if (xy == NULL || n != 2)
+		return false;
+
+	const redis_result* rr_lo = xy[0], *rr_la = xy[1];
+	double lo = rr_lo->get_double();
+	if (lo < GEO_LONGITUDE_MIN || lo > GEO_LONGITUDE_MAX)
+		return false;
+
+	double la = rr_la->get_double();
+	if (la < GEO_LATITUDE_MIN || la > GEO_LATITUDE_MAX)
+		return false;
+
+	result.first = lo;
+	result.second = la;
 	return true;
 }
 
 double redis_geo::geodist(const char* key, const char* member1,
 	const char* member2, int unit /* = GEO_UNIT_M */)
 {
-	std::vector<string> names;
-	names.push_back(member1);
-	names.push_back(member2);
+	const char* names[3];
+	names[0] = member1;
+	names[1] = member2;
+
+	size_t argc = 2;
+
 	const char* unit_s = get_unit(unit);
 	if (unit_s != NULL)
-		names.push_back(unit_s);
+	{
+		names[2] = unit_s;
+		argc++;
+	}
 
-	build("GEODIST", key, names);
+	hash_slot(key);
+	build("GEODIST", key, names, argc);
 
 	string buf;
 	if (get_string(buf) == 0)
@@ -290,7 +357,7 @@ double redis_geo::geodist(const char* key, const char* member1,
 	return atof(buf.c_str());
 }
 
-const std::vector<geo_pos>& redis_geo::georadius(const char* key,
+const std::vector<geo_member>& redis_geo::georadius(const char* key,
 	double longitude, double latitude, double radius,
 	int unit /* = GEO_UNIT_M */,
 	int with /* = GEO_WITH_COORD | GEO_WITH_DIST */,
@@ -298,8 +365,8 @@ const std::vector<geo_pos>& redis_geo::georadius(const char* key,
 {
 	positions_.clear();
 
-	const char* argv[9];
-	size_t lens[9];
+	const char* argv[10];
+	size_t lens[10];
 	size_t argc = 0;
 
 	argv[argc] = "GEORADIUS";
@@ -372,6 +439,7 @@ const std::vector<geo_pos>& redis_geo::georadius(const char* key,
 	const redis_result* result = run();
 	if (result == NULL || result->get_type() != REDIS_RESULT_ARRAY)
 		return positions_;
+
 	size_t size;
 	const redis_result** children = result->get_children(&size);
 	if (children == NULL)
@@ -383,7 +451,7 @@ const std::vector<geo_pos>& redis_geo::georadius(const char* key,
 	return positions_;
 }
 
-const std::vector<geo_pos>& redis_geo::georadiusbymember(const char* key,
+const std::vector<geo_member>& redis_geo::georadiusbymember(const char* key,
 	const char* member, double radius,
 	int unit /* = GEO_UNIT_M */,
 	int with /* = GEO_WITH_COORD | GEO_WITH_DIST */,
@@ -391,8 +459,8 @@ const std::vector<geo_pos>& redis_geo::georadiusbymember(const char* key,
 {
 	positions_.clear();
 
-	const char* argv[8];
-	size_t lens[8];
+	const char* argv[9];
+	size_t lens[9];
 	size_t argc = 0;
 
 	argv[argc] = "GEORADIUSBYMEMBER";
@@ -457,6 +525,7 @@ const std::vector<geo_pos>& redis_geo::georadiusbymember(const char* key,
 	const redis_result* result = run();
 	if (result == NULL || result->get_type() != REDIS_RESULT_ARRAY)
 		return positions_;
+
 	size_t size;
 	const redis_result** children = result->get_children(&size);
 	if (children == NULL)
@@ -475,7 +544,7 @@ void redis_geo::add_one_pos(const redis_result& rr)
 	if (type == REDIS_RESULT_STRING)
 	{
 		rr.argv_to_string(buf);
-		positions_.push_back(geo_pos(buf.c_str()));
+		positions_.push_back(geo_member(buf.c_str()));
 		return;
 	}
 	if (type != REDIS_RESULT_ARRAY)
@@ -489,7 +558,7 @@ void redis_geo::add_one_pos(const redis_result& rr)
 	if (children[0]->get_type() != REDIS_RESULT_STRING)
 		return;
 	children[0]->argv_to_string(buf);
-	geo_pos pos(buf.c_str());
+	geo_member pos(buf.c_str());
 
 	for (size_t i = 1; i < size; i++)
 	{
@@ -512,8 +581,8 @@ void redis_geo::add_one_pos(const redis_result& rr)
 			&& results[0]->get_type() == REDIS_RESULT_STRING
 			&& results[1]->get_type() == REDIS_RESULT_STRING)
 		{
-			pos.set_longitude(results[0]->get_double());
-			pos.set_latitude(results[0]->get_double());
+			pos.set_coordinate(results[0]->get_double(),
+				results[1]->get_double());
 		}
 	}
 
