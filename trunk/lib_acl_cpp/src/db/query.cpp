@@ -1,6 +1,7 @@
 #include "acl_stdafx.hpp"
 #include <assert.h>
 #include "acl_cpp/stdlib/log.hpp"
+#include "acl_cpp/stdlib/snprintf.hpp"
 #include "acl_cpp/db/query.hpp"
 
 namespace acl
@@ -39,6 +40,8 @@ bool query::append_key(string& buf, char* key)
 		return false;
 	}
 
+	char fmt[256];
+
 	query_param* param = it->second;
 	switch (param->type)
 	{
@@ -57,6 +60,14 @@ bool query::append_key(string& buf, char* key)
 	case DB_PARAM_STR:
 		buf.format_append("'%s'",
 			escape(param->v.S, param->dlen, buf_).c_str());
+		break;
+	case DB_PARAM_FLOAT:
+		safe_snprintf(fmt, sizeof(fmt), "%%.%df", param->precision);
+		buf.format_append(fmt, param->v.f);
+		break;
+	case DB_PARAM_DOUBLE:
+		safe_snprintf(fmt, sizeof(fmt), "%%.%df", param->precision);
+		buf.format_append(fmt, param->v.d);
 		break;
 	default:
 		logger_error("unknown type: %d", param->type);
@@ -156,8 +167,7 @@ query& query::set_parameter(const char* name, char value)
 	key.lower();
 	del_param(key);
 
-	query_param* param = (query_param*)
-		acl_mymalloc(sizeof(query_param));
+	query_param* param = (query_param*) acl_mymalloc(sizeof(query_param));
 	param->type = DB_PARAM_CHAR;
 	param->v.c = value;
 	param->dlen = sizeof(char);
@@ -172,8 +182,7 @@ query& query::set_parameter(const char* name, short value)
 	key.lower();
 	del_param(key);
 
-	query_param* param = (query_param*)
-		acl_mymalloc(sizeof(query_param));
+	query_param* param = (query_param*) acl_mymalloc(sizeof(query_param));
 	param->type = DB_PARAM_SHORT;
 	param->v.s = value;
 	param->dlen = sizeof(short);
@@ -188,8 +197,7 @@ query& query::set_parameter(const char* name, int value)
 	key.lower();
 	del_param(key);
 
-	query_param* param = (query_param*)
-		acl_mymalloc(sizeof(query_param));
+	query_param* param = (query_param*) acl_mymalloc(sizeof(query_param));
 	param->type = DB_PARAM_INT32;
 	param->v.n = value;
 	param->dlen = sizeof(int);
@@ -204,11 +212,48 @@ query& query::set_parameter(const char* name, acl_int64 value)
 	key.lower();
 	del_param(key);
 
-	query_param* param = (query_param*)
-		acl_mymalloc(sizeof(query_param));
+	query_param* param = (query_param*) acl_mymalloc(sizeof(query_param));
 	param->type = DB_PARAM_INT64;
 	param->v.l = value;
 	param->dlen = sizeof(long long int);
+
+	params_[key] = param;
+	return *this;
+}
+
+query& query::set_parameter(const char* name, float value, int precision /* = 8 */)
+{
+	string key(name);
+	key.lower();
+	del_param(key);
+
+	query_param* param = (query_param*) acl_mymalloc(sizeof(query_param));
+	param->type = DB_PARAM_FLOAT;
+	param->v.f = value;
+	param->dlen = sizeof(float);
+	if (precision >= 0)
+		param->precision = precision;
+	else
+		param->precision = 8;
+
+	params_[key] = param;
+	return *this;
+}
+
+query& query::set_parameter(const char* name, double value, int precision /* = 8 */)
+{
+	string key(name);
+	key.lower();
+	del_param(key);
+
+	query_param* param = (query_param*) acl_mymalloc(sizeof(query_param));
+	param->type = DB_PARAM_DOUBLE;
+	param->v.d = value;
+	param->dlen = sizeof(double);
+	if (precision >= 0)
+		param->precision = precision;
+	else
+		param->precision = 8;
 
 	params_[key] = param;
 	return *this;

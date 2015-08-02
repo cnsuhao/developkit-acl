@@ -17,7 +17,7 @@ HttpServlet::HttpServlet(void)
 	local_charset_[0] = 0;
 	rw_timeout_ = 60;
 	parse_body_enable_ = true;
-	parse_body_limit_ = 102400;
+	parse_body_limit_ = 0;
 }
 
 HttpServlet::~HttpServlet(void)
@@ -48,7 +48,8 @@ HttpServlet& HttpServlet::setParseBody(bool on)
 
 HttpServlet& HttpServlet::setParseBodyLimit(int length)
 {
-	parse_body_limit_ = length;
+	if (length > 0)
+		parse_body_limit_ = length;
 	return *this;
 }
 
@@ -91,6 +92,10 @@ bool HttpServlet::doRun(session& session, socket_stream* stream /* = NULL */)
 	bool  ret;
 
 	http_method_t method = req.getMethod();
+
+	// 根据请求的值自动设定是否需要保持长连接
+	if (!cgi_mode)
+		res.setKeepAlive(req.isKeepAlive());
 
 	switch (method)
 	{
