@@ -18,8 +18,66 @@ const char* CREATE_TBL =
 	"primary key(group_name, class_level)\r\n"
 	")";
 
-static bool tbl_create(acl::db_handle& db)
+static bool db_create(const char* dbaddr, const char* dbname,
+	const char* dbuser, const char* dbpass)
 {
+	acl::db_mysql db(dbaddr, "mysql", dbuser, dbpass);
+	if (db.open() == false)
+	{
+		printf("open %s@mysql error, dbuser: %s, dbpass: %s\r\n",
+			dbaddr, dbuser, dbpass);
+		return false;
+	}
+
+	acl::string sql;
+	sql.format("use mysql");
+	if (db.sql_update(sql.c_str()) == false)
+	{
+		printf("'%s' error: %s\r\n", sql.c_str(), db.get_error());
+		return false;
+	}
+	db.free_result();
+
+	sql.format("create database %s character set utf8;\r\n", dbname);
+	if (db.sql_update(sql.c_str()) == false)
+	{
+		printf("'%s' error: %s\r\n", sql.c_str(), db.get_error());
+		return false;
+	}
+	db.free_result();
+	
+	sql.format("grant CREATE,DROP,INSERT,DELETE,UPDATE,SELECT on %s.* to %s",
+		dbname, dbuser);
+	if (db.sql_update(sql.c_str()) == false)
+	{
+		printf("'%s' error: %s\r\n", sql.c_str(), db.get_error());
+		return false;
+	}
+	db.free_result();
+		
+	sql = "flush privileges";
+	if (db.sql_update(sql.c_str()) == false)
+	{
+		printf("'%s' error: %s\r\n", sql.c_str(), db.get_error());
+		return false;
+	}
+	db.free_result();
+
+	printf("create db(%s) ok\r\n", dbname);
+	return true;
+}
+
+static bool tbl_create(const char* dbaddr, const char* dbname,
+	const char* dbuser, const char* dbpass)
+{
+	acl::db_mysql db(dbaddr, dbname, dbuser, dbpass);
+	if (db.open() == false)
+	{
+		printf("open %s@mysql error, dbuser: %s, dbpass: %s\r\n",
+			dbaddr, dbuser, dbpass);
+		return false;
+	}
+
 	if (db.tbl_exists("group_tbl"))
 	{
 		printf("table exist\r\n");
@@ -173,32 +231,108 @@ static bool tbl_delete(acl::db_handle& db, int n)
 
 int main(void)
 {
-	const char* dbaddr = "127.0.0.1:3306";
-	const char* dbname = "acl_test_db";
-	const char* dbuser = "root", *dbpass = "111111";
-	acl::db_mysql db(dbaddr, dbname, dbuser, dbpass);
-	int   max = 100;
+	// WIN32 下需要调用此函数进行有关 SOCKET 的初始化
+	acl::acl_cpp_init();
 
 	// 允许将错误日志输出至屏幕
 	acl::log::stdout_open(true);
 
-	// 先打开数据库连接
-	if (db.open() == false)
+	acl::string line;
+	acl::stdin_stream in;
+	acl::stdout_stream out;
+
+#if	defined(_WIN32) || defined(_WIN64)
+	const char* libname = "libmysql.dll";
+#else
+	const char* libname = "libmysqlclient_r.so";
+#endif
+
+	acl::string path;
+
+	// 因为采用动态加载的方式，所以需要应用给出 mysql 客户端库所在的路径
+	out.format("Enter %s load path: ", libname);
+	if (in.gets(line) && !line.empty())
+#if	defined(_WIN32) || defined(_WIN64)
+		path.format("%s\\%s", line.c_str(), libname);
+#else
+		path.format("%s/%s", line.c_str(), libname);
+#endif
+	else
+		path = libname;
+
+	out.format("%s path: %s\r\n", libname, path.c_str());
+	// 设置动态库加载的全路径
+	acl::db_handle::set_loadpath(path);
+
+	acl::string dbaddr("127.0.0.1:3306");
+	acl::string dbname("acl_db"), dbuser("root"), dbpass("111111");
+
+	out.format("Enter dbaddr [default: %s]: ", dbaddr.c_str());
+	if (in.gets(line) && !line.empty())
+		dbaddr = line;
+
+	out.format("Enter dbname [default: %s]: ", dbname.c_str());
+	if (in.gets(line) && !line.empty())
+		dbname = line;
+
+	out.format("Enter dbuser [default: %s]: ", dbuser.c_str());
+	if (in.gets(line) && !line.empty())
+		dbuser = line;
+
+	out.format("Enter dbpass [default: %s]: ", dbpass.c_str());
+	if (in.gets(line) && !line.empty())
+		dbpass = line;
+
+	out.format("dbname: %s, dbuser: %s, dbpass: %s\r\n",
+		dbname.c_str(), dbuser.c_str(), dbpass.c_str());
+
+	// 如果需要创建数据库，则需要以 root 身份进行创建
+	out.format("Do you want to create %s? yes|no: ", dbname.c_str());
+	if (in.gets(line) && (line == "yes" || line == "y"))
 	{
-		printf("open db(%s) error\r\n", dbname);
-		getchar();
-		return 1;
+		if (dbuser != "root")
+		{
+			printf("dbuser must be root for create db\r\n");
+			dbuser = "root";
+		}
+
+		// 创建数据库
+		if (db_create(dbaddr, dbname, dbuser, dbpass) == false)
+		{
+			printf("create db failed, enter any key to exit.\r\n");
+			getchar();
+			return 1;
+		}
+		printf("create db %s ok, enter any key to continue\r\n",
+			dbname.c_str());
+		(void) in.gets(line);
 	}
 
-	printf("open db %s ok\r\n", dbname);
-
 	// 当数据表不存在时创建表
-	if (tbl_create(db) == false)
+	if (tbl_create(dbaddr, dbname, dbuser, dbpass) == false)
 	{
 		printf("create table error\r\n");
 		getchar();
 		return 1;
 	}
+
+	//////////////////////////////////////////////////////////////////////
+
+	acl::db_mysql db(dbaddr, dbname, dbuser, dbpass);
+	int   max = 100;
+
+	// 先打开数据库连接
+	if (db.open() == false)
+	{
+		printf("open db(%s@%s) error\r\n",
+			dbaddr.c_str(), dbname.c_str());
+		getchar();
+		return 1;
+	}
+
+	printf("open db %s ok\r\n", dbname.c_str());
+	out.puts("Enter any key to continue ...");
+	(void) in.gets(line);
 
 	// 批量添加数据
 	for (int i = 0; i < max; i++)
@@ -206,7 +340,7 @@ int main(void)
 		bool ret = tbl_insert(db, i);
 		if (ret)
 			printf(">>insert ok: i=%d, affected: %d\r",
-			i, db.affect_count());
+				i, db.affect_count());
 		else
 			printf(">>insert error: i = %d\r\n", i);
 	}
@@ -240,10 +374,10 @@ int main(void)
 	}
 	printf("\r\n");
 
-#ifndef WIN32
-	//	mysql_server_end();
-	//	mysql_thread_end();
-#endif
+//#ifndef WIN32
+//	mysql_server_end();
+//	mysql_thread_end();
+//#endif
 
 	printf("mysqlclient lib's version: %ld, info: %s\r\n",
 		db.mysql_libversion(), db.mysql_client_info());

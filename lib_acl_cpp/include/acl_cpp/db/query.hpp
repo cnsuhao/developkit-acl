@@ -58,6 +58,24 @@ public:
 	query& set_parameter(const char* name, int value);
 
 	/**
+	 * 设置单精度浮点类型的变量值
+	 * @param name {const char*} 变量名
+	 * @param value {float} 单精度浮点类型
+	 * @param precision {int} 尾数的精度值
+	 * @return {query&}
+	 */
+	query& set_parameter(const char* name, float value, int precision = 8);
+
+	/**
+	 * 设置双精度浮点类型的变量值
+	 * @param name {const char*} 变量名
+	 * @param value {double} 双精度浮点类型
+	 * @param precision {int} 尾数的精度值
+	 * @return {query&}
+	 */
+	query& set_parameter(const char* name, double value, int precision = 8);
+
+	/**
 	 * 设置 64 位短整类型的变量值
 	 * @param name {const char*} 变量名
 	 * @param value {long long int} 变量值
@@ -136,6 +154,8 @@ private:
 		DB_PARAM_SHORT,
 		DB_PARAM_INT32,
 		DB_PARAM_INT64,
+		DB_PARAM_FLOAT,
+		DB_PARAM_DOUBLE,
 		DB_PARAM_STR
 	} db_param_type;
 
@@ -143,12 +163,15 @@ private:
 	{
 		char type;
 		int  dlen;
+		int  precision;
 		union
 		{
 			char  c;
 			short s;
 			int   n;
 			long long int l;
+			double d;
+			float f;
 			char  S[1];
 		} v;
 	};

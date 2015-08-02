@@ -56,6 +56,9 @@ static void test_redis_key(acl::redis_key& cmd, const char* key)
 
 int main()
 {
+	// init socket module for windows
+	acl::acl_cpp_init();
+
 	const char* redis_addr = "127.0.0.1:6379";
 	int conn_timeout = 10, rw_timeout = 10;
 
@@ -78,6 +81,9 @@ int main()
 ```c++
 int main(void)
 {
+	// init socket module for windows
+	acl::acl_cpp_init();
+
 	const char* redis_addr = "127.0.0.1:6379";
 	int conn_timeout = 10, rw_timeout = 10, max_conns = 100;
 
@@ -143,6 +149,9 @@ static void test_redis_key(acl::redis& cmd, const char* key)
 
 int main(void)
 {
+	// init socket module for windows
+	acl::acl_cpp_init();
+
 	const char* redis_addr = "127.0.0.1:6379";
 	int conn_timeout = 10, rw_timeout = 10, max_conns = 100;
 
@@ -188,6 +197,9 @@ static void* thread_main(void* arg)
 
 int main(void)
 {
+	// init socket module for windows
+	acl::acl_cpp_init();
+
 	const char* redis_addr = "127.0.0.1:6379";
 	int conn_timeout = 10, rw_timeout = 10;
 
@@ -206,8 +218,8 @@ int main(void)
 	pthread_t id2;
 	pthread_create(&id2, &attr, thread_main, &cluster);
 
-	pthread_join(&id1, NULL);
-	pthread_join(&id2, NULL);
+	pthread_join(id1, NULL);
+	pthread_join(id2, NULL);
 
 	return 0;
 }
@@ -239,9 +251,9 @@ LDFLAGS = -L$(BASE_PATH)/lib_acl_cpp/lib -l_acl_cpp \
 	-L$(BASE_PATH)/lib_acl/lib -l_acl \
 	-lpthread
 test: main.o
-	gcc -o main.o $(LDFLAGS)
+	g++ -o main.o $(LDFLAGS)
 main.o: main.cpp
-	gcc $(CFLAGS) main.cpp -o main.o
+	g++ $(CFLAGS) main.cpp -o main.o
 ```
 ### On WIN32
 Open acl_cpp_vc2003.sln/acl_cpp_vc2008.sln/acl_cpp_vc2010.sln/acl_cpp_vc2012.sln, and look at at the redis samples project option setting.

@@ -32,7 +32,7 @@ redis_command::redis_command()
 , slice_res_(false)
 , result_(NULL)
 {
-	pool_ = NEW dbuf_pool(128000);
+	pool_ = new dbuf_pool();
 	addr_[0] = 0;
 }
 
@@ -54,7 +54,7 @@ redis_command::redis_command(redis_client* conn)
 , slice_res_(false)
 , result_(NULL)
 {
-	pool_ = NEW dbuf_pool(128000);
+	pool_ = new dbuf_pool();
 	if (conn != NULL)
 		set_client_addr(*conn);
 	else
@@ -76,7 +76,7 @@ redis_command::redis_command(redis_client_cluster* cluster, size_t max_conns)
 , slice_res_(false)
 , result_(NULL)
 {
-	pool_ = NEW dbuf_pool(128000);
+	pool_ = new dbuf_pool();
 	addr_[0] = 0;
 
 	if (cluster != NULL)
@@ -101,7 +101,7 @@ redis_command::~redis_command()
 		acl_myfree(argv_lens_);
 	delete request_buf_;
 	delete request_obj_;
-	delete pool_;
+	pool_->destroy();
 }
 
 void redis_command::reset(bool save_slot /* = false */)
@@ -328,6 +328,12 @@ redis_client* redis_command::redirect(redis_client_cluster* cluster,
 
 		conns->set_alive(false);
 		conns = (redis_client_pool*) cluster->peek();
+		if (conns == NULL)
+		{
+			logger_error("no connections availabble, "
+				"i: %d, addr: %s", i, addr);
+			return NULL;
+		}
 	}
 
 	logger_warn("too many retry: %d, addr: %s", i, addr);
@@ -411,24 +417,24 @@ const redis_result* redis_command::run(redis_client_cluster* cluster,
 
 			// 从连接池集群中顺序取得一个连接对象
 			conn = peek_conn(cluster, slot_);
-			if (conn != NULL)
+			if (conn == NULL)
 			{
-				last_moved = true;
-				clear(true);
-				set_client_addr(*conn);
-				continue;
+				logger_error("peek_conn NULL");
+				return result_;
 			}
 
-			last_moved = false;
+			last_moved = true;
+			clear(true);
+			set_client_addr(*conn);
+			continue;
 		}
-
-		// 将连接对象归还给连接池对象
-		else
-			conn->get_pool()->put(conn, true);
 
 		if (result_ == NULL)
 		{
+			// 将旧连接对象归还给连接池对象
+			conn->get_pool()->put(conn, true);
 			logger_error("result NULL");
+
 			return NULL;
 		}
 
@@ -437,7 +443,10 @@ const redis_result* redis_command::run(redis_client_cluster* cluster,
 
 		if (type == REDIS_RESULT_UNKOWN)
 		{
+			// 将旧连接对象归还给连接池对象
+			conn->get_pool()->put(conn, true);
 			logger_error("unknown result type: %d", type);
+
 			return NULL;
 		}
 
@@ -445,10 +454,19 @@ const redis_result* redis_command::run(redis_client_cluster* cluster,
 		{
 			// 如果发生重定向过程，则设置哈希槽对应 redis 服务地址
 			if (slot_ < 0 || !last_moved)
+			{
+				// 将连接对象归还给连接池对象
+				conn->get_pool()->put(conn, true);
 				return result_;
+			}
 
+			// XXX: 因为此处还要引用一次 conn 对象，所以将 conn
+			// 归还给连接池的过程须放在此段代码之后
 			const char* addr = conn->get_pool()->get_addr();
 			cluster->set_slot(slot_, addr);
+
+			// 将连接对象归还给连接池对象
+			conn->get_pool()->put(conn, true);
 
 			return result_;
 		}
@@ -459,13 +477,19 @@ const redis_result* redis_command::run(redis_client_cluster* cluster,
 		const char* ptr = result_->get_error();
 		if (ptr == NULL || *ptr == 0)
 		{
+			// 将旧连接对象归还给连接池对象
+			conn->get_pool()->put(conn, true);
 			logger_error("result error: null");
+
 			return result_;
 		}
 
 		// 如果出错信息为重定向指令，则执行重定向过程
 		if (EQ(ptr, "MOVED"))
 		{
+			// 将旧连接对象归还给连接池对象
+			conn->get_pool()->put(conn, true);
+
 			const char* addr = get_addr(ptr);
 			if (addr == NULL)
 			{
@@ -500,6 +524,9 @@ const redis_result* redis_command::run(redis_client_cluster* cluster,
 		}
 		else if (EQ(ptr, "ASK"))
 		{
+			// 将旧连接对象归还给连接池对象
+			conn->get_pool()->put(conn, true);
+
 			const char* addr = get_addr(ptr);
 			if (addr == NULL)
 			{
@@ -558,20 +585,26 @@ const redis_result* redis_command::run(redis_client_cluster* cluster,
 				acl_doze(redirect_sleep_);
 			}
 
+			// 将旧连接对象归还给连接池对象
+			conn->get_pool()->put(conn, true);
+
 			conn = peek_conn(cluster, -1);
 			if (conn == NULL)
 			{
 				logger_error("peek_conn NULL");
 				return result_;
 			}
-			clear(true);
 
+			clear(true);
 			set_client_addr(*conn);
 		}
 
 		// 对于其它错误类型，则直接返回本次得到的响应结果对象
 		else
 		{
+			// 将旧连接对象归还给连接池对象
+			conn->get_pool()->put(conn, true);
+
 			logger_error("server error: %s", ptr);
 			return result_;
 		}
