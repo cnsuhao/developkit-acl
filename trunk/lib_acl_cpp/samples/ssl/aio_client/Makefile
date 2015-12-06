@@ -1,3 +1,4 @@
 base_path = ../../..
-PROG = string
 include ../../Makefile.in
+PROG = aio_client
+EXTLIBS += -lpolarssl -lz
