@@ -134,8 +134,12 @@ void redis_command::set_slice_respond(bool on)
 
 void redis_command::set_client(redis_client* conn)
 {
-	conn_ = conn;
-	set_client_addr(*conn);
+	if (conn != NULL)
+	{
+		conn_ = conn;
+		cluster_ = NULL;
+		set_client_addr(*conn);
+	}
 }
 
 void redis_command::set_client_addr(redis_client& conn)
@@ -159,6 +163,7 @@ void redis_command::set_cluster(redis_client_cluster* cluster, size_t max_conns)
 	if (cluster == NULL)
 		return;
 
+	conn_ = NULL;
 	redirect_max_ = cluster->get_redirect_max();
 	if (redirect_max_ <= 0)
 		redirect_max_ = 15;
@@ -1742,6 +1747,37 @@ void redis_command::build(const char* cmd, const char* key,
 	}
 
 	build_request(argc_, argv_, argv_lens_);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+const redis_result* redis_command::request(size_t argc, const char* argv[],
+	size_t lens[], size_t nchild /* = 0 */)
+{
+	build_request(argc, argv, lens);
+	const redis_result* result = run(nchild);
+	return result;
+}
+
+const redis_result* redis_command::request(const std::vector<string>& args,
+	size_t nchild /* = 0 */)
+{
+	argc_ = args.size();
+	if (argc_ == 0)
+	{
+		logger_error("args empty!");
+		return NULL;
+	}
+
+	argv_space(argc_);
+
+	for (size_t i = 0; i < argc_; i++)
+	{
+		argv_[i] = args[i].c_str();
+		argv_lens_[i] = args[i].size();
+	}
+
+	return request(argc_, argv_, argv_lens_, nchild);
 }
 
 /////////////////////////////////////////////////////////////////////////////
