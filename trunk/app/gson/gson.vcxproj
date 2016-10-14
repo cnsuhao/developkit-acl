@@ -80,6 +80,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>lib_acl_vc2015d.lib;lib_acl_cpp_vc2015d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib_acl_cpp;$(SolutionDir)lib_acl;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -121,6 +122,11 @@
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\stdafx.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\lib_acl_cpp\lib_acl_cpp_vc2015.vcxproj">
+      <Project>{6ec1f44e-6a6a-48e9-b699-d7e89b63c8dc}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
